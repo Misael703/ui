@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "UI Kit React + TypeScript multi-marca, optimizado para Next.js. Tokens, componentes accesibles y branding configurable en runtime.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": false,
   "repository": {
     "type": "git",
@@ -82,7 +82,7 @@
     "vitest": "^2.1.0"
   },
   "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

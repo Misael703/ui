@@ -21,10 +21,16 @@ describe('Logo', () => {
     expect(img.src).toContain('/assets/logos/logo-horizontal-light.svg');
   });
 
-  it('uses PNG fallback for vertical (no SVG available)', () => {
+  it('uses preferred SVG for vertical', () => {
     render(<Logo variant="vertical" bg="dark" />);
     const img = screen.getByAltText('El Alba') as HTMLImageElement;
-    expect(img.src).toContain('/assets/logos/logo-vertical-dark.png');
+    expect(img.src).toContain('/assets/logos/logo-vertical-dark.svg');
+  });
+
+  it('respects explicit PNG format override for vertical', () => {
+    render(<Logo variant="vertical" bg="light" format="png" />);
+    const img = screen.getByAltText('El Alba') as HTMLImageElement;
+    expect(img.src).toContain('/assets/logos/logo-vertical-light.png');
   });
 
   it('renders <picture> with mobile + desktop sources when responsive', () => {

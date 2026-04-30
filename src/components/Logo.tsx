@@ -6,12 +6,12 @@ export type LogoVariant = 'horizontal' | 'vertical' | 'mark' | 'wordmark';
 export type LogoBg = 'light' | 'dark';
 export type LogoFormat = 'svg' | 'png';
 
-/** Formato preferido por variante (SVG si existe, sino PNG). */
+/** Formato preferido por variante. SVG en todas las variantes (mejor escalado y peso). */
 const PREFERRED_FORMAT: Record<LogoVariant, LogoFormat> = {
   horizontal: 'svg',
-  vertical: 'png',
+  vertical: 'svg',
   mark: 'svg',
-  wordmark: 'png',
+  wordmark: 'svg',
 };
 
 /** Altura razonable por defecto según la forma de la variante. */
