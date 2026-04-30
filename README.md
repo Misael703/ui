@@ -18,6 +18,17 @@ npm install @misael703/elalba-ui
 npm install react react-dom
 ```
 
+### Actualizar a una nueva versión
+
+```bash
+npm outdated @misael703/elalba-ui          # ver si hay versión nueva
+npm update @misael703/elalba-ui            # sube hasta donde el rango permite
+npm install @misael703/elalba-ui@latest    # fuerza la última (ignora rango)
+npm install @misael703/elalba-ui@0.2.1     # fija una versión específica
+```
+
+> ⚠️ Mientras el paquete esté en `0.x.x` la API se considera inestable — cualquier `minor` puede traer breaking changes. Lee las [release notes](https://github.com/Misael703/elalba-ui/releases) antes de subir de minor o major.
+
 ## Uso en Next.js (App Router)
 
 **1) Importa los estilos en `app/layout.tsx` (una sola vez):**
