@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>El Alba — UI Kit</title>
+  <link rel="stylesheet" href="tokens/colors_and_type.css"/>
+  <link rel="stylesheet" href="tokens/kit.css"/>
+  <link rel="stylesheet" href="tokens/components.css"/>
+  <style>
+    /* App shell extras for index */
+    .kit-screen { display: none; }
+    .kit-screen.active { display: block; }
+    .sidebar__brand small { color: var(--color-blue-200); }
+
+    /* Make tables in templates sticky-ish */
+    .template-frame .table-wrap { background: var(--color-white); }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="app/Icons.jsx"></script>
+  <script type="text/babel" src="app/Foundations.jsx"></script>
+  <script type="text/babel" src="app/ComponentsA.jsx"></script>
+  <script type="text/babel" src="app/ComponentsB.jsx"></script>
+  <script type="text/babel" src="app/ComponentsC.jsx"></script>
+  <script type="text/babel" src="app/ComponentsD.jsx"></script>
+  <script type="text/babel" src="app/Templates.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const NAV = [
+      { group: 'Inicio', items: [
+        { id: 'overview', label: 'Overview', screen: 'overview' },
+      ]},
+      { group: 'Foundations', items: [
+        { id: 'colors',     label: 'Colors',       screen: 'colors' },
+        { id: 'type',       label: 'Typography',   screen: 'type' },
+        { id: 'spacing',    label: 'Spacing & layout', screen: 'spacing' },
+        { id: 'iconography',label: 'Iconography',  screen: 'iconography' },
+        { id: 'logo',       label: 'Logo & brand', screen: 'logo' },
+      ]},
+      { group: 'Components', items: [
+        { id: 'buttons',    label: 'Buttons',      screen: 'buttons' },
+        { id: 'forms',      label: 'Forms',        screen: 'forms' },
+        { id: 'tables',     label: 'Tables',       screen: 'tables' },
+        { id: 'cards',      label: 'Cards',        screen: 'cards' },
+        { id: 'nav',        label: 'Navigation',   screen: 'nav' },
+        { id: 'feedback',   label: 'Feedback',     screen: 'feedback' },
+        { id: 'overlays',   label: 'Overlays',     screen: 'overlays' },
+        { id: 'data',       label: 'Data display', screen: 'data' },
+        { id: 'charts',     label: 'Charts',       screen: 'charts' },
+        { id: 'layout',     label: 'Layout',       screen: 'layout' },
+        { id: 'misc',       label: 'Date · Upload · Stepper', screen: 'misc' },
+      ]},
+      { group: 'Patterns', items: [
+        { id: 'templates',  label: 'Page templates', screen: 'templates' },
+      ]},
+    ];
+
+    const SCREENS = {
+      overview:    Overview,
+      colors:      window.KitFoundations.PageColors,
+      type:        window.KitFoundations.PageType,
+      spacing:     window.KitFoundations.PageSpacing,
+      iconography: window.KitFoundations.PageIconography,
+      logo:        window.KitFoundations.PageLogo,
+      buttons:     window.KitButtons.PageButtons,
+      forms:       window.KitForms.PageForms,
+      tables:      window.KitB.PageTables,
+      cards:       window.KitB.PageCards,
+      nav:         window.KitB.PageNav,
+      feedback:    window.KitC.PageFeedback,
+      overlays:    window.KitC.PageOverlays,
+      data:        window.KitC.PageDataDisplay,
+      charts:      window.KitD.PageCharts,
+      layout:      window.KitD.PageLayout,
+      misc:        window.KitD.PageMisc,
+      templates:   window.KitTemplates.PageTemplates,
+    };
+
+    function Overview() {
+      const { PageHeader, Section, Stage } = window.KitPrimitives;
+      const groups = [
+        { l: 'Foundations', n: 5, d: 'Colores, tipografía, escalas, iconografía y uso de marca.', go: 'colors' },
+        { l: 'Components',  n: 11, d: 'Buttons, forms, tablas, navegación, feedback, overlays, charts y más.', go: 'buttons' },
+        { l: 'Patterns',    n: 6, d: 'Pantallas completas: dashboard, listados, login, wizard, settings, errores.', go: 'templates' },
+      ];
+      return (
+        <div data-screen-label="Overview">
+          <PageHeader eyebrow="UI Kit · v1.0" title="El Alba — UI Kit web"
+            lede="Sistema de componentes para construir las apps de El Alba: ecommerce, panel admin, POS, dashboards y bodega. Todo en light mode, mobile-friendly, listo para Next.js + Tailwind." />
+
+          <Section title="¿Qué hay aquí?">
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+              {groups.map(g => (
+                <button key={g.l} className="card card--clickable" style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', padding: 24 }}
+                  onClick={() => window.__nav(g.go)}>
+                  <div className="page-eyebrow" style={{ marginBottom: 4 }}>{g.l}</div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 32, textTransform: 'uppercase', margin: '0 0 8px', lineHeight: 1 }}>
+                    {g.n} <span style={{ color: 'var(--color-brand-orange)' }}>·</span>
+                  </h3>
+                  <div style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 16 }}>{g.d}</div>
+                  <div style={{ color: 'var(--color-brand-blue)', fontWeight: 700, fontSize: 13, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Explorar →</div>
+                </button>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Cómo está organizado">
+            <Stage>
+              <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 32 }}>
+                <div>
+                  <h4 className="subsection__title">Stack y compatibilidad</h4>
+                  <ul style={{ paddingLeft: 18, margin: 0, color: 'var(--fg-default)', lineHeight: 1.7 }}>
+                    <li>Tokens CSS en <code className="mono">colors_and_type.css</code></li>
+                    <li>Componentes en <code className="mono">components.css</code> — class API estable</li>
+                    <li>Pensado para Next.js + Tailwind: tokens van a <code className="mono">theme.extend</code></li>
+                    <li>Iconos: Lucide</li>
+                    <li>Solo light mode</li>
+                    <li>Responsive desde 360 px</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="subsection__title">Cobertura por app</h4>
+                  <ul style={{ paddingLeft: 18, margin: 0, color: 'var(--fg-default)', lineHeight: 1.7 }}>
+                    <li><strong>E-commerce</strong> — product card, filtros, wizard de cotización</li>
+                    <li><strong>Admin</strong> — sidebar, data tables, KPIs, charts</li>
+                    <li><strong>POS</strong> — botones grandes, listas densas, totales</li>
+                    <li><strong>Bodega</strong> — empty/error states, badges de estado</li>
+                    <li><strong>Institucional</strong> — heroes, banners, type display</li>
+                  </ul>
+                </div>
+              </div>
+            </Stage>
+          </Section>
+
+          <Section title="Principios de marca">
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+              {[
+                { t: 'Confiable', d: 'Azul brand como ancla. Tipografía estable y predecible.' },
+                { t: 'Pragmático', d: 'Listas densas, tablas legibles, jerarquía clara. Sin adornos.' },
+                { t: 'Cercano', d: 'Naranja para acciones que importan. Copy en chileno directo.' },
+                { t: 'Industrial', d: 'Integral CF condensada en titulares. Mayúsculas con propósito.' },
+              ].map(p => (
+                <div key={p.t} style={{ padding: 20, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)' }}>
+                  <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, textTransform: 'uppercase', margin: '0 0 6px', color: 'var(--color-brand-blue)' }}>{p.t}</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.5 }}>{p.d}</p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        </div>
+      );
+    }
+
+    function App() {
+      const initial = (window.location.hash || '#overview').slice(1);
+      const [active, setActive] = useState(SCREENS[initial] ? initial : 'overview');
+      const [open, setOpen] = useState(false);
+
+      useEffect(() => {
+        const onHash = () => {
+          const id = (window.location.hash || '#overview').slice(1);
+          if (SCREENS[id]) setActive(id);
+        };
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+      }, []);
+
+      const go = (id) => {
+        if (!SCREENS[id]) return;
+        setActive(id);
+        setOpen(false);
+        window.location.hash = id;
+        document.querySelector('.main')?.scrollTo({ top: 0 });
+        window.scrollTo({ top: 0 });
+      };
+      window.__nav = go;
+
+      const Active = SCREENS[active] || Overview;
+
+      return (
+        <div className="app">
+          <aside className={`sidebar ${open ? 'open' : ''}`}>
+            <div className="sidebar__brand">
+              <img src="assets/mark-darkbg.svg?v=2" alt="El Alba"/>
+              <div className="sidebar__brand-text">
+                El Alba
+                <small>UI Kit · v1.0</small>
+              </div>
+            </div>
+            <nav className="sidebar__nav">
+              {NAV.map(g => (
+                <div key={g.group} className="sidebar__group">
+                  <div className="sidebar__group-title">{g.group}</div>
+                  {g.items.map(it => (
+                    <button key={it.id}
+                      className={`sidebar__link ${active === it.screen ? 'active' : ''}`}
+                      onClick={() => go(it.screen)}>
+                      {it.label}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </nav>
+            <div className="sidebar__footer">
+              Ferretería El Alba<br/>
+              UI Kit · {new Date().getFullYear()}
+            </div>
+          </aside>
+
+          <div className={`scrim ${open ? 'visible' : ''}`} onClick={() => setOpen(false)}/>
+
+          <main className="main">
+            <div className="topbar">
+              <button className="topbar__menu-btn" onClick={() => setOpen(true)} aria-label="Abrir menú">
+                <I.Menu size={18}/>
+              </button>
+              <div className="topbar__brand">El Alba · UI Kit</div>
+              <div style={{ width: 36 }}/>
+            </div>
+            <div className="content">
+              <Active/>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

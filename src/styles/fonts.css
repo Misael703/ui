@@ -1,0 +1,42 @@
+/**
+ * Optional self-hosted fonts.
+ *
+ * Importa este archivo si quieres usar Integral CF + Metropolis empaquetadas
+ * con el kit (necesario en Next.js si no las cargás vía next/font):
+ *
+ *   import "@misael703/elalba-ui/fonts.css";
+ *   import "@misael703/elalba-ui/styles.css";
+ *
+ * El archivo principal `styles.css` ya contiene las mismas declaraciones
+ * apuntando a `../fonts/`; este archivo es el equivalente publicado del
+ * paquete y queda como punto de entrada estable para fonts solamente.
+ */
+
+@font-face {
+  font-family: "Integral CF";
+  src: url("./fonts/IntegralCF-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Integral CF";
+  src: url("./fonts/IntegralCF-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("./fonts/Metropolis-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("./fonts/Metropolis-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
