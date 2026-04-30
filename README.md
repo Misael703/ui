@@ -10,18 +10,7 @@ Incluye tokens (colores, tipografía, espacio, radii, sombras, motion) y compone
 
 ## Instalación
 
-El paquete vive en **GitHub Packages** (registry privado). Necesitas autenticarte una vez:
-
-**1) Crear `~/.npmrc` (o `.npmrc` en la raíz de la app consumer):**
-
-```
-@misael703:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-`GITHUB_TOKEN` debe ser un Personal Access Token (PAT) con scope `read:packages` (clásico) o un Fine-grained token con permiso "Packages: read".
-
-**2) Instalar:**
+El paquete está publicado en **npm público** ([registry.npmjs.org](https://www.npmjs.com/package/@misael703/elalba-ui)) bajo licencia MIT. No requiere autenticación.
 
 ```bash
 npm install @misael703/elalba-ui
@@ -219,7 +208,37 @@ Cada componente tiene un `*.stories.tsx` con variantes interactivas y autodocs.
 
 ## Tests
 
-`npm test` corre Vitest + Testing Library en jsdom. Cobertura actual: **196 tests** sobre todos los componentes públicos. Agregar tests es trivial — copia uno existente como referencia.
+`npm test` corre Vitest + Testing Library en jsdom. Cobertura actual: **197 tests** sobre todos los componentes públicos. Agregar tests es trivial — copia uno existente como referencia.
+
+---
+
+## Releases & CI
+
+Las publicaciones a npm están automatizadas con un workflow de GitHub Actions (`.github/workflows/publish.yml`) que se dispara al crear un release.
+
+**Autenticación**: el workflow usa **npm Trusted Publishing** (OIDC) — no hay `NPM_TOKEN` ni secrets estáticos. npm confía directamente en GitHub Actions vía OpenID Connect, y cada publish se firma con `--provenance` para que el tarball quede criptográficamente atado al commit + workflow que lo produjo.
+
+Configurado en: [npmjs.com/package/@misael703/elalba-ui/access](https://www.npmjs.com/package/@misael703/elalba-ui/access) → Trusted Publisher → `Misael703/elalba-ui` workflow `publish.yml`.
+
+### Sacar una nueva versión
+
+```bash
+npm version patch     # o minor / major — bumpea package.json y crea tag
+git push && git push --tags
+gh release create vX.Y.Z --title "vX.Y.Z" --notes "..."
+```
+
+El workflow corre tests, build, y publica automáticamente. Sin OTP, sin tokens en tu máquina.
+
+### Publicar manualmente (caso excepcional)
+
+Si necesitas publicar desde local (ej. CI caído):
+
+```bash
+npm publish --otp=<código de 2FA>
+```
+
+Requiere `~/.npmrc` con tu token de npm y haber corrido `npm login` antes.
 
 ---
 
