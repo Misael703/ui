@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { Check as CheckIcon } from './Icons';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
@@ -73,34 +74,58 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(function 
   );
 });
 
-export type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement>;
+export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Optional label rendered next to the checkbox. */
+  children?: React.ReactNode;
+}
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { className, ...rest },
+  { className, children, ...rest },
   ref
 ) {
-  return <input ref={ref} type="checkbox" className={cx('checkbox', className)} {...rest} />;
+  return (
+    <label className={cx('check', className)}>
+      <input ref={ref} type="checkbox" {...rest} />
+      <span className="check__box" aria-hidden="true">
+        <CheckIcon size={14} strokeWidth={3} />
+      </span>
+      {children != null && <span>{children}</span>}
+    </label>
+  );
 });
 
-export type RadioProps = React.InputHTMLAttributes<HTMLInputElement>;
+export interface RadioProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Optional label rendered next to the radio. */
+  children?: React.ReactNode;
+}
 
 export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(function Radio(
-  { className, ...rest },
+  { className, children, ...rest },
   ref
 ) {
-  return <input ref={ref} type="radio" className={cx('radio', className)} {...rest} />;
+  return (
+    <label className={cx('check', 'check--radio', className)}>
+      <input ref={ref} type="radio" {...rest} />
+      <span className="check__box" aria-hidden="true" />
+      {children != null && <span>{children}</span>}
+    </label>
+  );
 });
 
-export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {}
+export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  /** Optional label rendered next to the switch. */
+  children?: React.ReactNode;
+}
 
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { className, ...rest },
+  { className, children, ...rest },
   ref
 ) {
   return (
     <label className={cx('switch', className)}>
       <input ref={ref} type="checkbox" {...rest} />
       <span className="switch__track" aria-hidden="true" />
+      {children != null && <span>{children}</span>}
     </label>
   );
 });

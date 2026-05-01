@@ -37,6 +37,21 @@ describe('DataTable', () => {
     render(<DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} empty="Nada" />);
     expect(screen.getByText('Nada')).toBeInTheDocument();
   });
+
+  it('numeric columns get .table__num class and right-align by default', () => {
+    const numericRows = [{ id: '1', name: 'A', price: 1500 }];
+    const numericCols = [
+      { key: 'name', header: 'Nombre' },
+      { key: 'price', header: 'Precio', numeric: true },
+    ];
+    const { container } = render(
+      <DataTable columns={numericCols} rows={numericRows} rowKey={(r) => r.id} />
+    );
+    const numCell = container.querySelector('td.table__num');
+    expect(numCell).not.toBeNull();
+    expect(numCell!.textContent).toBe('1500');
+    expect((numCell as HTMLElement).style.textAlign).toBe('right');
+  });
 });
 
 describe('Accordion', () => {

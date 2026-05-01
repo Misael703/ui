@@ -28,10 +28,15 @@ describe('Button', () => {
   });
 
   it('renders all variants without crashing', () => {
-    const variants = ['primary', 'secondary', 'outline', 'ghost', 'subtle', 'danger'] as const;
+    const variants = [
+      'primary', 'secondary', 'outline', 'ghost', 'subtle',
+      'danger', 'success', 'warning', 'link',
+    ] as const;
     variants.forEach((v) => {
-      const { unmount } = render(<Button variant={v}>x</Button>);
-      expect(screen.getByRole('button')).toBeInTheDocument();
+      const { unmount, container } = render(<Button variant={v}>x</Button>);
+      const btn = screen.getByRole('button');
+      expect(btn).toBeInTheDocument();
+      expect(btn.className).toContain(`btn--${v}`);
       unmount();
     });
   });

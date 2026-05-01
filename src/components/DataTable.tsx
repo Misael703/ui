@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronUp, ChevronDown, MoreVertical } from './Icons';
+import { Checkbox } from './Form';
 
 // ---------- DataTable ----------------------------------------------------
 export interface Column<T> {
@@ -11,6 +12,11 @@ export interface Column<T> {
   sortable?: boolean;
   align?: 'left' | 'right' | 'center';
   width?: number | string;
+  /**
+   * Marks the column as numeric: cells get the `.table__num` class
+   * (monospace + tabular alignment) and right-align by default.
+   */
+  numeric?: boolean;
 }
 
 export interface DataTableProps<T> {
@@ -69,10 +75,8 @@ export function DataTable<T>({
           <tr>
             {selectable && (
               <th style={{ width: 40 }}>
-                <input
+                <Checkbox
                   ref={headerCbRef}
-                  type="checkbox"
-                  className="checkbox"
                   checked={!!allSelected}
                   onChange={toggleAll}
                   aria-label="Seleccionar todo"
@@ -81,10 +85,11 @@ export function DataTable<T>({
             )}
             {columns.map((c) => {
               const active = sort?.key === c.key;
+              const align = c.align ?? (c.numeric ? 'right' : 'left');
               return (
                 <th
                   key={c.key}
-                  style={{ width: c.width, textAlign: c.align ?? 'left', cursor: c.sortable ? 'pointer' : undefined }}
+                  style={{ width: c.width, textAlign: align, cursor: c.sortable ? 'pointer' : undefined }}
                   aria-sort={active ? (sort!.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                   onClick={() => onSort(c)}
                 >
@@ -123,20 +128,25 @@ export function DataTable<T>({
                 <tr key={k} className={cx(sel && 'is-selected')}>
                   {selectable && (
                     <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
+                      <Checkbox
                         checked={!!sel}
                         onChange={() => toggleRow(k)}
                         aria-label="Seleccionar fila"
                       />
                     </td>
                   )}
-                  {columns.map((c) => (
-                    <td key={c.key} style={{ textAlign: c.align ?? 'left' }}>
-                      {c.accessor ? c.accessor(r) : (r as any)[c.key]}
-                    </td>
-                  ))}
+                  {columns.map((c) => {
+                    const align = c.align ?? (c.numeric ? 'right' : 'left');
+                    return (
+                      <td
+                        key={c.key}
+                        className={cx(c.numeric && 'table__num')}
+                        style={{ textAlign: align }}
+                      >
+                        {c.accessor ? c.accessor(r) : (r as any)[c.key]}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })
