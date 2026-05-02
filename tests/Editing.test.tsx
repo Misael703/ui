@@ -101,4 +101,11 @@ describe('TransferList', () => {
     expect(screen.getByLabelText('Asignar seleccionados')).toBeDisabled();
     expect(screen.getByLabelText('Quitar seleccionados')).toBeDisabled();
   });
+
+  it('uses styled Checkbox component (not raw input)', () => {
+    const { container } = render(<TransferList source={items} selected={[]} onChange={() => {}} />);
+    const checks = container.querySelectorAll('label.check');
+    expect(checks.length).toBeGreaterThan(0);
+    expect(checks[0].querySelector('.check__box')).not.toBeNull();
+  });
 });

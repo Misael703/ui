@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { Checkbox } from './Form';
 
 export interface PermissionRole { id: string; label: React.ReactNode }
 export interface PermissionAction { id: string; label: React.ReactNode; description?: React.ReactNode }
@@ -69,9 +70,7 @@ export function PermissionMatrix({
               </th>
               {roles.map((r) => (
                 <td key={r.id} className="permissions__cell">
-                  <input
-                    type="checkbox"
-                    className="checkbox"
+                  <Checkbox
                     checked={has(r.id, a.id)}
                     disabled={readOnly}
                     onChange={() => toggle(r.id, a.id)}

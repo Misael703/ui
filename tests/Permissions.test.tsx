@@ -51,4 +51,13 @@ describe('PermissionMatrix', () => {
     fireEvent.click(buttons[0]); // Admin
     expect(onChange).toHaveBeenCalledWith({ admin: ['read', 'write'], viewer: [] });
   });
+
+  it('uses styled Checkbox component (not raw input)', () => {
+    const { container } = render(
+      <PermissionMatrix roles={roles} actions={actions} value={{}} onChange={() => {}} />
+    );
+    const checks = container.querySelectorAll('td.permissions__cell label.check');
+    expect(checks.length).toBe(roles.length * actions.length);
+    expect(checks[0].querySelector('.check__box')).not.toBeNull();
+  });
 });

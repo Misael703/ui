@@ -15,7 +15,10 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 function initials(name: string) {
   if (name.startsWith('+')) return name;
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('');
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
 }
 
 export function Avatar({ src, alt, name, size = 32, shape = 'circle', status, className, style, ...rest }: AvatarProps) {

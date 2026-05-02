@@ -11,6 +11,20 @@ describe('Avatar', () => {
     render(<Avatar src="/foo.png" alt="Patricio" />);
     expect(screen.getByRole('img', { name: 'Patricio' })).toBeInTheDocument();
   });
+  it('uses first two letters when name is a single word', () => {
+    render(<Avatar name="JN" />);
+    expect(screen.getByText('JN')).toBeInTheDocument();
+  });
+  it('falls back to ? when name is empty/whitespace', () => {
+    render(<Avatar name="   " />);
+    expect(screen.getByText('?')).toBeInTheDocument();
+  });
+  it('scales font-size proportional to size', () => {
+    const { container } = render(<Avatar name="EA" size={64} />);
+    const avatar = container.querySelector('.avatar') as HTMLElement;
+    expect(avatar.style.fontSize).toBe(`${64 * 0.42}px`);
+    expect(avatar.style.width).toBe('64px');
+  });
 });
 
 describe('AvatarGroup', () => {

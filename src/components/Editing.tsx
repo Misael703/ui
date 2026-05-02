@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Modal } from './Overlay';
 import { ChevronLeft, ChevronRight } from './Icons';
+import { Checkbox } from './Form';
 
 // ---------- ConfirmDialog -----------------------------------------------
 export interface ConfirmDialogProps {
@@ -188,14 +189,13 @@ export function TransferList({
             aria-selected={checked.has(it.id)}
             onClick={() => !it.disabled && toggleCheck(checked, setChecked, it.id)}
           >
-            <input
-              type="checkbox"
-              className="checkbox"
-              checked={checked.has(it.id)}
-              disabled={it.disabled}
-              onChange={() => toggleCheck(checked, setChecked, it.id)}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <span onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={checked.has(it.id)}
+                disabled={it.disabled}
+                onChange={() => toggleCheck(checked, setChecked, it.id)}
+              />
+            </span>
             <div className="transfer__item-body">
               <div>{it.label}</div>
               {it.description && <div className="transfer__item-desc">{it.description}</div>}
