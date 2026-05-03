@@ -794,9 +794,10 @@ a:hover {
   letter-spacing: 0.02em;
   flex: none;
   position: relative;
-  overflow: hidden;
+  /* No overflow:hidden so .avatar__status can overhang the circle.
+     Image clipping is delegated to the <img> via border-radius: inherit. */
 }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .avatar--xs { width: 24px; height: 24px; font-size: 0.625rem; }
 .avatar--sm { width: 32px; height: 32px; font-size: var(--text-2xs); }
 .avatar--lg { width: 56px; height: 56px; font-size: var(--text-md); }
@@ -2083,16 +2084,24 @@ a:hover {
 .avatar--circle { border-radius: var(--radius-pill); }
 .avatar--square { border-radius: var(--radius-md); }
 .avatar__initials {
-  font-family: var(--font-display);
+  /* Body font has balanced metrics — display font (Integral CF) clips descenders
+     and pushes glyphs below center inside small circles. */
+  font-family: var(--font-body);
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1;
-  display: inline-block;
+  /* Inter/Metropolis baseline sits at ~80% of em-box → caps appear above
+     geometric center. Push down to land on the optical center. */
+  transform: translateY(0.06em);
 }
 .avatar__status {
-  position: absolute; bottom: 0; right: 0;
-  width: 28%; height: 28%; min-width: 8px; min-height: 8px;
+  position: absolute;
+  /* Anchor at 4% inside from bottom-right so the dot sits on the circle's
+     ~45° tangent and reads as "attached" rather than floating away. */
+  bottom: 4%; right: 4%;
+  width: 34%; height: 34%; min-width: 10px; min-height: 10px;
   border-radius: var(--radius-pill); border: 2px solid var(--bg-surface);
+  box-sizing: border-box;
 }
 .avatar__status--online { background: var(--color-success); }
 .avatar__status--offline { background: var(--color-gray-400); }
