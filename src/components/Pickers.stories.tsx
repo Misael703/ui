@@ -37,19 +37,19 @@ export const DatePickerFormatos: StoryObj = {
     const [d, setD] = React.useState<Date | null>(new Date(2026, 4, 2));
     return (
       <div style={{ display: 'grid', gap: 16, maxWidth: 320 }}>
-        <label>
+        <label style={{ display: 'grid', gap: 4 }}>
           <strong>auto (es-CL → dmy)</strong>
           <DatePicker value={d} onChange={setD} format="auto" />
         </label>
-        <label>
+        <label style={{ display: 'grid', gap: 4 }}>
           <strong>iso</strong>
           <DatePicker value={d} onChange={setD} format="iso" />
         </label>
-        <label>
+        <label style={{ display: 'grid', gap: 4 }}>
           <strong>dmy explícito</strong>
           <DatePicker value={d} onChange={setD} format="dmy" />
         </label>
-        <label>
+        <label style={{ display: 'grid', gap: 4 }}>
           <strong>mdy explícito</strong>
           <DatePicker value={d} onChange={setD} format="mdy" />
         </label>
