@@ -38,3 +38,4 @@ export * from './components/Carousel';
 export * from './components/Resizable';
 export * from './components/Menubar';
 export * from './components/NavigationMenu';
+export * from './components/Collapsible';

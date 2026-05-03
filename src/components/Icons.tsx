@@ -122,3 +122,11 @@ export const Sun           = make(<><circle cx="12" cy="12" r="5" /><line x1="12
 export const Moon          = make(<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />, 'Moon');
 export const Globe         = make(<><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></>, 'Globe');
 export const Building      = make(<><path d="M3 21V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v18" /><path d="M7 21V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v14" /><line x1="9" y1="9" x2="11" y2="9" /><line x1="13" y1="9" x2="15" y2="9" /><line x1="9" y1="13" x2="11" y2="13" /><line x1="13" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="11" y2="17" /><line x1="13" y1="17" x2="15" y2="17" /></>, 'Building');
+
+// Text formatting (used by ToggleGroup formatter examples)
+export const Bold          = make(<path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6zM6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />, 'Bold');
+export const Italic        = make(<><line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" /></>, 'Italic');
+export const Underline     = make(<><path d="M6 3v7a6 6 0 0 0 12 0V3" /><line x1="4" y1="21" x2="20" y2="21" /></>, 'Underline');
+export const AlignLeft     = make(<><line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" /></>, 'AlignLeft');
+export const AlignCenter   = make(<><line x1="18" y1="10" x2="6" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="18" y1="18" x2="6" y2="18" /></>, 'AlignCenter');
+export const AlignRight    = make(<><line x1="21" y1="10" x2="7" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="21" y1="18" x2="7" y2="18" /></>, 'AlignRight');
