@@ -4,14 +4,21 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../src/comp
 
 describe('Collapsible', () => {
   it('content is hidden by default and revealed on trigger click', () => {
-    render(
+    const { container } = render(
       <Collapsible>
         <CollapsibleTrigger>Toggle</CollapsibleTrigger>
         <CollapsibleContent>Hidden content</CollapsibleContent>
       </Collapsible>
     );
-    expect(screen.queryByText('Hidden content')).toBeNull();
+    // Content stays in the DOM (SSR-friendly) but is hidden via the `hidden` attribute.
+    const content = container.querySelector('.collapsible__content') as HTMLElement;
+    expect(content).not.toBeNull();
+    expect(content).toHaveAttribute('hidden');
+    expect(content.getAttribute('data-state')).toBe('closed');
+
     fireEvent.click(screen.getByText('Toggle'));
+    expect(content).not.toHaveAttribute('hidden');
+    expect(content.getAttribute('data-state')).toBe('open');
     expect(screen.getByText('Hidden content')).toBeInTheDocument();
   });
 
@@ -27,15 +34,17 @@ describe('Collapsible', () => {
 
   it('controlled mode calls onOpenChange and respects external state', () => {
     const onOpenChange = vi.fn();
-    const { rerender } = render(
+    const { container, rerender } = render(
       <Collapsible open={false} onOpenChange={onOpenChange}>
         <CollapsibleTrigger>Toggle</CollapsibleTrigger>
         <CollapsibleContent>Body</CollapsibleContent>
       </Collapsible>
     );
+    const content = container.querySelector('.collapsible__content') as HTMLElement;
     fireEvent.click(screen.getByText('Toggle'));
     expect(onOpenChange).toHaveBeenCalledWith(true);
-    expect(screen.queryByText('Body')).toBeNull(); // still false until parent re-renders
+    // Still hidden until the parent re-renders with the new `open` value.
+    expect(content).toHaveAttribute('hidden');
 
     rerender(
       <Collapsible open={true} onOpenChange={onOpenChange}>
@@ -43,7 +52,7 @@ describe('Collapsible', () => {
         <CollapsibleContent>Body</CollapsibleContent>
       </Collapsible>
     );
-    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(content).not.toHaveAttribute('hidden');
   });
 
   it('trigger has aria-expanded that reflects open state', () => {
