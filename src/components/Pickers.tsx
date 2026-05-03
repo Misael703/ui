@@ -39,6 +39,8 @@ export function Combobox<T = string>({
   const [active, setActive] = React.useState(0);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
 
   const selected = options.find((o) => o.value === value) ?? null;
   const filtered = React.useMemo(
@@ -48,11 +50,20 @@ export function Combobox<T = string>({
 
   React.useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (listRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  React.useEffect(() => {
+    if (!open || !wrapRef.current) return;
+    const t = wrapRef.current.getBoundingClientRect();
+    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX, width: t.width });
+  }, [open]);
 
   React.useEffect(() => { setActive(0); }, [query, open]);
 
@@ -102,8 +113,14 @@ export function Combobox<T = string>({
           aria-label="Limpiar selección"
         ><X size={16} /></button>
       )}
-      {open && (
-        <ul id={`${id ?? 'combobox'}-listbox`} role="listbox" className="combobox__list">
+      {open && typeof document !== 'undefined' && createPortal(
+        <ul
+          ref={listRef}
+          id={`${id ?? 'combobox'}-listbox`}
+          role="listbox"
+          className="combobox__list"
+          style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
+        >
           {filtered.length === 0 ? (
             <li className="combobox__empty">{emptyMessage}</li>
           ) : (
@@ -128,7 +145,8 @@ export function Combobox<T = string>({
               </li>
             ))
           )}
-        </ul>
+        </ul>,
+        document.body
       )}
     </div>
   );

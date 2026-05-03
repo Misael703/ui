@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { ChevronDown } from './Icons';
 
@@ -30,12 +31,17 @@ export interface NavigationMenuProps {
 
 export function NavigationMenu({ items, className, ariaLabel = 'Navegación principal', linkAs, rootLinkAs }: NavigationMenuProps) {
   const [openId, setOpenId] = React.useState<string | null>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
   const rootRef = React.useRef<HTMLElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!openId) return;
     const onClick = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpenId(null);
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpenId(null);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpenId(null);
@@ -48,8 +54,13 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
     };
   }, [openId]);
 
+  const positionPanel = (trigger: HTMLElement) => {
+    const t = trigger.getBoundingClientRect();
+    setCoords({ top: t.bottom + window.scrollY, left: t.left + window.scrollX });
+  };
+
   return (
-    <nav ref={rootRef as any} aria-label={ariaLabel} className={cx('nav-menu', className)}>
+    <nav ref={rootRef} aria-label={ariaLabel} className={cx('nav-menu', className)}>
       <ul className="nav-menu__list">
         {items.map((item) => {
           const hasChildren = !!item.links?.length;
@@ -70,8 +81,16 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                   className={triggerCls}
                   aria-expanded={isOpen}
                   aria-haspopup="menu"
-                  onClick={() => setOpenId(isOpen ? null : item.id)}
-                  onMouseEnter={() => openId && setOpenId(item.id)}
+                  onClick={(e) => {
+                    if (isOpen) { setOpenId(null); return; }
+                    positionPanel(e.currentTarget);
+                    setOpenId(item.id);
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!openId) return;
+                    positionPanel(e.currentTarget);
+                    setOpenId(item.id);
+                  }}
                 >
                   {content}
                 </button>
@@ -82,8 +101,13 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                   {content}
                 </a>
               )}
-              {hasChildren && isOpen && (
-                <div className="nav-menu__panel" role="menu">
+              {hasChildren && isOpen && typeof document !== 'undefined' && createPortal(
+                <div
+                  ref={panelRef}
+                  className="nav-menu__panel"
+                  role="menu"
+                  style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+                >
                   {item.featured && (
                     <div className="nav-menu__featured">
                       <strong>{item.featured.label}</strong>
@@ -126,7 +150,8 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                       );
                     })}
                   </ul>
-                </div>
+                </div>,
+                document.body
               )}
             </li>
           );

@@ -40,6 +40,8 @@ export function MultiCombobox<T = string>({
   const [active, setActive] = React.useState(0);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
   const selSet = new Set(value);
 
   const filtered = React.useMemo(
@@ -49,11 +51,20 @@ export function MultiCombobox<T = string>({
 
   React.useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (listRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  React.useEffect(() => {
+    if (!open || !wrapRef.current) return;
+    const t = wrapRef.current.getBoundingClientRect();
+    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX, width: t.width });
+  }, [open]);
 
   const toggle = (v: T) => {
     if (selSet.has(v)) onChange(value.filter((x) => x !== v));
@@ -100,8 +111,14 @@ export function MultiCombobox<T = string>({
           onKeyDown={onKey}
         />
       </div>
-      {open && (
-        <ul role="listbox" aria-multiselectable="true" className="multicombo__list">
+      {open && typeof document !== 'undefined' && createPortal(
+        <ul
+          ref={listRef}
+          role="listbox"
+          aria-multiselectable="true"
+          className="multicombo__list"
+          style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
+        >
           {filtered.length === 0 ? (
             <li className="multicombo__empty">{emptyMessage}</li>
           ) : (
@@ -126,7 +143,8 @@ export function MultiCombobox<T = string>({
               );
             })
           )}
-        </ul>
+        </ul>,
+        document.body
       )}
     </div>
   );
