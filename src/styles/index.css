@@ -265,6 +265,11 @@ svg text { font-family: inherit; }
    button/input/select uses the kit's body font without per-component overrides. */
 button, input, select, textarea, optgroup { font: inherit; }
 
+/* Border-box on form controls so explicit width/height match the rendered
+   box (border + padding included). Prevents off-by-2px gaps between adjacent
+   controls in input-group layouts (DatePicker, Combobox, etc). */
+button, input, select, textarea { box-sizing: border-box; }
+
 
 /* ==========================================================================
    Semantic typographic roles
@@ -1515,68 +1520,9 @@ a:hover {
   margin: 8px 0 4px;
 }
 
-/* ---------- Date picker (simple) ---------------------------------------- */
-.datepicker {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  width: 280px;
-  box-shadow: var(--shadow-md);
-  font-family: var(--font-body);
-}
-.datepicker__head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
-}
-.datepicker__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-}
-.datepicker__nav {
-  background: transparent; border: 0; cursor: pointer;
-  width: 28px; height: 28px;
-  border-radius: var(--radius-sm);
-  color: var(--fg-default);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.datepicker__nav:hover { background: var(--bg-subtle); }
-.datepicker__grid {
-  display: grid; grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  font-size: var(--text-xs);
-}
-.datepicker__dow {
-  font-family: var(--font-body);
-  font-weight: 700;
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-  color: var(--fg-subtle);
-  font-size: 0.625rem;
-  text-align: center;
-  padding: 6px 0;
-}
-.datepicker__day {
-  height: 32px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  border: 0; background: transparent;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--fg-default);
-}
-.datepicker__day:hover { background: var(--bg-subtle); }
-.datepicker__day.muted { color: var(--fg-subtle); }
-.datepicker__day.today { font-weight: 700; color: var(--color-brand-blue); }
-.datepicker__day.selected {
-  background: var(--color-brand-blue);
-  color: var(--color-white);
-  font-weight: 700;
-}
+/* Note: legacy .datepicker block removed — it styled the wrapper as the
+   calendar panel (padding, width, border, shadow) and conflicted with the
+   modern wrapper/input/toggle/popover layout. Source of truth lives below. */
 
 /* ---------- Divider ------------------------------------------------------ */
 .divider { height: 1px; background: var(--border-default); width: 100%; }
@@ -1838,9 +1784,11 @@ a:hover {
 .datepicker__input:focus { outline: 2px solid var(--border-focus); outline-offset: 1px; }
 .datepicker.is-invalid .datepicker__input { border-color: var(--color-danger); }
 .datepicker__toggle {
-  width: 40px; height: 40px; border: 1px solid var(--border-default); border-left: none;
+  width: 40px; height: 40px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-default); border-left: none;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--bg-subtle); color: var(--fg-default); cursor: pointer; font-size: var(--text-md);
+  background: var(--bg-subtle); color: var(--fg-default); cursor: pointer;
 }
 .datepicker__popover {
   position: absolute; top: calc(100% + 4px); left: 0;
