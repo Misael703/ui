@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppShell, PageHeader, type AppShellTheme } from './AppShell';
 import { Button } from './Button';
+import { Avatar } from './Display2';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart } from './Icons';
 
@@ -41,7 +42,7 @@ const Shell = ({ theme }: { theme?: AppShellTheme }) => (
           <input className="input" placeholder="Buscar pedidos, productos, clientes…" />
         </div>
       }
-      user={<Button variant="ghost" size="sm">MO</Button>}
+      user={<Avatar name="Misael Ocas" size={32} />}
     >
       <PageHeader
         title="Pedidos"
