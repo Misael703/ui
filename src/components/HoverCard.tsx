@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 
 export type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -63,6 +64,19 @@ export function HoverCard({
     setCoords({ top: top + window.scrollY, left: left + window.scrollX });
   }, [open, placement, offset]);
 
+  const panel = open && (
+    <div
+      ref={contentRef}
+      role="tooltip"
+      className={cx('hover-card__content', contentClassName)}
+      style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <span
       className={cx('hover-card', className)}
@@ -72,18 +86,7 @@ export function HoverCard({
       onBlur={onLeave}
     >
       <span ref={triggerRef} className="hover-card__trigger">{trigger}</span>
-      {open && (
-        <div
-          ref={contentRef}
-          role="tooltip"
-          className={cx('hover-card__content', contentClassName)}
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-        >
-          {children}
-        </div>
-      )}
+      {panel && typeof document !== 'undefined' && createPortal(panel, document.body)}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
@@ -169,14 +170,27 @@ export function DatePicker({
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
   const wrapRef = React.useRef<HTMLDivElement>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
 
   React.useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (popoverRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  // Position popover relative to trigger; portal'd to body so overflow ancestors
+  // don't clip and absolute coords (document-relative) match the offset parent.
+  React.useEffect(() => {
+    if (!open || !wrapRef.current) return;
+    const t = wrapRef.current.getBoundingClientRect();
+    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX });
+  }, [open]);
 
   React.useEffect(() => {
     if (value) setView(startOfMonth(value));
@@ -216,8 +230,13 @@ export function DatePicker({
         disabled={disabled}
         aria-label="Abrir calendario"
       ><CalendarIcon size={16} /></button>
-      {open && (
-        <div className="datepicker__popover" role="dialog">
+      {open && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={popoverRef}
+          className="datepicker__popover"
+          role="dialog"
+          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+        >
           <div className="datepicker__nav">
             <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label="Mes anterior"><ChevronLeft size={16} /></button>
             <span className="datepicker__title">{MONTHS[view.getMonth()]} {view.getFullYear()}</span>
@@ -243,7 +262,8 @@ export function DatePicker({
               );
             })}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

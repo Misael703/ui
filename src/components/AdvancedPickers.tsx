@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
 import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
@@ -167,14 +168,25 @@ export function DateRangePicker({
   const [view, setView] = React.useState(() => startOfMonth(value.from ?? new Date()));
   const [hover, setHover] = React.useState<Date | null>(null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
 
   React.useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (popoverRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  React.useEffect(() => {
+    if (!open || !wrapRef.current) return;
+    const t = wrapRef.current.getBoundingClientRect();
+    setCoords({ top: t.bottom + 6 + window.scrollY, left: t.left + window.scrollX });
+  }, [open]);
 
   const monthGrid = (offset: number) => {
     const m = addMonths(view, offset);
@@ -259,8 +271,14 @@ export function DateRangePicker({
         <span className="daterange__icon" aria-hidden="true"><CalendarIcon size={16} /></span>
         <span>{label}</span>
       </button>
-      {open && (
-        <div className="daterange__popover" role="dialog" onMouseLeave={() => setHover(null)}>
+      {open && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={popoverRef}
+          className="daterange__popover"
+          role="dialog"
+          onMouseLeave={() => setHover(null)}
+          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+        >
           {presets && presets.length > 0 && (
             <ul className="daterange__presets">
               {presets.map((p, i) => (
@@ -285,7 +303,8 @@ export function DateRangePicker({
               <button type="button" className="daterange__apply" onClick={() => setOpen(false)} disabled={!value.from || !value.to}>Aplicar</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
