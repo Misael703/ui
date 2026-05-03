@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
+import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
 
 // ---------- Combobox -----------------------------------------------------
 export interface ComboboxOption<T = string> {
@@ -138,17 +139,6 @@ function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getM
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-function fmtISO(d: Date) {
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-function parseISO(s: string): Date | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const [y, m, d] = s.split('-').map(Number);
-  const dt = new Date(y, m - 1, d);
-  return isNaN(dt.getTime()) ? null : dt;
-}
 
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -163,12 +153,19 @@ export interface DatePickerProps {
   invalid?: boolean;
   className?: string;
   id?: string;
+  /**
+   * Display & parse format. Default `'auto'` derives from `configureBrand().locale`
+   * (e.g. `es-CL` → `dd-mm-aaaa`, `en-US` → `mm-dd-aaaa`, `ja-JP` → `aaaa-mm-dd`).
+   */
+  format?: DateFormat;
 }
 
 export function DatePicker({
-  value, onChange, minDate, maxDate, placeholder = 'aaaa-mm-dd',
-  disabled, invalid, className, id,
+  value, onChange, minDate, maxDate, placeholder,
+  disabled, invalid, className, id, format = 'auto',
 }: DatePickerProps) {
+  const fmt = resolveDateFormat(format);
+  const ph = placeholder ?? dateFormatPlaceholder(fmt);
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
   const wrapRef = React.useRef<HTMLDivElement>(null);
@@ -202,11 +199,11 @@ export function DatePicker({
         id={id}
         type="text"
         className="datepicker__input"
-        placeholder={placeholder}
+        placeholder={ph}
         disabled={disabled}
-        value={value ? fmtISO(value) : ''}
+        value={value ? formatDate(value, fmt) : ''}
         onChange={(e) => {
-          const d = parseISO(e.target.value);
+          const d = parseDate(e.target.value, fmt);
           onChange(d);
         }}
         onFocus={() => setOpen(true)}

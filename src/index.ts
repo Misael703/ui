@@ -1,6 +1,7 @@
 // @misael703/elalba-ui — public surface
 export * from './brand';
 export * from './utils/cx';
+export * from './utils/dateFormat';
 export * from './components/Button';
 export * from './components/Form';
 export * from './components/Display';

@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
+import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
 
 // ---------- MultiCombobox -----------------------------------------------
 export interface MultiComboboxOption<T = string> {
@@ -136,11 +137,6 @@ function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getM
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-function fmtISO(d: Date) {
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -156,12 +152,17 @@ export interface DateRangePickerProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  /**
+   * Display format. Default `'auto'` derives from `configureBrand().locale`.
+   */
+  format?: DateFormat;
 }
 
 export function DateRangePicker({
   value, onChange, minDate, maxDate, presets,
-  invalid, disabled, className, id,
+  invalid, disabled, className, id, format = 'auto',
 }: DateRangePickerProps) {
+  const fmt = resolveDateFormat(format);
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value.from ?? new Date()));
   const [hover, setHover] = React.useState<Date | null>(null);
@@ -211,8 +212,8 @@ export function DateRangePicker({
 
   const label = value.from
     ? value.to
-      ? `${fmtISO(value.from)} → ${fmtISO(value.to)}`
-      : `${fmtISO(value.from)} → …`
+      ? `${formatDate(value.from, fmt)} → ${formatDate(value.to, fmt)}`
+      : `${formatDate(value.from, fmt)} → …`
     : 'Seleccionar rango';
 
   const renderMonth = (offset: number) => {
