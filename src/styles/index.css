@@ -1119,7 +1119,19 @@ a:hover {
   display: inline-flex; vertical-align: middle; margin-left: 4px;
   opacity: 0.4;
 }
-.table th.sorted .sort { opacity: 1; color: var(--color-brand-blue); }
+.table th.sorted,
+.table th[aria-sort="ascending"],
+.table th[aria-sort="descending"] {
+  background: var(--color-blue-50);
+  color: var(--color-brand-blue);
+  border-bottom-color: var(--color-brand-blue);
+}
+.table th.sorted .sort,
+.table th[aria-sort="ascending"] .data-table__sort,
+.table th[aria-sort="descending"] .data-table__sort {
+  opacity: 1;
+  color: var(--color-brand-blue);
+}
 .table td {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-default);
@@ -2398,6 +2410,7 @@ a:hover {
   display: grid;
   grid-template-columns: 248px 1fr;
   min-height: 100vh; background: var(--bg-canvas);
+  transition: grid-template-columns var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
 }
 .appshell.is-collapsed { grid-template-columns: 72px 1fr; }
 .appshell__sidebar {
@@ -2408,13 +2421,16 @@ a:hover {
   overflow: hidden;
 }
 .appshell__brand {
-  padding: 16px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border-default);
-  min-height: 64px; display: flex; align-items: center;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display); font-weight: 700;
   text-transform: uppercase; letter-spacing: var(--tracking-wide);
 }
-.appshell.is-collapsed .appshell__brand { padding: 16px 12px; justify-content: center; }
+.appshell.is-collapsed .appshell__brand { padding: 16px 12px; }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
 .appshell__navlabel-section {
@@ -2444,17 +2460,95 @@ a:hover {
 }
 .appshell__navicon { width: 20px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--fg-muted); }
 .appshell__navitem.is-active .appshell__navicon { color: var(--color-brand-blue); }
-.appshell__navlabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.appshell.is-collapsed .appshell__navlabel,
-.appshell.is-collapsed .appshell__navbadge,
-.appshell.is-collapsed .appshell__navchildren { display: none; }
+.appshell__navlabel {
+  flex: 1; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  transition: opacity var(--duration-fast, 150ms) ease, max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
 .appshell__navbadge {
   background: var(--color-orange-100); color: var(--color-orange-800);
   font-size: var(--text-2xs); font-weight: 700;
   padding: 1px 8px; border-radius: var(--radius-pill);
+  transition: opacity var(--duration-fast, 150ms) ease, max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+.appshell.is-collapsed .appshell__navlabel,
+.appshell.is-collapsed .appshell__navbadge {
+  opacity: 0;
+  max-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.appshell.is-collapsed .appshell__navchildren { display: none; }
+.appshell__navlabel-section {
+  transition: opacity var(--duration-fast, 150ms) ease, visibility 0s linear 0s;
+}
+.appshell.is-collapsed .appshell__navlabel-section {
+  opacity: 0;
+  visibility: hidden; /* removes from accessibility tree once collapsed */
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Delay visibility:hidden until after the opacity fade completes. */
+  transition: opacity var(--duration-fast, 150ms) ease, visibility 0s linear var(--duration-fast, 150ms);
 }
 .appshell__navchildren { padding-left: 28px; }
 .appshell__navitem--depth-1 { padding: 8px 10px; font-size: var(--text-sm); font-weight: 500; }
+
+/* ---- Theme: brand (sidebar azul de marca) -----------------------------
+   Use case: apps con identidad visual fuerte donde el sidebar completo
+   debe leer "marca". Ojo: texto blanco sobre fondo oscuro fatiga más en
+   uso prolongado. La industria B2B moderna prefiere `default`. */
+.appshell--brand .appshell__sidebar {
+  background: var(--color-brand-blue);
+  border-right-color: transparent;
+  color: var(--color-white);
+}
+.appshell--brand .appshell__brand {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+}
+.appshell--brand .appshell__navlabel-section {
+  color: rgba(255, 255, 255, 0.55);
+}
+.appshell--brand .appshell__navitem {
+  color: rgba(255, 255, 255, 0.85);
+}
+.appshell--brand .appshell__navitem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+}
+.appshell--brand .appshell__navitem.is-active {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--color-white);
+}
+.appshell--brand .appshell__navitem.is-active::before {
+  background: var(--color-brand-orange);
+}
+.appshell--brand .appshell__navicon {
+  color: rgba(255, 255, 255, 0.7);
+}
+.appshell--brand .appshell__navitem.is-active .appshell__navicon,
+.appshell--brand .appshell__navitem:hover .appshell__navicon {
+  color: var(--color-white);
+}
+.appshell--brand .appshell__navbadge {
+  background: var(--color-brand-orange);
+  color: var(--color-white);
+}
+.appshell--brand .appshell__sidebar-foot {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+.appshell--brand .appshell__collapse {
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+}
+.appshell--brand .appshell__collapse:hover {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
 
 .appshell__sidebar-foot {
   border-top: 1px solid var(--border-default);
@@ -3247,7 +3341,14 @@ a:hover {
 }
 .hero--sm { padding: var(--space-8) var(--space-6); }
 .hero--lg { padding: var(--space-20) var(--space-8); }
-.hero__inner { position: relative; max-width: 720px; display: flex; flex-direction: column; gap: var(--space-3); }
+.hero__inner {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
 .hero--align-center .hero__inner { margin: 0 auto; text-align: center; align-items: center; }
 .hero--align-end .hero__inner { margin-left: auto; text-align: right; align-items: flex-end; }
 .hero__eyebrow {
@@ -3272,6 +3373,35 @@ a:hover {
 .hero__actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-3); }
 .hero--align-center .hero__actions { justify-content: center; }
 .hero--align-end .hero__actions { justify-content: flex-end; }
+
+/* On dark/branded heroes, outline & ghost buttons placed in `.hero__actions`
+   need to invert their colors — otherwise they share the hero's background
+   and disappear. Scoped to `.hero__actions` (not the whole hero) to avoid
+   recoloring buttons inside nested cards or other surfaces with their own bg. */
+.hero--brand .hero__actions .btn--outline,
+.hero--inverse .hero__actions .btn--outline,
+.hero--image .hero__actions .btn--outline {
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+}
+.hero--brand .hero__actions .btn--outline:hover:not(:disabled),
+.hero--inverse .hero__actions .btn--outline:hover:not(:disabled),
+.hero--image .hero__actions .btn--outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-white);
+  color: var(--color-white);
+}
+.hero--brand .hero__actions .btn--ghost,
+.hero--inverse .hero__actions .btn--ghost,
+.hero--image .hero__actions .btn--ghost {
+  color: var(--color-white);
+}
+.hero--brand .hero__actions .btn--ghost:hover:not(:disabled),
+.hero--inverse .hero__actions .btn--ghost:hover:not(:disabled),
+.hero--image .hero__actions .btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* ---------- Testimonial ----------------------------------------------- */
 .testimonial { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-6); margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
@@ -3401,13 +3531,27 @@ a:hover {
 .toggle--md { padding: 6px var(--space-3); font-size: var(--text-sm); height: 36px; }
 .toggle--lg { padding: 8px var(--space-4); font-size: var(--text-base); height: 44px; }
 .toggle--outline { border-color: var(--border-default); }
-.toggle:hover:not(:disabled) { background: var(--bg-subtle); }
+
+/* Hover when NOT pressed: subtle gray background with dark text. */
+.toggle:hover:not(:disabled):not(.is-pressed):not([aria-pressed="true"]) {
+  background: var(--bg-subtle);
+}
+
 .toggle.is-pressed,
 .toggle[aria-pressed="true"] {
   background: var(--bg-inverse, var(--fg-default));
   color: var(--bg-canvas);
   border-color: transparent;
 }
+
+/* Hover when pressed: keep dark background, lift slightly via brightness so
+   the text stays legible. The previous rule turned the background gray while
+   the text remained light, producing an unreadable gray-on-gray state. */
+.toggle.is-pressed:hover:not(:disabled),
+.toggle[aria-pressed="true"]:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
 .toggle:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .toggle-group {
@@ -3603,3 +3747,55 @@ a:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Aspect Ratio ----------------------------------------------- */
+.aspect-ratio {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.aspect-ratio > img,
+.aspect-ratio > video,
+.aspect-ratio > iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- Collapsible ------------------------------------------------- */
+.collapsible__trigger {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.collapsible__trigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.collapsible__content {
+  /* Consumers can layer their own animation/padding via className. */
+}
+
+/* ---------- Scroll Area ------------------------------------------------- */
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.scroll-area--vertical { overflow-y: auto; overflow-x: hidden; }
+.scroll-area--horizontal { overflow-x: auto; overflow-y: hidden; }
+.scroll-area--both { overflow: auto; }
+.scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scroll-area::-webkit-scrollbar-thumb:hover { background-color: var(--fg-muted); }
+.scroll-area::-webkit-scrollbar-corner { background: transparent; }
