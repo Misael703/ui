@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 
 export type PopoverPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -97,6 +98,18 @@ export function Popover({
     };
   }, [open, closeOnOutsideClick, closeOnEscape]);
 
+  const panel = open && (
+    <div
+      ref={contentRef}
+      role="dialog"
+      aria-label={ariaLabel}
+      className={cx('popover__content', contentClassName)}
+      style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <span className={cx('popover', className)}>
       <span
@@ -108,17 +121,9 @@ export function Popover({
       >
         {trigger}
       </span>
-      {open && (
-        <div
-          ref={contentRef}
-          role="dialog"
-          aria-label={ariaLabel}
-          className={cx('popover__content', contentClassName)}
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
-        >
-          {children}
-        </div>
-      )}
+      {/* Portal to body so absolute coords (document-relative) match the
+          positioning origin and overflow:hidden ancestors don't clip. */}
+      {panel && typeof document !== 'undefined' && createPortal(panel, document.body)}
     </span>
   );
 }
