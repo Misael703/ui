@@ -274,27 +274,110 @@ export const Shadows: StoryObj = {
 // Motion
 // =============================================================================
 
-export const Motion: StoryObj = {
-  render: () => (
-    <div>
-      <SectionTitle>Duraciones</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: '120px 200px 1fr', gap: 12, alignItems: 'center' }}>
-        {[['fast', '120ms'], ['base', '200ms'], ['slow', '320ms']].map(([k, ms]) => (
-          <React.Fragment key={k}>
-            <Caption>--duration-{k}</Caption>
-            <span style={{ color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{ms}</span>
-            <div className={`motion-demo motion-demo--${k}`} style={{ height: 8, background: 'var(--color-brand-orange)', borderRadius: 4, width: '40%' }} />
-          </React.Fragment>
-        ))}
-      </div>
-      <SectionTitle>Easings</SectionTitle>
-      <div style={{ display: 'grid', gap: 8 }}>
-        <div><Caption>--ease-standard</Caption> <span style={{ color: 'var(--fg-muted)', fontSize: 12, marginLeft: 8 }}>cubic-bezier(0.2, 0.8, 0.2, 1) — uso general</span></div>
-        <div><Caption>--ease-in</Caption> <span style={{ color: 'var(--fg-muted)', fontSize: 12, marginLeft: 8 }}>cubic-bezier(0.4, 0, 1, 1) — entrada</span></div>
-        <div><Caption>--ease-out</Caption> <span style={{ color: 'var(--fg-muted)', fontSize: 12, marginLeft: 8 }}>cubic-bezier(0, 0, 0.2, 1) — salida</span></div>
-      </div>
+/** Demo runs at 5× actual duration so the difference is perceptible. */
+const DEMO_SCALE = 5;
+
+function MotionTrack({
+  durationMs,
+  easing,
+  trigger,
+}: {
+  durationMs: number;
+  easing: string;
+  trigger: number;
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        height: 32,
+        width: '100%',
+        maxWidth: 480,
+        background: 'var(--bg-subtle)',
+        borderRadius: 4,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        key={trigger}
+        style={{
+          position: 'absolute',
+          top: 4,
+          width: 24,
+          height: 24,
+          background: 'var(--color-brand-orange)',
+          borderRadius: 4,
+          animation: `motion-demo-slide ${durationMs}ms ${easing} 0s 1 forwards`,
+        }}
+      />
     </div>
-  ),
+  );
+}
+
+export const Motion: StoryObj = {
+  render: () => {
+    const [trigger, setTrigger] = React.useState(0);
+    React.useEffect(() => {
+      const id = setInterval(() => setTrigger((t) => t + 1), 2200);
+      return () => clearInterval(id);
+    }, []);
+
+    const durations: Array<[string, number]> = [
+      ['fast', 120],
+      ['base', 200],
+      ['slow', 320],
+    ];
+    const easings: Array<[string, string, string]> = [
+      ['standard', 'cubic-bezier(0.2, 0.8, 0.2, 1)', 'uso general (entra suave, sale suave)'],
+      ['in', 'cubic-bezier(0.4, 0, 1, 1)', 'entrada (arranca lento, acelera al final)'],
+      ['out', 'cubic-bezier(0, 0, 0.2, 1)', 'salida (arranca rápido, frena al final)'],
+    ];
+
+    return (
+      <div>
+        <style>{`
+          @keyframes motion-demo-slide {
+            from { left: 4px; }
+            to   { left: calc(100% - 28px); }
+          }
+        `}</style>
+
+        <SectionTitle>Duraciones</SectionTitle>
+        <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 16 }}>
+          Demos a <strong>{DEMO_SCALE}×</strong> velocidad real para que la diferencia sea perceptible.
+          Los valores reales (a la izquierda) son los que usa el kit en transitions e interacciones.
+          Loop cada 2.2s.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '160px 80px 1fr', gap: 12, alignItems: 'center', marginBottom: 32 }}>
+          {durations.map(([k, ms]) => (
+            <React.Fragment key={k}>
+              <Caption>--duration-{k}</Caption>
+              <span style={{ color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{ms}ms</span>
+              <MotionTrack durationMs={ms * DEMO_SCALE} easing="var(--ease-standard)" trigger={trigger} />
+            </React.Fragment>
+          ))}
+        </div>
+
+        <SectionTitle>Easings</SectionTitle>
+        <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 16 }}>
+          Misma duración (<code>--duration-slow</code>, 320ms a {DEMO_SCALE}× = {320 * DEMO_SCALE}ms),
+          distinta curva. Notá cómo el cuadrado arranca y termina diferente en cada fila.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, alignItems: 'center', marginBottom: 24 }}>
+          {easings.map(([k, bezier, desc]) => (
+            <React.Fragment key={k}>
+              <div>
+                <Caption>--ease-{k}</Caption>
+                <div style={{ color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', fontSize: 10, marginTop: 2 }}>{bezier}</div>
+                <div style={{ color: 'var(--fg-muted)', fontSize: 11, marginTop: 2 }}>{desc}</div>
+              </div>
+              <MotionTrack durationMs={320 * DEMO_SCALE} easing={`var(--ease-${k})`} trigger={trigger} />
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    );
+  },
 };
 
 // =============================================================================
@@ -318,24 +401,28 @@ interface LogoVariant {
 // Ejemplo: si tienes "logo-vertical-dark.svg", agrega:
 //   { name: 'Vertical', type: 'vertical', bg: 'dark', format: 'svg', path: '/assets/logos/logo-vertical-dark.svg' }
 const LOGOS: LogoVariant[] = [
-  // Horizontal — disponible en SVG (recomendado) y PNG
+  // Horizontal — SVG (recomendado) + PNG
   { name: 'Horizontal · light · SVG', type: 'horizontal', bg: 'light', format: 'svg', path: '/assets/logos/logo-horizontal-light.svg' },
   { name: 'Horizontal · light · PNG', type: 'horizontal', bg: 'light', format: 'png', path: '/assets/logos/logo-horizontal-light.png' },
   { name: 'Horizontal · dark · SVG',  type: 'horizontal', bg: 'dark',  format: 'svg', path: '/assets/logos/logo-horizontal-dark.svg' },
   { name: 'Horizontal · dark · PNG',  type: 'horizontal', bg: 'dark',  format: 'png', path: '/assets/logos/logo-horizontal-dark.png' },
 
-  // Vertical — solo PNG por ahora
+  // Vertical — SVG (recomendado) + PNG
+  { name: 'Vertical · light · SVG',   type: 'vertical', bg: 'light', format: 'svg', path: '/assets/logos/logo-vertical-light.svg' },
   { name: 'Vertical · light · PNG',   type: 'vertical', bg: 'light', format: 'png', path: '/assets/logos/logo-vertical-light.png' },
+  { name: 'Vertical · dark · SVG',    type: 'vertical', bg: 'dark',  format: 'svg', path: '/assets/logos/logo-vertical-dark.svg' },
   { name: 'Vertical · dark · PNG',    type: 'vertical', bg: 'dark',  format: 'png', path: '/assets/logos/logo-vertical-dark.png' },
 
-  // Mark (isotipo) — disponible en SVG (recomendado) y PNG
+  // Mark (isotipo) — SVG (recomendado) + PNG
   { name: 'Mark · light · SVG',       type: 'mark', bg: 'light', format: 'svg', path: '/assets/logos/mark-light.svg' },
   { name: 'Mark · light · PNG',       type: 'mark', bg: 'light', format: 'png', path: '/assets/logos/mark-light.png' },
   { name: 'Mark · dark · SVG',        type: 'mark', bg: 'dark',  format: 'svg', path: '/assets/logos/mark-dark.svg' },
   { name: 'Mark · dark · PNG',        type: 'mark', bg: 'dark',  format: 'png', path: '/assets/logos/mark-dark.png' },
 
-  // Wordmark (solo texto) — solo PNG por ahora
+  // Wordmark (solo texto) — SVG (recomendado) + PNG
+  { name: 'Wordmark · light · SVG',   type: 'wordmark', bg: 'light', format: 'svg', path: '/assets/logos/wordmark-light.svg' },
   { name: 'Wordmark · light · PNG',   type: 'wordmark', bg: 'light', format: 'png', path: '/assets/logos/wordmark-light.png' },
+  { name: 'Wordmark · dark · SVG',    type: 'wordmark', bg: 'dark',  format: 'svg', path: '/assets/logos/wordmark-dark.svg' },
   { name: 'Wordmark · dark · PNG',    type: 'wordmark', bg: 'dark',  format: 'png', path: '/assets/logos/wordmark-dark.png' },
 ];
 

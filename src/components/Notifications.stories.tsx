@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { NotificationCenter } from './Notifications';
 
-export default { title: 'ERP/NotificationCenter', tags: ['autodocs'] } as Meta;
+export default { title: 'Feedback/Notifications', tags: ['autodocs'] } as Meta;
 
 export const ConNotificaciones: StoryObj = {
   render: () => {

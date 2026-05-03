@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { NumberInput, Pagination, EmptyState, Kpi } from './Inputs';
 
-export default { title: 'Avanzados/Inputs', tags: ['autodocs'] } as Meta;
+export default { title: 'Forms/Misc', tags: ['autodocs'] } as Meta;
 
 export const NumberInputBasico: StoryObj = {
   render: () => {

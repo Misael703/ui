@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Hero, Testimonial, CategoryNav } from './Marketing';
 import { Button } from './Button';
 
-export default { title: 'Marketing', tags: ['autodocs'] } as Meta;
+export default { title: 'ERP/Marketing', tags: ['autodocs'] } as Meta;
 
 export const HeroBrand: StoryObj = {
   render: () => (

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Logo } from './Logo';
 
 export default {
-  title: 'Branding/Logo',
+  title: 'Foundations/Logo',
   component: Logo,
   tags: ['autodocs'],
   argTypes: {
@@ -70,6 +70,56 @@ export const TodasLasVariantes: S = {
       </div>
     </div>
   ),
+};
+
+/**
+ * Inspección byte-por-byte de los 16 archivos en `public/assets/logos/`.
+ * Cada celda muestra el archivo individual cargado por path explícito —
+ * útil para detectar logos rotos o con tamaños inconsistentes entre los
+ * formatos SVG y PNG.
+ */
+export const InspeccionDeArchivos: S = {
+  render: () => {
+    const variants = ['mark', 'horizontal', 'wordmark', 'vertical'] as const;
+    const bgs = ['light', 'dark'] as const;
+    const formats = ['svg', 'png'] as const;
+
+    const Cell = ({ variant, bg, format }: {
+      variant: (typeof variants)[number];
+      bg: (typeof bgs)[number];
+      format: (typeof formats)[number];
+    }) => (
+      <div
+        style={{
+          display: 'flex', flexDirection: 'column', gap: 8,
+          padding: 16,
+          background: bg === 'dark' ? 'var(--color-brand-blue)' : 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 12,
+          minHeight: 120,
+        }}
+      >
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: bg === 'dark' ? 'rgba(255,255,255,0.7)' : 'var(--fg-muted)' }}>
+          {variant}-{bg}.{format}
+        </div>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Logo variant={variant} bg={bg} format={format} height={40} />
+        </div>
+      </div>
+    );
+
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {bgs.flatMap((bg) =>
+          formats.flatMap((format) =>
+            variants.map((variant) => (
+              <Cell key={`${variant}-${bg}-${format}`} variant={variant} bg={bg} format={format} />
+            ))
+          )
+        )}
+      </div>
+    );
+  },
 };
 
 export const Responsive: S = {

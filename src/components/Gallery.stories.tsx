@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ImageGallery } from './Gallery';
 
-export default { title: 'Commerce/Gallery', tags: ['autodocs'] } as Meta;
+export default { title: 'ERP/Gallery', tags: ['autodocs'] } as Meta;
 
 const images = [
   { src: 'https://picsum.photos/id/1011/600/600', alt: 'Vista 1' },

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as Recharts from 'recharts';
 import { LineChart, AreaChart, BarChart, DonutChart, Sparkline } from './Charts';
 
-export default { title: 'Charts', tags: ['autodocs'] } as Meta;
+export default { title: 'Data/Charts', tags: ['autodocs'] } as Meta;
 
 const monthlyData = [
   { mes: 'Ene', ventas: 4200, devoluciones: 320 },

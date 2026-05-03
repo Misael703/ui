@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { CodeBlock, JsonViewer } from './Code';
 
-export default { title: 'ERP/Code', tags: ['autodocs'] } as Meta;
+export default { title: 'Display/Code', tags: ['autodocs'] } as Meta;
 
 export const CodeBlockDemo: StoryObj = {
   render: () => (

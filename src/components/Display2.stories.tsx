@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Avatar, AvatarGroup, Stat, Menu } from './Display2';
 
-export default { title: 'Display/Avatares y Stats', tags: ['autodocs'] } as Meta;
+export default { title: 'Display/Avatar y Stat', tags: ['autodocs'] } as Meta;
 
 export const Avatares: StoryObj = {
   render: () => (

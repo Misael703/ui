@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Modal, Drawer } from './Overlay';
 import { Button } from './Button';
 
-export default { title: 'Overlay', tags: ['autodocs'] } as Meta;
+export default { title: 'Overlay/Modal y Drawer', tags: ['autodocs'] } as Meta;
 
 export const ModalBasico: StoryObj = {
   render: () => {

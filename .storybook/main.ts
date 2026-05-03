@@ -8,5 +8,9 @@ const config: StorybookConfig = {
   ],
   framework: { name: '@storybook/react-vite', options: {} },
   docs: { autodocs: 'tag' },
+  // Serve `public/` as static root so components that reference absolute paths
+  // (e.g. `<Logo>` looking for `/assets/logos/...`) resolve correctly inside
+  // the Storybook iframe.
+  staticDirs: ['../public'],
 };
 export default config;
