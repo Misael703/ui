@@ -23,6 +23,8 @@ export interface NavSection {
   items: NavItem[];
 }
 
+export type AppShellTheme = 'default' | 'brand';
+
 export interface AppShellProps {
   brand?: React.ReactNode;
   brandCollapsed?: React.ReactNode;
@@ -35,6 +37,12 @@ export interface AppShellProps {
   onCollapsedChange?: (c: boolean) => void;
   children: React.ReactNode;
   className?: string;
+  /**
+   * Sidebar color theme:
+   * - `default` (light): claro, mejor para apps data-heavy de uso prolongado.
+   * - `brand`: sidebar azul de marca con texto blanco. Mayor brand recall.
+   */
+  theme?: AppShellTheme;
   /** Render-prop for navigation links so the host app can use Next.js Link, etc. */
   linkAs?: (item: NavItem, content: React.ReactNode, className: string) => React.ReactNode;
 }
@@ -42,7 +50,7 @@ export interface AppShellProps {
 export function AppShell({
   brand, brandCollapsed, sections, topbar, footer, user,
   defaultCollapsed = false, collapsed: ctrlCollapsed, onCollapsedChange,
-  children, className, linkAs,
+  children, className, theme = 'default', linkAs,
 }: AppShellProps) {
   const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -90,7 +98,7 @@ export function AppShell({
   };
 
   return (
-    <div className={cx('appshell', collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
+    <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
       <aside className="appshell__sidebar" aria-label="Navegación principal">
         <div className="appshell__brand">
           {collapsed ? (brandCollapsed ?? brand) : brand}
