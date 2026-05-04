@@ -116,8 +116,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     </div>
   );
 
+  // Memoize the provider value so consumers calling useToast() to access
+  // only `push`/`dismiss` (the common case) don't re-render on every state
+  // change. Without this, every toast push churned every consumer.
+  const ctx = React.useMemo(() => ({ toasts, push, dismiss }), [toasts, push, dismiss]);
+
   return (
-    <ToastContext.Provider value={{ toasts, push, dismiss }}>
+    <ToastContext.Provider value={ctx}>
       {children}
       {typeof document !== 'undefined' && createPortal(stack, document.body)}
     </ToastContext.Provider>
