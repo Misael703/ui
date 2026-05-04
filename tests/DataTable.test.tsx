@@ -33,6 +33,63 @@ describe('DataTable', () => {
     expect(onSort).toHaveBeenCalledWith({ key: 'sku', dir: 'asc' });
   });
 
+  it('sortable headers render a button so they are keyboard-operable', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} onSortChange={() => {}} />
+    );
+    // The "SKU" column is sortable; its <th> should contain a real <button>.
+    const skuTh = Array.from(container.querySelectorAll('th'))
+      .find((th) => th.textContent?.includes('SKU'))!;
+    expect(skuTh.querySelector('button')).not.toBeNull();
+    // Non-sortable columns ("Nombre") should not.
+    const nameTh = Array.from(container.querySelectorAll('th'))
+      .find((th) => th.textContent?.includes('Nombre'))!;
+    expect(nameTh.querySelector('button')).toBeNull();
+  });
+
+  it('aria-sort is only set on sortable columns', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    const ths = container.querySelectorAll('th');
+    const nameTh = Array.from(ths).find((th) => th.textContent?.includes('Nombre'))!;
+    const skuTh = Array.from(ths).find((th) => th.textContent?.includes('SKU'))!;
+    expect(nameTh.hasAttribute('aria-sort')).toBe(false);
+    expect(skuTh.getAttribute('aria-sort')).toBe('none');
+  });
+
+  it('every <th> has scope="col"', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    const ths = container.querySelectorAll('th');
+    expect(ths.length).toBeGreaterThan(0);
+    ths.forEach((th) => expect(th.getAttribute('scope')).toBe('col'));
+  });
+
+  it('ariaLabel is applied to the <table> element', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} ariaLabel="Productos" />
+    );
+    expect(container.querySelector('table')).toHaveAttribute('aria-label', 'Productos');
+  });
+
+  it('rowLabel customizes the per-row checkbox aria-label', () => {
+    render(
+      <DataTable
+        columns={cols}
+        rows={rows}
+        rowKey={(r) => r.id}
+        rowLabel={(r) => `producto ${r.name}`}
+        selectable
+        selectedKeys={new Set()}
+        onSelectionChange={() => {}}
+      />
+    );
+    expect(screen.getByLabelText('Seleccionar producto Taladro')).toBeInTheDocument();
+    expect(screen.getByLabelText('Seleccionar producto Sierra')).toBeInTheDocument();
+  });
+
   it('shows empty state', () => {
     render(<DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} empty="Nada" />);
     expect(screen.getByText('Nada')).toBeInTheDocument();

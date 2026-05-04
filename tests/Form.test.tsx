@@ -15,6 +15,50 @@ describe('Form controls', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Required');
   });
 
+  it('FormField auto-generates id and wires label htmlFor + input id', () => {
+    const { container } = render(
+      <FormField label="Email"><Input placeholder="x" /></FormField>
+    );
+    const label = container.querySelector('label.label');
+    const input = screen.getByPlaceholderText('x');
+    expect(label).not.toBeNull();
+    const labelFor = label!.getAttribute('for');
+    expect(labelFor).toBeTruthy();
+    expect(input).toHaveAttribute('id', labelFor!);
+  });
+
+  it('FormField wires aria-describedby to the input from hint and error ids', () => {
+    const { container } = render(
+      <FormField label="Email" hint="Te servirá para login" error="Inválido">
+        <Input placeholder="x" />
+      </FormField>
+    );
+    const input = screen.getByPlaceholderText('x');
+    const describedBy = input.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    // Error id should be present (hint is suppressed when error is shown).
+    const errorEl = container.querySelector('[role="alert"]');
+    expect(errorEl).not.toBeNull();
+    expect(describedBy).toContain(errorEl!.getAttribute('id')!);
+  });
+
+  it('Checkbox forwards aria-invalid when invalid', () => {
+    render(<Checkbox invalid />);
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('Checkbox indeterminate sets the property and aria-checked="mixed"', () => {
+    const { container } = render(<Checkbox indeterminate />);
+    const input = container.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+    expect(input.indeterminate).toBe(true);
+    expect(input).toHaveAttribute('aria-checked', 'mixed');
+  });
+
+  it('Switch forwards aria-invalid when invalid', () => {
+    render(<Switch invalid />);
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-invalid', 'true');
+  });
+
   it('Checkbox toggles and renders compound .check structure', () => {
     const onChange = vi.fn();
     const { container } = render(<Checkbox onChange={onChange}>Acepto</Checkbox>);
