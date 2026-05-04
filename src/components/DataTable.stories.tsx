@@ -40,6 +40,62 @@ export const DataTableBasica: StoryObj = {
   },
 };
 
+/** Estado vacío: pasa `rows={[]}`. Muestra el mensaje por defecto o el `empty` slot. */
+export const SinDatos: StoryObj = {
+  render: () => (
+    <DataTable
+      rows={[]}
+      rowKey={(r: { id: string }) => r.id}
+      ariaLabel="Productos"
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'stock', header: 'Stock', align: 'right' },
+      ]}
+    />
+  ),
+};
+
+/** Estado de carga: skeleton de 5 filas mientras `loading=true`. */
+export const Cargando: StoryObj = {
+  render: () => (
+    <DataTable
+      loading
+      rows={[]}
+      rowKey={(r: { id: string }) => r.id}
+      ariaLabel="Productos"
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'stock', header: 'Stock', align: 'right' },
+      ]}
+    />
+  ),
+};
+
+/** Empty slot custom: pasa un nodo arbitrario via `empty`. */
+export const SinDatosCustom: StoryObj = {
+  render: () => (
+    <DataTable
+      rows={[]}
+      rowKey={(r: { id: string }) => r.id}
+      ariaLabel="Productos"
+      empty={
+        <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+          <strong style={{ display: 'block', marginBottom: 4 }}>Sin productos en este filtro</strong>
+          <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
+            Ajusta los filtros o limpia la búsqueda para ver más resultados.
+          </span>
+        </div>
+      }
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+      ]}
+    />
+  ),
+};
+
 export const ConToolbar: StoryObj = {
   render: () => {
     const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
