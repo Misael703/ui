@@ -34,11 +34,11 @@ describe('Form controls', () => {
     expect(screen.getByRole('radio')).toBeInTheDocument();
   });
 
-  it('Switch renders track and is a checkbox under the hood', () => {
+  it('Switch renders track and exposes role="switch" for screen readers', () => {
     const { container } = render(<Switch defaultChecked>Activar</Switch>);
     expect(container.querySelector('label.switch')).not.toBeNull();
     expect(container.querySelector('.switch__track')).not.toBeNull();
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getByRole('switch')).toBeChecked();
     expect(screen.getByText('Activar')).toBeInTheDocument();
   });
 });

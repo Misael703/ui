@@ -77,15 +77,37 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(function 
 export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /** Optional label rendered next to the checkbox. */
   children?: React.ReactNode;
+  invalid?: boolean;
+  /** Tri-state mark (e.g. select-all partially checked). HTML attribute is JS-only. */
+  indeterminate?: boolean;
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { className, children, ...rest },
+  { className, children, invalid, indeterminate, ...rest },
   ref
 ) {
+  // Bridge the forwarded ref with our internal ref so we can set the
+  // indeterminate property (HTML doesn't expose it as an attribute).
+  const innerRef = React.useRef<HTMLInputElement | null>(null);
+  React.useEffect(() => {
+    if (innerRef.current) innerRef.current.indeterminate = !!indeterminate;
+  }, [indeterminate]);
+
+  const setRef = (node: HTMLInputElement | null) => {
+    innerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
+  };
+
   return (
-    <label className={cx('check', className)}>
-      <input ref={ref} type="checkbox" {...rest} />
+    <label className={cx('check', invalid && 'is-invalid', className)}>
+      <input
+        ref={setRef}
+        type="checkbox"
+        aria-invalid={invalid || undefined}
+        aria-checked={indeterminate ? 'mixed' : undefined}
+        {...rest}
+      />
       <span className="check__box" aria-hidden="true">
         <CheckIcon size={14} strokeWidth={3} />
       </span>
@@ -115,15 +137,24 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(function Rad
 export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /** Optional label rendered next to the switch. */
   children?: React.ReactNode;
+  invalid?: boolean;
 }
 
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { className, children, ...rest },
+  { className, children, invalid, ...rest },
   ref
 ) {
   return (
-    <label className={cx('switch', className)}>
-      <input ref={ref} type="checkbox" {...rest} />
+    <label className={cx('switch', invalid && 'is-invalid', className)}>
+      {/* role="switch" overrides the native checkbox role so screen readers
+          announce "on/off" semantics instead of "checked/unchecked". */}
+      <input
+        ref={ref}
+        type="checkbox"
+        role="switch"
+        aria-invalid={invalid || undefined}
+        {...rest}
+      />
       <span className="switch__track" aria-hidden="true" />
       {children != null && <span>{children}</span>}
     </label>
