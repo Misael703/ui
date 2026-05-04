@@ -151,22 +151,40 @@ export interface FormFieldProps {
   hint?: React.ReactNode;
   error?: React.ReactNode;
   required?: boolean;
+  /** Override the auto-generated id (e.g. when the input is rendered outside FormField). */
   htmlFor?: string;
   children: React.ReactNode;
   className?: string;
 }
 
 export function FormField({ label, hint, error, required, htmlFor, children, className }: FormFieldProps) {
-  const hintId = hint && htmlFor ? `${htmlFor}-hint` : undefined;
-  const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
+  const reactId = React.useId();
+  const id = htmlFor ?? reactId;
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+
+  // Inject id + aria-describedby into the single child element so screen readers
+  // announce the helper/error text. Consumer-provided values win.
+  const child = React.isValidElement(children)
+    ? React.cloneElement(
+        children as React.ReactElement<{ id?: string; 'aria-describedby'?: string }>,
+        {
+          id: (children.props as { id?: string }).id ?? id,
+          'aria-describedby':
+            (children.props as { 'aria-describedby'?: string })['aria-describedby'] ?? describedBy,
+        }
+      )
+    : children;
+
   return (
     <div className={cx('form-field', className)}>
       {label && (
-        <Label htmlFor={htmlFor} required={required}>
+        <Label htmlFor={id} required={required}>
           {label}
         </Label>
       )}
-      {children}
+      {child}
       {hint && !error && <div id={hintId} className="form-field__hint">{hint}</div>}
       {error && <div id={errorId} className="form-field__error" role="alert">{error}</div>}
     </div>

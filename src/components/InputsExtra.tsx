@@ -277,12 +277,14 @@ export interface RadioGroupProps<T = string> {
   options: OptionItem<T>[];
   name: string;
   orientation?: 'vertical' | 'horizontal';
+  /** Accessible name for the group (announced as "<label>, radio group" by screen readers). */
+  label?: string;
   className?: string;
 }
 
-export function RadioGroup<T = string>({ value, onChange, options, name, orientation = 'vertical', className }: RadioGroupProps<T>) {
+export function RadioGroup<T = string>({ value, onChange, options, name, orientation = 'vertical', label, className }: RadioGroupProps<T>) {
   return (
-    <div role="radiogroup" className={cx('option-group', `option-group--${orientation}`, className)}>
+    <div role="radiogroup" aria-label={label} className={cx('option-group', `option-group--${orientation}`, className)}>
       {options.map((o) => (
         <label key={String(o.value)} className={cx('option-row', o.disabled && 'is-disabled')}>
           <input
