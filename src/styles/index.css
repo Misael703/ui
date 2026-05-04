@@ -1107,7 +1107,11 @@ a:hover {
 /* ---------- Tables ------------------------------------------------------- */
 .table-wrap {
   overflow-x: auto;
-  background: var(--bg-surface);
+  /* Inset shadow on the right edge hints "scrolls horizontally" on
+     mobile / iOS Safari where scrollbars are invisible by default. */
+  background:
+    linear-gradient(to left, rgba(0, 0, 0, 0.08), transparent 16px) right center / 100% 100% no-repeat,
+    var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
 }
@@ -2539,8 +2543,9 @@ a:hover {
   border-bottom: 1px solid var(--border-default);
   position: sticky; top: 0; z-index: 20;
 }
-.appshell__topbar-content { flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
-.appshell__topbar-user { display: flex; align-items: center; gap: 12px; }
+.appshell__topbar-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; overflow: hidden; }
+/* flex:none keeps the user/avatar slot from shrinking when topbar content is wide. */
+.appshell__topbar-user { flex: none; display: flex; align-items: center; gap: 12px; }
 .appshell__hamburger {
   display: none;
   background: transparent; border: 0; cursor: pointer;
@@ -2562,6 +2567,28 @@ a:hover {
   .appshell.is-mobile-open .appshell__sidebar { transform: translateX(0); }
   .appshell.is-mobile-open .appshell__scrim { display: block; }
   .appshell__hamburger { display: inline-flex; align-items: center; justify-content: center; }
+}
+
+/* ---------- Mobile responsive overrides --------------------------------- */
+/* Below --bp-md: tighten container padding and scale form inputs to fit. */
+@media (max-width: 768px) {
+  .appshell__content { padding: 16px; }
+  /* min-width: min(X, 100%) lets these inputs shrink to their container
+     on narrow viewports while keeping the desktop minimum. */
+  .combobox { min-width: min(220px, 100%); }
+  .multicombo { min-width: min(240px, 100%); }
+  .datepicker__input { min-width: min(160px, 100%); }
+  .number-input { min-width: min(140px, 100%); }
+}
+
+/* Below --bp-sm: collapse the DateRangePicker to a single-month panel
+   and stack the toast stack edge-to-edge so it doesn't overflow. */
+@media (max-width: 600px) {
+  .daterange__popover { min-width: 0; flex-direction: column; }
+  .daterange__months { grid-template-columns: 1fr; }
+  .daterange__presets { display: none; }
+  .toast-stack { right: 0; left: 0; padding: 0 12px; }
+  .toast { min-width: 0; width: 100%; max-width: none; }
 }
 
 /* ---------- PageHeader ---------- */
