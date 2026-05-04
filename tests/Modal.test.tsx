@@ -18,8 +18,9 @@ describe('Modal', () => {
 
   it('closes on backdrop click', () => {
     const onClose = vi.fn();
-    const { container } = render(<Modal open onClose={onClose} title="x">y</Modal>);
-    const backdrop = container.querySelector('.modal-backdrop')!;
+    render(<Modal open onClose={onClose} title="x">y</Modal>);
+    // Modal is portal'd to document.body, so query the document — not container.
+    const backdrop = document.querySelector('.modal-backdrop')!;
     fireEvent.click(backdrop);
     expect(onClose).toHaveBeenCalled();
   });

@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
 
@@ -17,6 +18,7 @@ export interface OverlayProps {
 
 function useEscape(active: boolean, onClose: () => void, enabled: boolean) {
   React.useEffect(() => {
+    if (typeof document === 'undefined') return;
     if (!active || !enabled) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -28,6 +30,7 @@ function useEscape(active: boolean, onClose: () => void, enabled: boolean) {
 
 function useFocusTrap(ref: React.RefObject<HTMLElement>, active: boolean) {
   React.useEffect(() => {
+    if (typeof document === 'undefined') return;
     if (!active || !ref.current) return;
     const node = ref.current;
     const previously = document.activeElement as HTMLElement | null;
@@ -58,34 +61,59 @@ function useFocusTrap(ref: React.RefObject<HTMLElement>, active: boolean) {
   }, [active, ref]);
 }
 
+// Lock body scroll while any overlay is open. Stacked overlays share a single
+// counter so closing the inner one doesn't release the lock for the outer one.
+let scrollLockCount = 0;
+let originalOverflow = '';
+function useScrollLock(active: boolean) {
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (!active) return;
+    if (scrollLockCount === 0) {
+      originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+    scrollLockCount++;
+    return () => {
+      scrollLockCount--;
+      if (scrollLockCount === 0) {
+        document.body.style.overflow = originalOverflow;
+      }
+    };
+  }, [active]);
+}
+
 export function Modal({
   open, onClose, title, children, footer, size = 'md',
   closeOnBackdrop = true, closeOnEsc = true, className,
 }: OverlayProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const titleId = React.useId();
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
-  if (!open) return null;
-  return (
+  useScrollLock(open);
+  if (!open || typeof document === 'undefined') return null;
+  return createPortal(
     <div className="modal-backdrop" onClick={() => closeOnBackdrop && onClose()}>
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-labelledby={title ? titleId : undefined}
         className={cx('modal', `modal--${size}`, className)}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="modal__header">
-            <div id="modal-title" className="modal__title">{title}</div>
+            <div id={titleId} className="modal__title">{title}</div>
             <button type="button" className="modal__close" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
           </div>
         )}
         <div className="modal__body">{children}</div>
         {footer && <div className="modal__footer">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -98,27 +126,31 @@ export function Drawer({
   closeOnBackdrop = true, closeOnEsc = true, className,
 }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const titleId = React.useId();
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
-  if (!open) return null;
-  return (
+  useScrollLock(open);
+  if (!open || typeof document === 'undefined') return null;
+  return createPortal(
     <div className="drawer-backdrop" onClick={() => closeOnBackdrop && onClose()}>
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
         className={cx('drawer', `drawer--${side}`, className)}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="drawer__header">
-            <div className="drawer__title">{title}</div>
+            <div id={titleId} className="drawer__title">{title}</div>
             <button type="button" className="drawer__close" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
           </div>
         )}
         <div className="drawer__body">{children}</div>
         {footer && <div className="drawer__footer">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle, AlertTriangle, AlertCircle, Info } from './Icons';
 
 const VARIANT_ICON = {
@@ -60,25 +61,33 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Portal the stack to body so it isn't clipped by ancestor stacking contexts
+  // (overflow:hidden, transform, filter on app shell layouts).
+  // aria-atomic intentionally omitted: with `false` (default), screen readers
+  // announce only newly added toasts instead of re-reading the entire stack.
+  const stack = (
+    <div className="toast-stack" aria-live="polite">
+      {toasts.map((t) => {
+        const variant = t.variant ?? 'info';
+        const Icon = VARIANT_ICON[variant];
+        return (
+          <div key={t.id} className={`toast toast--${variant}`} role="status">
+            <span className="toast__icon" aria-hidden="true"><Icon size={20} /></span>
+            <div className="toast__body">
+              {t.title && <div className="toast__title">{t.title}</div>}
+              {t.description && <div className="toast__desc">{t.description}</div>}
+            </div>
+            <button type="button" className="toast__close" aria-label="Cerrar" onClick={() => dismiss(t.id)}><X size={16} /></button>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToastContext.Provider value={{ toasts, push, dismiss }}>
       {children}
-      <div className="toast-stack" aria-live="polite" aria-atomic="true">
-        {toasts.map((t) => {
-          const variant = t.variant ?? 'info';
-          const Icon = VARIANT_ICON[variant];
-          return (
-            <div key={t.id} className={`toast toast--${variant}`} role="status">
-              <span className="toast__icon" aria-hidden="true"><Icon size={20} /></span>
-              <div className="toast__body">
-                {t.title && <div className="toast__title">{t.title}</div>}
-                {t.description && <div className="toast__desc">{t.description}</div>}
-              </div>
-              <button type="button" className="toast__close" aria-label="Cerrar" onClick={() => dismiss(t.id)}><X size={16} /></button>
-            </div>
-          );
-        })}
-      </div>
+      {typeof document !== 'undefined' && createPortal(stack, document.body)}
     </ToastContext.Provider>
   );
 }
