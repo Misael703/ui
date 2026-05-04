@@ -26,14 +26,20 @@ interface ToastContextValue {
 
 const ToastContext = React.createContext<ToastContextValue | null>(null);
 
+interface ToastTimerState {
+  handle: ReturnType<typeof setTimeout>;
+  startedAt: number;
+  remaining: number;
+}
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
-  const timers = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const timers = React.useRef<Map<string, ToastTimerState>>(new Map());
 
   const dismiss = React.useCallback((id: string) => {
-    const t = timers.current.get(id);
-    if (t) {
-      clearTimeout(t);
+    const state = timers.current.get(id);
+    if (state) {
+      clearTimeout(state.handle);
       timers.current.delete(id);
     }
     setToasts((list) => list.filter((toast) => toast.id !== id));
@@ -46,17 +52,35 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       setToasts((list) => [...list, item]);
       if (item.duration && item.duration > 0) {
         const handle = setTimeout(() => dismiss(id), item.duration);
-        timers.current.set(id, handle);
+        timers.current.set(id, { handle, startedAt: Date.now(), remaining: item.duration });
       }
       return id;
     },
     [dismiss]
   );
 
+  // Pause auto-dismiss while pointer is over the toast — users reading a
+  // multi-line message shouldn't have it disappear mid-read.
+  const pause = React.useCallback((id: string) => {
+    const state = timers.current.get(id);
+    if (!state) return;
+    clearTimeout(state.handle);
+    const elapsed = Date.now() - state.startedAt;
+    const remaining = Math.max(0, state.remaining - elapsed);
+    timers.current.set(id, { ...state, remaining });
+  }, []);
+
+  const resume = React.useCallback((id: string) => {
+    const state = timers.current.get(id);
+    if (!state) return;
+    const handle = setTimeout(() => dismiss(id), state.remaining);
+    timers.current.set(id, { handle, startedAt: Date.now(), remaining: state.remaining });
+  }, [dismiss]);
+
   React.useEffect(() => {
     const map = timers.current;
     return () => {
-      map.forEach((handle) => clearTimeout(handle));
+      map.forEach((state) => clearTimeout(state.handle));
       map.clear();
     };
   }, []);
@@ -71,7 +95,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         const variant = t.variant ?? 'info';
         const Icon = VARIANT_ICON[variant];
         return (
-          <div key={t.id} className={`toast toast--${variant}`} role="status">
+          <div
+            key={t.id}
+            className={`toast toast--${variant}`}
+            role="status"
+            onMouseEnter={() => pause(t.id)}
+            onMouseLeave={() => resume(t.id)}
+            onFocus={() => pause(t.id)}
+            onBlur={() => resume(t.id)}
+          >
             <span className="toast__icon" aria-hidden="true"><Icon size={20} /></span>
             <div className="toast__body">
               {t.title && <div className="toast__title">{t.title}</div>}
