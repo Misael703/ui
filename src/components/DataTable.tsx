@@ -24,20 +24,49 @@ export interface DataTableProps<T> {
   rows: T[];
   rowKey: (row: T) => string;
   sort?: { key: string; dir: 'asc' | 'desc' } | null;
+  /**
+   * Sorting is uncontrolled inside the table — consumers re-order `rows`
+   * in response to `onSortChange`. Stability of equal-keyed rows is the
+   * caller's responsibility (use a stable sort like `Array.prototype.sort`
+   * in V8/Node ≥ 12, or a tiebreaker on rowKey).
+   */
   onSortChange?: (s: { key: string; dir: 'asc' | 'desc' } | null) => void;
   selectable?: boolean;
   selectedKeys?: Set<string>;
+  /**
+   * "Select all" toggles only the rows currently passed to the component.
+   * If the consumer paginates externally and only passes the visible page,
+   * this selects the page — not the dataset across all pages.
+   */
   onSelectionChange?: (keys: Set<string>) => void;
   empty?: React.ReactNode;
   loading?: boolean;
+  /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
+  ariaLabel?: string;
+  /**
+   * Builds the accessible label for the per-row checkbox so screen-reader
+   * users can tell rows apart. Defaults to the row's key. Provide this
+   * when the key isn't human-readable (e.g. a UUID).
+   */
+  rowLabel?: (row: T) => string;
   className?: string;
 }
 
+/**
+ * Tabular data renderer with optional sorting, selection, and skeleton.
+ *
+ * Known limits (deferred to a later release):
+ * - No built-in pagination component; consumers wrap with their own.
+ * - No `error` prop; surface fetch errors through the `empty` slot.
+ * - No sticky header; wrap in your own scrollable container if needed.
+ * - No virtualization; tested up to ~200 rows. For large datasets, plug
+ *   in react-window/tanstack-virtual around the body rows.
+ */
 export function DataTable<T>({
   columns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, loading, className,
+  empty, loading, ariaLabel, rowLabel, className,
 }: DataTableProps<T>) {
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));
@@ -70,11 +99,11 @@ export function DataTable<T>({
 
   return (
     <div className={cx('table-wrap', className)}>
-      <table className="table data-table">
+      <table className="table data-table" aria-label={ariaLabel}>
         <thead>
           <tr>
             {selectable && (
-              <th style={{ width: 40 }}>
+              <th scope="col" style={{ width: 40 }}>
                 <Checkbox
                   ref={headerCbRef}
                   checked={!!allSelected}
@@ -86,21 +115,35 @@ export function DataTable<T>({
             {columns.map((c) => {
               const active = sort?.key === c.key;
               const align = c.align ?? (c.numeric ? 'right' : 'left');
+              const sortValue = c.sortable
+                ? (active ? (sort!.dir === 'asc' ? 'ascending' : 'descending') : 'none')
+                : undefined;
+              const headerInner = (
+                <span className="data-table__th">
+                  {c.header}
+                  {c.sortable && (
+                    <span className="data-table__sort" aria-hidden="true">
+                      {active ? (sort!.dir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />) : <MoreVertical size={12} />}
+                    </span>
+                  )}
+                </span>
+              );
               return (
                 <th
                   key={c.key}
-                  style={{ width: c.width, textAlign: align, cursor: c.sortable ? 'pointer' : undefined }}
-                  aria-sort={active ? (sort!.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
-                  onClick={() => onSort(c)}
+                  scope="col"
+                  style={{ width: c.width, textAlign: align }}
+                  aria-sort={sortValue}
                 >
-                  <span className="data-table__th">
-                    {c.header}
-                    {c.sortable && (
-                      <span className="data-table__sort">
-                        {active ? (sort!.dir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />) : <MoreVertical size={12} />}
-                      </span>
-                    )}
-                  </span>
+                  {c.sortable ? (
+                    <button
+                      type="button"
+                      className="data-table__sort-btn"
+                      onClick={() => onSort(c)}
+                    >
+                      {headerInner}
+                    </button>
+                  ) : headerInner}
                 </th>
               );
             })}
@@ -124,6 +167,7 @@ export function DataTable<T>({
             rows.map((r) => {
               const k = rowKey(r);
               const sel = selectedKeys?.has(k);
+              const label = rowLabel ? rowLabel(r) : k;
               return (
                 <tr key={k} className={cx(sel && 'is-selected')}>
                   {selectable && (
@@ -131,19 +175,22 @@ export function DataTable<T>({
                       <Checkbox
                         checked={!!sel}
                         onChange={() => toggleRow(k)}
-                        aria-label="Seleccionar fila"
+                        aria-label={`Seleccionar ${label}`}
                       />
                     </td>
                   )}
                   {columns.map((c) => {
                     const align = c.align ?? (c.numeric ? 'right' : 'left');
+                    const value = c.accessor
+                      ? c.accessor(r)
+                      : (r as Record<string, unknown>)[c.key] as React.ReactNode;
                     return (
                       <td
                         key={c.key}
                         className={cx(c.numeric && 'table__num')}
                         style={{ textAlign: align }}
                       >
-                        {c.accessor ? c.accessor(r) : (r as any)[c.key]}
+                        {value as React.ReactNode}
                       </td>
                     );
                   })}

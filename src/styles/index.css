@@ -1119,20 +1119,26 @@ a:hover {
   border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
 }
-.table th.sortable { cursor: pointer; user-select: none; }
-.table th.sortable:hover { color: var(--fg-default); }
-.table th .sort {
+.data-table__sort {
   display: inline-flex; vertical-align: middle; margin-left: 4px;
   opacity: 0.4;
 }
-.table th.sorted,
+.data-table__sort-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: transparent; border: 0; padding: 0; cursor: pointer;
+  color: inherit; text-transform: inherit; letter-spacing: inherit;
+  font-weight: inherit; font-size: inherit;
+}
+.data-table__sort-btn:hover { color: var(--fg-default); }
+.data-table__sort-btn:focus-visible {
+  outline: 2px solid var(--border-focus); outline-offset: 2px; border-radius: var(--radius-sm);
+}
 .table th[aria-sort="ascending"],
 .table th[aria-sort="descending"] {
   background: var(--color-blue-50);
   color: var(--color-brand-blue);
   border-bottom-color: var(--color-brand-blue);
 }
-.table th.sorted .sort,
 .table th[aria-sort="ascending"] .data-table__sort,
 .table th[aria-sort="descending"] .data-table__sort {
   opacity: 1;
