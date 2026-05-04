@@ -1659,6 +1659,7 @@ a:hover {
   cursor: pointer;
 }
 .number-input__btn:hover { background: var(--color-grey-200); }
+.number-input__btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
 .number-input__field {
   border: none; outline: none; padding: 0 12px; min-width: 80px;
   background: transparent; color: var(--fg-default);
@@ -1746,6 +1747,7 @@ a:hover {
   border: none; background: var(--bg-subtle);
   color: var(--fg-muted); cursor: pointer; font-size: var(--text-sm);
 }
+.combobox__clear:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .combobox__list {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px);
   max-height: 240px; overflow-y: auto;
@@ -1785,6 +1787,7 @@ a:hover {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--bg-subtle); color: var(--fg-default); cursor: pointer;
 }
+.datepicker__toggle:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
 .datepicker__popover {
   position: absolute; top: calc(100% + 4px); left: 0;
   background: var(--bg-surface);

@@ -41,6 +41,9 @@ export function Combobox<T = string>({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
+  // Stable per-instance listbox id so multiple Comboboxes don't collide on aria-controls.
+  const reactId = React.useId();
+  const listboxId = `${id ?? reactId}-listbox`;
 
   const selected = options.find((o) => o.value === value) ?? null;
   const filtered = React.useMemo(
@@ -96,7 +99,7 @@ export function Combobox<T = string>({
         type="text"
         role="combobox"
         aria-expanded={open}
-        aria-controls={`${id ?? 'combobox'}-listbox`}
+        aria-controls={listboxId}
         className="combobox__input"
         placeholder={placeholder}
         disabled={disabled}
@@ -116,7 +119,7 @@ export function Combobox<T = string>({
       {open && typeof document !== 'undefined' && createPortal(
         <ul
           ref={listRef}
-          id={`${id ?? 'combobox'}-listbox`}
+          id={listboxId}
           role="listbox"
           className="combobox__list"
           style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
@@ -296,11 +299,17 @@ export interface FileUploadProps {
   disabled?: boolean;
   className?: string;
   hint?: React.ReactNode;
+  /** Accessible name for the drop zone (e.g. "Subir foto de perfil"). */
+  'aria-label'?: string;
 }
 
-export function FileUpload({ onFiles, accept, multiple = false, maxSize, disabled, className, hint }: FileUploadProps) {
+export function FileUpload({
+  onFiles, accept, multiple = false, maxSize, disabled, className, hint,
+  'aria-label': ariaLabel,
+}: FileUploadProps) {
   const [drag, setDrag] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const hintId = React.useId();
   const handle = (list: FileList | null) => {
     if (!list) return;
     let arr = Array.from(list);
@@ -317,6 +326,8 @@ export function FileUpload({ onFiles, accept, multiple = false, maxSize, disable
       onClick={() => !disabled && inputRef.current?.click()}
       role="button"
       tabIndex={disabled ? -1 : 0}
+      aria-label={ariaLabel}
+      aria-describedby={hint ? hintId : undefined}
       onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !disabled) inputRef.current?.click(); }}
     >
       <input
@@ -330,7 +341,7 @@ export function FileUpload({ onFiles, accept, multiple = false, maxSize, disable
       />
       <div className="file-upload__icon" aria-hidden="true">⤴</div>
       <div className="file-upload__title">Arrastra archivos o haz clic</div>
-      {hint && <div className="file-upload__hint">{hint}</div>}
+      {hint && <div id={hintId} className="file-upload__hint">{hint}</div>}
     </div>
   );
 }

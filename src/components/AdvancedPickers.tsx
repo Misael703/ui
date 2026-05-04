@@ -42,6 +42,8 @@ export function MultiCombobox<T = string>({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
   const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
+  const reactId = React.useId();
+  const listboxId = `${id ?? reactId}-listbox`;
   const selSet = new Set(value);
 
   const filtered = React.useMemo(
@@ -102,6 +104,7 @@ export function MultiCombobox<T = string>({
           type="text"
           role="combobox"
           aria-expanded={open}
+          aria-controls={listboxId}
           className="multicombo__input"
           placeholder={selectedItems.length === 0 ? placeholder : ''}
           disabled={disabled}
@@ -114,6 +117,7 @@ export function MultiCombobox<T = string>({
       {open && typeof document !== 'undefined' && createPortal(
         <ul
           ref={listRef}
+          id={listboxId}
           role="listbox"
           aria-multiselectable="true"
           className="multicombo__list"
