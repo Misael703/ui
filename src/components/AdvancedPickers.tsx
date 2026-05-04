@@ -162,6 +162,15 @@ function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getM
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
+function buildMonthGrid(view: Date, offset: number) {
+  const m = addMonths(view, offset);
+  const startDow = (m.getDay() + 6) % 7;
+  const days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+  const cells: (Date | null)[] = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= days; d++) cells.push(new Date(m.getFullYear(), m.getMonth(), d));
+  return { m, cells };
+}
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -212,15 +221,11 @@ export function DateRangePicker({
     setCoords({ top: t.bottom + 6 + window.scrollY, left: t.left + window.scrollX });
   }, [open]);
 
-  const monthGrid = (offset: number) => {
-    const m = addMonths(view, offset);
-    const startDow = (m.getDay() + 6) % 7;
-    const days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-    const cells: (Date | null)[] = [];
-    for (let i = 0; i < startDow; i++) cells.push(null);
-    for (let d = 1; d <= days; d++) cells.push(new Date(m.getFullYear(), m.getMonth(), d));
-    return { m, cells };
-  };
+  // Each panel renders ~42 Date cells. Without memoization, every
+  // setHover() triggered a full rebuild of both panels' grids on every
+  // mouse movement over the calendar. Memo keyed on `view` only.
+  const monthGrid0 = React.useMemo(() => buildMonthGrid(view, 0), [view]);
+  const monthGrid1 = React.useMemo(() => buildMonthGrid(view, 1), [view]);
 
   const isDisabled = (d: Date) =>
     (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
@@ -253,7 +258,7 @@ export function DateRangePicker({
     : 'Seleccionar rango';
 
   const renderMonth = (offset: number) => {
-    const { m, cells } = monthGrid(offset);
+    const { m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
     return (
       <div className="daterange__month">
         <div className="daterange__title">{MONTHS[m.getMonth()]} {m.getFullYear()}</div>

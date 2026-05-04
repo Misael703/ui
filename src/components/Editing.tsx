@@ -152,8 +152,17 @@ export function TransferList({
   const [leftChecked, setLeftChecked] = React.useState<Set<string>>(new Set());
   const [rightChecked, setRightChecked] = React.useState<Set<string>>(new Set());
 
-  const selectedIds = new Set(selected.map((s) => s.id));
-  const left = source.filter((s) => !selectedIds.has(s.id));
+  // Without memo, every checkbox click rebuilt selectedIds and re-filtered
+  // `source` to compute `left`. At ~500 source items that's a measurable
+  // O(n) hit per click.
+  const selectedIds = React.useMemo(
+    () => new Set(selected.map((s) => s.id)),
+    [selected]
+  );
+  const left = React.useMemo(
+    () => source.filter((s) => !selectedIds.has(s.id)),
+    [source, selectedIds]
+  );
   const right = selected;
 
   const moveRight = () => {
