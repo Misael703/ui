@@ -44,7 +44,9 @@ export function MultiCombobox<T = string>({
   const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
-  const selSet = new Set(value);
+  // Build the lookup Set once per `value` change, not on every keystroke or
+  // hover-driven re-render.
+  const selSet = React.useMemo(() => new Set(value), [value]);
 
   const filtered = React.useMemo(
     () => (query ? options.filter((o) => filter(o, query)) : options),

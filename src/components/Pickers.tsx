@@ -45,7 +45,10 @@ export function Combobox<T = string>({
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
 
-  const selected = options.find((o) => o.value === value) ?? null;
+  const selected = React.useMemo(
+    () => options.find((o) => o.value === value) ?? null,
+    [options, value]
+  );
   const filtered = React.useMemo(
     () => (query ? options.filter((o) => filter(o, query)) : options),
     [options, query, filter]
