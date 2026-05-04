@@ -162,6 +162,17 @@
   --border-brand:    var(--color-brand-blue);
   --border-focus:    var(--color-brand-orange);
 
+  /* -------- Breakpoints --------------------------------------------- */
+  /* CSS custom properties cannot be used inside @media query conditions,
+     so these serve as design-system documentation. The same numbers are
+     used by the kit's own @media rules and can be referenced by consumers
+     in JS (e.g. `getComputedStyle(:root).getPropertyValue('--bp-md')`)
+     to keep their app's breakpoints in sync. */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+
   /* -------- Type families -------------------------------------------- */
   --font-display: "Integral CF", "Arial Black", "Helvetica Neue", sans-serif;
   --font-body:    "Metropolis", "Inter", "Helvetica Neue", Arial, sans-serif;
