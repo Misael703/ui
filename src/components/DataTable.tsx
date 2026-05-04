@@ -4,6 +4,56 @@ import { cx } from '../utils/cx';
 import { ChevronUp, ChevronDown, MoreVertical } from './Icons';
 import { Checkbox } from './Form';
 
+// ---------- DataTableRow (memoized) -------------------------------------
+// Extracted as React.memo so unrelated parent re-renders don't churn through
+// every row in the table. Combined with a ref-stable `onToggle`, only the
+// row whose `selected` prop actually changed re-renders on toggle.
+interface DataTableRowProps<T> {
+  row: T;
+  rowK: string;
+  selected: boolean;
+  selectable: boolean;
+  label: string;
+  columns: Column<T>[];
+  onToggle: (k: string) => void;
+}
+
+function DataTableRowImpl<T>({
+  row, rowK, selected, selectable, label, columns, onToggle,
+}: DataTableRowProps<T>) {
+  return (
+    <tr className={cx(selected && 'is-selected')}>
+      {selectable && (
+        <td>
+          <Checkbox
+            checked={selected}
+            onChange={() => onToggle(rowK)}
+            aria-label={`Seleccionar ${label}`}
+          />
+        </td>
+      )}
+      {columns.map((c) => {
+        const align = c.align ?? (c.numeric ? 'right' : 'left');
+        const value = c.accessor
+          ? c.accessor(row)
+          : (row as Record<string, unknown>)[c.key] as React.ReactNode;
+        return (
+          <td
+            key={c.key}
+            className={cx(c.numeric && 'table__num')}
+            style={{ textAlign: align }}
+          >
+            {value as React.ReactNode}
+          </td>
+        );
+      })}
+    </tr>
+  );
+}
+
+// Cast preserves the generic signature through React.memo.
+const DataTableRow = React.memo(DataTableRowImpl) as typeof DataTableRowImpl;
+
 // ---------- DataTable ----------------------------------------------------
 export interface Column<T> {
   key: string;
@@ -75,20 +125,29 @@ export function DataTable<T>({
     if (headerCbRef.current) headerCbRef.current.indeterminate = !!someSelected;
   }, [someSelected]);
 
-  const toggleAll = () => {
+  // Latest-props ref so toggleRow stays referentially stable across selection
+  // changes. Without this, every selection update would create a new
+  // toggleRow, defeating React.memo on DataTableRow.
+  const propsRef = React.useRef({ rows, rowKey, selectedKeys, onSelectionChange });
+  propsRef.current = { rows, rowKey, selectedKeys, onSelectionChange };
+
+  const toggleAll = React.useCallback(() => {
+    const { rows, rowKey, selectedKeys, onSelectionChange } = propsRef.current;
     if (!onSelectionChange) return;
+    const allSel = rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
     const next = new Set(selectedKeys);
-    if (allSelected) rows.forEach((r) => next.delete(rowKey(r)));
+    if (allSel) rows.forEach((r) => next.delete(rowKey(r)));
     else rows.forEach((r) => next.add(rowKey(r)));
     onSelectionChange(next);
-  };
+  }, []);
 
-  const toggleRow = (k: string) => {
+  const toggleRow = React.useCallback((k: string) => {
+    const { selectedKeys, onSelectionChange } = propsRef.current;
     if (!onSelectionChange) return;
     const next = new Set(selectedKeys);
     if (next.has(k)) next.delete(k); else next.add(k);
     onSelectionChange(next);
-  };
+  }, []);
 
   const onSort = (col: Column<T>) => {
     if (!col.sortable || !onSortChange) return;
@@ -166,35 +225,17 @@ export function DataTable<T>({
           ) : (
             rows.map((r) => {
               const k = rowKey(r);
-              const sel = selectedKeys?.has(k);
-              const label = rowLabel ? rowLabel(r) : k;
               return (
-                <tr key={k} className={cx(sel && 'is-selected')}>
-                  {selectable && (
-                    <td>
-                      <Checkbox
-                        checked={!!sel}
-                        onChange={() => toggleRow(k)}
-                        aria-label={`Seleccionar ${label}`}
-                      />
-                    </td>
-                  )}
-                  {columns.map((c) => {
-                    const align = c.align ?? (c.numeric ? 'right' : 'left');
-                    const value = c.accessor
-                      ? c.accessor(r)
-                      : (r as Record<string, unknown>)[c.key] as React.ReactNode;
-                    return (
-                      <td
-                        key={c.key}
-                        className={cx(c.numeric && 'table__num')}
-                        style={{ textAlign: align }}
-                      >
-                        {value as React.ReactNode}
-                      </td>
-                    );
-                  })}
-                </tr>
+                <DataTableRow
+                  key={k}
+                  row={r}
+                  rowK={k}
+                  selected={!!selectedKeys?.has(k)}
+                  selectable={!!selectable}
+                  label={rowLabel ? rowLabel(r) : k}
+                  columns={columns}
+                  onToggle={toggleRow}
+                />
               );
             })
           )}
