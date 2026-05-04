@@ -27,7 +27,7 @@ npm install @misael703/elalba-ui@latest    # fuerza la última (ignora rango)
 npm install @misael703/elalba-ui@0.2.1     # fija una versión específica
 ```
 
-> ⚠️ Mientras el paquete esté en `0.x.x` la API se considera inestable — cualquier `minor` puede traer breaking changes. Lee las [release notes](https://github.com/Misael703/elalba-ui/releases) antes de subir de minor o major.
+> ⚠️ Mientras el paquete esté en `0.x.x` la API se considera inestable — cualquier `minor` puede traer breaking changes. Lee las [release notes](https://github.com/Misael703/elalba-ui/releases) o el [CHANGELOG](./CHANGELOG.md) antes de subir de minor o major.
 
 ## Uso en Next.js (App Router)
 
@@ -64,8 +64,10 @@ export function NewOrder() {
     <Card>
       <CardHeader>Nuevo pedido <Badge variant="success">Activo</Badge></CardHeader>
       <CardBody>
-        <FormField label="SKU" htmlFor="sku" required hint="Ej. ELT-12-AC">
-          <Input id="sku" placeholder="SKU del producto" />
+        {/* FormField genera automáticamente el id del input y enlaza
+            label/aria-describedby con hint y error. */}
+        <FormField label="SKU" required hint="Ej. ELT-12-AC">
+          <Input placeholder="SKU del producto" />
         </FormField>
         <Button onClick={() => push({ title: 'Guardado', variant: 'success' })}>
           Guardar
@@ -82,16 +84,17 @@ export function NewOrder() {
 
 | Categoría | Componentes |
 |---|---|
-| **Acción** | `Button`, `Menu` (dropdown accesible) |
-| **Forms** | `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Label`, `FormField`, `NumberInput`, `Slider`, `MoneyInput` (CLP), `PhoneInput`, `TimePicker`, `TagInput`, `RadioGroup`, `CheckboxGroup` |
+| **Acción** | `Button`, `Menu` (dropdown accesible), `Toggle`, `ToggleGroup` |
+| **Forms** | `Input`, `Textarea`, `Select`, `Checkbox` (con `indeterminate` y `invalid`), `Radio`, `Switch` (con `role="switch"`), `Label`, `FormField` (auto-id + aria-describedby), `NumberInput`, `Slider`, `MoneyInput` (CLP), `PhoneInput`, `TimePicker`, `TagInput`, `RadioGroup`, `CheckboxGroup`, `InputOTP` |
 | **Pickers** | `Combobox`, `MultiCombobox`, `DatePicker`, `DateRangePicker` (con presets), `FileUpload` |
 | **Command** | `CommandPalette` + `useCommandPalette({ hotkey: 'mod+k' })` |
 | **Display** | `Card`, `Badge`, `Alert`, `Skeleton`, `Spinner`, `Kpi`, `EmptyState`, `Avatar`, `AvatarGroup`, `Stat`, `Progress`, `ProgressCircle` |
-| **Overlay** | `Modal`, `Drawer` (focus-trap + ESC + backdrop) |
-| **Layout** | `Tabs`, `Table`, `Tooltip`, `Stepper`, `Accordion`, `Breadcrumbs`, `Pagination`, `AppShell`, `PageHeader` |
-| **Data** | `DataTable` (sort + selección + skeleton + empty) |
+| **Overlay** | `Modal`, `Drawer` (focus-trap + ESC + backdrop + body scroll lock + portal a `document.body`), `Popover`, `HoverCard`, `ContextMenu` |
+| **Layout** | `Tabs`, `Table`, `Tooltip`, `Stepper`, `Accordion`, `Breadcrumbs`, `Pagination`, `AppShell` (con tema `default`/`brand`), `PageHeader`, `Menubar`, `NavigationMenu`, `Resizable`, `Carousel` |
+| **Data** | `DataTable` (sort + selección + skeleton + empty + `ariaLabel` + `rowLabel`) |
+| **Primitives** | `AspectRatio`, `Collapsible`, `ScrollArea`, `Separator`, `Slot` |
 | **Charts** | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline` (wrappers de Recharts; pasar `recharts={Recharts}`) |
-| **Feedback** | `ToastProvider` + `useToast()` |
+| **Feedback** | `ToastProvider` + `useToast()` (con pausa al hover/focus) |
 | **Hooks** | `useCommandPalette()` |
 
 Todos los componentes son **type-safe**, exponen `forwardRef` cuando aplica y aceptan `className` para extender estilos.
@@ -199,6 +202,12 @@ Los tokens viven en `:root`. La paleta de marca y los tokens semánticos están 
 .my-card { background: var(--bg-surface); color: var(--fg-default); }
 ```
 
+¿Solo querés los tokens (sin los componentes)? Importá únicamente `tokens.css`:
+
+```ts
+import '@misael703/elalba-ui/tokens.css';
+```
+
 ---
 
 ## Build local
@@ -219,7 +228,7 @@ Cada componente tiene un `*.stories.tsx` con variantes interactivas y autodocs.
 
 ## Tests
 
-`npm test` corre Vitest + Testing Library en jsdom. Cobertura actual: **197 tests** sobre todos los componentes públicos. Agregar tests es trivial — copia uno existente como referencia.
+`npm test` corre Vitest + Testing Library en jsdom. Cobertura actual: **249 tests** sobre todos los componentes públicos, incluyendo regresiones de a11y (FormField wiring, indeterminate, hover-pause, focus rings). Agregar tests es trivial — copia uno existente como referencia.
 
 ---
 
