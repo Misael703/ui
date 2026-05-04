@@ -6,6 +6,9 @@ import { cx } from '../utils/cx';
  * Lightweight chart wrappers. We do NOT bundle Recharts — the host app provides it
  * and passes the modules in via the `recharts` prop so consumers only pay for what they use.
  *
+ * Recharts is treated as an implicit peer dependency: install it in the host
+ * app if you use any chart component.
+ *
  * Usage in a Next.js client component:
  *
  *   import * as Recharts from 'recharts';
@@ -13,22 +16,29 @@ import { cx } from '../utils/cx';
  *   <LineChart recharts={Recharts} data={...} dataKey="value" categoryKey="month" />
  */
 
+// Structural mirror of the Recharts public API. `any` is intentional here:
+// each Recharts component has a different prop shape, and typing them
+// exhaustively would mean depending on `recharts` types — which would force
+// consumers to install recharts even when they don't use any chart.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RechartsComp = React.ComponentType<any>;
+
 export type RechartsLike = {
-  ResponsiveContainer: React.ComponentType<any>;
-  LineChart: React.ComponentType<any>;
-  AreaChart: React.ComponentType<any>;
-  BarChart: React.ComponentType<any>;
-  PieChart: React.ComponentType<any>;
-  Line: React.ComponentType<any>;
-  Area: React.ComponentType<any>;
-  Bar: React.ComponentType<any>;
-  Pie: React.ComponentType<any>;
-  Cell: React.ComponentType<any>;
-  CartesianGrid: React.ComponentType<any>;
-  XAxis: React.ComponentType<any>;
-  YAxis: React.ComponentType<any>;
-  Tooltip: React.ComponentType<any>;
-  Legend: React.ComponentType<any>;
+  ResponsiveContainer: RechartsComp;
+  LineChart: RechartsComp;
+  AreaChart: RechartsComp;
+  BarChart: RechartsComp;
+  PieChart: RechartsComp;
+  Line: RechartsComp;
+  Area: RechartsComp;
+  Bar: RechartsComp;
+  Pie: RechartsComp;
+  Cell: RechartsComp;
+  CartesianGrid: RechartsComp;
+  XAxis: RechartsComp;
+  YAxis: RechartsComp;
+  Tooltip: RechartsComp;
+  Legend: RechartsComp;
 };
 
 const PALETTE = [

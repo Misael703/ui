@@ -33,20 +33,18 @@
     },
     "./styles.css": "./dist/styles.css",
     "./fonts.css": "./dist/fonts.css",
-    "./tokens.css": "./src/styles/tokens.css",
+    "./tokens.css": "./dist/tokens.css",
     "./fonts/*": "./dist/fonts/*"
   },
   "files": [
-    "dist",
-    "src/styles",
-    "src/fonts"
+    "dist"
   ],
   "sideEffects": [
     "**/*.css"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.otf dist/fonts/",
-    "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css",
+    "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",

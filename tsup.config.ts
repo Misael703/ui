@@ -7,4 +7,8 @@ export default defineConfig({
   external: ['react', 'react-dom'],
   clean: true,
   treeshake: true,
+  // Emit per-module ESM chunks so consumers' bundlers shake unused
+  // components. CJS stays a single file (splitting is ESM-only in tsup).
+  splitting: true,
+  sourcemap: true,
 });
