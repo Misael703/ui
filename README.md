@@ -91,7 +91,7 @@ export function NewOrder() {
 | **Display** | `Card`, `Badge`, `Alert`, `Skeleton`, `Spinner`, `Kpi`, `EmptyState`, `Avatar`, `AvatarGroup`, `Stat`, `Progress`, `ProgressCircle` |
 | **Overlay** | `Modal`, `Drawer` (focus-trap + ESC + backdrop + body scroll lock + portal a `document.body`), `Popover`, `HoverCard`, `ContextMenu` |
 | **Layout** | `Tabs`, `Table`, `Tooltip`, `Stepper`, `Accordion`, `Breadcrumbs`, `Pagination`, `AppShell` (con tema `default`/`brand`), `PageHeader`, `Menubar`, `NavigationMenu`, `Resizable`, `Carousel` |
-| **Data** | `DataTable` (sort + selección + skeleton + empty + `ariaLabel` + `rowLabel`) |
+| **Data** | `DataTable` (sort + selección + skeleton + empty + error + `stickyHeader` + `mobileLayout="cards"` + `ariaLabel` + `rowLabel`), `TablePagination` |
 | **Primitives** | `AspectRatio`, `Collapsible`, `ScrollArea`, `Separator`, `Slot` |
 | **Charts** | `LineChart`, `AreaChart`, `BarChart`, `DonutChart`, `Sparkline` (wrappers de Recharts; pasar `recharts={Recharts}`) |
 | **Feedback** | `ToastProvider` + `useToast()` (con pausa al hover/focus) |
@@ -124,6 +124,50 @@ import { AppShell } from '@misael703/elalba-ui';
   {/* page content */}
 </AppShell>
 ```
+
+### DataTable con miles de filas (virtualization)
+
+El kit no incluye virtualización built-in — para datasets grandes (>200 filas), envuelve el `<DataTable>` con `react-window` o `@tanstack/react-virtual`. Patrón base:
+
+```tsx
+'use client';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useRef } from 'react';
+import { DataTable } from '@misael703/elalba-ui';
+
+function VirtualTable({ rows, columns, rowKey }) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 48,
+    overscan: 10,
+  });
+
+  const visibleRows = virtualizer.getVirtualItems().map((vi) => rows[vi.index]);
+
+  return (
+    <div ref={parentRef} style={{ height: 600, overflow: 'auto' }}>
+      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+        <DataTable
+          columns={columns}
+          rows={visibleRows}
+          rowKey={rowKey}
+          stickyHeader
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+Notas:
+- El kit pasa `stickyHeader` para que el thead se mantenga visible durante el scroll.
+- El `<div>` exterior con `height` fija es el contenedor de scroll que el virtualizer mide.
+- Si necesitás keyboard navigation entre filas virtuales, agregalo en el wrapper — es responsabilidad del consumer porque depende del UX deseado (Enter para abrir vs. expandir, etc.).
+
+Para casos donde el sort/filter pasa por el server, mantené `<DataTable rows={pageData}>` con paginación normal y `<TablePagination>`. Virtualization rinde solo cuando todo el dataset cabe en memoria.
 
 ### Charts (Recharts opcional)
 
