@@ -128,7 +128,6 @@ export function CategoryNav({ categories, className, ...rest }: CategoryNavProps
                   aria-expanded={isOpen}
                   aria-haspopup="true"
                   onClick={() => setOpenId(isOpen ? null : c.id)}
-                  onMouseEnter={() => setOpenId(c.id)}
                 >
                   {c.label}
                   <ChevronDown size={12} />
@@ -137,7 +136,11 @@ export function CategoryNav({ categories, className, ...rest }: CategoryNavProps
                 <a href={c.href ?? '#'} className="category-nav__link">{c.label}</a>
               )}
               {hasMega && isOpen && (
-                <div className="category-nav__mega" onMouseLeave={() => setOpenId(null)}>
+                // Click-to-open instead of hover so the mega menu works
+                // identically on touch devices (no hover events) and is
+                // accessible to keyboard/screen-reader users. Closes on
+                // outside click via the document mousedown listener above.
+                <div className="category-nav__mega">
                   {c.groups!.map((g, i) => (
                     <div key={i} className="category-nav__group">
                       <div className="category-nav__group-title">{g.title}</div>
