@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar } from './DataTable';
+import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination } from './DataTable';
 import { Badge } from './Display';
 import { Input } from './Form';
 import { Button } from './Button';
@@ -119,6 +119,144 @@ export const ConToolbar: StoryObj = {
             { key: 'stock', header: 'Stock', sortable: true, align: 'right' },
             { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
           ]}
+        />
+      </div>
+    );
+  },
+};
+
+/** Estado de error: pasa `error` para mostrar un mensaje rojo con `role="alert"`. */
+export const ConError: StoryObj = {
+  render: () => (
+    <DataTable
+      rows={[]}
+      rowKey={(r: { id: string }) => r.id}
+      ariaLabel="Productos"
+      error="No pudimos cargar los productos. Reintenta en unos segundos."
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'stock', header: 'Stock', align: 'right' },
+      ]}
+    />
+  ),
+};
+
+/** Sticky header: el thead se mantiene visible mientras se scrolea el body.
+ * Requiere envolver la tabla en un contenedor con altura limitada y `overflow-y: auto`. */
+export const StickyHeader: StoryObj = {
+  render: () => {
+    const manyRows = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      name: `Producto ${i + 1}`,
+      sku: `SKU-${String(i + 1).padStart(3, '0')}`,
+      stock: Math.floor(Math.random() * 100),
+      price: Math.floor(Math.random() * 200000) + 10000,
+    }));
+    return (
+      <div style={{ height: 320, overflowY: 'auto', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+        <DataTable
+          stickyHeader
+          rows={manyRows}
+          rowKey={(r) => r.id}
+          ariaLabel="Inventario"
+          columns={[
+            { key: 'name', header: 'Producto' },
+            { key: 'sku', header: 'SKU' },
+            { key: 'stock', header: 'Stock', align: 'right' },
+            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+          ]}
+        />
+      </div>
+    );
+  },
+};
+
+/** Card layout en mobile: a partir de <600px cada fila se renderiza como
+ * una tarjeta con label + value. Usa el viewport mobile en Storybook para verlo. */
+export const CardLayoutMobile: StoryObj = {
+  parameters: {
+    viewport: { defaultViewport: 'mobile1' },
+  },
+  render: () => (
+    <DataTable
+      mobileLayout="cards"
+      rows={rows}
+      rowKey={(r) => r.id}
+      ariaLabel="Productos"
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'stock', header: 'Stock', align: 'right' },
+        { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+      ]}
+    />
+  ),
+};
+
+/** TablePagination con page-size selector y rango de filas. */
+export const PaginacionCompleta: StoryObj = {
+  render: () => {
+    const [page, setPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10);
+    return (
+      <TablePagination
+        page={page}
+        pageSize={pageSize}
+        total={87}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+      />
+    );
+  },
+};
+
+/** TablePagination sin page-size selector — para tablas con tamaño fijo. */
+export const PaginacionSimple: StoryObj = {
+  render: () => {
+    const [page, setPage] = React.useState(1);
+    return (
+      <TablePagination
+        page={page}
+        pageSize={20}
+        total={155}
+        onPageChange={setPage}
+      />
+    );
+  },
+};
+
+/** DataTable + TablePagination juntos, patrón típico de uso. */
+export const DataTableConPaginacion: StoryObj = {
+  render: () => {
+    const allRows = Array.from({ length: 87 }, (_, i) => ({
+      id: String(i + 1),
+      name: `Producto ${i + 1}`,
+      sku: `SKU-${String(i + 1).padStart(3, '0')}`,
+      stock: Math.floor(Math.random() * 100),
+    }));
+    const [page, setPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10);
+    const start = (page - 1) * pageSize;
+    const visible = allRows.slice(start, start + pageSize);
+    return (
+      <div>
+        <DataTable
+          rows={visible}
+          rowKey={(r) => r.id}
+          ariaLabel="Productos"
+          columns={[
+            { key: 'name', header: 'Producto' },
+            { key: 'sku', header: 'SKU' },
+            { key: 'stock', header: 'Stock', align: 'right' },
+          ]}
+        />
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          total={allRows.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
         />
       </div>
     );
