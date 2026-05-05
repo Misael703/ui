@@ -129,6 +129,37 @@ describe('DataTable', () => {
     expect(screen.getByText('No records')).toBeInTheDocument();
   });
 
+  it('renders error state with role=alert and hides rows/loading/empty', () => {
+    render(
+      <DataTable
+        columns={cols}
+        rows={rows}
+        rowKey={(r) => r.id}
+        loading
+        error="Falló la carga"
+      />
+    );
+    // Error wins over loading and rows
+    expect(screen.getByRole('alert')).toHaveTextContent('Falló la carga');
+    // Rows are NOT rendered when error is set
+    expect(screen.queryByText('Taladro')).toBeNull();
+    expect(screen.queryByText('Sierra')).toBeNull();
+  });
+
+  it('error takes precedence over empty state', () => {
+    render(
+      <DataTable
+        columns={cols}
+        rows={[]}
+        rowKey={(r: any) => r.id}
+        error="Network error"
+        empty="No data"
+      />
+    );
+    expect(screen.getByText('Network error')).toBeInTheDocument();
+    expect(screen.queryByText('No data')).toBeNull();
+  });
+
   it('numeric columns get .table__num class and right-align by default', () => {
     const numericRows = [{ id: '1', name: 'A', price: 1500 }];
     const numericCols = [

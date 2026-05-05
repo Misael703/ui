@@ -92,6 +92,11 @@ export interface DataTableProps<T> {
    */
   onSelectionChange?: (keys: Set<string>) => void;
   empty?: React.ReactNode;
+  /**
+   * Renders an error state in place of the body. Takes precedence over
+   * `loading`, `empty`, and rows. Use it when a fetch fails.
+   */
+  error?: React.ReactNode;
   loading?: boolean;
   /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
   ariaLabel?: string;
@@ -105,12 +110,13 @@ export interface DataTableProps<T> {
 }
 
 /**
- * Tabular data renderer with optional sorting, selection, and skeleton.
+ * Tabular data renderer with optional sorting, selection, error/empty/
+ * loading states.
+ *
+ * State priority (only one body state renders at a time):
+ *   error > loading > empty > rows
  *
  * Known limits (deferred to a later release):
- * - No built-in pagination component; consumers wrap with their own.
- * - No `error` prop; surface fetch errors through the `empty` slot.
- * - No sticky header; wrap in your own scrollable container if needed.
  * - No virtualization; tested up to ~200 rows. For large datasets, plug
  *   in react-window/tanstack-virtual around the body rows.
  */
@@ -118,7 +124,7 @@ export function DataTable<T>({
   columns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, loading, ariaLabel, rowLabel, className,
+  empty, error, loading, ariaLabel, rowLabel, className,
 }: DataTableProps<T>) {
   const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
@@ -212,7 +218,18 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody>
-          {loading ? (
+          {error ? (
+            <tr>
+              <td
+                colSpan={columns.length + (selectable ? 1 : 0)}
+                className="data-table__error"
+                role="alert"
+                style={{ padding: 32, textAlign: 'center' }}
+              >
+                {error}
+              </td>
+            </tr>
+          ) : loading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={`s${i}`}>
                 {selectable && <td><div className="skel" style={{ height: 14 }} /></td>}

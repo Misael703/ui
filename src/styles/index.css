@@ -1154,6 +1154,10 @@ a:hover {
   color: var(--color-brand-blue);
   border-bottom-color: var(--color-brand-blue);
 }
+.data-table__error {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
 .table th[aria-sort="ascending"] .data-table__sort,
 .table th[aria-sort="descending"] .data-table__sort {
   opacity: 1;
