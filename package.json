@@ -43,9 +43,9 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.otf dist/fonts/",
+    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.otf dist/fonts/",
     "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
