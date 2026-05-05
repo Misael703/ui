@@ -487,12 +487,12 @@ export interface AddressFormProps {
   onChange: (value: Partial<Address>) => void;
   showRut?: boolean;
   className?: string;
-  /** Lista de regiones a mostrar en el select. Default desde `getBrand().regions`. */
+  /** Lista de regiones a mostrar en el select. */
   regions?: readonly string[];
 }
 
 export function AddressForm({ value, onChange, showRut = true, className, regions }: AddressFormProps) {
-  const resolvedRegions = regions ?? getBrand().regions;
+  const resolvedRegions = regions ?? [];
   const set = (k: keyof Address, v: string) => onChange({ ...value, [k]: v });
   return (
     <div className={cx('address-form', className)}>

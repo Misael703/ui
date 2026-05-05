@@ -1,200 +1,158 @@
-# v0.3.0 — i18n LocaleProvider
+# v0.3.0 — Brand cleanup (A + B3 + C)
 
 ## Objetivo
 
-Mover los ~30 strings hardcoded en español a un dict tipado consumible vía context, manteniendo español como default (no breaking en runtime para consumers que no envuelvan `LocaleProvider`).
+Sacar las dependencias country-specific (CL_REGIONS, phonePrefix de Chile) del UI kit, hacer `<AddressForm>` un compositor genérico de campos, y aplicar el lazy getter al singleton de brand. Resultado: kit honestamente neutro de país.
 
-## Diseño
+## Bloque A — Slim BrandDefaults
 
-- **Context-based**: `<LocaleProvider messages={{...}}>` opcional. Sin provider, se usa `esMessages` como default.
-- **Flat key dict**: `t['modal.close']` (no nested objects → más fácil de tipar y de override parcial).
-- **Shallow merge**: el provider hace `{ ...esMessages, ...userMessages }` para que consumers solo overrideen las keys que quieren cambiar.
-- **Hook**: `useLocale()` retorna el dict mergeado (memoizado).
-- **Default fallback**: si una key no está en el dict (porque consumer pasó un dict incompleto sin merge), usar la key como fallback string para no romper el render.
-- **Side modules**: `MONTH_NAMES` / `WEEKDAYS` (Display3) también vienen del dict como arrays.
+**Cambios**:
+- `BrandDefaults` deja solo: `name`, `logoBasePath`, `currency`, `locale`. Salen `phonePrefix` y `regions`.
+- Eliminar `CL_REGIONS` del archivo (constante de 16 strings que solo aplica a Chile).
+- `<PhoneInput>` ya no toma default desde el brand. La prop `prefix` queda opcional con default `''` (vacío). Consumers que quieran `+56` pasan `prefix="+56"` explícitamente.
 
-## Dict tipado (UiKitMessages)
+**Archivos**:
+- `src/brand.ts` — borrar campos + constante.
+- `src/components/InputsExtra.tsx` — `PhoneInput` línea 230 (`resolvedPrefix = prefix ?? getBrand().phonePrefix`) → `prefix ?? ''`.
+
+## Bloque B3 — AddressForm como compositor genérico
+
+**Diseño**: `<AddressForm>` deja de tener campos hardcoded chilenos (RUT, Comuna, Región). Pasa a consumir un array de `AddressField` que el consumer define.
 
 ```ts
-export interface UiKitMessages {
-  // Generic actions
-  'common.close': string;
-  'common.cancel': string;
-  'common.confirm': string;
-  'common.apply': string;
-  'common.clear': string;
-  'common.edit': string;
-  'common.empty': string;
-  'common.loading': string;
-  'common.search': string;
-  'common.noResults': string;
-  // Overlay
-  'modal.close': string;
-  'drawer.close': string;
-  'toast.close': string;
-  // DataTable
-  'table.empty': string;
-  'table.selectAll': string;
-  'table.selectRow': string; // template: "Seleccionar {label}"
-  // AppShell
-  'appshell.mainNav': string;
-  'appshell.expandMenu': string;
-  'appshell.collapseMenu': string;
-  'appshell.expand': string;
-  'appshell.collapse': string;
-  'appshell.openMenu': string;
-  // Notifications
-  'notifications.button': string; // template: "Notificaciones{unreadSuffix}"
-  'notifications.unreadSuffix': string; // template: " ({n} sin leer)"
-  'notifications.empty': string;
-  'notifications.panel': string;
-  // Filters
-  'filters.panel': string;
-  'filters.bulk': string;
-  'filters.deselectAll': string;
-  'filters.sortBy': string;
-  // Editing
-  'transfer.available': string;
-  'transfer.assigned': string;
-  'transfer.assignSelected': string;
-  'transfer.removeSelected': string;
-  'transfer.empty': string;
-  'descList.edit': string;
-  'diff.label': string;
-  'diff.field': string;
-  'diff.before': string;
-  'diff.after': string;
-  // Permissions
-  'permissions.markAll': string;
-  'permissions.unmarkAll': string;
-  // Comments
-  'attachments.empty': string;
-  'attachments.remove': string; // template: "Eliminar {name}"
-  // Gallery
-  'gallery.thumbnails': string;
-  'gallery.viewer': string;
-  'gallery.prev': string;
-  'gallery.next': string;
-  // Display
-  'alert.close': string;
-  'spinner.loading': string;
-  'chip.remove': string;
-  // Display3 (Calendar)
-  'calendar.prevMonth': string;
-  'calendar.nextMonth': string;
-  'calendar.weekdays': readonly [string, string, string, string, string, string, string]; // L M X J V S D
-  'calendar.months': readonly [string, string, string, string, string, string, string, string, string, string, string, string];
-  // Pickers
-  'picker.openCalendar': string;
-  'picker.clearSelection': string;
-  'picker.selectRange': string;
-  'picker.searchCommands': string;
-  'combobox.remove': string; // template: "Quitar {label}"
-  // Inputs
-  'pagination.label': string;
-  'pagination.prev': string;
-  'pagination.next': string;
-  'numberInput.decrement': string;
-  'numberInput.increment': string;
-  // Commerce
-  'commerce.quantity': string;
-  'commerce.decreaseQty': string;
-  'commerce.increaseQty': string;
-  'commerce.removeFromCart': string;
-  'commerce.removeItem': string; // template: "Quitar {name}"
-  'commerce.toggleFavorite': string; // template: "{add|remove} de favoritos"
-  'commerce.addFavorite': string;
-  'commerce.removeFavorite': string;
-  'commerce.applyCoupon': string;
-  'commerce.cartTitle': string;
-  // Tags input
-  'tagsInput.remove': string; // template: "Quitar {tag}"
+export interface AddressField {
+  /** Key del campo en el objeto value. */
+  key: string;
+  label: React.ReactNode;
+  type?: 'text' | 'select' | 'textarea';
+  placeholder?: string;
+  /** Para `type: 'select'`. */
+  options?: readonly { value: string; label: React.ReactNode }[];
+  /** Layout: 'full' ocupa toda la fila, 'half' = 1/2, 'third' = 1/3. */
+  width?: 'full' | 'half' | 'third';
+  /** Para `type: 'textarea'`. */
+  rows?: number;
+}
+
+export interface AddressFormProps {
+  fields: AddressField[];
+  value: Record<string, string>;
+  onChange: (value: Record<string, string>) => void;
+  className?: string;
 }
 ```
 
-Las plantillas con `{var}` se resuelven con un helper `format(template, vars)`.
+**Resultado en uso**:
+
+```tsx
+// Consumer Chile (marginapp / Factureo) define sus propios campos
+const CL_REGIONS = [
+  'Arica y Parinacota', 'Tarapacá', /* ... */
+].map(r => ({ value: r, label: r }));
+
+const chileFields: AddressField[] = [
+  { key: 'fullName', label: 'Nombre completo', width: 'full' },
+  { key: 'rut', label: 'RUT', placeholder: '12.345.678-9', width: 'full' },
+  { key: 'phone', label: 'Teléfono', placeholder: '+56 9 1234 5678', width: 'full' },
+  { key: 'street', label: 'Calle', width: 'half' },
+  { key: 'number', label: 'Número', width: 'third' },
+  { key: 'apartment', label: 'Depto/Casa', width: 'third' },
+  { key: 'region', label: 'Región', type: 'select', options: CL_REGIONS, width: 'half' },
+  { key: 'comuna', label: 'Comuna', width: 'half' },
+  { key: 'notes', label: 'Notas para el despacho', type: 'textarea', rows: 2, width: 'full' },
+];
+
+<AddressForm fields={chileFields} value={value} onChange={onChange} />
+```
+
+**Lo que muere**:
+- Interface `Address` (con campos chilenos: rut, region, comuna, etc.).
+- Prop `showRut` (cada consumer decide qué campos tiene).
+- Prop `regions` (los pasa el consumer dentro del field).
+
+**Lo que el kit conserva**: el layout grid responsive (`address-form__row`), el render de label/input/select/textarea, la accesibilidad (htmlFor + id auto-generado por field key).
+
+**Migración**:
+- CHANGELOG entry detallada con before/after.
+- Storybook story actualizada con el set chileno como ejemplo.
+- Si lo querés: helper export `addressPresets.chile` con el array listo (más adelante, no en este PR).
+
+## Bloque C — Lazy getter en brand
+
+**Cambio**: el singleton mutable `let _brand = { ...BRAND_DEFAULTS }` se reemplaza por:
+
+```ts
+let _overrides: Partial<BrandDefaults> | null = null;
+let _cached: BrandDefaults | null = null;
+
+export function configureBrand(overrides: Partial<BrandDefaults>): void {
+  _overrides = overrides;
+  _cached = null; // invalidar cache
+}
+
+export function getBrand(): BrandDefaults {
+  if (!_cached) {
+    _cached = _overrides ? { ...BRAND_DEFAULTS, ..._overrides } : BRAND_DEFAULTS;
+  }
+  return _cached;
+}
+
+export function resetBrand(): void {
+  _overrides = null;
+  _cached = null;
+}
+```
+
+**Por qué importa**:
+- El módulo deja de tener side effects al import time (solo declara dos `null` y una const).
+- Combinado con `"sideEffects": false` en `package.json`, los bundlers pueden eliminar el módulo si nadie lo usa.
+- `getBrand()` retorna la misma referencia mientras no haya configure (importante: si un consumer guardaba la ref, sigue funcionando — el cached object es estable).
+
+**Cuidado**: `resetBrand` es lo único que cambia semánticamente — antes resetaba a `{ ...BRAND_DEFAULTS }` (copia nueva), ahora a `null` y la próxima `getBrand()` retorna `BRAND_DEFAULTS` (referencia compartida). Si algún test mutaba el resultado de `getBrand()` rompería. **Verificar tests**.
+
+## Bloque D — Bundle hygiene
+
+- Añadir `"sideEffects": ["**/*.css", "**/*.otf"]` en `package.json`. Marca el resto como side-effect-free para el tree-shaker.
+- `npm run build` y verificar que el bundle ESM no creció (debería bajar mínimamente).
 
 ## Plan por commits
 
-- [x] **Commit 1**: `feat(locale): introduce LocaleProvider + UiKitMessages dict`
-  - Crear `src/locale/messages.ts` (interface + helper `format`)
-  - Crear `src/locale/es.ts` (defaults completos)
-  - Crear `src/locale/LocaleProvider.tsx` (Provider + useLocale hook)
-  - Crear `src/locale/index.ts` (barrel)
-  - Exportar desde `src/index.ts`
-  - Tests: `tests/locale.test.tsx` (default español, override parcial, format helper)
+- [ ] **Commit 1**: `feat(brand)!: slim BrandDefaults — remove phonePrefix and regions`
+  - Bloque A completo
+  - Tests: ajustar si algún test referencia los campos eliminados
 
-- [x] **Commit 2**: `feat(overlay): consume locale for Modal/Drawer/Toast close labels`
-  - Overlay.tsx: `aria-label="Cerrar"` → `t['modal.close']` / `t['drawer.close']`
-  - Toast.tsx: `aria-label="Cerrar"` → `t['toast.close']`
-  - Tests: verifica que override de `modal.close` cambia el aria-label
+- [ ] **Commit 2**: `refactor(brand): lazy getter for tree-shaking`
+  - Bloque C completo
+  - Tests: confirmar que `resetBrand` + `configureBrand` siguen pasando
 
-- [x] **Commit 3**: `feat(data-table): consume locale for empty + selection labels`
-  - DataTable.tsx: "Sin datos", "Seleccionar todo", "Seleccionar {label}"
-  - Tests: override de `table.empty`
+- [ ] **Commit 3**: `feat(commerce)!: AddressForm becomes a generic field composer`
+  - Bloque B3 completo
+  - Story actualizada con el preset chileno como ejemplo
+  - Tests AddressForm: rewrites — al menos render con 3 fields (text, select, textarea) + onChange
 
-- [x] **Commit 4**: `feat(app-shell): consume locale for navigation labels`
-  - AppShell.tsx: "Navegación principal", "Expandir/Colapsar menú", "Abrir menú", title attrs
-  - Notifications.tsx: aria-labels y empty message
-  - Tests: skip o smoke
+- [ ] **Commit 4**: `chore(bundle): mark package as side-effect-free`
+  - `package.json` `sideEffects` array
+  - Build verification (size delta documentado en commit body)
 
-- [x] **Commit 5**: `feat(forms): consume locale for filters + pickers labels`
-  - Filters.tsx: "Filtros", "Acciones en lote", "Deseleccionar todo", "Ordenar por"
-  - Pickers.tsx: "Buscar…", "Sin resultados", "Limpiar selección", "Abrir calendario", "Mes anterior/siguiente"
-  - AdvancedPickers.tsx: idem + "Seleccionar rango", "Buscar comandos…", "Limpiar/Aplicar"
-  - InputsExtra.tsx: "Quitar {tag}"
-  - Inputs.tsx: paginación + number input
-  - Tests: smoke
-
-- [x] **Commit 6**: `feat(misc): consume locale for editing/permissions/comments/gallery/display/commerce`
-  - Editing.tsx: ConfirmDialog default labels, TransferList (Disponibles/Asignados/Vacío/Asignar/Quitar), DiffViewer (Cambios/Campo/Antes/Después), DescriptionList (Editar)
-  - Permissions.tsx: "Quitar/Marcar todos"
-  - Comments.tsx: "Sin archivos adjuntos", "Eliminar {name}"
-  - Gallery.tsx: "Imagen anterior/siguiente", "Miniaturas", "Visor de imagen", "Cerrar"
-  - Display.tsx: "Cerrar alerta", "Cargando", chip removeLabel
-  - Display3.tsx: WEEKDAYS, MONTH_NAMES (consumidos vía locale), "Mes anterior/siguiente", "Colapsar/Expandir"
-  - Commerce.tsx: cantidad / favoritos / carro
-  - Tests: smoke
-
-- [x] **Commit 7**: `docs: document LocaleProvider in README + CHANGELOG`
-  - README sección "Internacionalización"
-  - CHANGELOG entry para v0.3.0 (added: LocaleProvider; otherwise non-breaking)
+- [ ] **Commit 5**: `docs: migration guide for v0.3.0 breaking changes`
+  - CHANGELOG: bloque "Breaking changes" con before/after de PhoneInput, AddressForm, BrandDefaults
+  - README: actualizar sección "Defaults de marca" — quitar referencias a regions/phonePrefix
 
 ## Verificación
 
-- [ ] Todos los tests existentes (249) siguen pasando sin cambios — los defaults preservan exactamente las strings actuales
-- [ ] Tests nuevos: ~6-10 (provider default, override parcial, format helper, overlay override, table override, calendar weekday override)
-- [ ] Build limpio (`npm run build`)
-- [ ] No-breaking: app que no envuelve en LocaleProvider ve las mismas strings
-- [ ] TypeScript: consumer recibe autocompletado en `messages` prop
+- [ ] Tests existentes (270): los que tocan brand se actualizan, el resto pasa intacto.
+- [ ] Tests nuevos: ~3-5 (AddressForm: render 3 tipos de field, onChange, layout grid).
+- [ ] Build limpio sin warnings.
+- [ ] Bundle ESM: documentar delta (esperable: ligera reducción).
+- [ ] `dist/index.d.ts`: verificar que `AddressField` se exporta y que `Address` ya no aparece.
 
-## Riesgos
+## Riesgos y notas
 
-- **Performance**: useLocale en cada render. Mitigación: memo el dict mergeado en el provider.
-- **SSR**: `React.useContext` es safe SSR.
-- **Bundle**: el dict default añade ~1KB. Aceptable.
-- **Testing existente**: si algún test queryea por aria-label "Cerrar" exacto, sigue funcionando porque el default es "Cerrar".
+- **Breaking changes**: 3. Documentados en CHANGELOG con migración paso a paso. v0.3.0 lo cubre.
+- **Blast radius**: chico. El kit nunca se ha consumido en prod (Task #8 abierto). Solo `marginapp` y `Factureo` son consumers potenciales y los ajustamos cuando los toquemos.
+- **`addressPresets.chile`**: explícitamente fuera de scope para este PR. Si lo necesitamos, lo agregamos como un sub-export opt-in en otro release.
+- **PhoneInput sin default `+56`**: visualmente no muestra prefijo si el consumer no lo pasa. Es lo correcto — el kit no debe asumir país.
 
-## Review (2026-05-05)
+## Review
 
-**Resultado**: i18n LocaleProvider implementado en 7 commits, todos no-breaking.
-- 270/270 tests pasando (de 268 baseline + 13 nuevos para locale, todos los breaking que aparecieron por el cambio de defaults a templates fueron preservados con fallbacks `??`).
-- Build limpio, +1.5KB ESM (dict + provider + algunos formats internos).
-- ~80 keys finales (más que las 28 estimadas — DateRangePicker, Pagination con range template, Commerce con shopping cart completo, y el shipping prefix/suffix sumaron bastante).
-
-**Decisiones que se tomaron sobre la marcha**:
-- **Pluralización de `filters.selectedCount`**: split en dos keys `selectedOne` / `selectedMany` en vez de una sola con un placeholder. Más explícito y futuro-compatible para idiomas con > 2 formas plurales (cuando llegue, agregamos `selectedFew`, etc.).
-- **Single-letter weekday vs. 3-letter weekday**: dos keys distintas (`picker.weekdaysShort` con "L M M J V S D" para DatePicker compacto, y `calendar.weekdays` con "Lun Mar Mié…" para Calendar full). Reusarlas habría obligado al consumer a elegir uno u otro.
-- **Shipping prefix/suffix split**: la frase "Te falta {x} para envío gratis" se partió en dos keys (`shippingPrefix`, `shippingSuffix`) en vez de un template "${prefix}{x}${suffix}", porque idiomas con orden de palabras inverso (japonés, alemán) no podrían acomodar el `<strong>` con un único template.
-- **AddressForm deferred**: los labels de RUT/región/comuna no entraron al dict — son CL-specific y meterlos hubiera bloated el dict para algo que un consumer en otro mercado va a reemplazar de todos modos.
-
-**Riesgos confirmados como no-issue**:
-- Performance: `useLocale()` se llama en cada componente que tenga strings. El dict mergeado se memoiza en el provider (referencia estable), así que el context update es O(1). React.memo'd children no se re-renderizan.
-- Tests existentes: ningún test queryea por aria-label que haya cambiado, todo sigue siendo "Cerrar", "Sin datos", etc. en español por default.
-
-**Próximos del v0.3.0 backlog**:
-- Brand singleton refactor (item #2 del roadmap)
-- Exit animations Modal/Drawer/Toast
-- DataTable features
-
-**Para v0.3.0 release**: bump version, CHANGELOG ya tiene la entrada en `[Unreleased]`. Antes de publicar a npm conviene hacer Task #8 (consumer test e2e) para validar que el LocaleProvider no rompe nada en una app real.
+Pendiente.

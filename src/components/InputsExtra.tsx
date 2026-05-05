@@ -227,10 +227,9 @@ export interface PhoneInputProps {
 }
 
 export function PhoneInput({ value, onChange, prefix, invalid, disabled, className, id, placeholder = '9 1234 5678' }: PhoneInputProps) {
-  const resolvedPrefix = prefix ?? getBrand().phonePrefix;
   return (
     <div className={cx('phone-input', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
-      <span className="phone-input__prefix">{resolvedPrefix}</span>
+      {prefix && <span className="phone-input__prefix">{prefix}</span>}
       <input
         id={id}
         type="tel"

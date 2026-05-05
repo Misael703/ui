@@ -1,36 +1,27 @@
 /**
- * Defaults centralizados de marca.
+ * Defaults centralizados de marca y locale para formateo UI.
  *
- * Todos los componentes que tienen valores brand-specific (nombre, logo paths,
- * moneda, locale, regiones, prefijo telefónico) leen sus defaults desde aquí.
+ * El kit no asume país. Solo guarda lo que necesita para renderizar:
+ * la identidad visual (nombre, logos) y la configuración de formateo
+ * (moneda, locale BCP 47 para Intl.NumberFormat / DateTimeFormat).
  *
- * Para forkear el kit a otra marca/empresa, llama a `configureBrand()` una sola
- * vez al arranque de tu app:
+ * Datos de país (regiones, prefijo telefónico, validaciones de RUT, etc.)
+ * los pasa el consumer como props. Ver `<AddressForm fields={...}>` y
+ * `<PhoneInput prefix="+56">`.
+ *
+ * Uso:
  *
  * ```tsx
- * // app/layout.tsx (Next.js) o donde inicialices la app
  * import { configureBrand } from '@misael703/elalba-ui';
  *
  * configureBrand({
  *   name: 'Mi Marca',
  *   currency: 'USD',
  *   locale: 'en-US',
- *   phonePrefix: '+1',
  *   logoBasePath: '/static/brand',
- *   regions: ['Alabama', 'Alaska', ...],
  * });
  * ```
- *
- * Después de configurar, todos los componentes usan los nuevos defaults sin
- * necesidad de pasar props en cada llamada. Las props siguen funcionando como
- * override puntual.
  */
-
-const CL_REGIONS: readonly string[] = [
-  'Arica y Parinacota', 'Tarapacá', 'Antofagasta', 'Atacama', 'Coquimbo',
-  'Valparaíso', 'Metropolitana', "O'Higgins", 'Maule', 'Ñuble',
-  'Biobío', 'Araucanía', 'Los Ríos', 'Los Lagos', 'Aysén', 'Magallanes',
-] as const;
 
 export interface BrandDefaults {
   /** Nombre legible de la marca. Usado como `alt` por defecto en `<Logo>`. */
@@ -41,10 +32,6 @@ export interface BrandDefaults {
   currency: string;
   /** Locale BCP 47 para Intl.NumberFormat / DateTimeFormat. */
   locale: string;
-  /** Prefijo telefónico de país. Ej: '+56' para Chile, '+1' para USA. */
-  phonePrefix: string;
-  /** Lista de regiones/estados para `<AddressForm>`. */
-  regions: readonly string[];
 }
 
 export const BRAND_DEFAULTS: BrandDefaults = {
@@ -52,8 +39,6 @@ export const BRAND_DEFAULTS: BrandDefaults = {
   logoBasePath: '/assets/logos',
   currency: 'CLP',
   locale: 'es-CL',
-  phonePrefix: '+56',
-  regions: CL_REGIONS,
 };
 
 /** Estado mutable singleton — solo se modifica via configureBrand(). */
