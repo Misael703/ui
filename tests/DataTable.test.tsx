@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DataTable, Accordion, AccordionItem, Breadcrumbs } from '../src/components/DataTable';
+import { LocaleProvider } from '../src/locale';
 
 const rows = [
   { id: '1', name: 'Taladro', sku: 'TLD-1' },
@@ -93,6 +94,39 @@ describe('DataTable', () => {
   it('shows empty state', () => {
     render(<DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} empty="Nada" />);
     expect(screen.getByText('Nada')).toBeInTheDocument();
+  });
+
+  it('respects LocaleProvider override for empty/selectAll/selectRow', () => {
+    render(
+      <LocaleProvider
+        messages={{
+          'table.empty': 'No data',
+          'table.selectAll': 'Select all',
+          'table.selectRow': 'Select {label}',
+        }}
+      >
+        <DataTable
+          columns={cols}
+          rows={rows}
+          rowKey={(r) => r.id}
+          rowLabel={(r) => r.name}
+          selectable
+          selectedKeys={new Set()}
+          onSelectionChange={() => {}}
+        />
+      </LocaleProvider>
+    );
+    expect(screen.getByLabelText('Select all')).toBeInTheDocument();
+    expect(screen.getByLabelText('Select Taladro')).toBeInTheDocument();
+  });
+
+  it('respects LocaleProvider override for empty state', () => {
+    render(
+      <LocaleProvider messages={{ 'table.empty': 'No records' }}>
+        <DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} />
+      </LocaleProvider>
+    );
+    expect(screen.getByText('No records')).toBeInTheDocument();
   });
 
   it('numeric columns get .table__num class and right-align by default', () => {

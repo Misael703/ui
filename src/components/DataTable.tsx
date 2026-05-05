@@ -3,6 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronUp, ChevronDown, MoreVertical } from './Icons';
 import { Checkbox } from './Form';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- DataTableRow (memoized) -------------------------------------
 // Extracted as React.memo so unrelated parent re-renders don't churn through
@@ -13,13 +15,13 @@ interface DataTableRowProps<T> {
   rowK: string;
   selected: boolean;
   selectable: boolean;
-  label: string;
+  selectAriaLabel: string;
   columns: Column<T>[];
   onToggle: (k: string) => void;
 }
 
 function DataTableRowImpl<T>({
-  row, rowK, selected, selectable, label, columns, onToggle,
+  row, rowK, selected, selectable, selectAriaLabel, columns, onToggle,
 }: DataTableRowProps<T>) {
   return (
     <tr className={cx(selected && 'is-selected')}>
@@ -28,7 +30,7 @@ function DataTableRowImpl<T>({
           <Checkbox
             checked={selected}
             onChange={() => onToggle(rowK)}
-            aria-label={`Seleccionar ${label}`}
+            aria-label={selectAriaLabel}
           />
         </td>
       )}
@@ -118,6 +120,7 @@ export function DataTable<T>({
   selectable, selectedKeys, onSelectionChange,
   empty, loading, ariaLabel, rowLabel, className,
 }: DataTableProps<T>) {
+  const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));
   const headerCbRef = React.useRef<HTMLInputElement>(null);
@@ -167,7 +170,7 @@ export function DataTable<T>({
                   ref={headerCbRef}
                   checked={!!allSelected}
                   onChange={toggleAll}
-                  aria-label="Seleccionar todo"
+                  aria-label={t['table.selectAll']}
                 />
               </th>
             )}
@@ -219,12 +222,13 @@ export function DataTable<T>({
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: 32 }}>
-                {empty ?? <div style={{ textAlign: 'center', color: 'var(--fg-muted)' }}>Sin datos</div>}
+                {empty ?? <div style={{ textAlign: 'center', color: 'var(--fg-muted)' }}>{t['table.empty']}</div>}
               </td>
             </tr>
           ) : (
             rows.map((r) => {
               const k = rowKey(r);
+              const label = rowLabel ? rowLabel(r) : k;
               return (
                 <DataTableRow
                   key={k}
@@ -232,7 +236,7 @@ export function DataTable<T>({
                   rowK={k}
                   selected={!!selectedKeys?.has(k)}
                   selectable={!!selectable}
-                  label={rowLabel ? rowLabel(r) : k}
+                  selectAriaLabel={format(t['table.selectRow'], { label })}
                   columns={columns}
                   onToggle={toggleRow}
                 />
