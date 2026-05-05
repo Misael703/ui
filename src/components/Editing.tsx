@@ -114,6 +114,10 @@ export interface DiffViewerProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function DiffViewer({ entries, className, ...rest }: DiffViewerProps) {
   const t = useLocale();
+  // data-label feeds the mobile stacked layout's ::before pseudo-elements
+  // so the "Antes" / "Después" labels remain i18n-able.
+  const beforeLabel = typeof t['diff.before'] === 'string' ? t['diff.before'] : undefined;
+  const afterLabel = typeof t['diff.after'] === 'string' ? t['diff.after'] : undefined;
   return (
     <div className={cx('diff', className)} role="table" aria-label={t['diff.label']} {...rest}>
       <div className="diff__head" role="row">
@@ -124,8 +128,8 @@ export function DiffViewer({ entries, className, ...rest }: DiffViewerProps) {
       {entries.map((e, i) => (
         <div key={i} className="diff__row" role="row">
           <div className="diff__field" role="cell">{e.field}</div>
-          <div className="diff__before" role="cell"><del>{e.before}</del></div>
-          <div className="diff__after" role="cell"><ins>{e.after}</ins></div>
+          <div className="diff__before" role="cell" data-label={beforeLabel}><del>{e.before}</del></div>
+          <div className="diff__after" role="cell" data-label={afterLabel}><ins>{e.after}</ins></div>
         </div>
       ))}
     </div>
