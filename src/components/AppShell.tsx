@@ -48,6 +48,60 @@ export interface AppShellProps {
   linkAs?: (item: NavItem, content: React.ReactNode, className: string) => React.ReactNode;
 }
 
+// Recursive nav item, memoized so a single item's parent re-render doesn't
+// churn through every other item in the tree. Stability of `linkAs` and
+// `onCloseMobile` is the parent's responsibility (we stabilize
+// `onCloseMobile` via useCallback below; consumers should memoize `linkAs`
+// if they care about avoiding renders, but for typical Next.js Link usage
+// the inline arrow is rarely a hot path).
+interface NavItemNodeProps {
+  item: NavItem;
+  depth: number;
+  linkAs?: AppShellProps['linkAs'];
+  onCloseMobile: () => void;
+}
+
+const NavItemNode = React.memo(function NavItemNode({
+  item, depth, linkAs, onCloseMobile,
+}: NavItemNodeProps) {
+  const klass = cx('appshell__navitem', item.active && 'is-active', `appshell__navitem--depth-${depth}`);
+  const inner = (
+    <>
+      {item.icon && <span className="appshell__navicon" aria-hidden="true">{item.icon}</span>}
+      <span className="appshell__navlabel">{item.label}</span>
+      {item.badge && <span className="appshell__navbadge">{item.badge}</span>}
+    </>
+  );
+  const node = item.href && linkAs
+    ? linkAs(item, inner, klass)
+    : (
+      <a
+        href={item.href ?? '#'}
+        className={klass}
+        aria-current={item.active ? 'page' : undefined}
+        onClick={(e) => {
+          if (!item.href) e.preventDefault();
+          item.onSelect?.();
+          onCloseMobile();
+        }}
+      >
+        {inner}
+      </a>
+    );
+  return (
+    <li>
+      {node}
+      {item.children && item.children.length > 0 && (
+        <ul className="appshell__navchildren">
+          {item.children.map((c) => (
+            <NavItemNode key={c.id} item={c} depth={depth + 1} linkAs={linkAs} onCloseMobile={onCloseMobile} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+});
+
 export function AppShell({
   brand, brandCollapsed, sections, topbar, footer, user,
   defaultCollapsed = false, collapsed: ctrlCollapsed, onCollapsedChange,
@@ -61,43 +115,7 @@ export function AppShell({
     if (ctrlCollapsed === undefined) setInternalCollapsed(v);
     onCollapsedChange?.(v);
   };
-
-  const renderItem = (item: NavItem, depth = 0) => {
-    const klass = cx('appshell__navitem', item.active && 'is-active', `appshell__navitem--depth-${depth}`);
-    const inner = (
-      <>
-        {item.icon && <span className="appshell__navicon" aria-hidden="true">{item.icon}</span>}
-        <span className="appshell__navlabel">{item.label}</span>
-        {item.badge && <span className="appshell__navbadge">{item.badge}</span>}
-      </>
-    );
-    const node = item.href && linkAs
-      ? linkAs(item, inner, klass)
-      : (
-        <a
-          href={item.href ?? '#'}
-          className={klass}
-          aria-current={item.active ? 'page' : undefined}
-          onClick={(e) => {
-            if (!item.href) e.preventDefault();
-            item.onSelect?.();
-            setMobileOpen(false);
-          }}
-        >
-          {inner}
-        </a>
-      );
-    return (
-      <li key={item.id}>
-        {node}
-        {item.children && item.children.length > 0 && (
-          <ul className="appshell__navchildren">
-            {item.children.map((c) => renderItem(c, depth + 1))}
-          </ul>
-        )}
-      </li>
-    );
-  };
+  const closeMobile = React.useCallback(() => setMobileOpen(false), []);
 
   return (
     <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
@@ -109,7 +127,9 @@ export function AppShell({
           {sections.map((s, i) => (
             <div key={s.id ?? i} className="appshell__navsection">
               {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
-              <ul>{s.items.map((it) => renderItem(it))}</ul>
+              <ul>{s.items.map((it) => (
+                <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
+              ))}</ul>
             </div>
           ))}
         </nav>
