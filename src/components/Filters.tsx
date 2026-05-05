@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronDown, ChevronUp, X } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- FilterPanel -------------------------------------------------
 export interface FilterPanelProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -10,19 +12,21 @@ export interface FilterPanelProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   activeCount?: number;
 }
 
-export function FilterPanel({ title = 'Filtros', onClearAll, activeCount, className, children, ...rest }: FilterPanelProps) {
+export function FilterPanel({ title, onClearAll, activeCount, className, children, ...rest }: FilterPanelProps) {
+  const t = useLocale();
+  const heading = title ?? t['filters.panel'];
   return (
-    <aside className={cx('filter-panel', className)} aria-label="Filtros" {...rest}>
+    <aside className={cx('filter-panel', className)} aria-label={t['filters.panel']} {...rest}>
       <div className="filter-panel__head">
         <span className="filter-panel__title">
-          {title}
+          {heading}
           {typeof activeCount === 'number' && activeCount > 0 && (
             <span className="filter-panel__count">{activeCount}</span>
           )}
         </span>
         {onClearAll && activeCount !== undefined && activeCount > 0 && (
           <button type="button" className="filter-panel__clear" onClick={onClearAll}>
-            Limpiar
+            {t['filters.clear']}
           </button>
         )}
       </div>
@@ -64,13 +68,18 @@ export interface BulkActionBarProps extends React.HTMLAttributes<HTMLDivElement>
 }
 
 export function BulkActionBar({ selectedCount, label, onClear, className, children, ...rest }: BulkActionBarProps) {
+  const t = useLocale();
   if (selectedCount <= 0) return null;
+  const countText = format(
+    selectedCount === 1 ? t['filters.selectedOne'] : t['filters.selectedMany'],
+    { n: selectedCount }
+  );
   return (
-    <div className={cx('bulk-bar', className)} role="region" aria-label="Acciones en lote" {...rest}>
+    <div className={cx('bulk-bar', className)} role="region" aria-label={t['filters.bulkActions']} {...rest}>
       <div className="bulk-bar__count">
-        {label ?? `${selectedCount} seleccionado${selectedCount === 1 ? '' : 's'}`}
+        {label ?? countText}
         {onClear && (
-          <button type="button" className="bulk-bar__clear" aria-label="Deseleccionar todo" onClick={onClear}>
+          <button type="button" className="bulk-bar__clear" aria-label={t['filters.deselectAll']} onClick={onClear}>
             <X size={14} />
           </button>
         )}
@@ -96,11 +105,12 @@ export interface SortDropdownProps<T = string> {
 }
 
 export function SortDropdown<T extends string = string>({
-  value, options, onChange, label = 'Ordenar por', className, id,
+  value, options, onChange, label, className, id,
 }: SortDropdownProps<T>) {
+  const t = useLocale();
   return (
     <label className={cx('sort-dropdown', className)}>
-      <span className="sort-dropdown__label">{label}</span>
+      <span className="sort-dropdown__label">{label ?? t['filters.sortBy']}</span>
       <select
         id={id}
         className="sort-dropdown__select select"

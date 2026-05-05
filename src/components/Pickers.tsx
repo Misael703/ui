@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
+import { useLocale } from '../locale/LocaleProvider';
 
 // ---------- Combobox -----------------------------------------------------
 export interface ComboboxOption<T = string> {
@@ -30,10 +31,13 @@ const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
   o.label.toLowerCase().includes(q.toLowerCase());
 
 export function Combobox<T = string>({
-  value, onChange, options, placeholder = 'Buscar…',
-  emptyMessage = 'Sin resultados', filter = defaultFilter,
+  value, onChange, options, placeholder,
+  emptyMessage, filter = defaultFilter,
   className, invalid, disabled, id,
 }: ComboboxProps<T>) {
+  const locale = useLocale();
+  const ph = placeholder ?? locale['common.search'];
+  const empty = emptyMessage ?? locale['common.noResults'];
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState(0);
@@ -104,7 +108,7 @@ export function Combobox<T = string>({
         aria-expanded={open}
         aria-controls={listboxId}
         className="combobox__input"
-        placeholder={placeholder}
+        placeholder={ph}
         disabled={disabled}
         value={open ? query : selected?.label ?? ''}
         onFocus={() => setOpen(true)}
@@ -116,7 +120,7 @@ export function Combobox<T = string>({
           type="button"
           className="combobox__clear"
           onClick={() => { onChange(null); setQuery(''); inputRef.current?.focus(); }}
-          aria-label="Limpiar selección"
+          aria-label={locale['picker.clearSelection']}
         ><X size={16} /></button>
       )}
       {open && typeof document !== 'undefined' && createPortal(
@@ -128,7 +132,7 @@ export function Combobox<T = string>({
           style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
         >
           {filtered.length === 0 ? (
-            <li className="combobox__empty">{emptyMessage}</li>
+            <li className="combobox__empty">{empty}</li>
           ) : (
             filtered.map((o, i) => (
               <li
@@ -165,9 +169,6 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
 export interface DatePickerProps {
   value: Date | null;
   onChange: (date: Date | null) => void;
@@ -189,8 +190,11 @@ export function DatePicker({
   value, onChange, minDate, maxDate, placeholder,
   disabled, invalid, className, id, format = 'auto',
 }: DatePickerProps) {
+  const locale = useLocale();
   const fmt = resolveDateFormat(format);
   const ph = placeholder ?? dateFormatPlaceholder(fmt);
+  const weekdays = locale['picker.weekdaysShort'];
+  const months = locale['calendar.months'];
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
   const wrapRef = React.useRef<HTMLDivElement>(null);
@@ -252,7 +256,7 @@ export function DatePicker({
         className="datepicker__toggle"
         onClick={() => setOpen((o) => !o)}
         disabled={disabled}
-        aria-label="Abrir calendario"
+        aria-label={locale['picker.openCalendar']}
       ><CalendarIcon size={16} /></button>
       {open && typeof document !== 'undefined' && createPortal(
         <div
@@ -262,12 +266,12 @@ export function DatePicker({
           style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
         >
           <div className="datepicker__nav">
-            <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label="Mes anterior"><ChevronLeft size={16} /></button>
-            <span className="datepicker__title">{MONTHS[view.getMonth()]} {view.getFullYear()}</span>
-            <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label="Mes siguiente"><ChevronRight size={16} /></button>
+            <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
+            <span className="datepicker__title">{months[view.getMonth()]} {view.getFullYear()}</span>
+            <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label={locale['calendar.nextMonth']}><ChevronRight size={16} /></button>
           </div>
           <div className="datepicker__grid">
-            {WEEKDAYS.map((w, i) => <span key={i} className="datepicker__dow">{w}</span>)}
+            {weekdays.map((w, i) => <span key={i} className="datepicker__dow">{w}</span>)}
             {cells.map((d, i) => {
               if (!d) return <span key={`b${i}`} />;
               const sel = value && isSameDay(d, value);
@@ -313,6 +317,7 @@ export function FileUpload({
   const [drag, setDrag] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const hintId = React.useId();
+  const locale = useLocale();
   const handle = (list: FileList | null) => {
     if (!list) return;
     let arr = Array.from(list);
@@ -343,7 +348,7 @@ export function FileUpload({
         onChange={(e) => handle(e.target.files)}
       />
       <div className="file-upload__icon" aria-hidden="true">⤴</div>
-      <div className="file-upload__title">Arrastra archivos o haz clic</div>
+      <div className="file-upload__title">{locale['fileUpload.title']}</div>
       {hint && <div id={hintId} className="file-upload__hint">{hint}</div>}
     </div>
   );

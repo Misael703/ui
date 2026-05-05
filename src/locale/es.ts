@@ -43,9 +43,12 @@ export const esMessages: UiKitMessages = {
 
   // Filters
   'filters.panel': 'Filtros',
+  'filters.clear': 'Limpiar',
   'filters.bulkActions': 'Acciones en lote',
   'filters.deselectAll': 'Deseleccionar todo',
   'filters.sortBy': 'Ordenar por',
+  'filters.selectedOne': '{n} seleccionado',
+  'filters.selectedMany': '{n} seleccionados',
 
   // Editing
   'transfer.available': 'Disponibles',
@@ -95,12 +98,16 @@ export const esMessages: UiKitMessages = {
   'picker.clearSelection': 'Limpiar selección',
   'picker.selectRange': 'Seleccionar rango',
   'picker.searchCommands': 'Buscar comandos…',
+  'picker.commandPalette': 'Paleta de comandos',
+  'picker.weekdaysShort': ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
   'combobox.remove': 'Quitar {label}',
+  'fileUpload.title': 'Arrastra archivos o haz clic',
 
   // Inputs
   'pagination.label': 'Paginación',
   'pagination.prev': 'Página anterior',
   'pagination.next': 'Página siguiente',
+  'pagination.range': '{from}–{to} de {total}',
   'numberInput.decrement': 'Disminuir',
   'numberInput.increment': 'Aumentar',
 
@@ -117,4 +124,5 @@ export const esMessages: UiKitMessages = {
 
   // Tags input
   'tagsInput.remove': 'Quitar {tag}',
+  'tagsInput.placeholder': 'Escribe y Enter…',
 };

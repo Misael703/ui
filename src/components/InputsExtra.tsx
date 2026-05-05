@@ -3,6 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
 import { getBrand } from '../brand';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- Slider ------------------------------------------------------
 export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type'> {
@@ -111,10 +113,12 @@ export interface TagInputProps {
 }
 
 export function TagInput({
-  value, onChange, placeholder = 'Escribe y Enter…',
+  value, onChange, placeholder,
   separator = /[,\s]+/, maxTags, validate, disabled, className, id,
 }: TagInputProps) {
   const [draft, setDraft] = React.useState('');
+  const locale = useLocale();
+  const ph = placeholder ?? locale['tagsInput.placeholder'];
 
   const addTags = (raw: string) => {
     const next = raw.split(separator).map((t) => t.trim()).filter(Boolean);
@@ -138,7 +142,7 @@ export function TagInput({
       {value.map((t, i) => (
         <span key={`${t}-${i}`} className="tag-input__tag">
           {t}
-          <button type="button" aria-label={`Quitar ${t}`} onClick={() => onChange(value.filter((_, idx) => idx !== i))}><X size={12} /></button>
+          <button type="button" aria-label={format(locale['tagsInput.remove'], { tag: t })} onClick={() => onChange(value.filter((_, idx) => idx !== i))}><X size={12} /></button>
         </span>
       ))}
       <input
@@ -146,7 +150,7 @@ export function TagInput({
         className="tag-input__field"
         value={draft}
         disabled={disabled}
-        placeholder={value.length === 0 ? placeholder : ''}
+        placeholder={value.length === 0 ? ph : ''}
         onChange={(e) => {
           const v = e.target.value;
           if (separator.test(v)) addTags(v);

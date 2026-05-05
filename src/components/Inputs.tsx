@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- NumberInput --------------------------------------------------
 export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type' | 'prefix'> {
@@ -18,6 +20,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   { value, onChange, min, max, step = 1, invalid, prefix, suffix, className, disabled, ...rest },
   ref
 ) {
+  const t = useLocale();
   const set = (next: number | null) => {
     if (next == null) return onChange?.(null);
     let v = next;
@@ -28,7 +31,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   const incr = (mult: number) => set((value ?? 0) + step * mult);
   return (
     <div className={cx('number-input', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
-      <button type="button" className="number-input__btn" tabIndex={-1} aria-label="Disminuir" onClick={() => incr(-1)} disabled={disabled}>−</button>
+      <button type="button" className="number-input__btn" tabIndex={-1} aria-label={t['numberInput.decrement']} onClick={() => incr(-1)} disabled={disabled}>−</button>
       {prefix && <span className="number-input__affix">{prefix}</span>}
       <input
         ref={ref}
@@ -44,7 +47,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         {...rest}
       />
       {suffix && <span className="number-input__affix">{suffix}</span>}
-      <button type="button" className="number-input__btn" tabIndex={-1} aria-label="Aumentar" onClick={() => incr(1)} disabled={disabled}>+</button>
+      <button type="button" className="number-input__btn" tabIndex={-1} aria-label={t['numberInput.increment']} onClick={() => incr(1)} disabled={disabled}>+</button>
     </div>
   );
 });
@@ -73,14 +76,15 @@ function pageList(current: number, total: number, siblings: number): (number | '
 }
 
 export function Pagination({ page, pageSize, total, onPageChange, siblings = 1, className }: PaginationProps) {
+  const t = useLocale();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pages = pageList(page, totalPages, siblings);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   return (
-    <nav className={cx('pagination', className)} aria-label="Paginación">
-      <span className="pagination__info">{from}–{to} de {total}</span>
-      <button type="button" className="pagination__btn" onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} aria-label="Página anterior"><ChevronLeft size={14} /></button>
+    <nav className={cx('pagination', className)} aria-label={t['pagination.label']}>
+      <span className="pagination__info">{format(t['pagination.range'], { from, to, total })}</span>
+      <button type="button" className="pagination__btn" onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} aria-label={t['pagination.prev']}><ChevronLeft size={14} /></button>
       {pages.map((p, i) =>
         p === '...' ? (
           <span key={`e${i}`} className="pagination__ellipsis">…</span>
@@ -96,7 +100,7 @@ export function Pagination({ page, pageSize, total, onPageChange, siblings = 1, 
           </button>
         )
       )}
-      <button type="button" className="pagination__btn" onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages} aria-label="Página siguiente"><ChevronRight size={14} /></button>
+      <button type="button" className="pagination__btn" onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages} aria-label={t['pagination.next']}><ChevronRight size={14} /></button>
     </nav>
   );
 }

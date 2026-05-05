@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Pagination, NumberInput, EmptyState, Kpi } from '../src/components/Inputs';
+import { LocaleProvider } from '../src/locale';
 
 describe('Pagination', () => {
   it('renders info and navigates', () => {
@@ -14,6 +15,23 @@ describe('Pagination', () => {
   it('disables prev on first page', () => {
     render(<Pagination page={1} pageSize={10} total={50} onPageChange={() => {}} />);
     expect(screen.getByLabelText('Página anterior')).toBeDisabled();
+  });
+
+  it('respects LocaleProvider override for prev/next/range', () => {
+    render(
+      <LocaleProvider
+        messages={{
+          'pagination.prev': 'Previous page',
+          'pagination.next': 'Next page',
+          'pagination.range': '{from}–{to} of {total}',
+        }}
+      >
+        <Pagination page={2} pageSize={10} total={55} onPageChange={() => {}} />
+      </LocaleProvider>
+    );
+    expect(screen.getByText('11–20 of 55')).toBeInTheDocument();
+    expect(screen.getByLabelText('Previous page')).toBeInTheDocument();
+    expect(screen.getByLabelText('Next page')).toBeInTheDocument();
   });
 });
 

@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
 import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
+import { useLocale } from '../locale/LocaleProvider';
+import { format as formatMsg } from '../locale/messages';
 
 // ---------- MultiCombobox -----------------------------------------------
 export interface MultiComboboxOption<T = string> {
@@ -31,10 +33,13 @@ const dfilter = <T,>(o: MultiComboboxOption<T>, q: string) =>
   o.label.toLowerCase().includes(q.toLowerCase());
 
 export function MultiCombobox<T = string>({
-  value, onChange, options, placeholder = 'Buscar…',
-  emptyMessage = 'Sin resultados', filter = dfilter,
+  value, onChange, options, placeholder,
+  emptyMessage, filter = dfilter,
   invalid, disabled, className, id, maxVisibleChips = 3,
 }: MultiComboboxProps<T>) {
+  const locale = useLocale();
+  const ph = placeholder ?? locale['common.search'];
+  const empty = emptyMessage ?? locale['common.noResults'];
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState(0);
@@ -96,7 +101,7 @@ export function MultiCombobox<T = string>({
         {visible.map((o) => (
           <span key={String(o.value)} className="multicombo__chip">
             {o.label}
-            <button type="button" aria-label={`Quitar ${o.label}`} onClick={(e) => { e.stopPropagation(); toggle(o.value); }}><X size={12} /></button>
+            <button type="button" aria-label={formatMsg(locale['combobox.remove'], { label: o.label })} onClick={(e) => { e.stopPropagation(); toggle(o.value); }}><X size={12} /></button>
           </span>
         ))}
         {overflow > 0 && <span className="multicombo__chip multicombo__chip--more">+{overflow}</span>}
@@ -108,7 +113,7 @@ export function MultiCombobox<T = string>({
           aria-expanded={open}
           aria-controls={listboxId}
           className="multicombo__input"
-          placeholder={selectedItems.length === 0 ? placeholder : ''}
+          placeholder={selectedItems.length === 0 ? ph : ''}
           disabled={disabled}
           value={query}
           onFocus={() => setOpen(true)}
@@ -126,7 +131,7 @@ export function MultiCombobox<T = string>({
           style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
         >
           {filtered.length === 0 ? (
-            <li className="multicombo__empty">{emptyMessage}</li>
+            <li className="multicombo__empty">{empty}</li>
           ) : (
             filtered.map((o, i) => {
               const checked = selSet.has(o.value);
@@ -171,9 +176,6 @@ function buildMonthGrid(view: Date, offset: number) {
   for (let d = 1; d <= days; d++) cells.push(new Date(m.getFullYear(), m.getMonth(), d));
   return { m, cells };
 }
-const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
 export interface DateRange { from: Date | null; to: Date | null }
 
 export interface DateRangePickerProps {
@@ -196,6 +198,9 @@ export function DateRangePicker({
   value, onChange, minDate, maxDate, presets,
   invalid, disabled, className, id, format = 'auto',
 }: DateRangePickerProps) {
+  const locale = useLocale();
+  const weekdays = locale['picker.weekdaysShort'];
+  const months = locale['calendar.months'];
   const fmt = resolveDateFormat(format);
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value.from ?? new Date()));
@@ -255,15 +260,15 @@ export function DateRangePicker({
     ? value.to
       ? `${formatDate(value.from, fmt)} → ${formatDate(value.to, fmt)}`
       : `${formatDate(value.from, fmt)} → …`
-    : 'Seleccionar rango';
+    : locale['picker.selectRange'];
 
   const renderMonth = (offset: number) => {
     const { m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
     return (
       <div className="daterange__month">
-        <div className="daterange__title">{MONTHS[m.getMonth()]} {m.getFullYear()}</div>
+        <div className="daterange__title">{months[m.getMonth()]} {m.getFullYear()}</div>
         <div className="daterange__grid">
-          {WEEKDAYS.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
+          {weekdays.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
           {cells.map((d, i) => {
             if (!d) return <span key={`b${i}`} />;
             const sel = (value.from && isSameDay(d, value.from)) || (value.to && isSameDay(d, value.to));
@@ -319,17 +324,17 @@ export function DateRangePicker({
           )}
           <div className="daterange__panes">
             <div className="daterange__nav">
-              <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label="Mes anterior"><ChevronLeft size={16} /></button>
+              <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
               <span />
-              <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label="Mes siguiente"><ChevronRight size={16} /></button>
+              <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label={locale['calendar.nextMonth']}><ChevronRight size={16} /></button>
             </div>
             <div className="daterange__months">
               {renderMonth(0)}
               {renderMonth(1)}
             </div>
             <div className="daterange__actions">
-              <button type="button" className="daterange__clear" onClick={() => onChange({ from: null, to: null })}>Limpiar</button>
-              <button type="button" className="daterange__apply" onClick={() => setOpen(false)} disabled={!value.from || !value.to}>Aplicar</button>
+              <button type="button" className="daterange__clear" onClick={() => onChange({ from: null, to: null })}>{locale['common.clear']}</button>
+              <button type="button" className="daterange__apply" onClick={() => setOpen(false)} disabled={!value.from || !value.to}>{locale['common.apply']}</button>
             </div>
           </div>
         </div>,
@@ -377,9 +382,12 @@ function matchesHotkey(e: KeyboardEvent, hk: string) {
 
 export function CommandPalette({
   open, onClose, items,
-  placeholder = 'Buscar comandos…',
-  emptyMessage = 'Sin resultados',
+  placeholder,
+  emptyMessage,
 }: CommandPaletteProps) {
+  const locale = useLocale();
+  const ph = placeholder ?? locale['picker.searchCommands'];
+  const empty = emptyMessage ?? locale['common.noResults'];
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -441,7 +449,7 @@ export function CommandPalette({
   if (!open) return null;
   let idx = -1;
   return (
-    <div className="cmdk__overlay" role="dialog" aria-modal="true" aria-label="Paleta de comandos" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="cmdk__overlay" role="dialog" aria-modal="true" aria-label={locale['picker.commandPalette']} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="cmdk__panel">
         <div className="cmdk__searchbar">
           <span className="cmdk__icon" aria-hidden="true"><Search size={16} /></span>
@@ -449,13 +457,13 @@ export function CommandPalette({
             ref={inputRef}
             className="cmdk__input"
             value={query}
-            placeholder={placeholder}
+            placeholder={ph}
             onChange={(e) => setQuery(e.target.value)}
           />
           <kbd className="cmdk__esc">Esc</kbd>
         </div>
         <ul ref={listRef} className="cmdk__list" role="listbox">
-          {flat.length === 0 && <li className="cmdk__empty">{emptyMessage}</li>}
+          {flat.length === 0 && <li className="cmdk__empty">{empty}</li>}
           {grouped.order.map((g) => (
             <React.Fragment key={g || '__none'}>
               {g && <li className="cmdk__group" aria-hidden="true">{g}</li>}

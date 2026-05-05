@@ -48,9 +48,14 @@ export interface UiKitMessages {
 
   // Filters
   'filters.panel': string;
+  'filters.clear': string;
   'filters.bulkActions': string;
   'filters.deselectAll': string;
   'filters.sortBy': string;
+  /** Template: "{n} seleccionado" (used when n === 1) */
+  'filters.selectedOne': string;
+  /** Template: "{n} seleccionados" (used when n !== 1) */
+  'filters.selectedMany': string;
 
   // Editing
   'transfer.available': string;
@@ -102,13 +107,22 @@ export interface UiKitMessages {
   'picker.clearSelection': string;
   'picker.selectRange': string;
   'picker.searchCommands': string;
+  'picker.commandPalette': string;
+  /**
+   * Single-letter weekday initials used by compact calendar grids (DatePicker,
+   * DateRangePicker). Mon-first to match the kit's calendars.
+   */
+  'picker.weekdaysShort': readonly [string, string, string, string, string, string, string];
   /** Template: "Quitar {label}" */
   'combobox.remove': string;
+  'fileUpload.title': string;
 
   // Inputs
   'pagination.label': string;
   'pagination.prev': string;
   'pagination.next': string;
+  /** Template: "{from}–{to} de {total}" */
+  'pagination.range': string;
   'numberInput.decrement': string;
   'numberInput.increment': string;
 
@@ -127,6 +141,7 @@ export interface UiKitMessages {
   // Tags input
   /** Template: "Quitar {tag}" */
   'tagsInput.remove': string;
+  'tagsInput.placeholder': string;
 }
 
 /**
