@@ -1158,6 +1158,15 @@ a:hover {
   color: var(--color-danger);
   font-size: var(--text-sm);
 }
+.table-wrap--sticky .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-surface);
+  /* Sticky cells lose the bottom border the row would normally have, so
+     paint one explicitly. */
+  box-shadow: inset 0 -1px 0 var(--border-default);
+}
 .table th[aria-sort="ascending"] .data-table__sort,
 .table th[aria-sort="descending"] .data-table__sort {
   opacity: 1;

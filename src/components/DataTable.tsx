@@ -98,6 +98,13 @@ export interface DataTableProps<T> {
    */
   error?: React.ReactNode;
   loading?: boolean;
+  /**
+   * Sticky-position the table header so it stays visible while the body
+   * scrolls. Requires the consumer to constrain the wrapper's height
+   * (e.g. wrapping `<DataTable>` in a `max-height: 60vh; overflow-y: auto`
+   * container) — without that, sticky has nothing to stick relative to.
+   */
+  stickyHeader?: boolean;
   /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
   ariaLabel?: string;
   /**
@@ -124,7 +131,8 @@ export function DataTable<T>({
   columns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, ariaLabel, rowLabel, className,
+  empty, error, loading, stickyHeader,
+  ariaLabel, rowLabel, className,
 }: DataTableProps<T>) {
   const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
@@ -166,7 +174,7 @@ export function DataTable<T>({
   };
 
   return (
-    <div className={cx('table-wrap', className)}>
+    <div className={cx('table-wrap', stickyHeader && 'table-wrap--sticky', className)}>
       <table className="table data-table" aria-label={ariaLabel}>
         <thead>
           <tr>

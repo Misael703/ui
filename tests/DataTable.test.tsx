@@ -160,6 +160,20 @@ describe('DataTable', () => {
     expect(screen.queryByText('No data')).toBeNull();
   });
 
+  it('stickyHeader adds the wrapper class', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader />
+    );
+    expect(container.querySelector('.table-wrap--sticky')).not.toBeNull();
+  });
+
+  it('does not add sticky class when stickyHeader is unset', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    expect(container.querySelector('.table-wrap--sticky')).toBeNull();
+  });
+
   it('numeric columns get .table__num class and right-align by default', () => {
     const numericRows = [{ id: '1', name: 'A', price: 1500 }];
     const numericCols = [
