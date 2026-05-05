@@ -30,34 +30,48 @@ export function Carousel({
   const total = slides.length;
   const [index, setIndex] = React.useState(0);
 
+  // Stable handlers: use the functional setIndex form so the callbacks
+  // don't have to close over `index`. They re-create only when `loop`,
+  // `total`, or `onIndexChange` change — meaning carousel arrow buttons
+  // and autoplay can rely on referential stability across navigations.
   const go = React.useCallback(
-    (next: number) => {
-      const target = loop ? (next + total) % total : Math.max(0, Math.min(next, total - 1));
-      setIndex(target);
-      onIndexChange?.(target);
+    (target: number) => {
+      const clamped = loop ? (target + total) % total : Math.max(0, Math.min(target, total - 1));
+      setIndex(clamped);
+      onIndexChange?.(clamped);
     },
     [loop, total, onIndexChange]
   );
 
-  const next = () => go(index + 1);
-  const prev = () => go(index - 1);
+  const next = React.useCallback(() => {
+    setIndex((i) => {
+      const t = loop ? (i + 1) % total : Math.min(i + 1, total - 1);
+      onIndexChange?.(t);
+      return t;
+    });
+  }, [loop, total, onIndexChange]);
+
+  const prev = React.useCallback(() => {
+    setIndex((i) => {
+      const t = loop ? (i - 1 + total) % total : Math.max(0, i - 1);
+      onIndexChange?.(t);
+      return t;
+    });
+  }, [loop, total, onIndexChange]);
 
   React.useEffect(() => {
     if (!autoplay || total <= 1) return;
-    const id = setInterval(() => {
-      setIndex((i) => {
-        const t = loop ? (i + 1) % total : Math.min(i + 1, total - 1);
-        onIndexChange?.(t);
-        return t;
-      });
-    }, autoplayInterval);
+    const id = setInterval(next, autoplayInterval);
     return () => clearInterval(id);
-  }, [autoplay, autoplayInterval, loop, total, onIndexChange]);
+  }, [autoplay, autoplayInterval, total, next]);
 
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') prev();
-    if (e.key === 'ArrowRight') next();
-  };
+  const onKey = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    },
+    [next, prev]
+  );
 
   return (
     <div
