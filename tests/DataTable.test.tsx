@@ -174,6 +174,24 @@ describe('DataTable', () => {
     expect(container.querySelector('.table-wrap--sticky')).toBeNull();
   });
 
+  it('mobileLayout=cards adds the wrapper class and data-label to cells', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} mobileLayout="cards" />
+    );
+    expect(container.querySelector('.table-wrap--cards')).not.toBeNull();
+    // Each cell with a string header should carry data-label
+    const cells = container.querySelectorAll('tbody td');
+    expect(cells[0].getAttribute('data-label')).toBe('Nombre');
+    expect(cells[1].getAttribute('data-label')).toBe('SKU');
+  });
+
+  it('mobileLayout default is table — no cards class', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    expect(container.querySelector('.table-wrap--cards')).toBeNull();
+  });
+
   it('numeric columns get .table__num class and right-align by default', () => {
     const numericRows = [{ id: '1', name: 'A', price: 1500 }];
     const numericCols = [

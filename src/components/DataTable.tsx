@@ -39,11 +39,18 @@ function DataTableRowImpl<T>({
         const value = c.accessor
           ? c.accessor(row)
           : (row as Record<string, unknown>)[c.key] as React.ReactNode;
+        // data-label is consumed by the .data-table--cards CSS to surface
+        // the column header as an inline label on each row when the table
+        // collapses to a card layout on narrow viewports. Non-string
+        // headers (e.g. JSX) can't be projected through `attr()` so we
+        // omit the attribute and the cell renders without a visible label.
+        const label = typeof c.header === 'string' ? c.header : undefined;
         return (
           <td
             key={c.key}
             className={cx(c.numeric && 'table__num')}
             style={{ textAlign: align }}
+            data-label={label}
           >
             {value as React.ReactNode}
           </td>
@@ -105,6 +112,14 @@ export interface DataTableProps<T> {
    * container) — without that, sticky has nothing to stick relative to.
    */
   stickyHeader?: boolean;
+  /**
+   * Layout for narrow viewports (`<600px`):
+   * - `'table'` (default): the table scrolls horizontally inside its wrapper.
+   * - `'cards'`: each row collapses to a stacked card with the column
+   *   header as an inline label per cell. Requires string `header` values
+   *   for the labels to appear; non-string headers render without a label.
+   */
+  mobileLayout?: 'table' | 'cards';
   /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
   ariaLabel?: string;
   /**
@@ -131,7 +146,7 @@ export function DataTable<T>({
   columns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, stickyHeader,
+  empty, error, loading, stickyHeader, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
 }: DataTableProps<T>) {
   const t = useLocale();
@@ -174,7 +189,14 @@ export function DataTable<T>({
   };
 
   return (
-    <div className={cx('table-wrap', stickyHeader && 'table-wrap--sticky', className)}>
+    <div
+      className={cx(
+        'table-wrap',
+        stickyHeader && 'table-wrap--sticky',
+        mobileLayout === 'cards' && 'table-wrap--cards',
+        className,
+      )}
+    >
       <table className="table data-table" aria-label={ariaLabel}>
         <thead>
           <tr>
