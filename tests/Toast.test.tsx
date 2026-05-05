@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ToastProvider, useToast } from '../src/components/Toast';
+import { LocaleProvider } from '../src/locale';
 
 function Pusher({ duration = 1000 }: { duration?: number }) {
   const { push } = useToast();
@@ -67,5 +68,17 @@ describe('Toast', () => {
     const stack = baseElement.querySelector('.toast-stack')!;
     expect(stack.getAttribute('aria-live')).toBe('polite');
     expect(stack.hasAttribute('aria-atomic')).toBe(false);
+  });
+
+  it('respects LocaleProvider override for close aria-label', () => {
+    render(
+      <LocaleProvider messages={{ 'toast.close': 'Dismiss' }}>
+        <ToastProvider>
+          <Pusher />
+        </ToastProvider>
+      </LocaleProvider>
+    );
+    fireEvent.click(screen.getByText('push'));
+    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeInTheDocument();
   });
 });

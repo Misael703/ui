@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 export interface OverlayProps {
   open: boolean;
@@ -89,6 +90,7 @@ export function Modal({
 }: OverlayProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
+  const t = useLocale();
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
   useScrollLock(open);
@@ -106,7 +108,7 @@ export function Modal({
         {title && (
           <div className="modal__header">
             <div id={titleId} className="modal__title">{title}</div>
-            <button type="button" className="modal__close" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+            <button type="button" className="modal__close" onClick={onClose} aria-label={t['modal.close']}><X size={18} /></button>
           </div>
         )}
         <div className="modal__body">{children}</div>
@@ -127,6 +129,7 @@ export function Drawer({
 }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
+  const t = useLocale();
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
   useScrollLock(open);
@@ -144,7 +147,7 @@ export function Drawer({
         {title && (
           <div className="drawer__header">
             <div id={titleId} className="drawer__title">{title}</div>
-            <button type="button" className="drawer__close" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+            <button type="button" className="drawer__close" onClick={onClose} aria-label={t['drawer.close']}><X size={18} /></button>
           </div>
         )}
         <div className="drawer__body">{children}</div>

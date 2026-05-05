@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle, AlertTriangle, AlertCircle, Info } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 const VARIANT_ICON = {
   success: CheckCircle,
@@ -35,6 +36,7 @@ interface ToastTimerState {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
   const timers = React.useRef<Map<string, ToastTimerState>>(new Map());
+  const locale = useLocale();
 
   const dismiss = React.useCallback((id: string) => {
     const state = timers.current.get(id);
@@ -109,7 +111,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               {t.title && <div className="toast__title">{t.title}</div>}
               {t.description && <div className="toast__desc">{t.description}</div>}
             </div>
-            <button type="button" className="toast__close" aria-label="Cerrar" onClick={() => dismiss(t.id)}><X size={16} /></button>
+            <button type="button" className="toast__close" aria-label={locale['toast.close']} onClick={() => dismiss(t.id)}><X size={16} /></button>
           </div>
         );
       })}
