@@ -4,6 +4,11 @@ import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
+
+// Exit animation duration in ms. Must match the `is-closing` keyframes
+// in src/styles/index.css (`.modal-backdrop`, `.drawer-backdrop`).
+const EXIT_MS = 200;
 
 export interface OverlayProps {
   open: boolean;
@@ -91,18 +96,26 @@ export function Modal({
   const ref = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
   const t = useLocale();
+  // useDelayedUnmount keeps the DOM mounted during exit animation. The
+  // a11y/scroll-lock hooks still consume `open` (the user's intent), not
+  // `mounted` — we don't want to trap focus or block scroll while
+  // animating out.
+  const { mounted, closing } = useDelayedUnmount(open, EXIT_MS);
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
   useScrollLock(open);
-  if (!open || typeof document === 'undefined') return null;
+  if (!mounted || typeof document === 'undefined') return null;
   return createPortal(
-    <div className="modal-backdrop" onClick={() => closeOnBackdrop && onClose()}>
+    <div
+      className={cx('modal-backdrop', closing && 'is-closing')}
+      onClick={() => closeOnBackdrop && onClose()}
+    >
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={cx('modal', `modal--${size}`, className)}
+        className={cx('modal', `modal--${size}`, closing && 'is-closing', className)}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
@@ -130,18 +143,22 @@ export function Drawer({
   const ref = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
   const t = useLocale();
+  const { mounted, closing } = useDelayedUnmount(open, EXIT_MS);
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
   useScrollLock(open);
-  if (!open || typeof document === 'undefined') return null;
+  if (!mounted || typeof document === 'undefined') return null;
   return createPortal(
-    <div className="drawer-backdrop" onClick={() => closeOnBackdrop && onClose()}>
+    <div
+      className={cx('drawer-backdrop', closing && 'is-closing')}
+      onClick={() => closeOnBackdrop && onClose()}
+    >
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={cx('drawer', `drawer--${side}`, className)}
+        className={cx('drawer', `drawer--${side}`, closing && 'is-closing', className)}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
