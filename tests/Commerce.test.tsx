@@ -188,16 +188,58 @@ describe('OrderSummary', () => {
 });
 
 describe('AddressForm', () => {
-  it('renders fields and triggers onChange', () => {
+  const fields = [
+    { key: 'fullName', label: 'Nombre completo' },
+    {
+      key: 'region',
+      label: 'Región',
+      type: 'select' as const,
+      options: [
+        { value: 'rm', label: 'Metropolitana' },
+        { value: 'vr', label: 'Valparaíso' },
+      ],
+      width: 'half' as const,
+    },
+    {
+      key: 'notes',
+      label: 'Notas',
+      type: 'textarea' as const,
+      rows: 3,
+    },
+  ];
+
+  it('renders text/select/textarea fields and triggers onChange on text input', () => {
     const onChange = vi.fn();
-    render(<AddressForm value={{}} onChange={onChange} />);
+    render(<AddressForm fields={fields} value={{}} onChange={onChange} />);
     fireEvent.change(screen.getByLabelText('Nombre completo'), { target: { value: 'Misael' } });
     expect(onChange).toHaveBeenCalledWith({ fullName: 'Misael' });
   });
 
-  it('hides RUT when showRut is false', () => {
-    render(<AddressForm value={{}} onChange={() => {}} showRut={false} />);
-    expect(screen.queryByLabelText('RUT')).toBeNull();
+  it('renders select with options', () => {
+    render(<AddressForm fields={fields} value={{}} onChange={() => {}} />);
+    const select = screen.getByLabelText('Región') as HTMLSelectElement;
+    expect(select.tagName).toBe('SELECT');
+    expect(select.querySelectorAll('option').length).toBe(3); // placeholder + 2 options
+  });
+
+  it('triggers onChange with merged value on select', () => {
+    const onChange = vi.fn();
+    render(<AddressForm fields={fields} value={{ fullName: 'Misa' }} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText('Región'), { target: { value: 'rm' } });
+    expect(onChange).toHaveBeenCalledWith({ fullName: 'Misa', region: 'rm' });
+  });
+
+  it('renders textarea with configured rows', () => {
+    render(<AddressForm fields={fields} value={{}} onChange={() => {}} />);
+    const ta = screen.getByLabelText('Notas') as HTMLTextAreaElement;
+    expect(ta.tagName).toBe('TEXTAREA');
+    expect(ta.rows).toBe(3);
+  });
+
+  it('applies width class to each field', () => {
+    const { container } = render(<AddressForm fields={fields} value={{}} onChange={() => {}} />);
+    expect(container.querySelector('.address-form__field--full')).not.toBeNull();
+    expect(container.querySelector('.address-form__field--half')).not.toBeNull();
   });
 });
 

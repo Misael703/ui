@@ -3295,12 +3295,15 @@ a:hover {
 .order-summary__row.is-emphasis dt, .order-summary__row.is-emphasis dd { font-weight: 700; color: var(--fg-default); }
 
 /* ---------- AddressForm ----------------------------------------------- */
-.address-form { display: flex; flex-direction: column; gap: var(--space-4); }
-.address-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-.address-form__row .form-field:first-child { grid-column: 1 / span 2; }
-@media (min-width: 768px) {
-  .address-form__row { grid-template-columns: 2fr 1fr 1fr; }
-  .address-form__row .form-field:first-child { grid-column: auto; }
+/* 6-column grid; each field declares width via address-form__field--*.
+   Below 600px everything stacks (each field spans the whole row). */
+.address-form { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-3) var(--space-3); }
+.address-form__field--full { grid-column: span 6; }
+.address-form__field--half { grid-column: span 3; }
+.address-form__field--third { grid-column: span 2; }
+@media (max-width: 600px) {
+  .address-form__field--half,
+  .address-form__field--third { grid-column: span 6; }
 }
 
 /* ---------- CompareTable ---------------------------------------------- */

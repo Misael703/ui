@@ -469,78 +469,92 @@ export function OrderSummary({ rows, title, className, ...rest }: OrderSummaryPr
   );
 }
 
-// ---------- AddressForm (CL defaults) ----------------------------------
-export interface Address {
-  fullName: string;
-  rut?: string;
-  phone: string;
-  street: string;
-  number: string;
-  apartment?: string;
-  region: string;
-  comuna: string;
-  notes?: string;
+// ---------- AddressForm (generic field composer) -----------------------
+// The kit doesn't ship country-specific fields. Consumers pass a `fields`
+// array describing which inputs to render and the order. For Chile, that
+// means defining `[{ key: 'rut', ... }, { key: 'comuna', ... }, ...]` in
+// app code. For other markets, define different fields.
+//
+// Layout: each field declares its `width` ('full' | 'half' | 'third').
+// The form renders in a 6-column CSS grid, where 'full' spans 6, 'half'
+// spans 3, and 'third' spans 2. On narrow viewports everything stacks.
+
+export interface AddressFieldOption {
+  value: string;
+  label: React.ReactNode;
+}
+
+export interface AddressField {
+  /** Key del campo en el objeto `value`. */
+  key: string;
+  label: React.ReactNode;
+  type?: 'text' | 'select' | 'textarea';
+  placeholder?: string;
+  /** Solo para `type: 'select'`. */
+  options?: readonly AddressFieldOption[];
+  /** Placeholder de la opción vacía. Default: 'Selecciona…' (locale: `common.search` no aplica). */
+  selectPlaceholder?: string;
+  /** Anchura en una grilla de 6 columnas. Default: 'full'. */
+  width?: 'full' | 'half' | 'third';
+  /** Solo para `type: 'textarea'`. */
+  rows?: number;
 }
 
 export interface AddressFormProps {
-  value: Partial<Address>;
-  onChange: (value: Partial<Address>) => void;
-  showRut?: boolean;
+  fields: AddressField[];
+  value: Record<string, string>;
+  onChange: (value: Record<string, string>) => void;
   className?: string;
-  /** Lista de regiones a mostrar en el select. */
-  regions?: readonly string[];
 }
 
-export function AddressForm({ value, onChange, showRut = true, className, regions }: AddressFormProps) {
-  const resolvedRegions = regions ?? [];
-  const set = (k: keyof Address, v: string) => onChange({ ...value, [k]: v });
+export function AddressForm({ fields, value, onChange, className }: AddressFormProps) {
+  const reactId = React.useId();
+  const set = (key: string, v: string) => onChange({ ...value, [key]: v });
+
   return (
     <div className={cx('address-form', className)}>
-      <div className="form-field">
-        <label className="label" htmlFor="addr-fullName">Nombre completo</label>
-        <input id="addr-fullName" className="input" value={value.fullName ?? ''} onChange={(e) => set('fullName', e.target.value)} />
-      </div>
-      {showRut && (
-        <div className="form-field">
-          <label className="label" htmlFor="addr-rut">RUT</label>
-          <input id="addr-rut" className="input" value={value.rut ?? ''} onChange={(e) => set('rut', e.target.value)} placeholder="12.345.678-9" />
-        </div>
-      )}
-      <div className="form-field">
-        <label className="label" htmlFor="addr-phone">Teléfono</label>
-        <input id="addr-phone" className="input" value={value.phone ?? ''} onChange={(e) => set('phone', e.target.value)} placeholder="+56 9 1234 5678" />
-      </div>
-      <div className="address-form__row">
-        <div className="form-field">
-          <label className="label" htmlFor="addr-street">Calle</label>
-          <input id="addr-street" className="input" value={value.street ?? ''} onChange={(e) => set('street', e.target.value)} />
-        </div>
-        <div className="form-field">
-          <label className="label" htmlFor="addr-number">Número</label>
-          <input id="addr-number" className="input" value={value.number ?? ''} onChange={(e) => set('number', e.target.value)} />
-        </div>
-        <div className="form-field">
-          <label className="label" htmlFor="addr-apt">Depto/Casa</label>
-          <input id="addr-apt" className="input" value={value.apartment ?? ''} onChange={(e) => set('apartment', e.target.value)} />
-        </div>
-      </div>
-      <div className="address-form__row">
-        <div className="form-field">
-          <label className="label" htmlFor="addr-region">Región</label>
-          <select id="addr-region" className="select" value={value.region ?? ''} onChange={(e) => set('region', e.target.value)}>
-            <option value="">Selecciona…</option>
-            {resolvedRegions.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
-        <div className="form-field">
-          <label className="label" htmlFor="addr-comuna">Comuna</label>
-          <input id="addr-comuna" className="input" value={value.comuna ?? ''} onChange={(e) => set('comuna', e.target.value)} />
-        </div>
-      </div>
-      <div className="form-field">
-        <label className="label" htmlFor="addr-notes">Notas para el despacho (opcional)</label>
-        <textarea id="addr-notes" className="textarea" value={value.notes ?? ''} onChange={(e) => set('notes', e.target.value)} rows={2} />
-      </div>
+      {fields.map((f) => {
+        const id = `${reactId}-${f.key}`;
+        const width = f.width ?? 'full';
+        const v = value[f.key] ?? '';
+        return (
+          <div key={f.key} className={cx('form-field', `address-form__field--${width}`)}>
+            <label className="label" htmlFor={id}>{f.label}</label>
+            {f.type === 'select' ? (
+              <select
+                id={id}
+                className="select"
+                value={v}
+                onChange={(e) => set(f.key, e.target.value)}
+              >
+                <option value="">{f.selectPlaceholder ?? 'Selecciona…'}</option>
+                {f.options?.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {typeof o.label === 'string' ? o.label : o.value}
+                  </option>
+                ))}
+              </select>
+            ) : f.type === 'textarea' ? (
+              <textarea
+                id={id}
+                className="textarea"
+                value={v}
+                placeholder={f.placeholder}
+                rows={f.rows ?? 2}
+                onChange={(e) => set(f.key, e.target.value)}
+              />
+            ) : (
+              <input
+                id={id}
+                className="input"
+                value={v}
+                placeholder={f.placeholder}
+                onChange={(e) => set(f.key, e.target.value)}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

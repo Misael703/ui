@@ -4,7 +4,7 @@ import {
   Rating, PriceDisplay, QuantitySelector, VariantSelector,
   WishlistButton, PromoCodeInput, FreeShippingProgress,
   CartDrawer, OrderSummary, AddressForm, CompareTable,
-  type Address,
+  type AddressField,
 } from './Commerce';
 import { Button } from './Button';
 
@@ -152,12 +152,32 @@ export const OrderSummaryDemo: StoryObj = {
   ),
 };
 
+// Example: a Chile-flavored address form. The kit doesn't ship country
+// data — consumers define their own field set per market.
+const CL_REGIONS = [
+  'Arica y Parinacota', 'Tarapacá', 'Antofagasta', 'Atacama', 'Coquimbo',
+  'Valparaíso', 'Metropolitana', "O'Higgins", 'Maule', 'Ñuble',
+  'Biobío', 'Araucanía', 'Los Ríos', 'Los Lagos', 'Aysén', 'Magallanes',
+].map((r) => ({ value: r, label: r }));
+
+const chileAddressFields: AddressField[] = [
+  { key: 'fullName', label: 'Nombre completo' },
+  { key: 'rut', label: 'RUT', placeholder: '12.345.678-9' },
+  { key: 'phone', label: 'Teléfono', placeholder: '+56 9 1234 5678' },
+  { key: 'street', label: 'Calle', width: 'half' },
+  { key: 'number', label: 'Número', width: 'third' },
+  { key: 'apartment', label: 'Depto/Casa', width: 'third' },
+  { key: 'region', label: 'Región', type: 'select', options: CL_REGIONS, width: 'half' },
+  { key: 'comuna', label: 'Comuna', width: 'half' },
+  { key: 'notes', label: 'Notas para el despacho (opcional)', type: 'textarea', rows: 2 },
+];
+
 export const AddressFormDemo: StoryObj = {
   render: () => {
-    const [addr, setAddr] = React.useState<Partial<Address>>({});
+    const [addr, setAddr] = React.useState<Record<string, string>>({});
     return (
       <div style={{ maxWidth: 600 }}>
-        <AddressForm value={addr} onChange={setAddr} />
+        <AddressForm fields={chileAddressFields} value={addr} onChange={setAddr} />
       </div>
     );
   },
