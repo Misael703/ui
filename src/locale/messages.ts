@@ -42,6 +42,9 @@ export interface UiKitMessages {
   'notifications.unreadSuffix': string;
   'notifications.empty': string;
   'notifications.panel': string;
+  'notifications.title': string;
+  'notifications.markAllRead': string;
+  'notifications.clear': string;
 
   // Filters
   'filters.panel': string;

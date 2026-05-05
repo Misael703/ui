@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight, MenuIcon } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 // ---------- AppShell (Sidebar + Topbar + Content) -----------------------
 // Designed to drop into a Next.js app/layout.tsx as a Client Component shell.
@@ -54,6 +55,7 @@ export function AppShell({
 }: AppShellProps) {
   const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const t = useLocale();
   const collapsed = ctrlCollapsed ?? internalCollapsed;
   const setCollapsed = (v: boolean) => {
     if (ctrlCollapsed === undefined) setInternalCollapsed(v);
@@ -99,7 +101,7 @@ export function AppShell({
 
   return (
     <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
-      <aside className="appshell__sidebar" aria-label="Navegación principal">
+      <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
         <div className="appshell__brand">
           {collapsed ? (brandCollapsed ?? brand) : brand}
         </div>
@@ -117,8 +119,8 @@ export function AppShell({
             type="button"
             className="appshell__collapse"
             onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-            title={collapsed ? 'Expandir' : 'Colapsar'}
+            aria-label={collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu']}
+            title={collapsed ? t['appshell.expand'] : t['appshell.collapse']}
           >
             {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
@@ -130,7 +132,7 @@ export function AppShell({
           <button
             type="button"
             className="appshell__hamburger"
-            aria-label="Abrir menú"
+            aria-label={t['appshell.openMenu']}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((o) => !o)}
           ><MenuIcon size={20} /></button>
@@ -158,10 +160,11 @@ export interface PageHeaderProps {
 }
 
 export function PageHeader({ title, description, breadcrumbs, actions, meta, className }: PageHeaderProps) {
+  const t = useLocale();
   return (
     <div className={cx('page-header', className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="page-header__crumbs" aria-label="Breadcrumb">
+        <nav className="page-header__crumbs" aria-label={t['appshell.breadcrumb']}>
           <ol>
             {breadcrumbs.map((c, i) => (
               <li key={i}>

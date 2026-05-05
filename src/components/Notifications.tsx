@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Bell } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 export type NotificationTone = 'info' | 'success' | 'warning' | 'danger';
 
@@ -27,12 +29,14 @@ export interface NotificationCenterProps {
 
 export function NotificationCenter({
   notifications, onMarkAllRead, onClearAll,
-  emptyMessage = 'No tienes notificaciones',
+  emptyMessage,
   trigger, className,
 }: NotificationCenterProps) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
+  const t = useLocale();
   const unread = notifications.filter((n) => !n.read).length;
+  const empty = emptyMessage ?? t['notifications.empty'];
 
   React.useEffect(() => {
     if (!open) return;
@@ -59,7 +63,7 @@ export function NotificationCenter({
     <button
       type="button"
       className="notif__trigger"
-      aria-label={`Notificaciones${unread > 0 ? ` (${unread} sin leer)` : ''}`}
+      aria-label={`${t['notifications.button']}${unread > 0 ? format(t['notifications.unreadSuffix'], { n: unread }) : ''}`}
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={() => setOpen((o) => !o)}
@@ -73,19 +77,19 @@ export function NotificationCenter({
     <div ref={ref} className={cx('notif', className)}>
       {triggerEl}
       {open && (
-        <div className="notif__panel" role="dialog" aria-label="Notificaciones">
+        <div className="notif__panel" role="dialog" aria-label={t['notifications.panel']}>
           <div className="notif__head">
-            <span className="notif__title">Notificaciones</span>
+            <span className="notif__title">{t['notifications.title']}</span>
             {notifications.length > 0 && (
               <div className="notif__head-actions">
                 {onMarkAllRead && unread > 0 && (
                   <button type="button" className="notif__action" onClick={onMarkAllRead}>
-                    Marcar todas como leídas
+                    {t['notifications.markAllRead']}
                   </button>
                 )}
                 {onClearAll && (
                   <button type="button" className="notif__action" onClick={onClearAll}>
-                    Limpiar
+                    {t['notifications.clear']}
                   </button>
                 )}
               </div>
@@ -93,7 +97,7 @@ export function NotificationCenter({
           </div>
           <div className="notif__list">
             {notifications.length === 0 ? (
-              <div className="notif__empty">{emptyMessage}</div>
+              <div className="notif__empty">{empty}</div>
             ) : (
               notifications.map((n) => (
                 <button

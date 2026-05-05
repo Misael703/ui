@@ -37,6 +37,9 @@ export const esMessages: UiKitMessages = {
   'notifications.unreadSuffix': ' ({n} sin leer)',
   'notifications.empty': 'No tienes notificaciones',
   'notifications.panel': 'Notificaciones',
+  'notifications.title': 'Notificaciones',
+  'notifications.markAllRead': 'Marcar todas como leídas',
+  'notifications.clear': 'Limpiar',
 
   // Filters
   'filters.panel': 'Filtros',
