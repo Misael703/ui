@@ -375,6 +375,57 @@ export function Breadcrumbs({ items, className }: { items: BreadcrumbItem[]; cla
   );
 }
 
+// ---------- TablePagination ---------------------------------------------
+// Convenience wrapper that pairs a page-size selector with a Pagination
+// row. Use it under a DataTable when the table is paginated externally.
+import { Pagination } from './Inputs';
+
+export interface TablePaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  /** If set, renders a page-size selector. Omit for fixed-size pagination. */
+  onPageSizeChange?: (size: number) => void;
+  /** Options shown in the page-size selector. Default `[10, 25, 50, 100]`. */
+  pageSizeOptions?: readonly number[];
+  className?: string;
+}
+
+export function TablePagination({
+  page, pageSize, total, onPageChange,
+  onPageSizeChange, pageSizeOptions = [10, 25, 50, 100],
+  className,
+}: TablePaginationProps) {
+  const t = useLocale();
+  const selectId = React.useId();
+  return (
+    <div className={cx('table-pagination', className)}>
+      {onPageSizeChange && (
+        <label className="table-pagination__size" htmlFor={selectId}>
+          <span>{t['pagination.rowsPerPage']}</span>
+          <select
+            id={selectId}
+            className="select"
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          >
+            {pageSizeOptions.map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={onPageChange}
+      />
+    </div>
+  );
+}
+
 // ---------- TableToolbar -------------------------------------------------
 // Barra superior que se compone arriba (o dentro de un wrapper) de un DataTable.
 // Cualquier hijo con className "grow" se expande para empujar las acciones al lado.

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DataTable, Accordion, AccordionItem, Breadcrumbs } from '../src/components/DataTable';
+import { DataTable, Accordion, AccordionItem, Breadcrumbs, TablePagination } from '../src/components/DataTable';
 import { LocaleProvider } from '../src/locale';
 
 const rows = [
@@ -226,5 +226,54 @@ describe('Breadcrumbs', () => {
   it('marks last item as current', () => {
     render(<Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Productos' }]} />);
     expect(screen.getByText('Productos')).toHaveAttribute('aria-current', 'page');
+  });
+});
+
+describe('TablePagination', () => {
+  it('renders pagination range and prev/next', () => {
+    render(<TablePagination page={2} pageSize={10} total={55} onPageChange={() => {}} />);
+    expect(screen.getByText(/11–20 de 55/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Página anterior')).toBeInTheDocument();
+    expect(screen.getByLabelText('Página siguiente')).toBeInTheDocument();
+  });
+
+  it('omits page-size selector when onPageSizeChange is not provided', () => {
+    const { container } = render(
+      <TablePagination page={1} pageSize={10} total={55} onPageChange={() => {}} />
+    );
+    expect(container.querySelector('.table-pagination__size')).toBeNull();
+  });
+
+  it('renders page-size selector when onPageSizeChange is provided', () => {
+    const onSize = vi.fn();
+    render(
+      <TablePagination
+        page={1}
+        pageSize={25}
+        total={100}
+        onPageChange={() => {}}
+        onPageSizeChange={onSize}
+      />
+    );
+    const sel = screen.getByLabelText(/Filas por página/) as HTMLSelectElement;
+    expect(sel.value).toBe('25');
+    expect(Array.from(sel.options).map((o) => o.value)).toEqual(['10', '25', '50', '100']);
+    fireEvent.change(sel, { target: { value: '50' } });
+    expect(onSize).toHaveBeenCalledWith(50);
+  });
+
+  it('respects custom pageSizeOptions', () => {
+    render(
+      <TablePagination
+        page={1}
+        pageSize={5}
+        total={50}
+        onPageChange={() => {}}
+        onPageSizeChange={() => {}}
+        pageSizeOptions={[5, 15, 30]}
+      />
+    );
+    const sel = screen.getByLabelText(/Filas por página/) as HTMLSelectElement;
+    expect(Array.from(sel.options).map((o) => o.value)).toEqual(['5', '15', '30']);
   });
 });

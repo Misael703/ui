@@ -116,6 +116,7 @@ export const esMessages: UiKitMessages = {
   'pagination.prev': 'Página anterior',
   'pagination.next': 'Página siguiente',
   'pagination.range': '{from}–{to} de {total}',
+  'pagination.rowsPerPage': 'Filas por página',
   'numberInput.decrement': 'Disminuir',
   'numberInput.increment': 'Aumentar',
 

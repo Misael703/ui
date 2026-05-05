@@ -1158,6 +1158,19 @@ a:hover {
   color: var(--color-danger);
   font-size: var(--text-sm);
 }
+.table-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3); flex-wrap: wrap;
+  padding: var(--space-3) 0;
+}
+.table-pagination__size {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-sm); color: var(--fg-muted);
+}
+.table-pagination__size .select { width: auto; min-width: 0; }
+@media (max-width: 600px) {
+  .table-pagination { justify-content: center; }
+}
 .table-wrap--sticky .table thead th {
   position: sticky;
   top: 0;

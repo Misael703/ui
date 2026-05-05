@@ -134,6 +134,7 @@ export interface UiKitMessages {
   'pagination.next': string;
   /** Template: "{from}–{to} de {total}" */
   'pagination.range': string;
+  'pagination.rowsPerPage': string;
   'numberInput.decrement': string;
   'numberInput.increment': string;
 
