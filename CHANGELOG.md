@@ -5,6 +5,46 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`LocaleProvider` + `useLocale()`** — internationalization layer. All
+  hardcoded Spanish strings (~80 keys spanning 20+ components) now read
+  from a typed `UiKitMessages` dict consumed via React context. Spanish
+  remains the default — without a `<LocaleProvider>` in the tree,
+  components fall back to `esMessages` and behave exactly as before.
+  - **Partial overrides via shallow merge**: pass only the keys you want
+    to translate; the rest fall back to Spanish. Example:
+    ```tsx
+    <LocaleProvider messages={{ 'modal.close': 'Close' }}>
+      <App />
+    </LocaleProvider>
+    ```
+  - **Templates with `format(template, vars)`**: keys like
+    `"Eliminar {name}"` or `"{from}–{to} de {total}"` get substituted
+    with values. The helper is exported for consumers building custom
+    components on top of the kit.
+  - **Calendar arrays** (`calendar.weekdays`, `calendar.months`,
+    `picker.weekdaysShort`) ship as `readonly` tuples for compile-time
+    safety.
+- **TypeScript autocompletion** for the `messages` prop — every key is
+  documented inline.
+
+### Behavior unchanged
+- Default Spanish strings preserved exactly. Existing tests that query by
+  Spanish aria-labels (`'Cerrar'`, `'Sin datos'`, …) still pass without
+  modification.
+
+### Notes for consumers
+- Wrapping in `<LocaleProvider>` is **optional**. The kit remains usable
+  standalone with Spanish defaults.
+- A handful of components still expose per-instance `placeholder` /
+  `emptyMessage` / `confirmLabel` props as before — those continue to
+  win over the locale dict when set.
+- `AddressForm` field labels (Chile-specific: RUT, regiones, comuna) are
+  not yet wired to the locale dict. Use a wrapper if you need other
+  markets.
+
 ## [0.2.1] — 2026-05-04
 
 Patch release with deep audits across overlay correctness, form

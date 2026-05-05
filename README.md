@@ -315,9 +315,31 @@ Reemplaza los archivos en `public/assets/logos/` manteniendo el naming (`logo-ho
 configureBrand({ logoBasePath: '/static/mi-marca' });
 ```
 
-### 5. Spanish copy
+### 5. Idioma (i18n)
 
-Los `aria-labels` y placeholders del kit están en español ("Cerrar", "Mes anterior", etc.). Para una app en otro idioma, hoy hay que forkear el kit y traducir manualmente. Si vas a tener varias marcas en distintos idiomas, considera agregar un sistema de i18n (ej: pasar todos los strings via context).
+Por defecto los strings del kit están en español ("Cerrar", "Sin datos", "Página anterior", etc.). Para una app en otro idioma, envuelve el árbol en un `LocaleProvider` con las claves que quieras traducir:
+
+```tsx
+import { LocaleProvider } from '@misael703/elalba-ui';
+
+<LocaleProvider
+  messages={{
+    'modal.close': 'Close',
+    'table.empty': 'No data',
+    'pagination.range': '{from}–{to} of {total}',
+    'calendar.weekdays': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  }}
+>
+  <App />
+</LocaleProvider>
+```
+
+**Cómo funciona**:
+- El dict `UiKitMessages` está completamente tipado (TypeScript te autocompleta cada clave).
+- Las claves no provistas hacen fallback al default español (`esMessages`) — no hace falta declarar todo.
+- Templates con placeholders (`"Eliminar {name}"`, `"{n} sin leer"`, etc.) se resuelven con el helper `format(tpl, vars)` que también está exportado.
+
+Sin `LocaleProvider` el kit funciona en español como siempre — el provider es opcional.
 
 ### Resumen del esfuerzo
 
@@ -327,4 +349,4 @@ Los `aria-labels` y placeholders del kit están en español ("Cerrar", "Mes ante
 | Defaults marca (name, currency, locale) | 5 min (`configureBrand()`) |
 | Fuente | 10 min (reemplazar archivos + tokens) |
 | Logos | 5 min (reemplazar archivos) |
-| Idioma | 1-2 horas (manual) |
+| Idioma | 15 min (envolver en `LocaleProvider` con un dict) |
