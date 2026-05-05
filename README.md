@@ -279,9 +279,11 @@ Override los tokens desde tu app — el kit usa `@layer` así que tus reglas gan
 }
 ```
 
-### 2. Defaults de marca (currency, locale, name, etc.)
+### 2. Defaults de marca (currency, locale, name, logoBasePath)
 
-Llama a `configureBrand()` una sola vez al arranque de tu app:
+El kit guarda solo lo que necesita para renderizar — **identidad visual** (`name`, `logoBasePath`) y **formateo UI** (`currency`, `locale` BCP 47 para `Intl.NumberFormat` / `DateTimeFormat`). No asume país.
+
+Llama a `configureBrand()` una sola vez al arranque:
 
 ```tsx
 // app/layout.tsx (Next.js)
@@ -291,13 +293,13 @@ configureBrand({
   name: 'Mi Marca',
   currency: 'USD',
   locale: 'en-US',
-  phonePrefix: '+1',
   logoBasePath: '/static/brand',
-  regions: ['Alabama', 'Alaska', /* ... */],
 });
 ```
 
-Después de configurar, `<Logo>`, `<PriceDisplay>`, `<MoneyInput>`, `<PhoneInput>`, `<CartDrawer>`, `<FreeShippingProgress>` y `<AddressForm>` usan los nuevos defaults automáticamente. Las props siguen funcionando como override puntual.
+Después de configurar, `<Logo>`, `<PriceDisplay>`, `<MoneyInput>`, `<CartDrawer>` y `<FreeShippingProgress>` usan los nuevos defaults automáticamente. Las props siguen funcionando como override puntual.
+
+**Datos de país** (regiones, prefijo telefónico, validaciones de RUT/SSN/etc.) los pasa el consumer como props o los modela en su `<AddressForm fields={...}>`. Ver "Idioma" (sección 5) y la story `Commerce → AddressFormDemo` para un ejemplo Chile-flavored.
 
 ### 3. Fuentes
 

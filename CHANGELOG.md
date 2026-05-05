@@ -5,45 +5,154 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] — v0.3.0
+
+This release makes the kit **honestly country-neutral**. The previous
+versions shipped with Chilean-flavored defaults (CL regions, `+56` phone
+prefix, hardcoded Spanish strings, an `AddressForm` with RUT/Comuna/
+Región fields). Those leaked country-specific data into a presentational
+layer where they didn't belong. v0.3.0 extracts them.
 
 ### Added
-- **`LocaleProvider` + `useLocale()`** — internationalization layer. All
-  hardcoded Spanish strings (~80 keys spanning 20+ components) now read
-  from a typed `UiKitMessages` dict consumed via React context. Spanish
-  remains the default — without a `<LocaleProvider>` in the tree,
-  components fall back to `esMessages` and behave exactly as before.
-  - **Partial overrides via shallow merge**: pass only the keys you want
-    to translate; the rest fall back to Spanish. Example:
+- **`LocaleProvider` + `useLocale()`** — i18n layer. All hardcoded
+  Spanish strings (~80 keys spanning 20+ components) now read from a
+  typed `UiKitMessages` dict consumed via React context. Spanish remains
+  the default — without a `<LocaleProvider>` in the tree, components
+  fall back to `esMessages` and behave exactly as before.
+  - **Partial overrides via shallow merge**:
     ```tsx
     <LocaleProvider messages={{ 'modal.close': 'Close' }}>
       <App />
     </LocaleProvider>
     ```
-  - **Templates with `format(template, vars)`**: keys like
-    `"Eliminar {name}"` or `"{from}–{to} de {total}"` get substituted
-    with values. The helper is exported for consumers building custom
-    components on top of the kit.
+  - **Templates** with `format(tpl, vars)`: keys like `"Eliminar {name}"`
+    or `"{from}–{to} de {total}"` substitute placeholders. The helper is
+    exported for consumers building on top of the kit.
   - **Calendar arrays** (`calendar.weekdays`, `calendar.months`,
     `picker.weekdaysShort`) ship as `readonly` tuples for compile-time
     safety.
-- **TypeScript autocompletion** for the `messages` prop — every key is
-  documented inline.
+- **`AddressField` + generic `<AddressForm fields={...}>`** —
+  `AddressForm` is now a presentational composer. Consumers describe
+  the field set per market. See "Migration" below for the Chile preset.
+
+### Changed
+- **`brand.ts` lazy getter**: `getBrand()` no longer spreads
+  `BRAND_DEFAULTS` at module init. The merge is deferred until the
+  first read after `configureBrand`. Without `configureBrand`,
+  `getBrand()` returns the `BRAND_DEFAULTS` reference directly. Combined
+  with the existing `"sideEffects": ["**/*.css"]` declaration in
+  `package.json`, this lets bundlers drop the brand module entirely from
+  consumer bundles that don't read brand defaults.
+
+### Removed (BREAKING)
+- **`BrandDefaults.phonePrefix`** — `<PhoneInput>` no longer falls back
+  to a brand-level prefix. The `prefix` prop stays optional but defaults
+  to nothing (the prefix span is omitted when absent). Pass
+  `prefix="+56"` explicitly per-instance, or wrap the component to set a
+  default for your app.
+- **`BrandDefaults.regions`** and the embedded `CL_REGIONS` constant.
+  Region data belongs in app code.
+- **`Address` interface** (with Chilean fields: `rut`, `region`,
+  `comuna`). `<AddressForm>`'s `value` is now `Record<string, string>`,
+  keyed by whatever the consumer puts in their field set.
+- **`AddressFormProps.regions` and `AddressFormProps.showRut`** props.
+  Replaced by entries in the `fields` array.
+
+### Migration
+
+#### `<PhoneInput>`
+
+Before (v0.2.x):
+
+```tsx
+// configureBrand({ phonePrefix: '+56' }) called once at startup → all
+// PhoneInputs got "+56" automatically.
+<PhoneInput value={v} onChange={setV} />
+```
+
+After (v0.3.0):
+
+```tsx
+<PhoneInput value={v} onChange={setV} prefix="+56" />
+```
+
+If you have many phone inputs, wrap once:
+
+```tsx
+const ChilePhoneInput = (p: React.ComponentProps<typeof PhoneInput>) =>
+  <PhoneInput {...p} prefix="+56" />;
+```
+
+#### `<AddressForm>`
+
+Before (v0.2.x):
+
+```tsx
+const [addr, setAddr] = useState<Partial<Address>>({});
+<AddressForm value={addr} onChange={setAddr} regions={CL_REGIONS} />
+```
+
+After (v0.3.0):
+
+```tsx
+import type { AddressField } from '@misael703/elalba-ui';
+
+const CL_REGIONS = [
+  'Arica y Parinacota', 'Tarapacá', /* ... */
+].map((r) => ({ value: r, label: r }));
+
+const chileFields: AddressField[] = [
+  { key: 'fullName', label: 'Nombre completo' },
+  { key: 'rut', label: 'RUT', placeholder: '12.345.678-9' },
+  { key: 'phone', label: 'Teléfono', placeholder: '+56 9 1234 5678' },
+  { key: 'street', label: 'Calle', width: 'half' },
+  { key: 'number', label: 'Número', width: 'third' },
+  { key: 'apartment', label: 'Depto/Casa', width: 'third' },
+  { key: 'region', label: 'Región', type: 'select', options: CL_REGIONS, width: 'half' },
+  { key: 'comuna', label: 'Comuna', width: 'half' },
+  { key: 'notes', label: 'Notas para el despacho', type: 'textarea', rows: 2 },
+];
+
+const [addr, setAddr] = useState<Record<string, string>>({});
+<AddressForm fields={chileFields} value={addr} onChange={setAddr} />
+```
+
+The Storybook story `Commerce → AddressFormDemo` is the canonical
+working example.
+
+#### `configureBrand`
+
+Before (v0.2.x):
+
+```tsx
+configureBrand({
+  name: 'Mi Marca',
+  currency: 'USD',
+  locale: 'en-US',
+  logoBasePath: '/static/brand',
+  phonePrefix: '+1',                // ❌ removed
+  regions: ['Alabama', 'Alaska'],   // ❌ removed
+});
+```
+
+After (v0.3.0):
+
+```tsx
+configureBrand({
+  name: 'Mi Marca',
+  currency: 'USD',
+  locale: 'en-US',
+  logoBasePath: '/static/brand',
+});
+```
+
+The TypeScript compiler will flag the removed fields.
 
 ### Behavior unchanged
-- Default Spanish strings preserved exactly. Existing tests that query by
-  Spanish aria-labels (`'Cerrar'`, `'Sin datos'`, …) still pass without
-  modification.
-
-### Notes for consumers
-- Wrapping in `<LocaleProvider>` is **optional**. The kit remains usable
-  standalone with Spanish defaults.
-- A handful of components still expose per-instance `placeholder` /
-  `emptyMessage` / `confirmLabel` props as before — those continue to
-  win over the locale dict when set.
-- `AddressForm` field labels (Chile-specific: RUT, regiones, comuna) are
-  not yet wired to the locale dict. Use a wrapper if you need other
-  markets.
+- Default Spanish strings preserved exactly (existing tests querying by
+  Spanish aria-labels still pass).
+- Visual appearance of `<AddressForm>` unchanged — the new 6-column
+  grid replicates the old column ratios at the layout level.
 
 ## [0.2.1] — 2026-05-04
 

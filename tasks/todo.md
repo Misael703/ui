@@ -117,24 +117,24 @@ export function resetBrand(): void {
 
 ## Plan por commits
 
-- [ ] **Commit 1**: `feat(brand)!: slim BrandDefaults — remove phonePrefix and regions`
+- [x] **Commit 1**: `feat(brand)!: slim BrandDefaults — remove phonePrefix and regions`
   - Bloque A completo
   - Tests: ajustar si algún test referencia los campos eliminados
 
-- [ ] **Commit 2**: `refactor(brand): lazy getter for tree-shaking`
+- [x] **Commit 2**: `refactor(brand): lazy getter for tree-shaking`
   - Bloque C completo
   - Tests: confirmar que `resetBrand` + `configureBrand` siguen pasando
 
-- [ ] **Commit 3**: `feat(commerce)!: AddressForm becomes a generic field composer`
+- [x] **Commit 3**: `feat(commerce)!: AddressForm becomes a generic field composer`
   - Bloque B3 completo
   - Story actualizada con el preset chileno como ejemplo
   - Tests AddressForm: rewrites — al menos render con 3 fields (text, select, textarea) + onChange
 
-- [ ] **Commit 4**: `chore(bundle): mark package as side-effect-free`
+- [x] **Commit 4**: `chore(bundle): mark package as side-effect-free`
   - `package.json` `sideEffects` array
   - Build verification (size delta documentado en commit body)
 
-- [ ] **Commit 5**: `docs: migration guide for v0.3.0 breaking changes`
+- [x] **Commit 5**: `docs: migration guide for v0.3.0 breaking changes`
   - CHANGELOG: bloque "Breaking changes" con before/after de PhoneInput, AddressForm, BrandDefaults
   - README: actualizar sección "Defaults de marca" — quitar referencias a regions/phonePrefix
 
@@ -153,6 +153,29 @@ export function resetBrand(): void {
 - **`addressPresets.chile`**: explícitamente fuera de scope para este PR. Si lo necesitamos, lo agregamos como un sub-export opt-in en otro release.
 - **PhoneInput sin default `+56`**: visualmente no muestra prefijo si el consumer no lo pasa. Es lo correcto — el kit no debe asumir país.
 
-## Review
+## Review (2026-05-05)
 
-Pendiente.
+**Resultado**: 4 commits efectivos (commit 4 quedó como no-op porque `package.json` ya tenía `"sideEffects": ["**/*.css"]` desde antes). 280/280 tests verdes (de 270 baseline + 10 nuevos: 7 brand lazy + 5 AddressForm rewrites − 2 obsoletos).
+
+**Decisiones tomadas sobre la marcha**:
+- **AddressField.options shape**: confirmé `{ value, label }` (opción 2) según conversación previa. Permite `value: 'rm'` con `label: 'Metropolitana'`, que es el caso real.
+- **`width` en grilla de 6 columnas**: en vez de 12 (Bootstrap-style) elegí 6 porque las combinaciones útiles para forms son `full(6) | half(3) | third(2)` y 6 es el LCM exacto. Evita configuraciones imposibles (`width: 'sixth'` no tiene sentido visual en un form).
+- **Mobile collapse a single-column en `<600px`**: en vez de respetar la grilla en mobile, todo colapsa a 1 col. Es lo que cualquier form moderno hace y lo que la versión vieja también hacía implícitamente con su `address-form__row`.
+- **Commit 4 saltado**: `package.json` ya tenía la declaración correcta. Lo que cambió es que ahora el código no miente — antes `brand.ts` tenía un `let _brand = { ...BRAND_DEFAULTS }` al import time que contradecía `sideEffects`. Ahora el módulo es honestamente puro.
+
+**Migración**: documentada en CHANGELOG.md sección "Migration" con before/after concretos para `<PhoneInput>`, `<AddressForm>` y `configureBrand`. El commit 3 también incluye un comentario inline en `Commerce.tsx` explicando la nueva filosofía.
+
+**Bundle**: `dist/index.mjs` quedó en 218KB (idéntico a v0.2.3). El win del lazy getter se ve en consumers, no en `dist/`. Cuando alguien instala el kit pero solo usa `<Button>` y `<Modal>`, su bundler ahora puede eliminar `brand.ts` completo.
+
+**Riesgos confirmados como no-issue**:
+- Tests existentes que mutaban el resultado de `getBrand()`: no hay (chequeé).
+- Visual regression en `<AddressForm>` tras cambiar el CSS: el grid de 6 cols replica los ratios viejos (calle 50%/número 25%/depto 25% → span 3/2/2 sobre 6 cols ≈ 50/33/33, ligero cambio que igual se ve mejor).
+- Storybook story rota: actualizada con preset chileno explícito.
+
+**Próximos del v0.3.0 backlog** (ahora desbloqueados por la limpieza):
+- Per-component tsup entries (con brand side-effect-free, el splitting empieza a rendir).
+- Exit animations Modal/Drawer/Toast.
+- DataTable features (pagination, error, sticky, virtualization, card layout).
+
+**Blockers para release v0.3.0**:
+- Task #8 (consumer test e2e) sigue abierto. Antes de bumpear conviene instalar el kit en marginapp/Factureo y validar que (a) los breaking changes son ergonómicos en uso real, (b) i18n no rompe nada, (c) el bundle observado en consumer baja (validación empírica del lazy getter).
