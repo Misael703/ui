@@ -1356,6 +1356,27 @@ a:hover {
 .drawer--right.is-closing { animation: slideOut var(--duration-base) var(--ease-standard) forwards; }
 .drawer--left.is-closing { animation: slideOutLeft var(--duration-base) var(--ease-standard) forwards; }
 
+/* Mobile bottom-sheet: at <600px the drawer slides in from the bottom
+   instead of from the side. Native pattern on iOS/Android — feels less
+   cramped than a side panel on narrow viewports. */
+@keyframes slideInBottom { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideOutBottom { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
+@media (max-width: 600px) {
+  .drawer-backdrop { align-items: flex-end; justify-content: stretch; }
+  .drawer-backdrop:has(.drawer--left) { justify-content: stretch; }
+  .drawer {
+    width: 100%; max-width: none;
+    height: auto; max-height: 90vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: slideInBottom var(--duration-base) var(--ease-standard);
+  }
+  .drawer.is-closing,
+  .drawer--right.is-closing,
+  .drawer--left.is-closing {
+    animation: slideOutBottom var(--duration-base) var(--ease-standard) forwards;
+  }
+}
+
 /* ---------- Menu ---------------------------------------------- */
 /* Note: legacy `.popover` block removed — it styled the wrapper as a panel,
    conflicting with the React Popover component whose panel is `.popover__content`. */
