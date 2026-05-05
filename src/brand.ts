@@ -41,23 +41,31 @@ export const BRAND_DEFAULTS: BrandDefaults = {
   locale: 'es-CL',
 };
 
-/** Estado mutable singleton — solo se modifica via configureBrand(). */
-let _brand: BrandDefaults = { ...BRAND_DEFAULTS };
+// Lazy singleton: the merge into a concrete dict only happens on the first
+// `getBrand()` call, so a tree-shaker can drop this whole module if no
+// component in the consumer's bundle calls `getBrand()` or `configureBrand()`.
+let _overrides: Partial<BrandDefaults> | null = null;
+let _cached: BrandDefaults | null = null;
 
 /**
  * Sobreescribe los defaults globales del kit. Llamar una sola vez al arranque
  * de la app. Las props siguen funcionando como override puntual.
  */
 export function configureBrand(overrides: Partial<BrandDefaults>): void {
-  _brand = { ...BRAND_DEFAULTS, ...overrides };
+  _overrides = overrides;
+  _cached = null;
 }
 
 /** Lee los defaults actuales. Los componentes lo usan internamente. */
 export function getBrand(): BrandDefaults {
-  return _brand;
+  if (!_cached) {
+    _cached = _overrides ? { ...BRAND_DEFAULTS, ..._overrides } : BRAND_DEFAULTS;
+  }
+  return _cached;
 }
 
 /** Resetea a los defaults originales. Útil en tests. */
 export function resetBrand(): void {
-  _brand = { ...BRAND_DEFAULTS };
+  _overrides = null;
+  _cached = null;
 }
