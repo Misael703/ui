@@ -52,13 +52,13 @@ Duración: 200ms para Modal/Drawer (igual a CSS transitions estándar). 300ms pa
 
 ### Plan por commits
 
-- [ ] **Commit B1.1**: `feat(overlay): exit animations for Modal/Drawer via useDelayedUnmount`
+- [x] **Commit B1.1**: `feat(overlay): exit animations for Modal/Drawer via useDelayedUnmount`
   - Crear hook + tests
   - Aplicar a Modal y Drawer
   - CSS: keyframes + `.is-closing` rules
   - Tests: verificar que el component permanece montado durante `durationMs` después de `open=false`
 
-- [ ] **Commit B1.2**: `feat(toast): exit animations on dismiss + auto-dismiss`
+- [x] **Commit B1.2**: `feat(toast): exit animations on dismiss + auto-dismiss`
   - Aplicar pattern al Toast individual (no al ToastProvider)
   - El timer de auto-dismiss ya existe; solo reusarlo con la animación
 
@@ -116,11 +116,11 @@ No lo construyo. En su lugar, agrego sección al README con guía de cómo envol
 
 ### Plan por commits
 
-- [ ] **Commit B2.1**: `feat(data-table): error prop for fetch failures`
-- [ ] **Commit B2.2**: `feat(data-table): sticky header opt-in`
-- [ ] **Commit B2.3**: `feat(data-table): mobile card layout opt-in`
-- [ ] **Commit B2.4**: `feat(data-table): TablePagination component`
-- [ ] **Commit B2.5**: `docs(data-table): virtualization recipe in README`
+- [x] **Commit B2.1**: `feat(data-table): error prop for fetch failures`
+- [x] **Commit B2.2**: `feat(data-table): sticky header opt-in`
+- [x] **Commit B2.3**: `feat(data-table): mobile card layout opt-in`
+- [x] **Commit B2.4**: `feat(data-table): TablePagination component`
+- [x] **Commit B2.5**: `docs(data-table): virtualization recipe in README`
 
 ## Bloque 3 — Misc cleanups
 
@@ -152,11 +152,11 @@ En `<600px`, las DescriptionList y DiffViewer dejan de ser grid horizontal y sta
 
 ### Plan por commits
 
-- [ ] **Commit B3.1**: `perf(app-shell): memo'd recursive nav item`
-- [ ] **Commit B3.2**: `perf(carousel): useCallback for next/prev`
-- [ ] **Commit B3.3**: `feat(drawer): bottom-sheet pattern on mobile`
-- [ ] **Commit B3.4**: `fix(category-nav): mega-menu touch strategy`
-- [ ] **Commit B3.5**: `feat(display): stacked mobile layout for desc-list/diff`
+- [x] **Commit B3.1**: `perf(app-shell): memo'd recursive nav item`
+- [x] **Commit B3.2**: `perf(carousel): useCallback for next/prev`
+- [x] **Commit B3.3**: `feat(drawer): bottom-sheet pattern on mobile`
+- [x] **Commit B3.4**: `fix(category-nav): mega-menu touch strategy`
+- [x] **Commit B3.5**: `feat(display): stacked mobile layout for desc-list/diff`
 
 ## Estimación total
 
@@ -173,6 +173,54 @@ En `<600px`, las DescriptionList y DiffViewer dejan de ser grid horizontal y sta
 - Después de cada bloque verifico suite + build + smoke visual donde aplique.
 - Al final del Bloque 3, summary general en CHANGELOG bajo `[Unreleased]`.
 
-## Review
+## Review (2026-05-05)
 
-Pendiente — se va llenando incrementalmente con notas de cada bloque.
+**Resultado**: 12 commits, los 3 bloques completos. 297/297 tests verdes (de 287 baseline + 10 nuevos: 6 useDelayedUnmount + 1 toast exit + 7 DataTable features − 4 reescritos).
+
+### Bloque 1 — Exit animations
+- `useDelayedUnmount(open, durationMs)` aplicado a Modal/Drawer; pattern distinto en Toast (lista de IDs en closing window porque maneja una colección, no un single open/close).
+- CSS keyframes nuevos: `fadeOut`, `sink`, `slideOut`, `slideOutLeft`, `slideOutBottom`, `toastSlideOut`. Todos con `animation-fill-mode: forwards`.
+- Duración 200ms estándar (matchea `--duration-base`).
+
+### Bloque 2 — DataTable features (5 features, 1 deferred)
+- `error` prop con `role="alert"`, prioridad `error > loading > empty > rows`.
+- `stickyHeader` con CSS-only sticky + box-shadow inset para conservar el border bottom (sticky strips collapsed-borders).
+- `mobileLayout="cards"` colapsa a stacked cards en `<600px` con labels inline vía `data-label` + `::before`.
+- `<TablePagination>` con page-size selector opcional + nueva key locale `pagination.rowsPerPage`.
+- Virtualization documentada en README como recipe con `@tanstack/react-virtual` (no built-in — leaky abstraction).
+
+### Bloque 3 — Misc cleanups
+- AppShell `<NavItemNode>` memo'd recursivo + `closeMobile` con useCallback.
+- Carousel: `next`/`prev` con functional setIndex (no cierra sobre `index`), `onKey` también memoizado. Autoplay simplificado al usar `next` directamente.
+- Drawer mobile bottom-sheet: CSS-only, `<600px` el panel viene de abajo en vez de los lados.
+- CategoryNav: removido `onMouseEnter`/`onMouseLeave`, click-only. Mejor para touch + accesibilidad + alineado con e-commerce moderno.
+- DescriptionList y DiffViewer: stacked en `<600px`. DiffViewer usa `data-label` desde locale para "Antes"/"Después" labels — i18n preservado.
+
+### Decisiones notables
+- **Toast no usa useDelayedUnmount**: el hook funciona para single-open/close; Toast maneja una lista. Implementé pattern diferente con `closingIds: Set<string>` + `exitTimers: Map<string, timeout>`. Cleanup en unmount limpia ambos maps.
+- **Sticky cells border**: las celdas sticky pierden el border bottom porque CSS strip de borders en sticky paint. Solución: `box-shadow: inset 0 -1px 0 ...`.
+- **CategoryNav: removido hover en lugar de detectar touch**: más simple y más accesible. Hover-to-open ya estaba caído para teclado/screen-readers.
+- **Drawer mobile: `<600px` ambos sides colapsan a bottom-sheet**: no diferencio left/right en mobile, el patrón nativo es bottom-sheet siempre.
+
+### Estado v0.3.0
+
+Todos los bloques arquitectónicos del roadmap original están hechos:
+- ✅ i18n LocaleProvider (sprint anterior)
+- ✅ Brand cleanup (slim defaults + lazy getter + AddressForm genérico)
+- ✅ Per-component tsup entries
+- ✅ Exit animations Modal/Drawer/Toast
+- ✅ DataTable features (5 features)
+- ✅ Misc cleanups (5 items)
+
+Listo para release v0.3.0 cuando el usuario quiera. El CHANGELOG está parcialmente actualizado (i18n + brand cleanup); falta consolidar las features de v0.3.0 en una sola entrada release-ready en lugar de la sección [Unreleased] actual.
+
+### Pre-existing issue (no regresión)
+
+Rollup strippea `'use client'` en build. Lo notamos en el commit del per-component splitting pero ya pasaba con single-entry. No es bloqueador para v0.3.0 release ya que el comportamiento es idéntico al de v0.2.x. Si un consumer necesita Next.js App Router strict, agregamos un esbuild plugin de preserve-directives.
+
+### Review final del CHANGELOG (pendiente)
+
+Antes del release v0.3.0 hay que:
+1. Consolidar la sección `[Unreleased]` agregando todos los nuevos commits (exit animations, DataTable features, misc cleanups).
+2. Renombrar la sección a `[0.3.0] — YYYY-MM-DD`.
+3. Bump `package.json` version.
