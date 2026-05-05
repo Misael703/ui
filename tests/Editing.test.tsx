@@ -4,6 +4,7 @@ import {
   ConfirmDialog, DescriptionList, DescriptionListItem,
   DiffViewer, TransferList, type TransferItem,
 } from '../src/components/Editing';
+import { LocaleProvider } from '../src/locale';
 
 describe('ConfirmDialog', () => {
   it('does not render when closed', () => {
@@ -107,5 +108,32 @@ describe('TransferList', () => {
     const checks = container.querySelectorAll('label.check');
     expect(checks.length).toBeGreaterThan(0);
     expect(checks[0].querySelector('.check__box')).not.toBeNull();
+  });
+
+  it('respects LocaleProvider override for default titles', () => {
+    render(
+      <LocaleProvider
+        messages={{ 'transfer.available': 'Available', 'transfer.assigned': 'Assigned' }}
+      >
+        <TransferList source={[]} selected={[]} onChange={() => {}} />
+      </LocaleProvider>
+    );
+    expect(screen.getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('Assigned')).toBeInTheDocument();
+  });
+});
+
+describe('DiffViewer locale', () => {
+  it('respects LocaleProvider override for headers', () => {
+    render(
+      <LocaleProvider
+        messages={{ 'diff.field': 'Field', 'diff.before': 'Before', 'diff.after': 'After' }}
+      >
+        <DiffViewer entries={[{ field: 'x', before: 'a', after: 'b' }]} />
+      </LocaleProvider>
+    );
+    expect(screen.getByText('Field')).toBeInTheDocument();
+    expect(screen.getByText('Before')).toBeInTheDocument();
+    expect(screen.getByText('After')).toBeInTheDocument();
   });
 });

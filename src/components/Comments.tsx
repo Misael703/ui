@@ -3,6 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Avatar } from './Display2';
 import { FileText, Download, Trash, X } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- CommentThread ----------------------------------------------
 export interface CommentItem {
@@ -21,11 +23,13 @@ export interface CommentThreadProps extends React.HTMLAttributes<HTMLDivElement>
 }
 
 export function CommentThread({
-  comments, onAdd, placeholder = 'Escribe un comentario…',
+  comments, onAdd, placeholder,
   allowInternal = false, className, ...rest
 }: CommentThreadProps) {
   const [draft, setDraft] = React.useState('');
   const [internal, setInternal] = React.useState(false);
+  const t = useLocale();
+  const ph = placeholder ?? t['comments.placeholder'];
 
   const submit = () => {
     if (!draft.trim() || !onAdd) return;
@@ -44,7 +48,7 @@ export function CommentThread({
               <div className="comment__head">
                 <span className="comment__author">{c.author.name}</span>
                 <span className="comment__time">{c.timestamp}</span>
-                {c.internal && <span className="comment__tag">Nota interna</span>}
+                {c.internal && <span className="comment__tag">{t['comments.internalTag']}</span>}
               </div>
               <div className="comment__text">{c.body}</div>
             </div>
@@ -57,18 +61,18 @@ export function CommentThread({
             className="textarea"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={placeholder}
+            placeholder={ph}
             rows={3}
           />
           <div className="comments__compose-actions">
             {allowInternal && (
               <label className="comments__internal-toggle">
                 <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} />
-                <span>Solo nota interna</span>
+                <span>{t['comments.internalOnly']}</span>
               </label>
             )}
             <button type="button" className="btn btn--primary btn--sm" disabled={!draft.trim()} onClick={submit}>
-              Enviar
+              {t['comments.send']}
             </button>
           </div>
         </div>
@@ -94,9 +98,11 @@ export interface AttachmentListProps extends React.HTMLAttributes<HTMLUListEleme
   emptyMessage?: React.ReactNode;
 }
 
-export function AttachmentList({ attachments, emptyMessage = 'Sin archivos adjuntos', className, ...rest }: AttachmentListProps) {
+export function AttachmentList({ attachments, emptyMessage, className, ...rest }: AttachmentListProps) {
+  const t = useLocale();
+  const empty = emptyMessage ?? t['attachments.empty'];
   if (attachments.length === 0) {
-    return <div className="attachments__empty">{emptyMessage}</div>;
+    return <div className="attachments__empty">{empty}</div>;
   }
   return (
     <ul className={cx('attachments', className)} {...rest}>
@@ -115,12 +121,12 @@ export function AttachmentList({ attachments, emptyMessage = 'Sin archivos adjun
           </div>
           <div className="attachment__actions">
             {a.url && (
-              <a href={a.url} download className="attachment__action" aria-label={`Descargar ${a.name}`}>
+              <a href={a.url} download className="attachment__action" aria-label={format(t['attachments.download'], { name: a.name })}>
                 <Download size={16} />
               </a>
             )}
             {a.onRemove && (
-              <button type="button" className="attachment__action attachment__action--danger" aria-label={`Eliminar ${a.name}`} onClick={a.onRemove}>
+              <button type="button" className="attachment__action attachment__action--danger" aria-label={format(t['attachments.remove'], { name: a.name })} onClick={a.onRemove}>
                 <Trash size={16} />
               </button>
             )}

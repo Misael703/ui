@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Avatar } from './Display2';
 import { ChevronRight, ChevronDown } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 // ---------- UserCell ----------------------------------------------------
 export interface UserCellProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -122,6 +123,7 @@ function TreeNode({ node, depth, expanded, toggle, selectedId, onSelect }: TreeN
   const hasChildren = !!(node.children && node.children.length);
   const isOpen = expanded.has(node.id);
   const isSelected = selectedId === node.id;
+  const t = useLocale();
   return (
     <li role="treeitem" aria-expanded={hasChildren ? isOpen : undefined} aria-selected={isSelected} className="tree__node">
       <div
@@ -133,7 +135,7 @@ function TreeNode({ node, depth, expanded, toggle, selectedId, onSelect }: TreeN
           <button
             type="button"
             className="tree__chev"
-            aria-label={isOpen ? 'Colapsar' : 'Expandir'}
+            aria-label={isOpen ? t['calendar.collapse'] : t['calendar.expand']}
             onClick={(e) => { e.stopPropagation(); toggle(node.id); }}
           >
             {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -172,12 +174,6 @@ export interface CalendarProps extends React.HTMLAttributes<HTMLDivElement> {
   onDayClick?: (d: Date) => void;
 }
 
-const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-const MONTHS_FULL = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-];
-
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 function isSameDay(a: Date, b: Date) {
@@ -187,6 +183,9 @@ function isSameDay(a: Date, b: Date) {
 export function Calendar({ month: monthProp, events = [], onMonthChange, onDayClick, className, ...rest }: CalendarProps) {
   const [internalMonth, setInternalMonth] = React.useState(() => startOfMonth(monthProp ?? new Date()));
   const month = monthProp ? startOfMonth(monthProp) : internalMonth;
+  const t = useLocale();
+  const weekdays = t['calendar.weekdays'];
+  const months = t['calendar.months'];
   const setMonth = (m: Date) => {
     if (!monthProp) setInternalMonth(m);
     onMonthChange?.(m);
@@ -220,16 +219,16 @@ export function Calendar({ month: monthProp, events = [], onMonthChange, onDayCl
   return (
     <div className={cx('calendar', className)} {...rest}>
       <div className="calendar__head">
-        <button type="button" className="calendar__nav" aria-label="Mes anterior" onClick={() => setMonth(addMonths(month, -1))}>
+        <button type="button" className="calendar__nav" aria-label={t['calendar.prevMonth']} onClick={() => setMonth(addMonths(month, -1))}>
           <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
         </button>
-        <div className="calendar__title">{MONTHS_FULL[month.getMonth()]} {month.getFullYear()}</div>
-        <button type="button" className="calendar__nav" aria-label="Mes siguiente" onClick={() => setMonth(addMonths(month, 1))}>
+        <div className="calendar__title">{months[month.getMonth()]} {month.getFullYear()}</div>
+        <button type="button" className="calendar__nav" aria-label={t['calendar.nextMonth']} onClick={() => setMonth(addMonths(month, 1))}>
           <ChevronRight size={16} />
         </button>
       </div>
       <div className="calendar__grid calendar__weekdays">
-        {WEEKDAYS.map((w) => <div key={w} className="calendar__weekday">{w}</div>)}
+        {weekdays.map((w) => <div key={w} className="calendar__weekday">{w}</div>)}
       </div>
       <div className="calendar__grid">
         {days.map((d, i) => {

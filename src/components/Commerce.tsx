@@ -4,6 +4,8 @@ import { cx } from '../utils/cx';
 import { Drawer } from './Overlay';
 import { Heart, Minus, Plus, Star, Trash, X, Check } from './Icons';
 import { getBrand } from '../brand';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- Rating ------------------------------------------------------
 export interface RatingProps {
@@ -107,6 +109,7 @@ export interface QuantitySelectorProps {
 export function QuantitySelector({
   value, onChange, min = 1, max, step = 1, disabled, size = 'md', className, id,
 }: QuantitySelectorProps) {
+  const t = useLocale();
   const set = (next: number) => {
     let v = next;
     if (typeof min === 'number') v = Math.max(min, v);
@@ -120,7 +123,7 @@ export function QuantitySelector({
       <button
         type="button"
         className="qty__btn"
-        aria-label="Disminuir cantidad"
+        aria-label={t['commerce.decreaseQty']}
         onClick={dec}
         disabled={disabled || (typeof min === 'number' && value <= min)}
       >
@@ -136,12 +139,12 @@ export function QuantitySelector({
         step={step}
         disabled={disabled}
         onChange={(e) => set(Number(e.target.value))}
-        aria-label="Cantidad"
+        aria-label={t['commerce.quantity']}
       />
       <button
         type="button"
         className="qty__btn"
-        aria-label="Aumentar cantidad"
+        aria-label={t['commerce.increaseQty']}
         onClick={inc}
         disabled={disabled || (typeof max === 'number' && value >= max)}
       >
@@ -224,11 +227,12 @@ export interface WishlistButtonProps extends Omit<React.ButtonHTMLAttributes<HTM
 }
 
 export function WishlistButton({ active = false, onToggle, size = 20, className, ...rest }: WishlistButtonProps) {
+  const t = useLocale();
   return (
     <button
       type="button"
       className={cx('wishlist', active && 'is-active', className)}
-      aria-label={active ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+      aria-label={active ? t['commerce.removeFavorite'] : t['commerce.addFavorite']}
       aria-pressed={active}
       onClick={() => onToggle?.(!active)}
       {...rest}
@@ -249,12 +253,15 @@ export interface PromoCodeInputProps {
 }
 
 export function PromoCodeInput({
-  onApply, placeholder = 'Código promocional',
-  buttonLabel = 'Aplicar', className, id,
+  onApply, placeholder,
+  buttonLabel, className, id,
 }: PromoCodeInputProps) {
   const [code, setCode] = React.useState('');
   const [state, setState] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = React.useState<string | null>(null);
+  const t = useLocale();
+  const ph = placeholder ?? t['commerce.promoPlaceholder'];
+  const btn = buttonLabel ?? t['commerce.applyCoupon'];
 
   const apply = async () => {
     if (!code.trim()) return;
@@ -266,7 +273,7 @@ export function PromoCodeInput({
       setMessage(msg);
     } catch (err) {
       setState('error');
-      setMessage(err instanceof Error ? err.message : 'Código inválido');
+      setMessage(err instanceof Error ? err.message : t['commerce.promoInvalid']);
     }
   };
 
@@ -278,7 +285,7 @@ export function PromoCodeInput({
           type="text"
           className="input promo__input"
           value={code}
-          placeholder={placeholder}
+          placeholder={ph}
           disabled={state === 'loading' || state === 'success'}
           onChange={(e) => { setCode(e.target.value.toUpperCase()); if (state !== 'idle') setState('idle'); }}
           onKeyDown={(e) => e.key === 'Enter' && apply()}
@@ -289,7 +296,7 @@ export function PromoCodeInput({
           disabled={!code.trim() || state === 'loading' || state === 'success'}
           onClick={apply}
         >
-          {state === 'loading' ? <span className="spinner spinner--inverse" aria-hidden="true" /> : buttonLabel}
+          {state === 'loading' ? <span className="spinner spinner--inverse" aria-hidden="true" /> : btn}
         </button>
       </div>
       {message && <div className={cx('promo__message', `promo__message--${state}`)}>{message}</div>}
@@ -310,21 +317,23 @@ export interface FreeShippingProgressProps extends React.HTMLAttributes<HTMLDivE
 
 export function FreeShippingProgress({
   current, threshold, currency, locale,
-  achievedMessage = '¡Tienes envío gratis!',
+  achievedMessage,
   className, ...rest
 }: FreeShippingProgressProps) {
   const brand = getBrand();
+  const t = useLocale();
   const fmt = (n: number) =>
     new Intl.NumberFormat(locale ?? brand.locale, { style: 'currency', currency: currency ?? brand.currency, maximumFractionDigits: 0 }).format(n);
 
   const pct = Math.min(100, (current / threshold) * 100);
   const remaining = Math.max(0, threshold - current);
   const achieved = current >= threshold;
+  const successMsg = achievedMessage ?? t['commerce.shippingAchieved'];
 
   return (
     <div className={cx('shipping-progress', achieved && 'is-achieved', className)} {...rest}>
       <div className="shipping-progress__text">
-        {achieved ? achievedMessage : <>Te falta <strong>{fmt(remaining)}</strong> para envío gratis</>}
+        {achieved ? successMsg : <>{t['commerce.shippingPrefix']}<strong>{fmt(remaining)}</strong>{t['commerce.shippingSuffix']}</>}
       </div>
       <div className="shipping-progress__track" aria-hidden="true">
         <div className="shipping-progress__bar" style={{ width: `${pct}%` }} />
@@ -361,6 +370,7 @@ export function CartDrawer({
   freeShippingThreshold, currency, locale,
 }: CartDrawerProps) {
   const brand = getBrand();
+  const t = useLocale();
   const resolvedCurrency = currency ?? brand.currency;
   const resolvedLocale = locale ?? brand.locale;
   const subtotal = items.reduce((sum, it) => sum + it.unitPrice * it.quantity, 0);
@@ -371,24 +381,24 @@ export function CartDrawer({
     <Drawer
       open={open}
       onClose={onClose}
-      title="Tu carro"
+      title={t['commerce.cartTitle']}
       footer={
         <div className="cart__footer">
           {freeShippingThreshold != null && (
             <FreeShippingProgress current={subtotal} threshold={freeShippingThreshold} currency={resolvedCurrency} locale={resolvedLocale} />
           )}
           <div className="cart__totals">
-            <span>Subtotal</span>
+            <span>{t['commerce.subtotal']}</span>
             <strong>{fmt(subtotal)}</strong>
           </div>
           <button type="button" className="btn btn--primary btn--lg btn--block" disabled={items.length === 0} onClick={onCheckout}>
-            Ir a pagar
+            {t['commerce.checkout']}
           </button>
         </div>
       }
     >
       {items.length === 0 ? (
-        <div className="cart__empty">Tu carro está vacío</div>
+        <div className="cart__empty">{t['commerce.cartEmpty']}</div>
       ) : (
         <ul className="cart__list">
           {items.map((it) => (
@@ -415,7 +425,7 @@ export function CartDrawer({
                   <button
                     type="button"
                     className="cart__item-remove"
-                    aria-label="Quitar del carro"
+                    aria-label={t['commerce.removeFromCart']}
                     onClick={() => onRemove(it.id)}
                   >
                     <Trash size={14} />
@@ -557,6 +567,7 @@ export interface CompareTableProps extends React.HTMLAttributes<HTMLTableElement
 }
 
 export function CompareTable({ items, attributes, onRemove, className, ...rest }: CompareTableProps) {
+  const t = useLocale();
   return (
     <div className={cx('compare', className)}>
       <table className="compare__table" {...rest}>
@@ -573,7 +584,7 @@ export function CompareTable({ items, attributes, onRemove, className, ...rest }
                     <button
                       type="button"
                       className="compare__remove"
-                      aria-label={`Quitar ${typeof it.name === 'string' ? it.name : 'item'}`}
+                      aria-label={format(t['commerce.removeItem'], { name: typeof it.name === 'string' ? it.name : 'item' })}
                       onClick={() => onRemove(it.id)}
                     >
                       <X size={14} />

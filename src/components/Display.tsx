@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 export type CardAccent = 'brand' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -74,6 +75,7 @@ export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, '
 }
 
 export function Alert({ variant = 'info', title, icon, onClose, className, children, ...rest }: AlertProps) {
+  const t = useLocale();
   return (
     <div role="alert" className={cx('alert', `alert--${variant}`, className)} {...rest}>
       {icon && <span className="alert__icon" aria-hidden="true">{icon}</span>}
@@ -82,7 +84,7 @@ export function Alert({ variant = 'info', title, icon, onClose, className, child
         {children && <div className="alert__desc">{children}</div>}
       </div>
       {onClose && (
-        <button type="button" className="alert__close" onClick={onClose} aria-label="Cerrar alerta">
+        <button type="button" className="alert__close" onClick={onClose} aria-label={t['alert.close']}>
           <X size={16} />
         </button>
       )}
@@ -114,10 +116,11 @@ export interface SpinnerProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export function Spinner({ size = 'md', inverse, className, ...rest }: SpinnerProps) {
+  const t = useLocale();
   return (
     <span
       role="status"
-      aria-label="Cargando"
+      aria-label={t['spinner.loading']}
       className={cx('spinner', size === 'lg' && 'spinner--lg', inverse && 'spinner--inverse', className)}
       {...rest}
     />
@@ -131,7 +134,8 @@ export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
   removeLabel?: string;
 }
 
-export function Chip({ active, onRemove, removeLabel = 'Quitar', className, children, ...rest }: ChipProps) {
+export function Chip({ active, onRemove, removeLabel, className, children, ...rest }: ChipProps) {
+  const t = useLocale();
   return (
     <span className={cx('chip', active && 'chip--active', className)} {...rest}>
       <span>{children}</span>
@@ -139,7 +143,7 @@ export function Chip({ active, onRemove, removeLabel = 'Quitar', className, chil
         <button
           type="button"
           className="chip__close"
-          aria-label={removeLabel}
+          aria-label={removeLabel ?? t['chip.remove']}
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
         >
           <X size={12} />

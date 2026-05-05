@@ -72,11 +72,20 @@ export interface UiKitMessages {
   // Permissions
   'permissions.markAll': string;
   'permissions.unmarkAll': string;
+  'permissions.action': string;
+  /** Template: "{action} para {role}" */
+  'permissions.cellLabel': string;
 
   // Comments
+  'comments.placeholder': string;
+  'comments.send': string;
+  'comments.internalTag': string;
+  'comments.internalOnly': string;
   'attachments.empty': string;
   /** Template: "Eliminar {name}" */
   'attachments.remove': string;
+  /** Template: "Descargar {name}" */
+  'attachments.download': string;
 
   // Gallery
   'gallery.thumbnails': string;
@@ -84,6 +93,8 @@ export interface UiKitMessages {
   'gallery.prev': string;
   'gallery.next': string;
   'gallery.close': string;
+  /** Template: "Imagen {n}" */
+  'gallery.imageNumber': string;
 
   // Display
   'alert.close': string;
@@ -137,6 +148,15 @@ export interface UiKitMessages {
   'commerce.removeFavorite': string;
   'commerce.applyCoupon': string;
   'commerce.cartTitle': string;
+  'commerce.cartEmpty': string;
+  'commerce.subtotal': string;
+  'commerce.checkout': string;
+  'commerce.promoPlaceholder': string;
+  'commerce.promoInvalid': string;
+  'commerce.shippingAchieved': string;
+  /** Template before {amount} placeholder: "Te falta " (suffix " para envío gratis"). Split into two so consumers can swap word order. */
+  'commerce.shippingPrefix': string;
+  'commerce.shippingSuffix': string;
 
   // Tags input
   /** Template: "Quitar {tag}" */

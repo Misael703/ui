@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Checkbox } from './Form';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 export interface PermissionRole { id: string; label: React.ReactNode }
 export interface PermissionAction { id: string; label: React.ReactNode; description?: React.ReactNode }
@@ -18,6 +20,7 @@ export interface PermissionMatrixProps extends Omit<React.HTMLAttributes<HTMLTab
 export function PermissionMatrix({
   roles, actions, value, onChange, readOnly, className, ...rest
 }: PermissionMatrixProps) {
+  const t = useLocale();
   const has = (roleId: string, actionId: string) => (value[roleId] ?? []).includes(actionId);
 
   const toggle = (roleId: string, actionId: string) => {
@@ -38,7 +41,7 @@ export function PermissionMatrix({
       <table className="permissions__table" {...rest}>
         <thead>
           <tr>
-            <th scope="col" className="permissions__action-col">Acción</th>
+            <th scope="col" className="permissions__action-col">{t['permissions.action']}</th>
             {roles.map((r) => {
               const count = (value[r.id] ?? []).length;
               const all = count === actions.length;
@@ -52,7 +55,7 @@ export function PermissionMatrix({
                         className="permissions__role-toggle"
                         onClick={() => toggleAllForRole(r.id, !all)}
                       >
-                        {all ? 'Quitar todos' : 'Marcar todos'}
+                        {all ? t['permissions.unmarkAll'] : t['permissions.markAll']}
                       </button>
                     )}
                   </div>
@@ -74,7 +77,10 @@ export function PermissionMatrix({
                     checked={has(r.id, a.id)}
                     disabled={readOnly}
                     onChange={() => toggle(r.id, a.id)}
-                    aria-label={`${typeof a.label === 'string' ? a.label : a.id} para ${typeof r.label === 'string' ? r.label : r.id}`}
+                    aria-label={format(t['permissions.cellLabel'], {
+                      action: typeof a.label === 'string' ? a.label : a.id,
+                      role: typeof r.label === 'string' ? r.label : r.id,
+                    })}
                   />
                 </td>
               ))}

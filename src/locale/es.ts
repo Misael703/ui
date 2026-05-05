@@ -65,10 +65,17 @@ export const esMessages: UiKitMessages = {
   // Permissions
   'permissions.markAll': 'Marcar todos',
   'permissions.unmarkAll': 'Quitar todos',
+  'permissions.action': 'Acción',
+  'permissions.cellLabel': '{action} para {role}',
 
   // Comments
+  'comments.placeholder': 'Escribe un comentario…',
+  'comments.send': 'Enviar',
+  'comments.internalTag': 'Nota interna',
+  'comments.internalOnly': 'Solo nota interna',
   'attachments.empty': 'Sin archivos adjuntos',
   'attachments.remove': 'Eliminar {name}',
+  'attachments.download': 'Descargar {name}',
 
   // Gallery
   'gallery.thumbnails': 'Miniaturas',
@@ -76,6 +83,7 @@ export const esMessages: UiKitMessages = {
   'gallery.prev': 'Imagen anterior',
   'gallery.next': 'Imagen siguiente',
   'gallery.close': 'Cerrar',
+  'gallery.imageNumber': 'Imagen {n}',
 
   // Display
   'alert.close': 'Cerrar alerta',
@@ -121,6 +129,14 @@ export const esMessages: UiKitMessages = {
   'commerce.removeFavorite': 'Quitar de favoritos',
   'commerce.applyCoupon': 'Aplicar',
   'commerce.cartTitle': 'Tu carro',
+  'commerce.cartEmpty': 'Tu carro está vacío',
+  'commerce.subtotal': 'Subtotal',
+  'commerce.checkout': 'Ir a pagar',
+  'commerce.promoPlaceholder': 'Código promocional',
+  'commerce.promoInvalid': 'Código inválido',
+  'commerce.shippingAchieved': '¡Tienes envío gratis!',
+  'commerce.shippingPrefix': 'Te falta ',
+  'commerce.shippingSuffix': ' para envío gratis',
 
   // Tags input
   'tagsInput.remove': 'Quitar {tag}',

@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight, X } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- ImageGallery ------------------------------------------------
 export interface GalleryImage {
@@ -26,6 +28,7 @@ export function ImageGallery({
 }: ImageGalleryProps) {
   const [index, setIndex] = React.useState(defaultIndex);
   const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const t = useLocale();
 
   if (images.length === 0) return null;
   const safeIndex = Math.max(0, Math.min(index, images.length - 1));
@@ -47,7 +50,7 @@ export function ImageGallery({
               <button
                 type="button"
                 className="gallery__nav gallery__nav--prev"
-                aria-label="Imagen anterior"
+                aria-label={t['gallery.prev']}
                 onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
               >
                 <ChevronLeft size={20} />
@@ -55,7 +58,7 @@ export function ImageGallery({
               <button
                 type="button"
                 className="gallery__nav gallery__nav--next"
-                aria-label="Imagen siguiente"
+                aria-label={t['gallery.next']}
                 onClick={() => setIndex((i) => (i + 1) % images.length)}
               >
                 <ChevronRight size={20} />
@@ -64,14 +67,14 @@ export function ImageGallery({
           )}
         </div>
         {images.length > 1 && (
-          <div className="gallery__thumbs" role="tablist" aria-label="Miniaturas">
+          <div className="gallery__thumbs" role="tablist" aria-label={t['gallery.thumbnails']}>
             {images.map((img, i) => (
               <button
                 key={i}
                 type="button"
                 role="tab"
                 aria-selected={i === safeIndex}
-                aria-label={`Imagen ${i + 1}`}
+                aria-label={format(t['gallery.imageNumber'], { n: i + 1 })}
                 className={cx('gallery__thumb', i === safeIndex && 'is-active')}
                 onClick={() => setIndex(i)}
               >
@@ -105,6 +108,7 @@ export interface LightboxProps {
 }
 
 export function Lightbox({ open, onClose, images, index, onChange }: LightboxProps) {
+  const t = useLocale();
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -120,11 +124,11 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
   const current = images[Math.max(0, Math.min(index, images.length - 1))];
 
   return (
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label="Visor de imagen" onClick={onClose}>
+    <div className="lightbox" role="dialog" aria-modal="true" aria-label={t['gallery.viewer']} onClick={onClose}>
       <button
         type="button"
         className="lightbox__close"
-        aria-label="Cerrar"
+        aria-label={t['gallery.close']}
         onClick={onClose}
       >
         <X size={20} />
@@ -133,7 +137,7 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
         <button
           type="button"
           className="lightbox__nav lightbox__nav--prev"
-          aria-label="Imagen anterior"
+          aria-label={t['gallery.prev']}
           onClick={(e) => { e.stopPropagation(); onChange((index - 1 + images.length) % images.length); }}
         >
           <ChevronLeft size={24} />
@@ -144,7 +148,7 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
         <button
           type="button"
           className="lightbox__nav lightbox__nav--next"
-          aria-label="Imagen siguiente"
+          aria-label={t['gallery.next']}
           onClick={(e) => { e.stopPropagation(); onChange((index + 1) % images.length); }}
         >
           <ChevronRight size={24} />

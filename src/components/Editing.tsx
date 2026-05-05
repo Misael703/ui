@@ -4,6 +4,7 @@ import { cx } from '../utils/cx';
 import { Modal } from './Overlay';
 import { ChevronLeft, ChevronRight } from './Icons';
 import { Checkbox } from './Form';
+import { useLocale } from '../locale/LocaleProvider';
 
 // ---------- ConfirmDialog -----------------------------------------------
 export interface ConfirmDialogProps {
@@ -22,11 +23,14 @@ export interface ConfirmDialogProps {
 
 export function ConfirmDialog({
   open, onClose, onConfirm, title, description,
-  confirmLabel = 'Confirmar', cancelLabel = 'Cancelar',
+  confirmLabel, cancelLabel,
   tone = 'default', loading,
 }: ConfirmDialogProps) {
   const [busy, setBusy] = React.useState(false);
   const isBusy = loading ?? busy;
+  const t = useLocale();
+  const confirmText = confirmLabel ?? t['common.confirm'];
+  const cancelText = cancelLabel ?? t['common.cancel'];
 
   const handleConfirm = async () => {
     try {
@@ -47,7 +51,7 @@ export function ConfirmDialog({
       footer={
         <>
           <button type="button" className="btn btn--ghost btn--md" onClick={onClose} disabled={isBusy}>
-            {cancelLabel}
+            {cancelText}
           </button>
           <button
             type="button"
@@ -57,7 +61,7 @@ export function ConfirmDialog({
             aria-busy={isBusy || undefined}
           >
             {isBusy ? <span className="spinner spinner--inverse" aria-hidden="true" /> : null}
-            {confirmLabel}
+            {confirmText}
           </button>
         </>
       }
@@ -81,6 +85,7 @@ export function DescriptionList({ children, className, ...rest }: React.HTMLAttr
 }
 
 export function DescriptionListItem({ label, value, onEdit, editable }: DescriptionListItemProps) {
+  const t = useLocale();
   return (
     <>
       <dt className="desc-list__label">{label}</dt>
@@ -88,7 +93,7 @@ export function DescriptionListItem({ label, value, onEdit, editable }: Descript
         <span>{value}</span>
         {editable && onEdit && (
           <button type="button" className="desc-list__edit" onClick={onEdit}>
-            Editar
+            {t['descList.edit']}
           </button>
         )}
       </dd>
@@ -108,12 +113,13 @@ export interface DiffViewerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function DiffViewer({ entries, className, ...rest }: DiffViewerProps) {
+  const t = useLocale();
   return (
-    <div className={cx('diff', className)} role="table" aria-label="Cambios" {...rest}>
+    <div className={cx('diff', className)} role="table" aria-label={t['diff.label']} {...rest}>
       <div className="diff__head" role="row">
-        <div role="columnheader">Campo</div>
-        <div role="columnheader">Antes</div>
-        <div role="columnheader">Después</div>
+        <div role="columnheader">{t['diff.field']}</div>
+        <div role="columnheader">{t['diff.before']}</div>
+        <div role="columnheader">{t['diff.after']}</div>
       </div>
       {entries.map((e, i) => (
         <div key={i} className="diff__row" role="row">
@@ -145,12 +151,14 @@ export interface TransferListProps {
 
 export function TransferList({
   source, selected, onChange,
-  sourceTitle = 'Disponibles',
-  selectedTitle = 'Asignados',
+  sourceTitle, selectedTitle,
   className,
 }: TransferListProps) {
   const [leftChecked, setLeftChecked] = React.useState<Set<string>>(new Set());
   const [rightChecked, setRightChecked] = React.useState<Set<string>>(new Set());
+  const t = useLocale();
+  const srcTitle = sourceTitle ?? t['transfer.available'];
+  const selTitle = selectedTitle ?? t['transfer.assigned'];
 
   // Without memo, every checkbox click rebuilt selectedIds and re-filtered
   // `source` to compute `left`. At ~500 source items that's a measurable
@@ -189,7 +197,7 @@ export function TransferList({
       </div>
       <ul className="transfer__list" role="listbox" aria-label={typeof title === 'string' ? title : undefined}>
         {items.length === 0 ? (
-          <li className="transfer__empty">Vacío</li>
+          <li className="transfer__empty">{t['transfer.empty']}</li>
         ) : items.map((it) => (
           <li
             key={it.id}
@@ -217,16 +225,16 @@ export function TransferList({
 
   return (
     <div className={cx('transfer', className)}>
-      {renderColumn(sourceTitle, left, leftChecked, setLeftChecked)}
+      {renderColumn(srcTitle, left, leftChecked, setLeftChecked)}
       <div className="transfer__controls">
-        <button type="button" className="btn btn--outline btn--sm" disabled={leftChecked.size === 0} onClick={moveRight} aria-label="Asignar seleccionados">
+        <button type="button" className="btn btn--outline btn--sm" disabled={leftChecked.size === 0} onClick={moveRight} aria-label={t['transfer.assignSelected']}>
           <ChevronRight size={16} />
         </button>
-        <button type="button" className="btn btn--outline btn--sm" disabled={rightChecked.size === 0} onClick={moveLeft} aria-label="Quitar seleccionados">
+        <button type="button" className="btn btn--outline btn--sm" disabled={rightChecked.size === 0} onClick={moveLeft} aria-label={t['transfer.removeSelected']}>
           <ChevronLeft size={16} />
         </button>
       </div>
-      {renderColumn(selectedTitle, right, rightChecked, setRightChecked)}
+      {renderColumn(selTitle, right, rightChecked, setRightChecked)}
     </div>
   );
 }
