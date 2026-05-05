@@ -23,7 +23,10 @@ describe('Toast', () => {
     vi.useRealTimers();
   });
 
-  it('auto-dismisses after the configured duration', () => {
+  // EXIT_MS in Toast.tsx — kept in sync with the toast.is-closing CSS animation.
+  const EXIT_MS = 200;
+
+  it('auto-dismisses after the configured duration (plus exit window)', () => {
     render(
       <ToastProvider>
         <Pusher duration={1000} />
@@ -31,9 +34,15 @@ describe('Toast', () => {
     );
     fireEvent.click(screen.getByText('push'));
     expect(screen.getByText('Hola')).toBeInTheDocument();
-    act(() => {
-      vi.advanceTimersByTime(1100);
-    });
+
+    // After duration, toast enters the closing window — still mounted, but
+    // marked is-closing.
+    act(() => { vi.advanceTimersByTime(1000); });
+    const toast = screen.getByText('Hola').closest('.toast')!;
+    expect(toast.classList.contains('is-closing')).toBe(true);
+
+    // After the exit window, it's actually unmounted.
+    act(() => { vi.advanceTimersByTime(EXIT_MS); });
     expect(screen.queryByText('Hola')).toBeNull();
   });
 
@@ -52,9 +61,29 @@ describe('Toast', () => {
     act(() => { vi.advanceTimersByTime(2000); });
     expect(screen.getByText('Hola')).toBeInTheDocument();
 
-    // Resume on mouse leave; remaining was ~500ms.
+    // Resume on mouse leave; remaining was ~500ms then exit window.
     fireEvent.mouseLeave(toast);
-    act(() => { vi.advanceTimersByTime(600); });
+    act(() => { vi.advanceTimersByTime(500 + EXIT_MS + 50); });
+    expect(screen.queryByText('Hola')).toBeNull();
+  });
+
+  it('plays exit animation when manually dismissed via close button', () => {
+    render(
+      <ToastProvider>
+        <Pusher duration={0} />
+      </ToastProvider>
+    );
+    fireEvent.click(screen.getByText('push'));
+    const toast = screen.getByText('Hola').closest('.toast')!;
+    expect(toast.classList.contains('is-closing')).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
+    expect(toast.classList.contains('is-closing')).toBe(true);
+
+    // Still mounted during exit window.
+    expect(screen.getByText('Hola')).toBeInTheDocument();
+
+    act(() => { vi.advanceTimersByTime(EXIT_MS); });
     expect(screen.queryByText('Hola')).toBeNull();
   });
 

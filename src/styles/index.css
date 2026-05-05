@@ -1364,6 +1364,8 @@ a:hover {
 .toast--info    { border-left-color: var(--color-info); }
 .toast--info    .toast__icon { color: var(--color-info); }
 @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+.toast.is-closing { animation: toastSlideOut var(--duration-base) var(--ease-standard) forwards; }
 
 /* ---------- Empty state ------------------------------------------------- */
 .empty {

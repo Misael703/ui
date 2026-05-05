@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle, AlertTriangle, AlertCircle, Info } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { cx } from '../utils/cx';
 
 const VARIANT_ICON = {
   success: CheckCircle,
@@ -10,6 +11,10 @@ const VARIANT_ICON = {
   danger: AlertCircle,
   info: Info,
 } as const;
+
+// Exit animation duration. Must match `.toast.is-closing` keyframes
+// (`toastSlideOut`) in src/styles/index.css.
+const EXIT_MS = 200;
 
 export interface ToastItem {
   id: string;
@@ -35,7 +40,12 @@ interface ToastTimerState {
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
+  // Toasts in the closing window: still rendered with `is-closing` class so
+  // CSS can play the exit animation, but already removed from new-toast
+  // accounting (auto-dismiss timer cancelled, can't be paused/resumed).
+  const [closingIds, setClosingIds] = React.useState<Set<string>>(new Set());
   const timers = React.useRef<Map<string, ToastTimerState>>(new Map());
+  const exitTimers = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const locale = useLocale();
 
   const dismiss = React.useCallback((id: string) => {
@@ -44,7 +54,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(state.handle);
       timers.current.delete(id);
     }
-    setToasts((list) => list.filter((toast) => toast.id !== id));
+    // Already in the closing window? skip (idempotent).
+    if (exitTimers.current.has(id)) return;
+    setClosingIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    const handle = setTimeout(() => {
+      exitTimers.current.delete(id);
+      setToasts((list) => list.filter((toast) => toast.id !== id));
+      setClosingIds((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, EXIT_MS);
+    exitTimers.current.set(id, handle);
   }, []);
 
   const push = React.useCallback(
@@ -81,9 +108,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     const map = timers.current;
+    const exits = exitTimers.current;
     return () => {
       map.forEach((state) => clearTimeout(state.handle));
       map.clear();
+      exits.forEach((handle) => clearTimeout(handle));
+      exits.clear();
     };
   }, []);
 
@@ -99,7 +129,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         return (
           <div
             key={t.id}
-            className={`toast toast--${variant}`}
+            className={cx('toast', `toast--${variant}`, closingIds.has(t.id) && 'is-closing')}
             role="status"
             onMouseEnter={() => pause(t.id)}
             onMouseLeave={() => resume(t.id)}
