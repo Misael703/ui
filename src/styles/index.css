@@ -1889,7 +1889,14 @@ a:hover {
 .combobox__empty { padding: 16px; text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
 
 /* ---------- DatePicker ---------- */
-.datepicker { position: relative; display: inline-flex; align-items: stretch; }
+/* The wrapper carries the focus ring (`:focus-within`) so input + toggle
+   light up as one cohesive compound input. Children get their own borders
+   removed of focus styling — otherwise the ring breaks across the seam. */
+.datepicker {
+  position: relative; display: inline-flex; align-items: stretch;
+  border-radius: var(--radius-sm);
+}
+.datepicker:focus-within { outline: 2px solid var(--border-focus); outline-offset: 1px; }
 .datepicker__input {
   height: 40px; padding: 0 12px; min-width: 160px;
   border: 1px solid var(--border-default);
@@ -1897,7 +1904,7 @@ a:hover {
   background: var(--bg-surface); color: var(--fg-default);
   font-family: var(--font-body); font-size: var(--text-sm);
 }
-.datepicker__input:focus { outline: 2px solid var(--border-focus); outline-offset: 1px; }
+.datepicker__input:focus { outline: none; }
 .datepicker.is-invalid .datepicker__input { border-color: var(--color-danger); }
 .datepicker__toggle {
   width: 40px; height: 40px; padding: 0;
@@ -1906,7 +1913,7 @@ a:hover {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--bg-subtle); color: var(--fg-default); cursor: pointer;
 }
-.datepicker__toggle:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
+.datepicker__toggle:focus-visible { outline: none; }
 .datepicker__popover {
   position: absolute; top: calc(100% + 4px); left: 0;
   background: var(--bg-surface);
