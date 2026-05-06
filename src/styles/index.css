@@ -2290,12 +2290,14 @@ a:hover {
   max-height: 280px; overflow: auto;
 }
 .multicombo__option {
-  display: flex; gap: 10px; align-items: flex-start;
+  display: flex; gap: 10px; align-items: center;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
 }
+/* Two-line options (with description) align the check with the title row. */
+.multicombo__option:has(.multicombo__option-desc) { align-items: flex-start; }
 .multicombo__option.is-active { background: var(--bg-subtle); }
 .multicombo__option.is-selected { color: var(--color-brand-blue); font-weight: 600; }
 .multicombo__option.is-disabled { opacity: 0.5; pointer-events: none; }
@@ -2305,8 +2307,9 @@ a:hover {
   border-radius: var(--radius-sm); display: inline-flex;
   align-items: center; justify-content: center;
   font-size: var(--text-xs); color: var(--bg-surface);
-  margin-top: 1px;
 }
+/* Two-line options need a tiny nudge so the check sits on the title baseline. */
+.multicombo__option:has(.multicombo__option-desc) .multicombo__check { margin-top: 1px; }
 .multicombo__check.is-checked {
   background: var(--color-brand-blue); border-color: var(--color-brand-blue);
 }
