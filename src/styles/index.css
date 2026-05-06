@@ -3206,11 +3206,14 @@ a:hover {
 .transfer__list { list-style: none; margin: 0; padding: var(--space-1); flex: 1; overflow-y: auto; max-height: 320px; }
 .transfer__empty { padding: var(--space-4); text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
 .transfer__item {
-  display: flex; align-items: flex-start; gap: var(--space-2);
+  display: flex; align-items: center; gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
+/* Items with a description span two lines — align the checkbox with the
+   title row instead of the midpoint of the title+description block. */
+.transfer__item:has(.transfer__item-desc) { align-items: flex-start; }
 .transfer__item:hover { background: var(--bg-subtle); }
 .transfer__item.is-checked { background: var(--color-blue-50); }
 .transfer__item.is-disabled { opacity: 0.5; cursor: not-allowed; }
