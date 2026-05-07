@@ -1895,6 +1895,9 @@ a:hover {
 .datepicker {
   position: relative; display: inline-flex; align-items: stretch;
   border-radius: var(--radius-sm);
+  /* Resist horizontal stretch from a flex/grid parent — the focus ring
+     should hug input+toggle, not span the parent container's width. */
+  width: fit-content;
 }
 .datepicker:focus-within { outline: 2px solid var(--border-focus); outline-offset: 1px; }
 .datepicker__input {
