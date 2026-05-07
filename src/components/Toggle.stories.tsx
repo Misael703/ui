@@ -18,7 +18,7 @@ export const ToggleSimple: StoryObj = {
 
 export const Variantes: StoryObj = {
   render: () => (
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
       <Toggle defaultPressed>Default</Toggle>
       <Toggle variant="outline">Outline</Toggle>
       <Toggle size="sm">Pequeño</Toggle>
