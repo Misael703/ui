@@ -5,21 +5,30 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v0.3.0
+## [0.3.0] — 2026-05-07
 
-This release makes the kit **honestly country-neutral**. The previous
-versions shipped with Chilean-flavored defaults (CL regions, `+56` phone
-prefix, hardcoded Spanish strings, an `AddressForm` with RUT/Comuna/
-Región fields). Those leaked country-specific data into a presentational
-layer where they didn't belong. v0.3.0 extracts them.
+Three big themes:
+
+1. **Country-neutral architecture**. Previous versions leaked Chile-specific
+   defaults (CL regions, `+56` phone prefix, hardcoded Spanish, an
+   `AddressForm` with RUT/Comuna/Región baked in). v0.3.0 extracts those
+   to consumer code and slims `BrandDefaults` to truly UI-formatting
+   concerns (`name`, `logoBasePath`, `currency`, `locale`).
+2. **Internationalization**. ~80 hardcoded Spanish strings across 20+
+   components now read from a typed `UiKitMessages` dict consumed via
+   `<LocaleProvider>`. Spanish remains the default — kits without a
+   provider behave exactly as before.
+3. **DataTable maturity + visual polish**. Five new DataTable features
+   (`error`, `stickyHeader`, `mobileLayout="cards"`, `TablePagination`,
+   plus a virtualization recipe), exit animations on Modal/Drawer/Toast,
+   mobile bottom-sheet drawer, and a sweep of small alignment fixes.
 
 ### Added
 - **`LocaleProvider` + `useLocale()`** — i18n layer. All hardcoded
-  Spanish strings (~80 keys spanning 20+ components) now read from a
-  typed `UiKitMessages` dict consumed via React context. Spanish remains
-  the default — without a `<LocaleProvider>` in the tree, components
-  fall back to `esMessages` and behave exactly as before.
-  - **Partial overrides via shallow merge**:
+  Spanish strings now read from a typed `UiKitMessages` dict consumed
+  via React context.
+  - **Partial overrides via shallow merge** — pass only the keys you
+    want to translate:
     ```tsx
     <LocaleProvider messages={{ 'modal.close': 'Close' }}>
       <App />
@@ -32,17 +41,60 @@ layer where they didn't belong. v0.3.0 extracts them.
     `picker.weekdaysShort`) ship as `readonly` tuples for compile-time
     safety.
 - **`AddressField` + generic `<AddressForm fields={...}>`** —
-  `AddressForm` is now a presentational composer. Consumers describe
-  the field set per market. See "Migration" below for the Chile preset.
+  presentational composer. Consumers describe the field set per market.
+  See "Migration" below for the Chile preset.
+- **DataTable features**:
+  - `error?: ReactNode` prop renders an alert state in place of the
+    body. Priority: `error > loading > empty > rows`.
+  - `stickyHeader?: boolean` pins the `<thead>` while the body scrolls.
+    Requires the consumer to constrain wrapper height.
+  - `mobileLayout?: 'table' | 'cards'` — below 600px, rows collapse to
+    stacked cards with column headers as inline labels.
+- **`<TablePagination>`** — convenience component pairing a page-size
+  selector with the existing `<Pagination>`. Drop it under a DataTable
+  when paginating externally.
+- **Exit animations** for `<Modal>`, `<Drawer>`, and `<Toast>` via the
+  new `useDelayedUnmount(open, durationMs)` hook (also exported).
+  Components stay mounted during a 200ms exit window with `is-closing`
+  class so CSS keyframes can play before unmount.
+- **Mobile bottom-sheet** for `<Drawer>` — below 600px, both `side`
+  variants slide in from the bottom with rounded top corners (native
+  iOS/Android pattern).
+- **Storybook stories** for every new feature: `ConError`,
+  `StickyHeader`, `CardLayoutMobile`, `PaginacionCompleta`,
+  `PaginacionSimple`, `DataTableConPaginacion`.
 
 ### Changed
 - **`brand.ts` lazy getter**: `getBrand()` no longer spreads
   `BRAND_DEFAULTS` at module init. The merge is deferred until the
   first read after `configureBrand`. Without `configureBrand`,
   `getBrand()` returns the `BRAND_DEFAULTS` reference directly. Combined
-  with the existing `"sideEffects": ["**/*.css"]` declaration in
-  `package.json`, this lets bundlers drop the brand module entirely from
-  consumer bundles that don't read brand defaults.
+  with `"sideEffects": ["**/*.css"]` in `package.json`, bundlers can
+  drop the brand module entirely from consumer bundles that don't read
+  defaults.
+- **CategoryNav mega-menu is click-only** — `onMouseEnter`/`onMouseLeave`
+  removed. Hover-to-open didn't work on touch devices and was already
+  inaccessible to keyboard/screen-reader users. Click matches modern
+  e-commerce patterns (Amazon, Mercado Libre).
+- **Mobile stacked layouts** for `DescriptionList` and `DiffViewer`. The
+  multi-column grids fold to single-column under 600px. The diff's
+  before/after labels surface inline via `data-label` attrs threaded
+  from the locale dict (i18n preserved).
+
+### Performance
+- **Per-component tsup entries**: the build now emits one file per
+  component plus shared chunks. The barrel `dist/index.mjs` shrinks
+  from 218 KB to 4 KB — a tiny pass-through that re-exports from
+  siblings. Consumers' bundlers can drop unused components reliably
+  even when importing from the barrel.
+- **AppShell memo'd recursive `<NavItemNode>`**: extracts `renderItem`
+  to a `React.memo`'d component. A single section re-render no longer
+  churns through every other nav item in the tree.
+- **Carousel `next`/`prev`/`onKey` stabilized via `useCallback`** with
+  the functional setIndex form, so handlers don't reconstruct on every
+  navigation.
+- **DataTable already-memo'd row** with ref-stable toggle handler (from
+  v0.2.3) plus `format()`-based aria-label computation in the parent.
 
 ### Removed (BREAKING)
 - **`BrandDefaults.phonePrefix`** — `<PhoneInput>` no longer falls back
@@ -57,6 +109,17 @@ layer where they didn't belong. v0.3.0 extracts them.
   keyed by whatever the consumer puts in their field set.
 - **`AddressFormProps.regions` and `AddressFormProps.showRut`** props.
   Replaced by entries in the `fields` array.
+
+### Fixed
+- **DatePicker focus ring** wraps the whole compound (input + toggle
+  button) via `:focus-within` on the wrapper — was breaking at the seam
+  before. Wrapper also uses `width: fit-content` so it doesn't stretch
+  inside flex/grid parents.
+- **TransferList and MultiCombobox** option items center the checkbox
+  vertically when the item has no description; fall back to
+  `flex-start` for two-line items via `:has(.*-desc)`.
+- **Toggle Variantes story** centers items vertically when mixing
+  sm/md/lg sizes.
 
 ### Migration
 
