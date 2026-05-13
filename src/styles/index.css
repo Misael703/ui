@@ -1392,17 +1392,23 @@ a:hover {
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-default);
   border-left-width: 4px;
-  display: flex; align-items: flex-start; gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   min-width: 320px; max-width: 420px;
   font-family: var(--font-body);
   font-size: var(--text-sm);
   pointer-events: auto;
   animation: slideUp var(--duration-base) var(--ease-standard);
 }
+/* Two-line toasts (title + description) align the icon with the title row
+   instead of the midpoint of the title+desc block. */
+.toast:has(.toast__desc) { align-items: flex-start; }
+.toast:has(.toast__desc) .toast__icon { margin-top: 1px; }
 .toast__body { flex: 1; min-width: 0; }
-.toast__title { font-weight: 700; margin-bottom: 2px; color: var(--fg-default); }
+/* Title margin-bottom only matters when a description follows. */
+.toast__title { font-weight: 700; color: var(--fg-default); }
+.toast:has(.toast__desc) .toast__title { margin-bottom: 2px; }
 .toast__desc { color: var(--fg-muted); font-size: var(--text-xs); line-height: 1.4; }
-.toast__icon { flex: none; margin-top: 1px; display: inline-flex; }
+.toast__icon { flex: none; display: inline-flex; }
 .toast__close {
   background: transparent;
   border: 0;

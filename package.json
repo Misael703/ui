@@ -1,6 +1,6 @@
 {
   "name": "@misael703/elalba-ui",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "UI Kit React + TypeScript multi-marca, optimizado para Next.js. Tokens, componentes accesibles y branding configurable en runtime.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",

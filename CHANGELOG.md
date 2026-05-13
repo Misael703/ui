@@ -5,6 +5,26 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] — 2026-05-13
+
+**Patch release.** Single visual fix surfaced by the barritas spike.
+
+### Fixed
+- **Toast icon vertical alignment when no `description` is provided.** The
+  `.toast` rule was using `align-items: flex-start` plus a `margin-top: 1px`
+  nudge on `.toast__icon` to handle the canonical two-line case (title +
+  description). On single-line toasts (`toast.push({ title, variant })` only)
+  the nudge pushed the icon ~1–2px below the title baseline.
+
+  Now the default is `align-items: center` with no icon nudge; `:has(.toast__desc)`
+  switches back to `flex-start` + `margin-top: 1px` only when a description is
+  present. Same pattern used in v0.3.0 for `TransferList` and `MultiCombobox`
+  items. The `.toast__title` `margin-bottom: 2px` is similarly scoped to the
+  two-line case so it doesn't shift the body off-center on single-line toasts.
+
+### Tests
+297/297 unchanged.
+
 ## [0.3.1] — 2026-05-08
 
 **Patch release.** Single critical fix: bundlers that resolve CSS `url()`
