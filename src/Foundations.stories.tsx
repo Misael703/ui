@@ -484,3 +484,33 @@ export const Logos: StoryObj = {
     );
   },
 };
+
+export const InvertedSurfaces: StoryObj = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 24 }}>
+      <SectionTitle>Inverted surfaces</SectionTitle>
+      <p style={{ color: 'var(--fg-muted)', fontSize: 14, margin: 0 }}>
+        Aplica <code>.surface-inverse</code> a una zona con bg oscuro y todo el texto
+        anidado (p, h1-h6, .caption, anchors) hereda colores claros automáticamente vía
+        re-scope de CSS variables. Sin overrides inline por elemento.
+      </p>
+
+      <footer className="surface-inverse surface-inverse--brand" style={{ padding: 24, borderRadius: 12 }}>
+        <h3 className="h3" style={{ marginTop: 0 }}>Footer en navy de marca</h3>
+        <p>El reset del kit pone <code>color: var(--fg-default)</code> en p — con la inversión activa, <code>--fg-default</code> resuelve a blanco.</p>
+        <p className="caption">Captions caen a <code>--fg-subtle</code> que en la inversión es blanco al 50%.</p>
+        <p><a href="#">Anchors usan</a> el accent invertido (naranja de marca en hover).</p>
+      </footer>
+
+      <section className="surface-inverse surface-inverse--dark" style={{ padding: 24, borderRadius: 12 }}>
+        <h3 className="h3" style={{ marginTop: 0 }}>Hero en azul más oscuro</h3>
+        <p>Misma utilidad, preset alterno <code>--dark</code> = <code>var(--color-blue-900)</code>.</p>
+      </section>
+
+      <div data-tone="inverse" style={{ background: '#1a1a1a', padding: 24, borderRadius: 12 }}>
+        <h3 className="h3" style={{ marginTop: 0 }}>Custom bg con <code>data-tone</code></h3>
+        <p>Para casos donde el consumer pinta su propio bg (gris, gradient, imagen…) el atributo <code>data-tone="inverse"</code> aplica las mismas reglas sin las clases de preset.</p>
+      </div>
+    </div>
+  ),
+};

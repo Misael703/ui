@@ -252,6 +252,27 @@ Los tokens viven en `:root`. La paleta de marca y los tokens semánticos están 
 import '@misael703/elalba-ui/tokens.css';
 ```
 
+### Superficies invertidas (zonas con bg oscuro)
+
+El kit resetea `color` en `<p>`, `<h1>`–`<h6>`, anchors y `.caption` para mantener consistencia tipográfica. Cuando metés esos elementos dentro de un footer / hero / sidebar oscuro, el color heredado del kit gana sobre el `color` del padre (especificidad). Para invertir el subtree completo en una línea, usá `.surface-inverse`:
+
+```html
+<footer class="surface-inverse surface-inverse--brand">
+  <h3 class="h3">Footer en navy</h3>
+  <p>Texto blanco automáticamente — herencia vía CSS vars.</p>
+  <p class="caption">Captions caen a blanco translúcido.</p>
+  <p><a href="#">Anchors</a> usan el naranja de marca en hover.</p>
+</footer>
+```
+
+Variantes:
+- `.surface-inverse` solo (sin bg) — para cuando vos pintás el fondo.
+- `.surface-inverse--brand` — bg `var(--color-brand-blue)`.
+- `.surface-inverse--dark` — bg `var(--color-blue-900)`.
+- `[data-tone="inverse"]` — atributo equivalente, sin agregar clases.
+
+El mecanismo es re-scope de tokens (`--fg-default`, `--fg-muted`, `--fg-subtle`, `--border-default`, `--fg-link*`) en el subtree. Cualquier componente del kit que resuelva esos vars adentro hereda los valores claros sin tocar el componente. **Cuidado**: componentes con bg propio (Card, Modal, Button, Input) **no** se invierten — la utilidad apunta al texto y bordes del contenedor, no a re-skinear cada componente anidado.
+
 ---
 
 ## Build local

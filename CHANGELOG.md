@@ -5,6 +5,44 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] — 2026-05-13
+
+**Patch release.** Adds a CSS-only utility for dark-background regions.
+
+### Added
+- **`.surface-inverse` + `[data-tone="inverse"]`** — re-scopes
+  foreground tokens (`--fg-default`, `--fg-muted`, `--fg-subtle`,
+  `--fg-link`, `--fg-link-hover`, `--border-default`, `--border-strong`)
+  so any element inside a dark-background region renders light text
+  automatically. No per-element `color: white` overrides needed.
+
+  Two preset bg variants for common cases:
+  - `.surface-inverse--brand` → `var(--color-brand-blue)`
+  - `.surface-inverse--dark` → `var(--color-blue-900)`
+
+  ```html
+  <footer class="surface-inverse surface-inverse--brand">
+    <p>Light text on navy, inherited via the cascaded CSS vars.</p>
+    <p class="caption">Captions, h1-h6, anchors all follow.</p>
+  </footer>
+  ```
+
+  Mechanism: same pattern as shadcn/ui's `[data-theme]`, Radix Themes'
+  `<Theme appearance="dark">`, and MUI's nested ThemeProvider — pure
+  CSS-only equivalent. Components with their own backgrounds (Card,
+  Modal, Button, Input) are unaffected; the utility targets surrounding
+  text + borders, not nested component skins.
+
+  Reported by barritas during the consumer migration — surfaces popping
+  up in footers, hero sections, dark sidebars. Worth shipping before
+  consumers normalize the inline `color: white` workaround.
+
+  Uses `color-mix(in srgb, ...)` for translucent muted/subtle/border
+  variants (Chrome 111+, Firefox 113+, Safari 16.2+).
+
+### Tests
+297/297 unchanged.
+
 ## [0.3.2] — 2026-05-13
 
 **Patch release.** Single visual fix surfaced by the barritas spike.

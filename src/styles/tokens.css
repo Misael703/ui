@@ -260,3 +260,36 @@ a:hover {
   color: var(--fg-link-hover);
   border-bottom-color: currentColor;
 }
+
+/* -------- Inverted surfaces ------------------------------------------- */
+/* Re-scope foreground tokens so any element (kit component or plain HTML)
+   inside a dark-background region renders light text automatically — no
+   per-element `color: white` overrides needed.
+   Apply to footers, hero sections, dark sidebars, dialogs on brand, etc.
+
+   Usage:
+     <footer class="surface-inverse surface-inverse--brand">
+       <p>Light text on navy — paragraphs, h1-h6, anchors, .caption all
+          inherit through the cascaded CSS variables.</p>
+     </footer>
+
+   The data-attribute variant is also supported for consumers who prefer
+   not to add a class:
+     <footer data-tone="inverse" style="background: var(--color-blue-900)">
+
+   Caveat: kit components that paint their own backgrounds (Card, Modal,
+   Button) keep their original surface. The inversion is meant for the
+   surrounding region's text, not for re-skinning every nested component. */
+.surface-inverse,
+[data-tone="inverse"] {
+  --fg-default: var(--fg-on-brand);
+  --fg-muted:   color-mix(in srgb, var(--fg-on-brand) 70%, transparent);
+  --fg-subtle:  color-mix(in srgb, var(--fg-on-brand) 50%, transparent);
+  --fg-link:    var(--fg-on-brand);
+  --fg-link-hover: var(--color-brand-orange);
+  --border-default: color-mix(in srgb, var(--fg-on-brand) 20%, transparent);
+  --border-strong:  color-mix(in srgb, var(--fg-on-brand) 35%, transparent);
+  color: var(--fg-default);
+}
+.surface-inverse--brand { background: var(--color-brand-blue); }
+.surface-inverse--dark  { background: var(--color-blue-900); }
