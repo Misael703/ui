@@ -5,6 +5,41 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] — 2026-05-08
+
+**Patch release.** Single critical fix: bundlers that resolve CSS `url()`
+references (Next.js, Vite, webpack) now build cleanly when importing
+the kit's stylesheets.
+
+### Fixed
+- **`@font-face` declarations in `styles.css` and `tokens.css` removed.**
+  Both files previously duplicated the four `@font-face` rules from
+  `fonts.css` with broken `url(../fonts/X.otf)` paths that resolved to a
+  non-existent `<package>/fonts/` directory (fonts live at
+  `<package>/dist/fonts/`). Any consumer that imported `styles.css` or
+  `tokens.css` through a CSS-aware bundler failed with
+  `Module not found` for each of the eight font files.
+
+  Now `fonts.css` is the sole owner of the `@font-face` rules, with
+  correct `url(fonts/X.otf)` paths. The duplication was a leftover
+  invariant — the README already documented importing `fonts.css`
+  separately, but the code path had never been exercised by a real
+  bundler because the kit had no consumers until barritas integrated
+  it at v0.3.0.
+
+### Behavior
+- **No breaking change for consumers following the README**, which
+  already documented importing `fonts.css` + `styles.css` separately.
+- **Behavior change for consumers that imported only `styles.css`**
+  expecting fonts inline: those builds were failing on v0.3.0 anyway.
+  After upgrading, also import `@misael703/elalba-ui/fonts.css` if you
+  want the bundled Integral CF + Metropolis fonts. Or skip it and let
+  the kit fall back to the next family in the `--font-display` /
+  `--font-body` token chain.
+
+### Tests
+297/297 unchanged.
+
 ## [0.3.0] — 2026-05-07
 
 Three big themes:

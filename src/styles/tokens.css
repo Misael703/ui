@@ -3,35 +3,8 @@
    Colors & Type foundations
    ========================================================================== */
 
-/* -------- Fonts -------------------------------------------------------- */
-@font-face {
-  font-family: "Integral CF";
-  src: url("../fonts/IntegralCF-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Integral CF";
-  src: url("../fonts/IntegralCF-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Metropolis";
-  src: url("../fonts/Metropolis-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Metropolis";
-  src: url("../fonts/Metropolis-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* `@font-face` declarations live in `fonts.css` (opt-in import). This
+   file only declares CSS custom properties. */
 
 :root {
   /* -------- Brand colors (spec-exact) -------------------------------- */

@@ -6,35 +6,16 @@
    Colors & Type foundations
    ========================================================================== */
 
-/* -------- Fonts -------------------------------------------------------- */
-@font-face {
-  font-family: "Integral CF";
-  src: url("../fonts/IntegralCF-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Integral CF";
-  src: url("../fonts/IntegralCF-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Metropolis";
-  src: url("../fonts/Metropolis-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Metropolis";
-  src: url("../fonts/Metropolis-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Fonts: `@font-face` declarations live exclusively in `fonts.css`.
+   Consumers that want the kit's bundled Integral CF + Metropolis fonts
+   should import that file explicitly:
+
+     import "@misael703/elalba-ui/fonts.css";
+     import "@misael703/elalba-ui/styles.css";
+
+   Apps that load fonts via `next/font` or another mechanism can skip
+   `fonts.css` and the kit will fall back to the next family in the
+   `--font-display` / `--font-body` token chain. */
 
 /* Wrap todos los estilos en un layer para que los consumidores puedan
    sobreescribir sin pelear con especificidad. Cualquier CSS sin layer
