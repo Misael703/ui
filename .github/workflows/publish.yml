@@ -17,7 +17,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          # Node 20 (EOL 2026-04-30 but still hosted by GH runners). Node 22
+          # exposes an upstream npm bootstrap bug where `npm install -g
+          # npm@latest` fails with `Cannot find module 'promise-retry'` mid
+          # self-upgrade. Revisit when fixed upstream (~npm 12 / Node 24 LTS).
+          node-version: 20
           registry-url: https://registry.npmjs.org
           cache: npm
 
