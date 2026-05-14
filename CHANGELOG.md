@@ -5,6 +5,48 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] — 2026-05-14
+
+**Internal refactor.** Eliminates the recurring drift between
+`tokens.css` and `index.css` (the cause of v0.4.2, v0.4.3 and v0.4.4
+patches) by introducing single-source partials. Zero behavior change
+for consumers — `dist/styles.css` and `dist/tokens.css` remain
+self-contained and functionally identical to v0.5.0.
+
+*Version 0.5.1 was not published to npm; it was an unrelated CI
+workflow change (Node 24 / Actions v5 bump).*
+
+### Changed
+- **`src/styles/_root.css`** (new) — canonical `:root { ... }` source
+  for every CSS custom property the kit exposes. Edit ONLY here.
+- **`src/styles/_typography.css`** (new) — type role classes (`.h1`,
+  `.body`, etc.), `code`/`.mono`, `a`/`a:hover`, `.surface-inverse`
+  utility. Shared between `tokens.css` and `index.css`.
+- **`src/styles/tokens.css`** — slimmed to two `@import` statements.
+  No more duplication of the token block.
+- **`src/styles/index.css`** — uses `@import url(...) layer(elalba)`
+  syntax at the top (spec-compliant position) to pull the partials
+  into the `elalba` cascade layer. Inline `@layer elalba { ... }` block
+  contains only base-element rules and component CSS now.
+- **`postcss.config.cjs`** — `postcss-import` added to the plugin chain
+  (runs before autoprefixer / cssnano) to inline the partials at build
+  time. Published `dist/styles.css` and `dist/tokens.css` are still
+  self-contained with no runtime `@import`.
+
+### Why
+Three patch releases in a row (v0.4.2 / v0.4.3 / v0.4.4) closed
+specific drift gaps between the two duplicated `:root` blocks. The
+duplication was intentional (to allow `tokens.css`-only imports) but
+the manual mirroring was load-bearing and error-prone. The single
+source of truth removes the maintenance burden permanently. Adding a
+new token now means editing **only** `_root.css`; both public entry
+points pick it up automatically.
+
+### Migration note for consumers
+None. The published dist output is functionally identical. If you fork
+the kit and were used to editing `tokens.css` and `index.css` in sync,
+edit `_root.css` instead.
+
 ## [0.5.0] — 2026-05-14
 
 **Visual minor.** Body font swapped from Metropolis to DM Sans. No API

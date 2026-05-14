@@ -1,0 +1,160 @@
+/* ==========================================================================
+   Typographic primitives — semantic role classes + link / code / surface
+   ==========================================================================
+
+   Single-source partial imported by both `tokens.css` and `index.css`.
+   Edit ONLY here.
+
+   Contents:
+     • `.h-display`, `.h1`-`.h4`, `.eyebrow`, `.label`, `.caption`
+     • `.body-lg`, `.body` (+ bare `p`), `.body-sm`
+     • `code`, `.mono`
+     • `a`, `a:hover`
+     • `.surface-inverse` + variants
+
+   Consumers importing only `tokens.css` get these classes too — they're
+   the minimum a design-system consumer needs to render typed content
+   without bringing in the full component layer. */
+
+.h-display,
+.h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-6xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  color: var(--fg-default);
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-4xl);
+  line-height: var(--leading-snug);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-default);
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+  text-transform: uppercase;
+  color: var(--fg-default);
+}
+
+.h4 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  color: var(--fg-default);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--accent-secondary);
+}
+
+.body-lg {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--fg-default);
+}
+
+.body,
+p {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--fg-default);
+}
+
+.body-sm {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--fg-muted);
+}
+
+.label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-default);
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-subtle);
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  background: var(--bg-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Utility link */
+a {
+  color: var(--fg-link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+a:hover {
+  color: var(--fg-link-hover);
+  border-bottom-color: currentColor;
+}
+
+/* -------- Inverted surfaces ------------------------------------------- */
+/* Re-scope foreground tokens so any element (kit component or plain HTML)
+   inside a dark-background region renders light text automatically — no
+   per-element `color: white` overrides needed.
+   Apply to footers, hero sections, dark sidebars, dialogs on brand, etc.
+
+   Usage:
+     <footer class="surface-inverse surface-inverse--brand">
+       <p>Light text on navy — paragraphs, h1-h6, anchors, .caption all
+          inherit through the cascaded CSS variables.</p>
+     </footer>
+
+   The data-attribute variant is also supported for consumers who prefer
+   not to add a class:
+     <footer data-tone="inverse" style="background: var(--color-blue-900)">
+
+   Caveat: kit components that paint their own backgrounds (Card, Modal,
+   Button) keep their original surface. The inversion is meant for the
+   surrounding region's text, not for re-skinning every nested component. */
+.surface-inverse,
+[data-tone="inverse"] {
+  --fg-default: var(--fg-on-brand);
+  --fg-muted:   color-mix(in srgb, var(--fg-on-brand) 70%, transparent);
+  --fg-subtle:  color-mix(in srgb, var(--fg-on-brand) 50%, transparent);
+  --fg-link:    var(--fg-on-brand);
+  --fg-link-hover: var(--color-brand-orange);
+  --border-default: color-mix(in srgb, var(--fg-on-brand) 20%, transparent);
+  --border-strong:  color-mix(in srgb, var(--fg-on-brand) 35%, transparent);
+  color: var(--fg-default);
+}
+.surface-inverse--brand { background: var(--color-brand-blue); }
+.surface-inverse--dark  { background: var(--color-blue-900); }
