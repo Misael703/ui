@@ -791,11 +791,30 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Tables ------------------------------------------------------- */
 .table-wrap {
   overflow-x: auto;
-  /* Inset shadow on the right edge hints "scrolls horizontally" on
-     mobile / iOS Safari where scrollbars are invisible by default. */
+  /* Scroll shadows pattern (Lea Verou, 2012). Hints "more content on this
+     side" when the table overflows horizontally — useful on mobile / iOS
+     Safari where scrollbars are invisible. Four background layers stack
+     in two pairs:
+
+       1. Solid surface fill (base, always opaque).
+       2. Cover masks on each edge (background-attachment: local) — these
+          move with the scrollable content. When the scroll is at start/end,
+          the matching mask sits over the shadow and hides it.
+       3. Shadows on each edge (background-attachment: scroll) — fixed to
+          the wrapper; revealed only when the local mask scrolls away.
+
+     Net: left shadow appears only when scrolled right (content hidden on
+     the left), right shadow only when content overflows past the right.
+     Empty or non-overflowing tables show neither. */
   background:
-    linear-gradient(to left, rgba(0, 0, 0, 0.08), transparent 16px) right center / 100% 100% no-repeat,
+    linear-gradient(to right, var(--bg-surface) 30%, transparent) left center,
+    linear-gradient(to left,  var(--bg-surface) 30%, transparent) right center,
+    linear-gradient(to right, rgba(0, 0, 0, 0.08), transparent 24px) left center,
+    linear-gradient(to left,  rgba(0, 0, 0, 0.08), transparent 24px) right center,
     var(--bg-surface);
+  background-size: 30px 100%, 30px 100%, 24px 100%, 24px 100%, 100% 100%;
+  background-attachment: local, local, scroll, scroll, scroll;
+  background-repeat: no-repeat;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
 }

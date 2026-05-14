@@ -5,6 +5,29 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] — 2026-05-14
+
+**Patch.** Table scroll shadows are now context-aware: they appear only
+when the table actually overflows horizontally, on whichever side has
+hidden content, and disappear on empty / short tables.
+
+### Fixed
+- **`.table-wrap` always showed a right-edge shadow** even when there
+  was no horizontal overflow, and never showed a left-edge shadow when
+  the user had scrolled into the table. Replaced the single static
+  gradient with Lea Verou's scroll-shadows pattern: four stacked
+  background layers (two cover masks pinned to content via
+  `background-attachment: local`, two real shadows pinned to the
+  wrapper via `background-attachment: scroll`) so each shadow is only
+  visible when there's content hidden on that side. Pure CSS, no JS.
+
+### Why this matters on touch devices
+iOS Safari and most Android browsers hide scrollbars by default. Without
+any visual hint, users don't know a table can be scrolled horizontally.
+The original shadow gave that hint but produced visual noise on tables
+that didn't actually scroll. The fix preserves the affordance only when
+useful.
+
 ## [0.7.0] — 2026-05-14
 
 **Visual minor.** Migrates kit-wide focus indicators from CSS `outline`
