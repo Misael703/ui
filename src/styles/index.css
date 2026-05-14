@@ -2,7 +2,6 @@
    Import once at app root: import "@misael703/elalba-ui/styles.css"; */
 
 /* ==========================================================================
-   El Alba — Ferretería El Alba / Patio Constructor
    Colors & Type foundations
    ========================================================================== */
 
@@ -380,7 +379,7 @@ a:hover {
 /* ---- Components ---- */
 
 /* ==========================================================================
-   El Alba — Component styles
+   Component styles
    ========================================================================== */
 
 /* ---------- Button ------------------------------------------------------- */
@@ -977,7 +976,9 @@ a:hover {
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--duration-fast);
-  z-index: var(--z-sticky);
+  /* Tooltips must clear sticky headers, navbars and drawers (z-sticky=60).
+     z-tooltip=1000 keeps them above all interactive overlays except modals. */
+  z-index: var(--z-tooltip);
 }
 .tooltip__bubble::after {
   content: '';

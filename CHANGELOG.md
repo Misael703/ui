@@ -5,6 +5,26 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] — 2026-05-13
+
+**Patch release.** One bug fix surfaced by barritas + cosmetic CSS cleanup.
+
+### Fixed
+- **Tooltip z-index** raised from `var(--z-sticky)` (60) to
+  `var(--z-tooltip)` (1000). Tooltips were rendering behind sticky
+  table headers, navbars, drawers, and any other element with
+  `z-index: 60+`. First hit in barritas: sticky `<th z-index: 1>`
+  covered the tooltip of IconButtons in the first row.
+
+### Changed
+- **Removed "El Alba — Ferretería El Alba / Patio Constructor"
+  comments** from `tokens.css` and `styles.css`. CSS now reads as a
+  generic design-token + component file. (Story files still reference
+  El Alba as showcase data — that's content, not branding leakage.)
+
+### Tests
+297/297 unchanged.
+
 ## [0.3.3] — 2026-05-13
 
 **Patch release.** Adds a CSS-only utility for dark-background regions.
