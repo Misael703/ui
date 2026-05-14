@@ -12,12 +12,13 @@
  *
  * Ambas fonts shipean bajo SIL Open Font License 1.1. Ver `dist/fonts/OFL.txt`.
  *
- *   - Outfit (display)  — Google Fonts / The Outfit Project Authors
- *   - Metropolis (body) — Chris Simpson
+ *   - Outfit (display) — Google Fonts / The Outfit Project Authors
+ *   - DM Sans (body)   — Google Fonts / Colophon Foundry, Jonny Pinhorn
+ *
+ * Ambas son variable fonts: un solo woff2 cubre el rango de weights completo.
  */
 
-/* Outfit is a variable font; `font-weight: 100 900` covers the full
-   thin→black range from a single 44 KB woff2. */
+/* Outfit — variable; `font-weight: 100 900` cubre thin→black en 44 KB. */
 @font-face {
   font-family: "Outfit";
   src: url("./fonts/Outfit-VariableFont_wght.woff2") format("woff2-variations"),
@@ -26,17 +27,16 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* DM Sans — variable; `font-weight: 100 1000` cubre thin→black en 36 KB.
+   Cobertura unicode: latin (U+0000–U+00FF). Suficiente para español,
+   inglés y la mayoría de idiomas europeos comunes. Para latin-ext
+   (polaco, vietnamita, etc.), agregar un segundo @font-face. */
 @font-face {
-  font-family: "Metropolis";
-  src: url("./fonts/Metropolis-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Metropolis";
-  src: url("./fonts/Metropolis-Bold.otf") format("opentype");
-  font-weight: 700;
+  font-family: "DM Sans";
+  src: url("./fonts/DMSans-VariableFont_wght.woff2") format("woff2-variations"),
+       url("./fonts/DMSans-VariableFont_wght.woff2") format("woff2");
+  font-weight: 100 1000;
   font-style: normal;
   font-display: swap;
 }

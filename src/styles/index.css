@@ -155,7 +155,7 @@
 
   /* -------- Type families -------------------------------------------- */
   --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
-  --font-body:    "Metropolis", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body:    "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
   /* -------- Type scale (Major Third, rooted at 16) ------------------- */
@@ -1819,7 +1819,6 @@ a:hover {
   cursor: pointer;
 }
 .number-input__btn:hover { background: var(--color-grey-200); }
-.number-input__btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
 .number-input__field {
   border: none; outline: none; padding: 0 12px; min-width: 80px;
   background: transparent; color: var(--fg-default);

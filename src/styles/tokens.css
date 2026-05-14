@@ -137,7 +137,7 @@
 
   /* -------- Type families -------------------------------------------- */
   --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
-  --font-body:    "Metropolis", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body:    "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
   /* -------- Type scale (Major Third, rooted at 16) ------------------- */

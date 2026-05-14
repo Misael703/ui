@@ -5,6 +5,67 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-05-14
+
+**Visual minor.** Body font swapped from Metropolis to DM Sans. No API
+changes; consumers will see all body text (paragraphs, labels, inputs,
+table cells, badges, tooltips) rendered in DM Sans variable on next
+update. Display font (Outfit) is unchanged. Also includes a small
+`NumberInput` visual fix.
+
+### Fixed
+- **`NumberInput` phantom orange bar** between the `−` button and the
+  numeric input. The `.number-input__btn:focus-visible` rule applied
+  `outline: 2px solid var(--border-focus); outline-offset: -2px`, which
+  drew the focus ring inside the button perimeter. Combined with the
+  wrapper's `overflow: hidden` and `border-radius`, the top/left/bottom
+  edges of the outline were clipped by the rounded corners but the
+  right edge — sitting flush against the input — stayed visible as a
+  stray orange bar after a mouse click. The rule has been removed: the
+  `±` buttons have `tabIndex={-1}` so they're not keyboard-reachable,
+  and a focus-visible style on them never served a navigation purpose.
+  `:hover` background change remains as the only feedback.
+
+### Why
+Metropolis was a solid choice but is a static font requiring multiple
+files (Regular + Bold = ~80 KB) and capped at two weights. DM Sans is
+a single variable woff2 (~36 KB) covering the full 100–1000 weight
+range, with comparable readability characteristics and slightly more
+modern proportions. The kit's bundle drops while gaining a full weight
+ramp for future hierarchical work.
+
+### Changed
+- **`--font-body`** in both `tokens.css` and `index.css`:
+  `"Metropolis", "Inter", ...` → `"DM Sans", "Helvetica Neue", ...`.
+- **`fonts.css`** — Metropolis `@font-face` declarations (two static
+  files) replaced with a single DM Sans variable `@font-face` covering
+  the full weight range.
+- **`src/fonts/`** — Metropolis-Regular.otf and Metropolis-Bold.otf
+  removed; DMSans-VariableFont_wght.woff2 added.
+- **Build script** (`package.json`) — no longer copies `*.otf` (none
+  remain); copies `*.woff2 + OFL.txt`.
+- **`OFL.txt`** — Metropolis attribution removed, DM Sans attribution
+  added (also SIL OFL 1.1).
+- **README + Foundations story caption** — references updated to DM Sans.
+
+### Bundle delta
+| | Before (v0.4.5) | After (v0.5.0) |
+|---|---|---|
+| Outfit (display) | 44 KB | 44 KB |
+| Body font | Metropolis: 47 KB (2 files) | DM Sans: 36 KB (1 file) |
+| **Total fonts** | **~91 KB** | **~80 KB** |
+| Weight range (body) | 400 + 700 | 100 → 1000 (variable) |
+
+### Migration note for consumers
+If your app has CSS overrides referencing `font-family: 'Metropolis'`
+directly (instead of `var(--font-body)`), update them to either:
+- `font-family: var(--font-body)` (recommended — follows kit token), or
+- `font-family: 'DM Sans', sans-serif` (explicit)
+
+The recommended path has always been `var(--font-body)` — components
+in the kit have never referenced `'Metropolis'` directly. If your
+overrides do, this is a good moment to migrate to the token.
+
 ## [0.4.5] — 2026-05-13
 
 **Minor patch.** Card accent rail now survives consumer-side border

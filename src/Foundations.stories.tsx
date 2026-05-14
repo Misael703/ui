@@ -171,7 +171,7 @@ export const Typography: StoryObj = {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, marginTop: 4 }}>The quick brown fox 0123</div>
         </div>
         <div>
-          <Caption>--font-body · Metropolis</Caption>
+          <Caption>--font-body · DM Sans (variable, weights 100–1000)</Caption>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 18, marginTop: 4 }}>The quick brown fox jumps over the lazy dog</div>
         </div>
         <div>

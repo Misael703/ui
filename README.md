@@ -230,7 +230,7 @@ Heredan `color` del padre y aceptan `size`, `strokeWidth`, `className` y `title`
 
 ### Fuentes (opcional)
 
-Si no usás `next/font`, podés cargar Outfit (display) + Metropolis (body) empaquetadas con el kit:
+Si no usás `next/font`, podés cargar Outfit (display) + DM Sans (body) empaquetadas con el kit. Ambas son variable fonts, total ~80 KB:
 
 ```ts
 // app/layout.tsx
@@ -401,7 +401,7 @@ Reemplaza los archivos en `src/fonts/` y actualiza:
 - Las declaraciones `@font-face` en `src/styles/fonts.css` (única ubicación; `styles.css` y `tokens.css` no las declaran)
 - Los tokens `--font-display` y `--font-body` en `src/styles/tokens.css` e `src/styles/index.css` (ambos archivos mantienen `:root` propio en sync)
 
-Todo el kit usa `var(--font-display)` y `var(--font-body)`, no hace referencia directa a "Outfit" ni "Metropolis" en componentes.
+Todo el kit usa `var(--font-display)` y `var(--font-body)`, no hace referencia directa a "Outfit" ni "DM Sans" en componentes.
 
 ### 4. Logos
 
