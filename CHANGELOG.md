@@ -5,6 +5,45 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-05-13
+
+**Minor release.** Display font swap — Integral CF (commercial license, not
+redistributable) replaced with **Outfit** (Google Fonts, SIL Open Font
+License 1.1).
+
+### Changed
+- **`--font-display` default** is now `"Outfit", "Helvetica Neue", Arial,
+  sans-serif` (was `"Integral CF", "Arial Black", ...`). Visual tone shifts
+  from industrial/condensed to geometric/modern. Override the token in your
+  app if you want a different display family.
+- **`fonts.css`** ships a single variable font for Outfit
+  (`Outfit-VariableFont_wght.woff2`, 44 KB) covering weights 100–900 from
+  one file. Metropolis (body) unchanged.
+- **`dist/fonts/`** payload: ~95 KB total (was ~106 KB with the
+  un-redistributable Integral CF).
+
+### Removed
+- **`IntegralCF-Regular.otf` and `IntegralCF-Bold.otf`** removed from the
+  bundle. Integral CF requires a commercial license per workstation and
+  cannot be redistributed through an npm package. Consumers that own an
+  Integral CF license can still load it themselves via their own
+  `@font-face` and override `--font-display` accordingly.
+
+### Added
+- **`OFL.txt`** in `dist/fonts/` covering both bundled families
+  (Outfit + Metropolis) — required attribution per SIL OFL 1.1.
+
+### Migration
+- **No code changes required.** The kit's components keep reading from
+  `var(--font-display)`; the value behind it changed.
+- Apps that explicitly referenced `"Integral CF"` in their own CSS should
+  swap to `"Outfit"` (or whatever family they prefer).
+- Build script now copies `*.otf`, `*.woff2`, and `OFL.txt` from
+  `src/fonts/` into `dist/fonts/`. No consumer impact.
+
+### Tests
+297/297 unchanged.
+
 ## [0.3.4] — 2026-05-13
 
 **Patch release.** One bug fix surfaced by barritas + cosmetic CSS cleanup.

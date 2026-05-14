@@ -1,6 +1,6 @@
 {
   "name": "@misael703/elalba-ui",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "UI Kit React + TypeScript multi-marca, optimizado para Next.js. Tokens, componentes accesibles y branding configurable en runtime.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.otf dist/fonts/",
+    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.otf src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/",
     "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css",
     "dev": "tsup --watch",
     "test": "vitest run",

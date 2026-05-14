@@ -80,7 +80,7 @@
   --border-focus:    var(--color-brand-orange);
 
   /* -------- Type families -------------------------------------------- */
-  --font-display: "Integral CF", "Arial Black", "Helvetica Neue", sans-serif;
+  --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
   --font-body:    "Metropolis", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
@@ -105,7 +105,7 @@
   --tracking-tight:  -0.01em;
   --tracking-normal: 0;
   --tracking-wide:   0.04em;
-  --tracking-wider:  0.08em;   /* Integral CF looks great at 40–80 tracking */
+  --tracking-wider:  0.08em;
 
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;

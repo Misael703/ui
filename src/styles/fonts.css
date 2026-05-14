@@ -1,8 +1,5 @@
 /**
- * Self-hosted fonts (Integral CF + Metropolis), opt-in.
- *
- * Importa este archivo si quieres usar las fonts empaquetadas con el kit
- * (necesario en Next.js si no las cargás vía next/font):
+ * Self-hosted fonts bundled with @misael703/elalba-ui — opt-in import.
  *
  *   import "@misael703/elalba-ui/fonts.css";
  *   import "@misael703/elalba-ui/styles.css";
@@ -12,19 +9,20 @@
  * Apps que cargan fonts por otro mecanismo (next/font, Google Fonts,
  * sistema) pueden saltarse este archivo: el kit hace fallback al
  * siguiente family de los tokens `--font-display` / `--font-body`.
+ *
+ * Ambas fonts shipean bajo SIL Open Font License 1.1. Ver `dist/fonts/OFL.txt`.
+ *
+ *   - Outfit (display)  — Google Fonts / The Outfit Project Authors
+ *   - Metropolis (body) — Chris Simpson
  */
 
+/* Outfit is a variable font; `font-weight: 100 900` covers the full
+   thin→black range from a single 44 KB woff2. */
 @font-face {
-  font-family: "Integral CF";
-  src: url("./fonts/IntegralCF-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Integral CF";
-  src: url("./fonts/IntegralCF-Bold.otf") format("opentype");
-  font-weight: 700;
+  font-family: "Outfit";
+  src: url("./fonts/Outfit-VariableFont_wght.woff2") format("woff2-variations"),
+       url("./fonts/Outfit-VariableFont_wght.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
