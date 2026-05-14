@@ -80,6 +80,35 @@ export function NewOrder() {
 
 ---
 
+## Interop con Tailwind (u otro reset global)
+
+El kit envuelve sus estilos en `@layer elalba` para que tus reglas no-layered (tu propio CSS o el de tu framework) ganen siempre por encima — así podés override-ear cualquier componente sin pelear con especificidad.
+
+El reverso: **si tu reset global no está en un layer, gana sobre el kit**. El caso más común es Tailwind v3+ con `preflight` habilitado, que aplica:
+
+```css
+*, ::before, ::after {
+  border-width: 0;
+  border-style: solid;
+  border-color: ...;
+}
+```
+
+…fuera de cualquier `@layer`. Como resultado, una regla del kit del tipo `border-left-width: 4px` (que vive dentro de `@layer elalba`) **pierde** contra el preflight, y el borde de acento se "apaga".
+
+Tres formas de evitarlo, ordenadas de menos a más invasiva:
+
+1. **Envolver tus estilos en un layer también** — agregá `@import "tailwindcss"` (Tailwind v4) o `@layer base, components, utilities;` (Tailwind v3) explícitamente, y asegurate de que tus utilidades vivan dentro de layers. Cuando ambos están layered, el orden de capas controla quién gana.
+2. **Desactivar el preflight** — en `tailwind.config.js`: `corePlugins: { preflight: false }`. Te pierde el reset pero el kit queda intacto.
+3. **Override puntual desde tu app** — si solo te molesta un componente, podés re-establecer la propiedad afuera de cualquier layer:
+   ```css
+   .card[class*="card--accent-"] { border-style: solid; }
+   ```
+
+A partir de v0.4.5 el kit mitiga este problema en `Card` usando `box-shadow inset` para la accent rail en vez de `border-left`. Otros componentes con bordes finos (`Input`, `Select`, `Table`) siguen dependiendo de `border-*` y son afectados por el preflight — si te pasa, andá por la opción (1) o (2).
+
+---
+
 ## Componentes
 
 | Categoría | Componentes |

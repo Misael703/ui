@@ -3,7 +3,7 @@ import { cx } from '../utils/cx';
 import { X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 
-export type CardAccent = 'brand' | 'success' | 'warning' | 'danger' | 'info';
+export type CardAccent = 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;

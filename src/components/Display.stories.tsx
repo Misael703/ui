@@ -22,6 +22,10 @@ export const CardConAccent: StoryObj = {
         <CardHeader>Pedido destacado</CardHeader>
         <CardBody>Cliente VIP — atención prioritaria.</CardBody>
       </Card>
+      <Card accent="secondary">
+        <CardHeader>Promo activa</CardHeader>
+        <CardBody>Usa el color secundario de la marca (token `--accent-secondary`).</CardBody>
+      </Card>
       <Card accent="success">
         <CardHeader>Despachado</CardHeader>
         <CardBody>Entregado el 28/04 a las 14:32.</CardBody>

@@ -867,18 +867,37 @@ a:hover {
 }
 .card--interactive:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
-/* card con accent lateral (estados / categorías) */
+/* card con accent lateral (estados / categorías).
+   Uses inset box-shadow instead of border-left so the rail survives
+   unlayered consumer border resets (e.g. Tailwind's preflight, which
+   sets `border-width: 0` on `*` outside any @layer — that would zero
+   out a layered `border-left-width: 4px` from this kit). */
 .card--accent-brand,
+.card--accent-secondary,
 .card--accent-success,
 .card--accent-warning,
 .card--accent-danger,
-.card--accent-info { border-left-width: 4px; }
+.card--accent-info {
+  box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-sm);
+}
+.card--accent-brand     { --card-accent-color: var(--color-brand-blue); }
+.card--accent-secondary { --card-accent-color: var(--accent-secondary); }
+.card--accent-success   { --card-accent-color: var(--color-success); }
+.card--accent-warning   { --card-accent-color: var(--color-warning); }
+.card--accent-danger    { --card-accent-color: var(--color-danger); }
+.card--accent-info      { --card-accent-color: var(--color-info); }
 
-.card--accent-brand   { border-left-color: var(--color-brand-blue); }
-.card--accent-success { border-left-color: var(--color-success); }
-.card--accent-warning { border-left-color: var(--color-warning); }
-.card--accent-danger  { border-left-color: var(--color-danger); }
-.card--accent-info    { border-left-color: var(--color-info); }
+/* Preserve the accent rail when an interactive card is hovered —
+   the base `.card--interactive:hover` swaps box-shadow, which would
+   otherwise wipe the inset rail. */
+.card--interactive.card--accent-brand:hover,
+.card--interactive.card--accent-secondary:hover,
+.card--interactive.card--accent-success:hover,
+.card--interactive.card--accent-warning:hover,
+.card--interactive.card--accent-danger:hover,
+.card--interactive.card--accent-info:hover {
+  box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-md);
+}
 
 /* KPI card */
 .kpi-card {

@@ -5,6 +5,39 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] — 2026-05-13
+
+**Minor patch.** Card accent rail now survives consumer-side border
+resets (notably Tailwind's `preflight`), plus a new `accent="secondary"`
+variant for dual-brand kits.
+
+### Fixed
+- **`Card` accent rail invisible when consumer applies an unlayered
+  border reset** (e.g. Tailwind v3+ preflight). The kit's
+  `border-left-width: 4px` lives in `@layer elalba`, so any unlayered
+  `border-width: 0` from the consumer wins by CSS spec. The accent rail
+  now uses `box-shadow: inset 4px 0 0 ...` instead of `border-left`,
+  which is unaffected by border resets. Behavior preserved for the
+  interactive hover state — accent stays during `:hover`.
+  *Visual delta:* cards with an accent are now ~3px narrower (no
+  longer extended by the 4px left border), and the text inside is
+  ~3px closer to the left edge. Imperceptible in most layouts.
+
+### Added
+- **`Card` accent variant `"secondary"`** — uses the existing
+  `--accent-secondary` token (which defaults to `--color-brand-orange`
+  in El Alba's defaults). Consumers with a different secondary brand
+  override the token at `:root` and the variant follows automatically.
+  Use case: highlighting promotional / featured cards that aren't
+  status-coded.
+  ```tsx
+  <Card accent="secondary">…</Card>
+  ```
+- **README → `Interop con Tailwind (u otro reset global)`** section
+  documenting why the kit's `@layer elalba` loses against unlayered
+  consumer styles, and three mitigation paths (layer your own styles,
+  disable preflight, scoped overrides).
+
 ## [0.4.4] — 2026-05-13
 
 **Patch release.** Closes the full set of drift between `tokens.css` and
