@@ -5,6 +5,43 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] — 2026-05-14
+
+**Minor feature.** Adds a weight scale to the design tokens. Both
+bundled font families (Outfit and DM Sans) are variable fonts covering
+the full 100–900+ range natively, so every step in the scale renders
+without faux-bold synthesis.
+
+### Added
+- **Weight scale tokens** in `_root.css`:
+  ```css
+  --weight-thin:       100;
+  --weight-extralight: 200;
+  --weight-light:      300;
+  --weight-regular:    400;
+  --weight-medium:     500;
+  --weight-semibold:   600;
+  --weight-bold:       700;
+  --weight-extrabold:  800;
+  --weight-black:      900;
+  ```
+  Use these in your CSS as `font-weight: var(--weight-semibold)`
+  instead of bare numbers for self-documenting weight choices.
+- **`Foundations → Weight Scale`** Storybook story — visualizes every
+  step on both display (Outfit) and body (DM Sans) families with usage
+  examples.
+
+### Note
+The kit's internal component CSS still uses bare numbers (`700`, `400`)
+for backward-compat and minimal diff. The tokens are for consumer /
+fork use and for future kit refactors.
+
+### Single source of truth in action
+This is the first release that benefits from the v0.5.2 refactor:
+adding the 9 weight tokens required editing **one file** (`_root.css`).
+Both `tokens.css` and `index.css` get them automatically via
+`@import` + postcss-import inlining.
+
 ## [0.5.2] — 2026-05-14
 
 **Internal refactor.** Eliminates the recurring drift between

@@ -213,6 +213,78 @@ export const Typography: StoryObj = {
 };
 
 // =============================================================================
+// Weight scale
+// =============================================================================
+
+const WEIGHT_STEPS = [
+  { token: 'weight-thin',       value: 100, label: 'Thin' },
+  { token: 'weight-extralight', value: 200, label: 'Extralight' },
+  { token: 'weight-light',      value: 300, label: 'Light' },
+  { token: 'weight-regular',    value: 400, label: 'Regular' },
+  { token: 'weight-medium',     value: 500, label: 'Medium' },
+  { token: 'weight-semibold',   value: 600, label: 'Semibold' },
+  { token: 'weight-bold',       value: 700, label: 'Bold' },
+  { token: 'weight-extrabold',  value: 800, label: 'Extrabold' },
+  { token: 'weight-black',      value: 900, label: 'Black' },
+];
+
+export const WeightScale: StoryObj = {
+  render: () => (
+    <div>
+      <SectionTitle>Display (Outfit, variable 100–900)</SectionTitle>
+      <p className="body-sm" style={{ color: 'var(--fg-muted)', marginBottom: 24 }}>
+        Outfit cubre todo el rango como variable font: cualquier weight es nativo (no faux).
+      </p>
+      <div style={{ display: 'grid', gap: 12 }}>
+        {WEIGHT_STEPS.map((w) => (
+          <div key={w.token} style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, alignItems: 'baseline', paddingBottom: 8, borderBottom: '1px solid var(--border-default)' }}>
+            <div>
+              <Caption>--{w.token}</Caption>
+              <div className="body-sm" style={{ color: 'var(--fg-muted)', marginTop: 4 }}>{w.label} ({w.value})</div>
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: `var(--${w.token})` as React.CSSProperties['fontWeight'], fontSize: 32, lineHeight: 1.1 }}>
+              Heavy machinery
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <SectionTitle>Body (DM Sans, variable 100–1000)</SectionTitle>
+      <p className="body-sm" style={{ color: 'var(--fg-muted)', marginBottom: 24 }}>
+        DM Sans también es variable: weights intermedios (300, 500, 600) son legítimos para body, no synthesized.
+      </p>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {WEIGHT_STEPS.map((w) => (
+          <div key={w.token} style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, alignItems: 'baseline' }}>
+            <div>
+              <Caption>--{w.token}</Caption>
+              <div className="body-sm" style={{ color: 'var(--fg-muted)', marginTop: 4 }}>{w.label} ({w.value})</div>
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontWeight: `var(--${w.token})` as React.CSSProperties['fontWeight'], fontSize: 16 }}>
+              Despacho del pedido #1042 — Constructora Norte SpA.
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <SectionTitle>Uso</SectionTitle>
+      <pre className="mono" style={{ padding: 16, background: 'var(--bg-subtle)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>{`/* En tu CSS */
+.my-emphasis {
+  font-weight: var(--weight-medium);  /* en lugar de "500" */
+}
+
+.my-card-title {
+  font-weight: var(--weight-semibold);
+  font-family: var(--font-display);
+}`}</pre>
+      <p className="body-sm" style={{ color: 'var(--fg-muted)', marginTop: 16 }}>
+        El kit interno sigue usando números pelados (700, 400) en sus componentes — los tokens son para uso del consumer / forks.
+      </p>
+    </div>
+  ),
+};
+
+// =============================================================================
 // Spacing
 // =============================================================================
 
