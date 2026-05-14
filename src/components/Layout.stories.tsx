@@ -33,6 +33,49 @@ export const TooltipBasico: StoryObj = {
   ),
 };
 
+/**
+ * Regression guard for v0.3.4 fix: `.tooltip__bubble` used to sit at
+ * `z-index: var(--z-sticky)` (=60), losing the stack against sticky table
+ * headers and similar elements. Now it uses `var(--z-tooltip)` (=1000).
+ * Hover the icon button in the first row — the tooltip should clear the
+ * sticky `<thead>` instead of disappearing behind it.
+ */
+export const TooltipEnContextoSticky: StoryObj = {
+  render: () => (
+    <div style={{ height: 220, overflowY: 'auto', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+      <table className="table" style={{ width: '100%' }}>
+        <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-surface)', zIndex: 60 }}>
+          <tr>
+            <th scope="col">Producto</th>
+            <th scope="col">SKU</th>
+            <th scope="col" style={{ textAlign: 'right' }}>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            { id: '1', name: 'Taladro percutor', sku: 'TLD-700' },
+            { id: '2', name: 'Sierra circular', sku: 'SRR-7' },
+            { id: '3', name: 'Lijadora orbital', sku: 'LIJ-300' },
+            { id: '4', name: 'Atornillador', sku: 'ATR-450' },
+            { id: '5', name: 'Pulidora', sku: 'PUL-180' },
+            { id: '6', name: 'Compresor', sku: 'CMP-50L' },
+          ].map((r) => (
+            <tr key={r.id}>
+              <td>{r.name}</td>
+              <td>{r.sku}</td>
+              <td style={{ textAlign: 'right' }}>
+                <Tooltip label={`Editar ${r.name}`}>
+                  <Button variant="ghost" size="sm">Editar</Button>
+                </Tooltip>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ),
+};
+
 export const DividerHorizontal: StoryObj = {
   render: () => (
     <div style={{ width: 320 }}>

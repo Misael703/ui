@@ -5,6 +5,45 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] — 2026-05-13
+
+**Patch release.** Fixes a leftover Integral CF reference that made v0.4.0
+visually incorrect, plus adds Storybook coverage for v0.3.4 and v0.3.0
+features that lacked stories.
+
+### Fixed
+- **`--font-display` in `styles.css`** still resolved to
+  `"Integral CF", "Arial Black", ...` from a leftover `:root` block in
+  `index.css`. The token was correctly flipped to Outfit in `tokens.css`
+  on v0.4.0 but `index.css` kept its own duplicate definition, so any
+  consumer importing `styles.css` (the recommended path per README) saw
+  Arial Black as the fallback — never Outfit, because Outfit wasn't even
+  in the token's font stack. `index.css` now matches `tokens.css`:
+  `"Outfit", "Helvetica Neue", Arial, sans-serif`.
+- **Three stale "Integral CF" comments** in `index.css` (tracking note,
+  fonts.css guidance, Avatar metrics comment) removed/generalized.
+- **README** "Fuentes (opcional)" section and "Forking → Fuentes"
+  pointers updated to reference Outfit + the current file layout.
+
+### Added
+- **`.storybook/fonts.css` + preview import** so Storybook actually loads
+  Outfit and Metropolis at dev time. Since v0.3.1 moved all `@font-face`
+  declarations to `fonts.css` and `preview.ts` only imported `index.css`,
+  Storybook had been rendering with fallback Helvetica/Arial fonts
+  without the maintainer realizing. Now mirrored with paths relative to
+  `.storybook/` so Vite resolves the assets in dev.
+- **`Foundations → Localization` story** — side-by-side demo of Spanish
+  defaults vs an English override via `LocaleProvider`. Closes the
+  documentation gap around the i18n layer shipped in v0.3.0.
+- **`Layout → TooltipEnContextoSticky` story** — regression guard for
+  the v0.3.4 tooltip z-index fix. Sticky `<thead z-index: 60>` with
+  tooltip buttons in row cells; if the tooltip ever drops below sticky
+  again the issue is visible at a glance.
+
+### Tests
+297/297 unchanged. JSDOM doesn't render fonts, so the v0.4.0 regression
+wasn't catchable by the existing suite.
+
 ## [0.4.1] — 2026-05-13
 
 **Patch release.** Single hydration fix.

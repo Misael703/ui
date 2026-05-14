@@ -1,5 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { LocaleProvider } from './locale';
+import { Modal } from './components/Overlay';
+import { DataTable } from './components/DataTable';
+import { Pagination } from './components/Inputs';
+import { Button } from './components/Button';
 
 const meta: Meta = {
   title: 'Foundations',
@@ -162,8 +167,8 @@ export const Typography: StoryObj = {
       <SectionTitle>Fuentes</SectionTitle>
       <div style={{ display: 'grid', gap: 12 }}>
         <div>
-          <Caption>--font-display · Integral CF</Caption>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, marginTop: 4 }}>FERRETERÍA EL ALBA 0123</div>
+          <Caption>--font-display · Outfit (variable, weights 100–900)</Caption>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, marginTop: 4 }}>The quick brown fox 0123</div>
         </div>
         <div>
           <Caption>--font-body · Metropolis</Caption>
@@ -513,4 +518,69 @@ export const InvertedSurfaces: StoryObj = {
       </div>
     </div>
   ),
+};
+
+export const Localization: StoryObj = {
+  render: () => {
+    const [openEs, setOpenEs] = React.useState(false);
+    const [openEn, setOpenEn] = React.useState(false);
+    const rows = [{ id: '1' }, { id: '2' }];
+    const cols = [
+      { key: 'name', header: 'Producto', accessor: () => '—' },
+      { key: 'sku', header: 'SKU', accessor: () => '—' },
+    ];
+    return (
+      <div style={{ display: 'grid', gap: 24 }}>
+        <SectionTitle>Localization (LocaleProvider)</SectionTitle>
+        <p style={{ color: 'var(--fg-muted)', fontSize: 14, margin: 0 }}>
+          ~80 strings hardcoded en español viven en <code>esMessages</code>. Envolvé tu árbol en{' '}
+          <code>{`<LocaleProvider messages={{...}}>`}</code> para overridear todo o algunas keys.
+          Sin provider, todo sale en español (default).
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div>
+            <h3 className="h3" style={{ marginTop: 0 }}>Default (español)</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <Button onClick={() => setOpenEs(true)}>Abrir modal</Button>
+              <Modal open={openEs} onClose={() => setOpenEs(false)} title="Confirmar acción">
+                <p>Mirá el botón ✕ arriba a la derecha — su <code>aria-label</code> es la key del locale.</p>
+              </Modal>
+              <DataTable rows={[]} rowKey={(r: { id: string }) => r.id} columns={cols} />
+              <Pagination page={1} pageSize={10} total={25} onPageChange={() => {}} />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="h3" style={{ marginTop: 0 }}>Override a inglés</h3>
+            <LocaleProvider
+              messages={{
+                'modal.close': 'Close dialog',
+                'table.empty': 'No data',
+                'pagination.label': 'Pagination',
+                'pagination.prev': 'Previous page',
+                'pagination.next': 'Next page',
+                'pagination.range': '{from}–{to} of {total}',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Button onClick={() => setOpenEn(true)}>Open modal</Button>
+                <Modal open={openEn} onClose={() => setOpenEn(false)} title="Confirm action">
+                  <p>Same Modal, close-button aria-label now reads "Close dialog".</p>
+                </Modal>
+                <DataTable rows={[]} rowKey={(r: { id: string }) => r.id} columns={cols} />
+                <Pagination page={1} pageSize={10} total={25} onPageChange={() => {}} />
+              </div>
+            </LocaleProvider>
+          </div>
+        </div>
+
+        <p style={{ color: 'var(--fg-muted)', fontSize: 13, marginTop: 8 }}>
+          Tip: pasá solo las keys que querés cambiar — el resto cae a <code>esMessages</code> vía
+          shallow merge. Templates como <code>{`{from}–{to} de {total}`}</code> se resuelven con el
+          helper <code>format()</code> exportado del kit.
+        </p>
+      </div>
+    );
+  },
 };

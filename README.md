@@ -201,7 +201,7 @@ Heredan `color` del padre y aceptan `size`, `strokeWidth`, `className` y `title`
 
 ### Fuentes (opcional)
 
-Si no usás `next/font`, podés cargar Integral CF + Metropolis empaquetadas con el kit:
+Si no usás `next/font`, podés cargar Outfit (display) + Metropolis (body) empaquetadas con el kit:
 
 ```ts
 // app/layout.tsx
@@ -368,11 +368,11 @@ Después de configurar, `<Logo>`, `<PriceDisplay>`, `<MoneyInput>`, `<CartDrawer
 
 ### 3. Fuentes
 
-Reemplaza los archivos en `public/fonts/` y `src/fonts/`, y actualiza:
-- Las declaraciones `@font-face` en `src/styles/index.css` (líneas 9-37) y `src/styles/fonts.css`
-- Los tokens `--font-display` y `--font-body` en `src/styles/index.css` (~línea 117)
+Reemplaza los archivos en `src/fonts/` y actualiza:
+- Las declaraciones `@font-face` en `src/styles/fonts.css` (única ubicación; `styles.css` y `tokens.css` no las declaran)
+- Los tokens `--font-display` y `--font-body` en `src/styles/tokens.css` e `src/styles/index.css` (ambos archivos mantienen `:root` propio en sync)
 
-Todo el kit usa `var(--font-display)` y `var(--font-body)`, no hace referencia directa a "Integral CF" ni "Metropolis" en componentes.
+Todo el kit usa `var(--font-display)` y `var(--font-body)`, no hace referencia directa a "Outfit" ni "Metropolis" en componentes.
 
 ### 4. Logos
 

@@ -6,7 +6,7 @@
    ========================================================================== */
 
 /* Fonts: `@font-face` declarations live exclusively in `fonts.css`.
-   Consumers that want the kit's bundled Integral CF + Metropolis fonts
+   Consumers that want the kit's bundled Outfit + Metropolis fonts
    should import that file explicitly:
 
      import "@misael703/elalba-ui/fonts.css";
@@ -154,7 +154,7 @@
   --bp-xl: 1280px;
 
   /* -------- Type families -------------------------------------------- */
-  --font-display: "Integral CF", "Arial Black", "Helvetica Neue", sans-serif;
+  --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
   --font-body:    "Metropolis", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
@@ -180,7 +180,7 @@
   --tracking-tight:  -0.01em;
   --tracking-normal: 0;
   --tracking-wide:   0.04em;
-  --tracking-wider:  0.08em;   /* Integral CF looks great at 40–80 tracking */
+  --tracking-wider:  0.08em;
 
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;
@@ -2144,8 +2144,8 @@ a:hover {
 .avatar--circle { border-radius: var(--radius-pill); }
 .avatar--square { border-radius: var(--radius-md); }
 .avatar__initials {
-  /* Body font has balanced metrics — display font (Integral CF) clips descenders
-     and pushes glyphs below center inside small circles. */
+  /* Body font has balanced metrics — display font clips descenders and
+     pushes glyphs below center inside small circles. */
   font-family: var(--font-body);
   font-weight: 700;
   letter-spacing: 0.02em;
