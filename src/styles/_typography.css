@@ -105,9 +105,17 @@ p {
   color: var(--fg-subtle);
 }
 
+/* Mono font for any <code> or .mono — applies regardless of context. */
 code, .mono {
   font-family: var(--font-mono);
   font-size: 0.95em;
+}
+/* Inline pill styling — applies to standalone <code> (NOT inside <pre>) and
+   the `.mono` utility. <pre> > <code> blocks intentionally skip the pill so
+   the parent <pre>'s container styling (e.g. CodeBlock's dark surface) wins
+   and the code text inherits the right color. */
+:not(pre) > code,
+.mono {
   background: var(--bg-subtle);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
@@ -154,6 +162,11 @@ a:hover {
   --fg-link-hover: var(--color-brand-orange);
   --border-default: color-mix(in srgb, var(--fg-on-brand) 20%, transparent);
   --border-strong:  color-mix(in srgb, var(--fg-on-brand) 35%, transparent);
+  /* Re-scope subtle/muted backgrounds for inline elements (code pills,
+     badges, kbd, etc.) — without this, anything using `var(--bg-subtle)`
+     keeps its light-gray bg and clashes with the inverted foreground. */
+  --bg-subtle:  color-mix(in srgb, var(--fg-on-brand) 12%, transparent);
+  --bg-muted:   color-mix(in srgb, var(--fg-on-brand) 18%, transparent);
   color: var(--fg-default);
 }
 .surface-inverse--brand { background: var(--color-brand-blue); }

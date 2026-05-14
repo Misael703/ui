@@ -5,6 +5,86 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] — 2026-05-14
+
+**Visual minor.** Migrates kit-wide focus indicators from CSS `outline`
+to `box-shadow` using the existing `--focus-ring-*` tokens. Also folds
+in two contrast/legibility fixes uncovered during Storybook QA:
+`<pre><code>` blocks rendering with invisible text and inline code pills
+inside `.surface-inverse` zones showing white-on-light-gray.
+
+### Why
+Native `outline` has two well-known limitations:
+1. It doesn't reliably respect `border-radius` (rectangular fallback
+   in some browsers / browser-versions).
+2. It's clipped by `overflow: hidden` on ancestors — caused the
+   v0.5.0 `NumberInput` phantom orange bar bug.
+
+`box-shadow` for focus rings (Adam Argyle / Chrome team pattern,
+adopted by Radix, Mantine v8, etc.) sidesteps both: shadows respect
+border-radius natively and aren't clipped by parent overflow.
+
+### Changed (12 focus rules migrated)
+All `outline: 2px solid var(--border-focus); outline-offset: Npx;`
+patterns replaced with `outline: none; box-shadow: var(--focus-ring-accent);`:
+
+- `.btn:focus-visible`
+- `.check input:focus-visible ~ .check__box` (custom checkbox)
+- `.chip__close:focus-visible`
+- `.tabs__tab:focus-visible`
+- `.data-table__sort-btn:focus-visible`
+- `.combobox__input:focus`
+- `.combobox__clear:focus-visible`
+- `.datepicker:focus-within`
+- `.daterange__trigger:focus-visible`
+- `.carousel:focus-visible`
+- `.collapsible__trigger:focus-visible`
+
+Plus `.bulk-bar__clear:focus-visible` (dark-context white focus,
+preserved with solid `box-shadow: 0 0 0 2px var(--color-white)`).
+
+### Visual delta
+- **Color preserved**: all migrated indicators stay orange
+  (`--focus-ring-accent`).
+- **Style changed**: from a 2px solid line offset by 1–4px to a 3px
+  translucent halo at the element's edge (35% opacity orange).
+- **Behavior changed**: focus rings now respect `border-radius` and
+  survive `overflow: hidden` ancestors without clipping.
+
+### Fixed (typography / contrast — uncovered via Storybook QA)
+- **`<pre><code>` blocks rendered with invisible text.** The global
+  `code, .mono` rule applied an inline "pill" style (light gray
+  background + padding + border-radius) to every `<code>` element,
+  including those inside `<pre>` blocks. Inside `CodeBlock` (dark
+  surface, light-gray text color), the `<code>` brought its OWN
+  light-gray background, leaving light-gray-on-light-gray. The pill
+  is now scoped to `:not(pre) > code, .mono` — only standalone inline
+  `<code>` and the explicit `.mono` utility get the pill. `<pre> >
+  <code>` falls through to whatever the container styles.
+- **Inline code pills inside `.surface-inverse` were illegible.**
+  `.surface-inverse` re-scoped `--fg-*` tokens to white but left
+  `--bg-subtle` at its default light gray — so `<code>` chips and
+  any element using subtle background tokens kept their light-gray
+  background while inheriting white text, ending up invisible.
+  `.surface-inverse` (and the `[data-tone="inverse"]` attribute
+  variant) now also re-scope `--bg-subtle` and `--bg-muted` to
+  translucent-light overlays (12% / 18% of `--fg-on-brand`), giving
+  inline elements a contextually correct dark backdrop with white
+  text. Fixes the Foundations → Inverted Surfaces story rendering
+  and any consumer using `<code>`, `Badge`, `KeyValueRow`, etc.
+  inside a surface-inverse region.
+
+### Not touched (known opportunities for future)
+- `.slider__input` thumb focus — hardcoded `0 0 0 4px rgba(...)`,
+  could be unified to `--focus-ring-brand`.
+- `.input-otp__slot:focus` — hardcoded `color-mix(... 25% ...)`,
+  could be unified to `--focus-ring-brand`.
+
+Both already use `box-shadow` so they don't have the original
+`outline` clipping bug — just stylistic inconsistency with the rest
+of the focus system. Will revisit when the kit needs another visual
+pass.
+
 ## [0.6.0] — 2026-05-14
 
 **Minor feature.** Adds a weight scale to the design tokens. Both
