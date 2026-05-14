@@ -44,6 +44,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   // CSS can play the exit animation, but already removed from new-toast
   // accounting (auto-dismiss timer cancelled, can't be paused/resumed).
   const [closingIds, setClosingIds] = React.useState<Set<string>>(new Set());
+  // SSR-safe portal gating. Without this, the first client render emits a
+  // `toast-stack` div into document.body via createPortal, while the
+  // server-rendered HTML doesn't — Next.js App Router flags it as a
+  // hydration mismatch. Starting `mounted=false` keeps the first client
+  // render identical to the server; the effect flips it true after
+  // hydration and the portal mounts on the next pass.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
   const timers = React.useRef<Map<string, ToastTimerState>>(new Map());
   const exitTimers = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const locale = useLocale();
@@ -156,7 +164,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={ctx}>
       {children}
-      {typeof document !== 'undefined' && createPortal(stack, document.body)}
+      {mounted && typeof document !== 'undefined' && createPortal(stack, document.body)}
     </ToastContext.Provider>
   );
 }

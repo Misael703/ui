@@ -5,6 +5,38 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] — 2026-05-13
+
+**Patch release.** Single hydration fix.
+
+### Fixed
+- **`<ToastProvider>` hydration mismatch in Next.js App Router.** The
+  provider always renders the `toast-stack` portal container so toasts
+  pushed later have a host to mount into. The previous SSR check —
+  `typeof document !== 'undefined' && createPortal(...)` — prevented a
+  *crash* on the server but did not prevent the *mismatch*: server
+  rendered nothing, client's first render rendered the portal, React
+  flagged the diff against the streamed HTML.
+
+  Standard React 18+ SSR-safe portal pattern applied: `mounted` state
+  starts as `false`, `useEffect` flips it to `true` after hydration.
+  Both server and the client's hydration render produce the same output
+  (no portal); the portal appears on the next render cycle, after
+  hydration is complete.
+
+  Reported by barritas during Fase 3 of the migration.
+
+### Not affected (verified)
+- Modal, Drawer, Popover, HoverCard, Combobox, MultiCombobox,
+  DatePicker, DateRangePicker, Menubar, NavigationMenu, Lightbox,
+  ContextMenu, CommandPalette — all are gated by user-interaction state
+  (`open`) that starts as `false`. Server and first client render
+  produce the same (no portal) output without any extra gating.
+
+### Tests
+297/297 unchanged. JSDOM doesn't reproduce SSR hydration, so verification
+is observational from a Next.js consumer.
+
 ## [0.4.0] — 2026-05-13
 
 **Minor release.** Display font swap — Integral CF (commercial license, not
