@@ -5,6 +5,66 @@ All notable changes to `@misael703/elalba-ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] — 2026-05-13
+
+**Patch release.** Closes the full set of drift between `tokens.css` and
+`index.css` that v0.4.2 only partially fixed: a deep CSS audit revealed
+the `.surface-inverse` utility was missing from `index.css`, plus
+`tokens.css` was missing entire sections of design tokens (status
+palette, z-index scale, focus rings, breakpoints, etc.) and one visible
+color divergence.
+
+(Version 0.4.3 was prepared during this work but never published; its
+`.surface-inverse` fix is folded into this release.)
+
+### Fixed
+- **`.surface-inverse` + `[data-tone="inverse"]`** missing from
+  `styles.css`. Originally shipped in v0.3.3 but added only to
+  `tokens.css`. Consumers who didn't also import `tokens.css` saw the
+  class as a no-op. The block (including `--brand` / `--dark` background
+  variants) is now mirrored in `index.css`, so a plain
+  `import '@misael703/elalba-ui/styles.css'` is enough to use it.
+- **`--color-danger` value divergence** — `tokens.css` had
+  `#d1462f` (warm/orange-tinted red) while `index.css` resolved
+  `--color-danger` to `--color-red-600` = `#dc2626` (clean red). Any
+  consumer using error states, destructive buttons, or form validation
+  saw a different color depending on which CSS entry point they
+  imported. `tokens.css` now aliases to the scale, so both files
+  resolve to `#dc2626`.
+- **`.daterange__popover` z-index** raised from `var(--z-sticky)` (60)
+  to `var(--z-tooltip)` (1000), matching the existing `.datepicker__popover`.
+  The date range picker was rendering behind sticky table headers — the
+  same regression class fixed for `.tooltip__bubble` in v0.3.4.
+
+### Added (to `tokens.css`, mirroring `index.css`)
+- **Full status color scale** (40 tokens): `--color-green-*`,
+  `--color-yellow-*`, `--color-red-*`, `--color-info-*` in 10 stops each.
+  Previously a `tokens.css`-only consumer had no access to non-base
+  shades of status colors.
+- **Z-index scale**: `--z-base`, `--z-dropdown`, `--z-sticky`,
+  `--z-overlay`, `--z-toast`, `--z-tooltip`, plus the new `--z-popover`
+  (1300) referenced by four components in `index.css`.
+- **Focus ring + overlay tokens**: `--focus-ring-brand`,
+  `--focus-ring-accent`, `--focus-ring-danger`, `--backdrop`.
+- **Breakpoint tokens**: `--bp-sm`, `--bp-md`, `--bp-lg`, `--bp-xl`.
+- **`--radius-xs`** (2px) and **`--text-2xs`** (0.6875rem) — both were
+  in `index.css` only.
+
+### Added (to `index.css`)
+- **`--z-popover: 1300`** in the `:root` z-index scale. Previously
+  referenced as `var(--z-popover, 1300)` (fallback magic number) in
+  Popover, HoverCard, Menubar, and NavigationMenu — consumers couldn't
+  override it via the token system.
+
+### Architecture note
+This is the third patch in a row (v0.4.2 → v0.4.4) closing drift
+between `tokens.css` and `index.css`. The duplication is intentional —
+it allows partial imports where a consumer wants only tokens — but
+mirroring is now established as load-bearing. A future release should
+evaluate either a single-source-of-truth build step (extract tokens
+into a separate file consumed by both) or a parity linter (test that
+fails if the two `:root` blocks diverge).
+
 ## [0.4.2] — 2026-05-13
 
 **Patch release.** Fixes a leftover Integral CF reference that made v0.4.0
