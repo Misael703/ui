@@ -7,7 +7,7 @@ export default { title: 'ERP/Marketing', tags: ['autodocs'] } as Meta;
 export const HeroBrand: StoryObj = {
   render: () => (
     <Hero
-      eyebrow="Patio Constructor"
+      eyebrow="Acme Supply Co"
       title="Materiales para tu obra"
       subtitle="Despachamos en 24h dentro de Santiago. Cotiza en línea o llámanos."
       actions={
@@ -53,7 +53,7 @@ export const TestimonialDemo: StoryObj = {
         quote="Llevo 3 años comprándoles. Despachan rápido y los precios son honestos. Recomendado para constructoras chicas."
         author="Patricio Rojas"
         role="Gerente de obra"
-        company="Constructora Norte SpA"
+        company="Northwind Builders"
         rating={5}
       />
     </div>

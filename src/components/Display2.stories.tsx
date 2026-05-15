@@ -7,8 +7,8 @@ export const Avatares: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <Avatar name="Misael Ocas" />
-      <Avatar name="Patio Constructor" size={40} />
-      <Avatar name="El Alba" size={48} />
+      <Avatar name="Acme Supply Co" size={40} />
+      <Avatar name="Acme Co" size={48} />
       <Avatar name="JN" status="online" />
       <Avatar src="https://i.pravatar.cc/64?img=12" alt="Cliente" size={48} />
     </div>

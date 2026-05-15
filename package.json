@@ -34,7 +34,14 @@
     "./styles.css": "./dist/styles.css",
     "./fonts.css": "./dist/fonts.css",
     "./tokens.css": "./dist/tokens.css",
-    "./fonts/*": "./dist/fonts/*"
+    "./fonts/*": "./dist/fonts/*",
+    "./presets/elalba": "./dist/presets/elalba/styles.css",
+    "./presets/elalba-defaults": {
+      "types": "./dist/presets/elalba/defaults.d.ts",
+      "import": "./dist/presets/elalba/defaults.mjs",
+      "require": "./dist/presets/elalba/defaults.js"
+    },
+    "./presets/elalba-logos/*": "./dist/presets/elalba/logos/*"
   },
   "files": [
     "dist"
@@ -43,8 +50,8 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/",
-    "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css",
+    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/ && mkdir -p dist/presets/elalba/logos && cp src/presets/elalba/logos/* dist/presets/elalba/logos/",
+    "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css && mkdir -p dist/presets/elalba && postcss src/presets/elalba/styles.css -o dist/presets/elalba/styles.css",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",

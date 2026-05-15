@@ -143,7 +143,7 @@ export const ContainerDemo: StoryObj = {
 export const KeyValueDemo: StoryObj = {
   render: () => (
     <KeyValue>
-      <KeyValueRow label="Cliente">Constructora Norte SpA</KeyValueRow>
+      <KeyValueRow label="Cliente">Northwind Builders</KeyValueRow>
       <KeyValueRow label="RUT">76.123.456-7</KeyValueRow>
       <KeyValueRow label="Pedido">#1042</KeyValueRow>
       <KeyValueRow label="Estado"><Badge variant="success">Despachado</Badge></KeyValueRow>

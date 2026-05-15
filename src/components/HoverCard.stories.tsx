@@ -18,7 +18,7 @@ export const Basico: StoryObj = {
           <Avatar name="Misael Ocas" size={48} />
           <div>
             <div style={{ fontWeight: 700 }}>Misael Ocas</div>
-            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Founder · Patio Constructor</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Founder · Acme Supply Co</div>
             <div style={{ fontSize: 12, marginTop: 6 }}>misael.ocas@gmail.com</div>
           </div>
         </div>

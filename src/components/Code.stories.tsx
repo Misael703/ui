@@ -26,7 +26,7 @@ export const JsonViewerDemo: StoryObj = {
       data={{
         order: {
           id: 1042,
-          customer: 'Constructora Norte SpA',
+          customer: 'Northwind Builders',
           items: [
             { sku: 'ELT-12', name: 'Cemento gris', qty: 10, price: 5490 },
             { sku: 'FRR-08', name: 'Fierro 12mm', qty: 5, price: 3290 },

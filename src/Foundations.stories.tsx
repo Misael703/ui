@@ -261,7 +261,7 @@ export const WeightScale: StoryObj = {
               <div className="body-sm" style={{ color: 'var(--fg-muted)', marginTop: 4 }}>{w.label} ({w.value})</div>
             </div>
             <div style={{ fontFamily: 'var(--font-body)', fontWeight: `var(--${w.token})` as React.CSSProperties['fontWeight'], fontSize: 16 }}>
-              Despacho del pedido #1042 — Constructora Norte SpA.
+              Despacho del pedido #1042 — Northwind Builders.
             </div>
           </div>
         ))}
@@ -303,10 +303,10 @@ export const BodyReview: StoryObj = {
       <section>
         <SectionTitle>Párrafo largo</SectionTitle>
         <p className="body" style={{ maxWidth: 520 }}>
-          Ferretería El Alba opera desde 1987 abasteciendo a constructoras y maestros independientes en la zona sur de Santiago. El catálogo actual supera las doce mil referencias entre herramientas manuales, eléctricas, fijaciones, pintura, sanitarios y materiales de construcción livianos. La operación se apoya en dos bodegas, cuatro vehículos de reparto y un equipo de quince personas que cubre venta presencial, despacho y postventa.
+          Acme Supply Co opera desde 1987 abasteciendo a constructoras y profesionales independientes en la zona industrial de la ciudad. El catálogo actual supera las doce mil referencias entre herramientas manuales, eléctricas, fijaciones, pintura, sanitarios y materiales de construcción livianos. La operación se apoya en dos bodegas, cuatro vehículos de reparto y un equipo de quince personas que cubre venta presencial, despacho y postventa.
         </p>
         <p className="body" style={{ maxWidth: 520 }}>
-          El sistema de gestión interno coordina inventario en tiempo real con las dos sucursales, integra el módulo de facturación electrónica con el SII y permite consultar márgenes por SKU desde cualquier punto de venta.
+          El sistema de gestión interno coordina inventario en tiempo real con las dos sucursales, integra el módulo de facturación electrónica con la autoridad tributaria y permite consultar márgenes por SKU desde cualquier punto de venta.
         </p>
         <p className="body-sm" style={{ maxWidth: 520, color: 'var(--fg-muted)' }}>
           Nota: si los renglones se sienten cansadores o las palabras se ven "designy" en lugar de neutrales, el body font no es el adecuado.
@@ -318,7 +318,7 @@ export const BodyReview: StoryObj = {
         <SectionTitle>Form denso</SectionTitle>
         <div style={{ display: 'grid', gap: 12, maxWidth: 420 }}>
           {[
-            { label: 'Razón social', value: 'Constructora Norte SpA' },
+            { label: 'Razón social', value: 'Northwind Builders' },
             { label: 'RUT', value: '76.123.456-7' },
             { label: 'Dirección de despacho', value: 'Av. Vicuña Mackenna 4860, La Florida' },
             { label: 'Contacto', value: 'Patricio Saavedra · +56 9 8124 4751' },
@@ -378,7 +378,7 @@ export const BodyReview: StoryObj = {
         <SectionTitle>Mix display + body</SectionTitle>
         <article style={{ maxWidth: 640 }}>
           <h2 className="h2">Despacho del pedido #1042</h2>
-          <p className="caption">Constructora Norte SpA · 14 ítems · 2026-05-08</p>
+          <p className="caption">Northwind Builders · 14 ítems · 2026-05-08</p>
           <h3 className="h3" style={{ marginTop: 24 }}>Resumen</h3>
           <p className="body">
             El pedido fue confirmado a las 10:48 y entró en preparación a las 11:12. La bodega norte completó el picking en 38 minutos, dentro del SLA de 60. El despacho salió a las 12:45 con destino a La Florida y se entregó a las 14:32 con firma del receptor.

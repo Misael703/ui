@@ -9,7 +9,7 @@ export const CardBasica: StoryObj = {
   render: () => (
     <Card style={{ maxWidth: 360 }}>
       <CardHeader>Pedido #1042</CardHeader>
-      <CardBody>Cliente: Constructora Norte. 14 ítems.</CardBody>
+      <CardBody>Cliente: Northwind Builders. 14 ítems.</CardBody>
       <CardFooter>$1.245.000</CardFooter>
     </Card>
   ),

@@ -17,6 +17,7 @@ export default defineConfig({
     'src/locale/index.ts',
     'src/utils/*.ts',
     'src/components/!(*.stories).tsx',
+    'src/presets/elalba/defaults.ts',
   ],
   format: ['esm', 'cjs'],
   dts: true,

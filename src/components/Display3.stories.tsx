@@ -9,7 +9,7 @@ export const UserCellDemo: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320 }}>
       <UserCell name="Misael Ocas" meta="misael.ocas@elalba.cl" />
-      <UserCell name="Patricia Rojas" meta="Admin · El Alba" size={40} />
+      <UserCell name="Patricia Rojas" meta="Admin · Acme Co" size={40} />
       <UserCell name="JN" meta="Bodeguero" avatarSrc="https://i.pravatar.cc/64?img=12" />
     </div>
   ),

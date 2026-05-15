@@ -29,7 +29,7 @@ export const ConfirmDialogDemo: StoryObj = {
 export const DescriptionListDemo: StoryObj = {
   render: () => (
     <DescriptionList style={{ maxWidth: 480 }}>
-      <DescriptionListItem label="Cliente" value="Constructora Norte SpA" />
+      <DescriptionListItem label="Cliente" value="Northwind Builders" />
       <DescriptionListItem label="RUT" value="76.123.456-7" editable onEdit={() => alert('Editar RUT')} />
       <DescriptionListItem label="Estado" value={<Badge variant="success">Despachado</Badge>} />
       <DescriptionListItem label="Total" value="$1.245.000" editable onEdit={() => alert('Editar total')} />
@@ -41,7 +41,7 @@ export const DiffViewerDemo: StoryObj = {
   render: () => (
     <DiffViewer
       entries={[
-        { field: 'Cliente', before: 'Constructora Sur', after: 'Constructora Norte SpA' },
+        { field: 'Cliente', before: 'Southwind Builders', after: 'Northwind Builders' },
         { field: 'Total', before: '$1.000.000', after: '$1.245.000' },
         { field: 'Estado', before: 'Borrador', after: 'Confirmado' },
         { field: 'Despacho', before: '2026-05-01', after: '2026-04-30' },
