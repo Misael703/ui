@@ -127,7 +127,9 @@
   --fg-muted:        var(--color-gray-600);
   --fg-subtle:       var(--color-gray-500);
   --fg-on-brand:     var(--color-white);
-  --fg-on-secondary: var(--color-white);
+  /* Secondary base is light (sand) in the default palette → dark text.
+     The El Alba preset (dark orange secondary) flips this back to white. */
+  --fg-on-secondary: var(--color-primary);
   --fg-link:         var(--color-primary);
   --fg-link-hover:   var(--color-secondary-600);
 

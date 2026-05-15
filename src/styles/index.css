@@ -109,16 +109,16 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* variants */
 .btn--primary {
-  background: var(--color-secondary);
-  color: var(--color-white);
+  background: var(--color-primary);
+  color: var(--fg-on-brand);
 }
-.btn--primary:hover:not(:disabled) { background: var(--color-secondary-700); }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-900); }
 
 .btn--secondary {
-  background: var(--color-primary);
-  color: var(--color-white);
+  background: var(--color-secondary);
+  color: var(--fg-on-secondary);
 }
-.btn--secondary:hover:not(:disabled) { background: var(--color-primary-800); }
+.btn--secondary:hover:not(:disabled) { background: var(--color-secondary-500); }
 
 .btn--outline {
   background: transparent;
