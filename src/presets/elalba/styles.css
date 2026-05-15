@@ -71,4 +71,9 @@
      at the 600 stop (matches the original @misael703/elalba-ui). */
   --color-primary:   var(--color-primary-700);
   --color-secondary: var(--color-secondary-600);
+
+  /* The generic base sets --fg-on-secondary dark because its secondary is
+     light sand; El Alba's secondary is a saturated orange, so restore the
+     white-on-orange CTA from v0.7.1 (was --fg-on-orange before the rename). */
+  --fg-on-secondary: var(--color-white);
 }

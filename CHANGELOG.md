@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-05-15
+
+**Patch.** Fixes a gap in the El Alba preset introduced in 1.0.0.
+
+### Fixed
+- **El Alba preset: secondary button had unreadable text.** The generic
+  base sets `--fg-on-secondary: var(--color-primary)` (dark) because the
+  generic secondary is light sand. The El Alba preset re-scoped
+  `--color-secondary` to its saturated orange but did not restore
+  `--fg-on-secondary`, so `.btn--secondary` rendered orange with El Alba
+  blue text instead of the white-on-orange CTA from v0.7.1. The preset
+  now sets `--fg-on-secondary: var(--color-white)`. Generic (non-preset)
+  consumers are unaffected.
+
 ## [1.0.0] — 2026-05-15
 
 **Major — generic kit + preset architecture.** The kit is no longer
