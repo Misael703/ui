@@ -41,10 +41,12 @@ const Caption = ({ children }: { children: React.ReactNode }) => (
 interface SwatchProps {
   token: string;
   hex?: string;
-  invert?: boolean;
 }
 
-function Swatch({ token, hex, invert }: SwatchProps) {
+/* The hex + token name sit BELOW the colour chip (on the page surface),
+   never overlaid on the swatch itself — overlaying white/dark text on an
+   arbitrary token colour can't satisfy WCAG contrast for mid-tones. */
+function Swatch({ token, hex }: SwatchProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [resolved, setResolved] = React.useState(hex ?? '');
   React.useEffect(() => {
@@ -62,14 +64,9 @@ function Swatch({ token, hex, invert }: SwatchProps) {
           borderRadius: 8,
           height: 56,
           border: '1px solid var(--border-default)',
-          color: invert ? 'var(--color-white)' : 'var(--fg-default)',
-          padding: 8,
-          display: 'flex',
-          alignItems: 'flex-end',
-          fontSize: 10,
-          fontFamily: 'var(--font-mono)',
         }}
-      >
+      />
+      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--fg-default)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {resolved}
       </div>
       <div style={{ fontSize: 11, color: 'var(--fg-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -93,7 +90,7 @@ const Scale = ({ name, base = 600 }: { name: string; base?: number }) => {
       <SubTitle>{name}</SubTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 8 }}>
         {steps.map((s) => (
-          <Swatch key={s} token={`color-${name.toLowerCase()}-${s}`} invert={s >= 500} />
+          <Swatch key={s} token={`color-${name.toLowerCase()}-${s}`} />
         ))}
       </div>
     </div>
@@ -109,8 +106,8 @@ export const Colors: StoryObj = {
     <div>
       <SectionTitle>Brand</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 480 }}>
-        <Swatch token="color-primary" invert />
-        <Swatch token="color-secondary" invert />
+        <Swatch token="color-primary" />
+        <Swatch token="color-secondary" />
       </div>
 
       <SectionTitle>Escalas brand</SectionTitle>
@@ -126,7 +123,7 @@ export const Colors: StoryObj = {
       <SectionTitle>Neutrales</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(11, 1fr)', gap: 8 }}>
         {[50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900].map((s) => (
-          <Swatch key={s} token={`color-gray-${s}`} invert={s >= 500} />
+          <Swatch key={s} token={`color-gray-${s}`} />
         ))}
       </div>
 
@@ -140,9 +137,9 @@ export const Colors: StoryObj = {
 
       <SectionTitle>Semánticos (foreground / texto)</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, maxWidth: 720 }}>
-        <Swatch token="fg-default" invert />
-        <Swatch token="fg-muted" invert />
-        <Swatch token="fg-subtle" invert />
+        <Swatch token="fg-default" />
+        <Swatch token="fg-muted" />
+        <Swatch token="fg-subtle" />
         <Swatch token="fg-on-brand" />
       </div>
 
@@ -150,8 +147,8 @@ export const Colors: StoryObj = {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, maxWidth: 720 }}>
         <Swatch token="border-default" />
         <Swatch token="border-strong" />
-        <Swatch token="border-brand" invert />
-        <Swatch token="border-focus" invert />
+        <Swatch token="border-brand" />
+        <Swatch token="border-focus" />
       </div>
     </div>
   ),
