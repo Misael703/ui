@@ -67,42 +67,8 @@
   /* Original white canvas (v1.0.0 default is warm cream paper). */
   --bg-canvas: var(--color-white);
 
-  /* El Alba's secondary button is navy (dark) → white text. The generic
-     default flips --fg-on-secondary to dark for the light sand secondary;
-     here we put it back to white. */
-  --fg-on-secondary: var(--color-white);
-
   /* Base aliases — El Alba anchors primary at the 700 stop and secondary
      at the 600 stop (matches the original @misael703/elalba-ui). */
   --color-primary:   var(--color-primary-700);
   --color-secondary: var(--color-secondary-600);
-}
-
-/* ---------------------------------------------------------------------------
-   El Alba button convention (v0.7.1 parity).
-
-   El Alba deliberately inverted the button hierarchy: the PRIMARY call to
-   action was orange (the `secondary` token) and the SECONDARY button was
-   navy (the `primary` token) — orange "shouts" louder as a CTA. The generic
-   kit (v1.0.0+) uses the intuitive mapping instead (.btn--primary →
-   --color-primary). This block restores El Alba's inversion so the preset
-   is pixel-identical to @misael703/elalba-ui@0.7.1.
-
-   These rules are unlayered, so they win over the kit's @layer elalba
-   button styles by CSS cascade-layer precedence.
-
-   ─ If a consumer prefers the generic mapping (primary button = primary
-     color), delete this block from their copy / fork. Flagged for the
-     barritas migration decision. ─ */
-.btn--primary {
-  background: var(--color-secondary);
-}
-.btn--primary:hover:not(:disabled) {
-  background: var(--color-secondary-700);
-}
-.btn--secondary {
-  background: var(--color-primary);
-}
-.btn--secondary:hover:not(:disabled) {
-  background: var(--color-primary-800);
 }

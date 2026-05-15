@@ -3254,6 +3254,22 @@ button, input, select, textarea { box-sizing: border-box; }
 .hero--image .hero__actions .btn--ghost:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.12);
 }
+/* `.btn--primary` shares `--color-primary` with `.hero--brand`'s
+   background — on dark/branded heroes it would vanish. Invert it to a
+   solid white button with brand-colored text (the standard "light CTA
+   on a dark hero" pattern). Scoped to `.hero__actions` so nested cards
+   keep their own primary buttons. */
+.hero--brand .hero__actions .btn--primary,
+.hero--inverse .hero__actions .btn--primary,
+.hero--image .hero__actions .btn--primary {
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+.hero--brand .hero__actions .btn--primary:hover:not(:disabled),
+.hero--inverse .hero__actions .btn--primary:hover:not(:disabled),
+.hero--image .hero__actions .btn--primary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.88);
+}
 
 /* ---------- Testimonial ----------------------------------------------- */
 .testimonial { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-6); margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
