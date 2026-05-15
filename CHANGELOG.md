@@ -1,9 +1,94 @@
 # Changelog
 
-All notable changes to `@misael703/elalba-ui` will be documented here.
+All notable changes to `@misael703/ui` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] — 2026-05-15
+
+**Major — generic kit + preset architecture.** The kit is no longer
+El Alba-branded by default. It ships a neutral "warm earth" palette and
+El Alba is now an opt-in preset. Package renamed
+`@misael703/elalba-ui` → `@misael703/ui`.
+
+### Migration guide (for El Alba / barritas consumers)
+
+To reproduce the exact pre-1.0 look:
+
+```diff
+- "@misael703/elalba-ui": "^0.7.1"
++ "@misael703/ui": "^1.0.0"
+```
+
+```ts
+import "@misael703/ui/styles.css";
+import "@misael703/ui/presets/elalba";        // restores El Alba palette
+import { elalbaDefaults } from "@misael703/ui/presets/elalba-defaults";
+configureBrand(elalbaDefaults);               // CLP / es-CL / "El Alba"
+// Logos: @misael703/ui/presets/elalba-logos/<name>.svg
+```
+
+The preset restores the El Alba blue/orange scales, the original cool
+neutral greys and the white canvas — pixel-identical to v0.7.1, **with
+two intentional exceptions** (see Breaking).
+
+### Breaking
+
+- **Package renamed**: `@misael703/elalba-ui` → `@misael703/ui`. The
+  old name is deprecated on npm (points here).
+- **Design token renames** (update any consumer CSS overrides):
+  | Old | New |
+  |---|---|
+  | `--color-brand-blue` | `--color-primary` |
+  | `--color-brand-orange` | `--color-secondary` |
+  | `--color-blue-{50..900}` | `--color-primary-{50..900}` |
+  | `--color-orange-{50..900}` | `--color-secondary-{50..900}` |
+  | `--fg-on-orange` | `--fg-on-secondary` |
+- **Default palette changed**: generic kit is now espresso primary
+  (`#423e37`) + sand secondary (`#e4bb97`) on a cream canvas
+  (`#fef5ef`), warm stone neutrals. Import the El Alba preset to get
+  the old blue/orange/white look back.
+- **Button color mapping fixed** (applies even with the El Alba
+  preset): `.btn--primary` now uses `--color-primary` and
+  `.btn--secondary` uses `--color-secondary`. v0.7.1 had these
+  inverted (an El Alba-specific orange-CTA convention baked into the
+  component). If you relied on the inversion, your primary buttons
+  will now be navy (El Alba primary) instead of orange — adopt the
+  generic mapping or override `.btn--*` in your app.
+- **Hero primary button on dark heroes**: `.btn--primary` inside
+  `.hero--brand` / `.hero--inverse` / `.hero--image` now renders as a
+  solid white CTA with brand-colored text (previously it shared the
+  hero background and vanished once the button mapping was fixed).
+
+### Added
+
+- **`@misael703/ui/presets/elalba`** — CSS token overrides restoring
+  the El Alba brand palette + cool neutrals + white canvas.
+- **`@misael703/ui/presets/elalba-defaults`** — `elalbaDefaults`
+  (`BrandDefaults`: CLP, es-CL, "El Alba", `/assets/logos`).
+- **`@misael703/ui/presets/elalba-logos/*`** — the 16 bundled El Alba
+  logo assets (4 variants × light/dark × svg/png).
+- **Single-source token architecture**: `_root.css` + `_typography.css`
+  partials, inlined into `styles.css` / `tokens.css` at build via
+  postcss-import (eliminates the v0.4.x drift class entirely).
+- **Weight scale tokens**: `--weight-thin` … `--weight-black`.
+- **Storybook preset switcher** — a "Preset" toolbar global toggles
+  the real El Alba preset CSS at runtime (Genérico ↔ El Alba).
+- **`Dockerfile`** for hosting the Storybook as a static site.
+
+### Changed / Fixed (rolled up from the 0.5–0.7 line)
+
+- Body font Metropolis → DM Sans (variable, single woff2).
+- Focus rings migrated `outline` → `box-shadow` (`--focus-ring-*`),
+  fixing clipping under `overflow: hidden` + border-radius.
+- Table scroll shadows are now overflow-aware (both edges).
+- `<pre><code>` and inline code inside `.surface-inverse` no longer
+  render invisible (contrast fixes).
+- Storybook taxonomy: consistent English tree, nine clean top-level
+  groups, generic demo copy (no El Alba / Chile-specific strings
+  outside the preset).
+- CI on Node 20 LTS, Actions v5.
 
 ## [0.7.1] — 2026-05-14
 

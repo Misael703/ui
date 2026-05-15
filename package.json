@@ -1,6 +1,6 @@
 {
   "name": "@misael703/ui",
-  "version": "0.7.1",
+  "version": "1.0.0",
   "description": "Generic React + TypeScript UI kit, optimized for Next.js. Tokens, accessible components, runtime-configurable theming via presets.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",

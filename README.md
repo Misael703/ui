@@ -1,4 +1,4 @@
-# @misael703/elalba-ui
+# @misael703/ui
 
 UI Kit React + TypeScript multi-marca, optimizado para Next.js (App Router).
 
@@ -10,10 +10,10 @@ Incluye tokens (colores, tipografía, espacio, radii, sombras, motion) y compone
 
 ## Instalación
 
-El paquete está publicado en **npm público** ([registry.npmjs.org](https://www.npmjs.com/package/@misael703/elalba-ui)) bajo licencia MIT. No requiere autenticación.
+El paquete está publicado en **npm público** ([registry.npmjs.org](https://www.npmjs.com/package/@misael703/ui)) bajo licencia MIT. No requiere autenticación.
 
 ```bash
-npm install @misael703/elalba-ui
+npm install @misael703/ui
 # pares
 npm install react react-dom
 ```
@@ -21,21 +21,35 @@ npm install react react-dom
 ### Actualizar a una nueva versión
 
 ```bash
-npm outdated @misael703/elalba-ui          # ver si hay versión nueva
-npm update @misael703/elalba-ui            # sube hasta donde el rango permite
-npm install @misael703/elalba-ui@latest    # fuerza la última (ignora rango)
-npm install @misael703/elalba-ui@0.2.1     # fija una versión específica
+npm outdated @misael703/ui          # ver si hay versión nueva
+npm update @misael703/ui            # sube hasta donde el rango permite
+npm install @misael703/ui@latest    # fuerza la última (ignora rango)
+npm install @misael703/ui@0.2.1     # fija una versión específica
 ```
 
-> ⚠️ Mientras el paquete esté en `0.x.x` la API se considera inestable — cualquier `minor` puede traer breaking changes. Lee las [release notes](https://github.com/Misael703/elalba-ui/releases) o el [CHANGELOG](./CHANGELOG.md) antes de subir de minor o major.
+> Desde `1.0.0` el paquete sigue [SemVer](https://semver.org/) estable: los `breaking changes` solo ocurren en bumps `major`. Lee las [release notes](https://github.com/Misael703/ui/releases) o el [CHANGELOG](./CHANGELOG.md) antes de subir de major.
+
+### Migrando desde `@misael703/elalba-ui`
+
+`@misael703/ui` es el sucesor renombrado y genérico. El kit ya **no** trae los colores de El Alba por defecto — ahora es un preset opt-in:
+
+```ts
+import '@misael703/ui/styles.css';
+import '@misael703/ui/presets/elalba';                      // paleta El Alba
+import { elalbaDefaults } from '@misael703/ui/presets/elalba-defaults';
+configureBrand(elalbaDefaults);                             // CLP / es-CL / "El Alba"
+// Logos: @misael703/ui/presets/elalba-logos/<variant>-<bg>.svg
+```
+
+Con el preset el render es idéntico a `elalba-ui@0.7.1` salvo el mapping de botones (`.btn--primary` ahora usa el color primario, no el secundario). Guía completa en el [CHANGELOG → 1.0.0](./CHANGELOG.md).
 
 ## Uso en Next.js (App Router)
 
 **1) Importa los estilos en `app/layout.tsx` (una sola vez):**
 
 ```tsx
-import '@misael703/elalba-ui/styles.css';
-import { ToastProvider } from '@misael703/elalba-ui';
+import '@misael703/ui/styles.css';
+import { ToastProvider } from '@misael703/ui';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -56,7 +70,7 @@ import {
   Input, FormField, Badge, Alert,
   Modal, Drawer, Tabs, TabList, Tab, TabPanel,
   Stepper, useToast,
-} from '@misael703/elalba-ui';
+} from '@misael703/ui';
 
 export function NewOrder() {
   const { push } = useToast();
@@ -132,7 +146,7 @@ Todos los componentes son **type-safe**, exponen `forwardRef` cuando aplica y ac
 
 ```tsx
 import Link from 'next/link';
-import { AppShell } from '@misael703/elalba-ui';
+import { AppShell } from '@misael703/ui';
 
 <AppShell
   brand={<img src="/logo.svg" alt="El Alba" height={28} />}
@@ -162,7 +176,7 @@ El kit no incluye virtualización built-in — para datasets grandes (>200 filas
 'use client';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
-import { DataTable } from '@misael703/elalba-ui';
+import { DataTable } from '@misael703/ui';
 
 function VirtualTable({ rows, columns, rowKey }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -200,12 +214,12 @@ Para casos donde el sort/filter pasa por el server, mantené `<DataTable rows={p
 
 ### Charts (Recharts opcional)
 
-`@misael703/elalba-ui` no incluye Recharts: lo recibe por prop. Instala `recharts` en tu app y pásalo:
+`@misael703/ui` no incluye Recharts: lo recibe por prop. Instala `recharts` en tu app y pásalo:
 
 ```tsx
 'use client';
 import * as Recharts from 'recharts';
-import { LineChart } from '@misael703/elalba-ui';
+import { LineChart } from '@misael703/ui';
 
 <LineChart
   recharts={Recharts}
@@ -217,10 +231,10 @@ import { LineChart } from '@misael703/elalba-ui';
 
 ### Iconos
 
-`@misael703/elalba-ui` exporta un set de íconos SVG (24×24, `currentColor`, stroke 1.75) listos para usar:
+`@misael703/ui` exporta un set de íconos SVG (24×24, `currentColor`, stroke 1.75) listos para usar:
 
 ```tsx
-import { Search, ShoppingCart, ChevronRight } from '@misael703/elalba-ui';
+import { Search, ShoppingCart, ChevronRight } from '@misael703/ui';
 
 <Button iconLeft={<ShoppingCart />}>Ver carro</Button>
 <ChevronRight size={16} />
@@ -234,8 +248,8 @@ Si no usás `next/font`, podés cargar Outfit (display) + DM Sans (body) empaque
 
 ```ts
 // app/layout.tsx
-import "@misael703/elalba-ui/fonts.css";
-import "@misael703/elalba-ui/styles.css";
+import "@misael703/ui/fonts.css";
+import "@misael703/ui/styles.css";
 ```
 
 ---
@@ -278,7 +292,7 @@ Los tokens viven en `:root`. La paleta de marca y los tokens semánticos están 
 ¿Solo querés los tokens (sin los componentes)? Importá únicamente `tokens.css`:
 
 ```ts
-import '@misael703/elalba-ui/tokens.css';
+import '@misael703/ui/tokens.css';
 ```
 
 ### Superficies invertidas (zonas con bg oscuro)
@@ -332,7 +346,7 @@ Las publicaciones a npm están automatizadas con un workflow de GitHub Actions (
 
 **Autenticación**: el workflow usa **npm Trusted Publishing** (OIDC) — no hay `NPM_TOKEN` ni secrets estáticos. npm confía directamente en GitHub Actions vía OpenID Connect, y cada publish se firma con `--provenance` para que el tarball quede criptográficamente atado al commit + workflow que lo produjo.
 
-Configurado en: [npmjs.com/package/@misael703/elalba-ui/access](https://www.npmjs.com/package/@misael703/elalba-ui/access) → Trusted Publisher → `Misael703/elalba-ui` workflow `publish.yml`.
+Configurado en: [npmjs.com/package/@misael703/ui/access](https://www.npmjs.com/package/@misael703/ui/access) → Trusted Publisher → `Misael703/ui` workflow `publish.yml`.
 
 ### Sacar una nueva versión
 
@@ -381,7 +395,7 @@ Llama a `configureBrand()` una sola vez al arranque:
 
 ```tsx
 // app/layout.tsx (Next.js)
-import { configureBrand } from '@misael703/elalba-ui';
+import { configureBrand } from '@misael703/ui';
 
 configureBrand({
   name: 'Mi Marca',
@@ -416,7 +430,7 @@ configureBrand({ logoBasePath: '/static/mi-marca' });
 Por defecto los strings del kit están en español ("Cerrar", "Sin datos", "Página anterior", etc.). Para una app en otro idioma, envuelve el árbol en un `LocaleProvider` con las claves que quieras traducir:
 
 ```tsx
-import { LocaleProvider } from '@misael703/elalba-ui';
+import { LocaleProvider } from '@misael703/ui';
 
 <LocaleProvider
   messages={{
