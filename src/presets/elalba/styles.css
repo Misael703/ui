@@ -12,11 +12,17 @@
 
    Output is pixel-identical to @misael703/elalba-ui@0.7.1.
 
-   Overrides the full primary/secondary scales plus the base aliases. The
-   kit's semantic tokens (--accent-primary, --border-focus, --bg-inverse,
-   --fg-link-hover, etc.) all reference --color-primary* / --color-secondary*,
-   so they pick up these El Alba values automatically — no need to override
-   the semantic layer here. */
+   Restores everything v1.0.0's default palette changed that El Alba
+   relied on:
+     • primary scale  → El Alba blue (Pantone 287 C)
+     • secondary scale → El Alba orange (Pantone 165 C)
+     • neutral scale   → the original cool slate-tinted greys
+     • --bg-canvas     → pure white (v1.0.0 default is warm cream paper)
+
+   The kit's semantic tokens (--accent-primary, --border-focus,
+   --bg-inverse, --fg-muted, etc.) all reference these, so they pick up
+   the El Alba values automatically — no need to override the semantic
+   layer here. */
 
 :root {
   /* El Alba blue scale (Pantone 287 C) → primary */
@@ -42,6 +48,24 @@
   --color-secondary-200: #ffd6bb;
   --color-secondary-100: #ffe8d7;
   --color-secondary-50:  #fff5ee;
+
+  /* Original cool slate-tinted neutral scale (v1.0.0 default switched
+     to warm stone). Restored so muted text / borders match v0.7.1. */
+  --color-ink:       #0c1220;
+  --color-gray-900:  #161c2c;
+  --color-gray-800:  #23293a;
+  --color-gray-700:  #3a4052;
+  --color-gray-600:  #5b6173;
+  --color-gray-500:  #7e8495;
+  --color-gray-400:  #a6acbb;
+  --color-gray-300:  #c9cdd7;
+  --color-gray-200:  #e3e6ec;
+  --color-gray-150:  #eceef3;
+  --color-gray-100:  #f4f5f8;
+  --color-gray-50:   #fafbfc;
+
+  /* Original white canvas (v1.0.0 default is warm cream paper). */
+  --bg-canvas: var(--color-white);
 
   /* Base aliases — El Alba anchors primary at the 700 stop and secondary
      at the 600 stop (matches the original @misael703/elalba-ui). */

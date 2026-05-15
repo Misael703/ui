@@ -10,47 +10,55 @@
    `@font-face` declarations live in `fonts.css` (opt-in import). */
 
 :root {
-  /* -------- Brand colors (spec-exact) -------------------------------- */
-  --color-primary:        #002f87;  /* Pantone 287 C — primary  */
-  --color-secondary:      #ff671d;  /* Pantone 165 C — secondary*/
+  /* -------- Brand colors --------------------------------------------- */
+  /* Default (generic) palette: warm earth — espresso primary + sand
+     secondary, sitting on a cream paper canvas. Distinct, premium,
+     anti-corporate. For a different brand, override via a preset
+     (see src/presets/) — every semantic token cascades from these. */
+  --color-primary:        var(--color-primary-800);   /* espresso */
+  --color-secondary:      var(--color-secondary-400);  /* sand     */
 
-  /* Extended palette — tints/shades of the two brand colors.
-     Tints generated toward white, shades toward black.                 */
-  --color-primary-900: #001a4d;
-  --color-primary-800: #00246b;
-  --color-primary-700: #002f87;   /* = primary base                        */
-  --color-primary-600: #1a46a0;
-  --color-primary-500: #3a62b4;
-  --color-primary-400: #6b8aca;
-  --color-primary-300: #9bb1dc;
-  --color-primary-200: #c7d3ea;
-  --color-primary-100: #e3eaf4;
-  --color-primary-50:  #f2f5fb;
+  /* Primary — espresso / taupe scale. Base at 800 (dark premium
+     buttons + cream text); 900 reserved for hover/pressed. */
+  --color-primary-900: #2e2b26;
+  --color-primary-800: #423e37;   /* = primary base */
+  --color-primary-700: #554839;
+  --color-primary-600: #6b5a47;
+  --color-primary-500: #87735e;
+  --color-primary-400: #a8957f;
+  --color-primary-300: #c8b8a6;
+  --color-primary-200: #dfd3c6;
+  --color-primary-100: #f0e9e1;
+  --color-primary-50:  #faf6f2;
 
-  --color-secondary-900: #8c3000;
-  --color-secondary-800: #b84300;
-  --color-secondary-700: #e05400;
-  --color-secondary-600: #ff671d;  /* = secondary base                     */
-  --color-secondary-500: #ff8344;
-  --color-secondary-400: #ffa06e;
-  --color-secondary-300: #ffbe98;
-  --color-secondary-200: #ffd6bb;
-  --color-secondary-100: #ffe8d7;
-  --color-secondary-50:  #fff5ee;
+  /* Secondary — sand / café-con-leche scale. Base at 400 (light
+     decorative accent: eyebrows, card rails — not a CTA color). */
+  --color-secondary-900: #573820;
+  --color-secondary-800: #7a4f30;
+  --color-secondary-700: #9c6840;
+  --color-secondary-600: #be8456;
+  --color-secondary-500: #d4a074;
+  --color-secondary-400: #e4bb97;  /* = secondary base */
+  --color-secondary-300: #ebcbab;
+  --color-secondary-200: #f1dbc2;
+  --color-secondary-100: #f8eddf;
+  --color-secondary-50:  #fcf7f1;
 
-  /* Neutrals — cool-leaning greys (Phase 3 may warm these up)           */
-  --color-ink:       #0c1220;
-  --color-gray-900:  #161c2c;
-  --color-gray-800:  #23293a;
-  --color-gray-700:  #3a4052;
-  --color-gray-600:  #5b6173;
-  --color-gray-500:  #7e8495;
-  --color-gray-400:  #a6acbb;
-  --color-gray-300:  #c9cdd7;
-  --color-gray-200:  #e3e6ec;
-  --color-gray-150:  #eceef3;
-  --color-gray-100:  #f4f5f8;
-  --color-gray-50:   #fafbfc;
+  /* Neutrals — warm stone greys (brown undertone) to pair with the
+     espresso primary. Luminance steps mirror the previous cool scale
+     so contrast ratios are preserved; only the temperature shifts. */
+  --color-ink:       #1c1917;
+  --color-gray-900:  #292524;
+  --color-gray-800:  #44403c;
+  --color-gray-700:  #57534e;
+  --color-gray-600:  #78716c;
+  --color-gray-500:  #a8a29e;
+  --color-gray-400:  #c4bcb4;
+  --color-gray-300:  #d6d3d1;
+  --color-gray-200:  #e7e5e4;
+  --color-gray-150:  #efedeb;
+  --color-gray-100:  #f5f5f4;
+  --color-gray-50:   #fafaf9;
   --color-white:     #ffffff;
 
   /* Status palettes — escalas completas para flexibilidad */
@@ -105,7 +113,10 @@
   --color-info:      var(--color-info-600);
 
   /* -------- Semantic color tokens ------------------------------------ */
-  --bg-canvas:       var(--color-white);
+  /* Canvas is warm cream paper; surface stays pure white so Cards,
+     Modals, etc. visually float above the page. The contrast between
+     the two is the signature of the default look. */
+  --bg-canvas:       #fef5ef;
   --bg-surface:      var(--color-white);
   --bg-subtle:       var(--color-gray-100);
   --bg-muted:        var(--color-gray-150);
