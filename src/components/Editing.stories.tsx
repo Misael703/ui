@@ -4,7 +4,7 @@ import { ConfirmDialog, DescriptionList, DescriptionListItem, DiffViewer, Transf
 import { Button } from './Button';
 import { Badge } from './Display';
 
-export default { title: 'ERP/Editing', tags: ['autodocs'] } as Meta;
+export default { title: 'Patterns/Editing', tags: ['autodocs'] } as Meta;
 
 export const ConfirmDialogDemo: StoryObj = {
   render: () => {

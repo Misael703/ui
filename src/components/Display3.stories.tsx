@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { UserCell, StatusIndicator, Timeline, TimelineItem, Tree, Calendar } from './Display3';
 import { CheckCircle, Edit, Bell, Folder, Package } from './Icons';
 
-export default { title: 'Display/Timeline & Tree', tags: ['autodocs'] } as Meta;
+export default { title: 'Data Display/Timeline & Tree', tags: ['autodocs'] } as Meta;
 
 export const UserCellDemo: StoryObj = {
   render: () => (

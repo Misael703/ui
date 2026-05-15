@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PermissionMatrix } from './Permissions';
 
-export default { title: 'ERP/Permissions', tags: ['autodocs'] } as Meta;
+export default { title: 'Patterns/Permissions', tags: ['autodocs'] } as Meta;
 
 export const Demo: StoryObj = {
   render: () => {

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Card, CardHeader, CardBody, CardFooter, Badge, Alert, Skeleton, Spinner, Chip, ChipGroup, ProductCard } from './Display';
 import { Button } from './Button';
 
-export default { title: 'Display/General', tags: ['autodocs'] } as Meta;
+export default { title: 'Data Display/Card & Badge', tags: ['autodocs'] } as Meta;
 
 export const CardBasica: StoryObj = {
   render: () => (

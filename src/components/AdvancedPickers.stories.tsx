@@ -4,7 +4,7 @@ import { MultiCombobox, DateRangePicker, CommandPalette } from './AdvancedPicker
 import { Button } from './Button';
 import type { DateRange } from './AdvancedPickers';
 
-export default { title: 'Forms/Pickers Avanzados', tags: ['autodocs'] } as Meta;
+export default { title: 'Forms/Advanced Pickers', tags: ['autodocs'] } as Meta;
 
 export const MultiSeleccion: StoryObj = {
   render: () => {

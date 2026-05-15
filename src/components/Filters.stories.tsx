@@ -5,7 +5,7 @@ import { Button } from './Button';
 import { Checkbox } from './Form';
 import { Slider } from './InputsExtra';
 
-export default { title: 'ERP/Filters', tags: ['autodocs'] } as Meta;
+export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
 export const FilterPanelDemo: StoryObj = {
   render: () => {

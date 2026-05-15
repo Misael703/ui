@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { CommentThread, AttachmentList } from './Comments';
 
-export default { title: 'ERP/Comments', tags: ['autodocs'] } as Meta;
+export default { title: 'Patterns/Comments', tags: ['autodocs'] } as Meta;
 
 export const CommentThreadDemo: StoryObj = {
   render: () => {

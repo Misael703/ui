@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { InputOTP } from './InputOTP';
 
-export default { title: 'Forms/InputOTP', tags: ['autodocs'] } as Meta;
+export default { title: 'Forms/Input OTP', tags: ['autodocs'] } as Meta;
 
 export const Basico: StoryObj = {
   render: () => {

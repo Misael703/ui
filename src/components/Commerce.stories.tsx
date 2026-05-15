@@ -8,7 +8,7 @@ import {
 } from './Commerce';
 import { Button } from './Button';
 
-export default { title: 'ERP/Commerce', tags: ['autodocs'] } as Meta;
+export default { title: 'Patterns/Commerce', tags: ['autodocs'] } as Meta;
 
 export const RatingDemo: StoryObj = {
   render: () => {

@@ -8,7 +8,7 @@ import {
 import { Button } from './Button';
 import { Badge } from './Display';
 
-export default { title: 'Layout/General', tags: ['autodocs'] } as Meta;
+export default { title: 'Layout/Container & Stack', tags: ['autodocs'] } as Meta;
 
 export const TabsBasicos: StoryObj = {
   render: () => (

@@ -5,7 +5,7 @@ import { Badge } from './Display';
 import { Input } from './Form';
 import { Button } from './Button';
 
-export default { title: 'Data/DataTable', tags: ['autodocs'] } as Meta;
+export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
 
 const rows = [
   { id: '1', name: 'Taladro percutor', sku: 'TLD-700', stock: 24, price: 89990 },

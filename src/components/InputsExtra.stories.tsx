@@ -12,7 +12,7 @@ import {
   CheckboxGroup,
 } from './InputsExtra';
 
-export default { title: 'Forms/Avanzados', tags: ['autodocs'] } as Meta;
+export default { title: 'Forms/Advanced Inputs', tags: ['autodocs'] } as Meta;
 
 export const SliderBasico: StoryObj = {
   render: () => {

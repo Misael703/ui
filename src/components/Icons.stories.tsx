@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as Icons from './Icons';
 
 export default {
-  title: 'Foundations/Iconos',
+  title: 'Foundations/Icons',
   tags: ['autodocs'],
   parameters: {
     docs: {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Input, Textarea, Select, Checkbox, Radio, Switch, FormField, Label, InputGroup, InputGroupAddon } from './Form';
 
-const meta: Meta = { title: 'Forms/Controles', tags: ['autodocs'] };
+const meta: Meta = { title: 'Forms/Controls', tags: ['autodocs'] };
 export default meta;
 
 export const InputBasico: StoryObj = {

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Toggle, ToggleGroup, ToggleGroupItem } from './Toggle';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from './Icons';
 
-export default { title: 'Forms/Toggle', tags: ['autodocs'] } as Meta;
+export default { title: 'Actions/Toggle', tags: ['autodocs'] } as Meta;
 
 export const ToggleSimple: StoryObj = {
   render: () => {
