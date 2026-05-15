@@ -9,7 +9,7 @@ export const HeroBrand: StoryObj = {
     <Hero
       eyebrow="Acme Supply Co"
       title="Materiales para tu obra"
-      subtitle="Despachamos en 24h dentro de Santiago. Cotiza en línea o llámanos."
+      subtitle="Despacho en 24h. Cotiza en línea o contáctanos."
       actions={
         <>
           <Button>Empezar a cotizar</Button>

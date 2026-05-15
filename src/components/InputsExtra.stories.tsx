@@ -45,7 +45,7 @@ export const ProgressCircular: StoryObj = {
 
 export const TagInputDemo: StoryObj = {
   render: () => {
-    const [tags, setTags] = React.useState<string[]>(['ferretería', 'pintura']);
+    const [tags, setTags] = React.useState<string[]>(['diseño', 'urgente']);
     return <TagInput value={tags} onChange={setTags} placeholder="Agrega un tag y presiona Enter" />;
   },
 };

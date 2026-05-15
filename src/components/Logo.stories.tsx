@@ -5,6 +5,21 @@ export default {
   title: 'Foundations/Logo',
   component: Logo,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Brand-agnostic logo renderer. `<Logo>` resolves assets from ' +
+          '`logoBasePath` (configure via `configureBrand`) — it ships no ' +
+          'logo of its own. The assets shown across these stories are the ' +
+          'bundled **El Alba preset** sample set (`@misael703/ui/presets/' +
+          'elalba-logos/*`), used here purely to demonstrate every variant ' +
+          '(mark / horizontal / wordmark / vertical), the light/dark + ' +
+          'svg/png matrix, responsive swap and custom sizing. Drop in your ' +
+          'own files at the same names to rebrand.',
+      },
+    },
+  },
   argTypes: {
     variant: { control: 'select', options: ['horizontal', 'vertical', 'mark', 'wordmark'] },
     bg: { control: 'inline-radio', options: ['light', 'dark'] },
@@ -73,10 +88,11 @@ export const TodasLasVariantes: S = {
 };
 
 /**
- * Inspección byte-por-byte de los 16 archivos en `public/assets/logos/`.
- * Cada celda muestra el archivo individual cargado por path explícito —
- * útil para detectar logos rotos o con tamaños inconsistentes entre los
- * formatos SVG y PNG.
+ * Byte-by-byte inspection of the bundled El Alba preset sample set
+ * (16 files: 4 variants × light/dark × svg/png). Each cell loads one
+ * file by explicit path — handy for spotting broken assets or size
+ * mismatches between the SVG and PNG of the same variant. Replace with
+ * your own brand's files (same names) to make this your QA grid.
  */
 export const InspeccionDeArchivos: S = {
   render: () => {

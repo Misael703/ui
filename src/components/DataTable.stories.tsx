@@ -266,7 +266,7 @@ export const DataTableConPaginacion: StoryObj = {
 export const AccordionBasico: StoryObj = {
   render: () => (
     <Accordion defaultOpen={['envio']}>
-      <AccordionItem id="envio" title="Envío y plazos">Despachamos en 24-48h hábiles dentro de Santiago.</AccordionItem>
+      <AccordionItem id="envio" title="Envío y plazos">Despachamos en 24-48h hábiles.</AccordionItem>
       <AccordionItem id="dev" title="Devoluciones">Tienes 10 días para devolver productos sin uso.</AccordionItem>
       <AccordionItem id="pago" title="Métodos de pago">Tarjetas, transferencia y crédito empresa.</AccordionItem>
     </Accordion>
