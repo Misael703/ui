@@ -42,9 +42,9 @@ export type RechartsLike = {
 };
 
 const PALETTE = [
-  'var(--color-brand-blue)',
-  'var(--color-brand-orange)',
-  'var(--color-blue-900)',
+  'var(--color-primary)',
+  'var(--color-secondary)',
+  'var(--color-primary-900)',
   'var(--color-success)',
   'var(--color-warning)',
   'var(--color-danger)',
@@ -256,7 +256,7 @@ export interface SparklineProps<D = any> {
 
 export function Sparkline<D = any>({
   recharts: R, data, dataKey,
-  width = 120, height = 32, color = 'var(--color-brand-blue)',
+  width = 120, height = 32, color = 'var(--color-primary)',
   fill = true, className, ariaLabel,
 }: SparklineProps<D>) {
   return (

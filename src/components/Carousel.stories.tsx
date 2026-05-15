@@ -27,8 +27,8 @@ export const Basico: StoryObj = {
   render: () => (
     <div style={{ width: 640 }}>
       <Carousel ariaLabel="Demostración">
-        <Slide n={1} color="var(--color-brand-orange)" />
-        <Slide n={2} color="var(--color-brand-blue)" />
+        <Slide n={1} color="var(--color-secondary)" />
+        <Slide n={2} color="var(--color-primary)" />
         <Slide n={3} color="#0ea5e9" />
         <Slide n={4} color="#10b981" />
       </Carousel>

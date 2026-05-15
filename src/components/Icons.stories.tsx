@@ -69,10 +69,10 @@ export const Tamanos: StoryObj = {
 export const ColorHeredado: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-      <span style={{ color: 'var(--color-brand-blue)' }}>
+      <span style={{ color: 'var(--color-primary)' }}>
         <Icons.Bell />
       </span>
-      <span style={{ color: 'var(--color-brand-orange)' }}>
+      <span style={{ color: 'var(--color-secondary)' }}>
         <Icons.Bell />
       </span>
       <span style={{ color: 'var(--color-success)' }}>

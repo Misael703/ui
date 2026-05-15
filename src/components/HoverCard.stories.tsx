@@ -9,7 +9,7 @@ export const Basico: StoryObj = {
     <div style={{ padding: 64 }}>
       <HoverCard
         trigger={
-          <span style={{ color: 'var(--color-brand-blue)', textDecoration: 'underline', cursor: 'pointer' }}>
+          <span style={{ color: 'var(--color-primary)', textDecoration: 'underline', cursor: 'pointer' }}>
             @misael703
           </span>
         }

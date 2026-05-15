@@ -8,7 +8,7 @@ export default { title: 'Layout/Collapsible', tags: ['autodocs'] } as Meta;
 export const Basico: StoryObj = {
   render: () => (
     <Collapsible defaultOpen={false}>
-      <CollapsibleTrigger style={{ fontWeight: 600, color: 'var(--color-brand-blue)' }}>
+      <CollapsibleTrigger style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
         Mostrar más detalles
       </CollapsibleTrigger>
       <CollapsibleContent>

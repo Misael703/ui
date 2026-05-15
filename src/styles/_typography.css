@@ -148,7 +148,7 @@ a:hover {
 
    The data-attribute variant is also supported for consumers who prefer
    not to add a class:
-     <footer data-tone="inverse" style="background: var(--color-blue-900)">
+     <footer data-tone="inverse" style="background: var(--color-primary-900)">
 
    Caveat: kit components that paint their own backgrounds (Card, Modal,
    Button) keep their original surface. The inversion is meant for the
@@ -159,7 +159,7 @@ a:hover {
   --fg-muted:   color-mix(in srgb, var(--fg-on-brand) 70%, transparent);
   --fg-subtle:  color-mix(in srgb, var(--fg-on-brand) 50%, transparent);
   --fg-link:    var(--fg-on-brand);
-  --fg-link-hover: var(--color-brand-orange);
+  --fg-link-hover: var(--color-secondary);
   --border-default: color-mix(in srgb, var(--fg-on-brand) 20%, transparent);
   --border-strong:  color-mix(in srgb, var(--fg-on-brand) 35%, transparent);
   /* Re-scope subtle/muted backgrounds for inline elements (code pills,
@@ -169,5 +169,5 @@ a:hover {
   --bg-muted:   color-mix(in srgb, var(--fg-on-brand) 18%, transparent);
   color: var(--fg-default);
 }
-.surface-inverse--brand { background: var(--color-brand-blue); }
-.surface-inverse--dark  { background: var(--color-blue-900); }
+.surface-inverse--brand { background: var(--color-primary); }
+.surface-inverse--dark  { background: var(--color-primary-900); }

@@ -77,8 +77,8 @@ export function ProgressCircle({ value, size = 64, stroke = 6, variant = 'blue',
   const c = 2 * Math.PI * r;
   const off = c - (v / 100) * c;
   const colorVar = {
-    blue: 'var(--color-brand-blue)',
-    orange: 'var(--color-brand-orange)',
+    blue: 'var(--color-primary)',
+    orange: 'var(--color-secondary)',
     success: 'var(--color-success)',
     warning: 'var(--color-warning)',
     danger: 'var(--color-danger)',

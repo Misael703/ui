@@ -36,7 +36,7 @@ export const SobreFondoOscuro: S = {
   args: { variant: 'horizontal', bg: 'dark' },
   decorators: [
     (Story) => (
-      <div style={{ background: 'var(--color-brand-blue)', padding: 32, borderRadius: 12 }}>
+      <div style={{ background: 'var(--color-primary)', padding: 32, borderRadius: 12 }}>
         <Story />
       </div>
     ),
@@ -61,7 +61,7 @@ export const TodasLasVariantes: S = {
         <h4 style={{ marginBottom: 12, fontSize: 12, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           Dark bg
         </h4>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', padding: 24, background: 'var(--color-brand-blue)', borderRadius: 12 }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', padding: 24, background: 'var(--color-primary)', borderRadius: 12 }}>
           <Logo variant="mark" bg="dark" />
           <Logo variant="horizontal" bg="dark" />
           <Logo variant="wordmark" bg="dark" />
@@ -93,7 +93,7 @@ export const InspeccionDeArchivos: S = {
         style={{
           display: 'flex', flexDirection: 'column', gap: 8,
           padding: 16,
-          background: bg === 'dark' ? 'var(--color-brand-blue)' : 'var(--bg-surface)',
+          background: bg === 'dark' ? 'var(--color-primary)' : 'var(--bg-surface)',
           border: '1px solid var(--border-default)',
           borderRadius: 12,
           minHeight: 120,

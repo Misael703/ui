@@ -11,34 +11,34 @@
 
 :root {
   /* -------- Brand colors (spec-exact) -------------------------------- */
-  --color-brand-blue:        #002f87;  /* Pantone 287 C — primary  */
-  --color-brand-orange:      #ff671d;  /* Pantone 165 C — secondary*/
+  --color-primary:        #002f87;  /* Pantone 287 C — primary  */
+  --color-secondary:      #ff671d;  /* Pantone 165 C — secondary*/
 
   /* Extended palette — tints/shades of the two brand colors.
      Tints generated toward white, shades toward black.                 */
-  --color-blue-900: #001a4d;
-  --color-blue-800: #00246b;
-  --color-blue-700: #002f87;   /* = brand blue                          */
-  --color-blue-600: #1a46a0;
-  --color-blue-500: #3a62b4;
-  --color-blue-400: #6b8aca;
-  --color-blue-300: #9bb1dc;
-  --color-blue-200: #c7d3ea;
-  --color-blue-100: #e3eaf4;
-  --color-blue-50:  #f2f5fb;
+  --color-primary-900: #001a4d;
+  --color-primary-800: #00246b;
+  --color-primary-700: #002f87;   /* = primary base                        */
+  --color-primary-600: #1a46a0;
+  --color-primary-500: #3a62b4;
+  --color-primary-400: #6b8aca;
+  --color-primary-300: #9bb1dc;
+  --color-primary-200: #c7d3ea;
+  --color-primary-100: #e3eaf4;
+  --color-primary-50:  #f2f5fb;
 
-  --color-orange-900: #8c3000;
-  --color-orange-800: #b84300;
-  --color-orange-700: #e05400;
-  --color-orange-600: #ff671d;  /* = brand orange                       */
-  --color-orange-500: #ff8344;
-  --color-orange-400: #ffa06e;
-  --color-orange-300: #ffbe98;
-  --color-orange-200: #ffd6bb;
-  --color-orange-100: #ffe8d7;
-  --color-orange-50:  #fff5ee;
+  --color-secondary-900: #8c3000;
+  --color-secondary-800: #b84300;
+  --color-secondary-700: #e05400;
+  --color-secondary-600: #ff671d;  /* = secondary base                     */
+  --color-secondary-500: #ff8344;
+  --color-secondary-400: #ffa06e;
+  --color-secondary-300: #ffbe98;
+  --color-secondary-200: #ffd6bb;
+  --color-secondary-100: #ffe8d7;
+  --color-secondary-50:  #fff5ee;
 
-  /* Neutrals — cool-leaning greys to pair with the blue                 */
+  /* Neutrals — cool-leaning greys (Phase 3 may warm these up)           */
   --color-ink:       #0c1220;
   --color-gray-900:  #161c2c;
   --color-gray-800:  #23293a;
@@ -109,24 +109,24 @@
   --bg-surface:      var(--color-white);
   --bg-subtle:       var(--color-gray-100);
   --bg-muted:        var(--color-gray-150);
-  --bg-inverse:      var(--color-brand-blue);
-  --bg-inverse-strong: var(--color-blue-900);
+  --bg-inverse:      var(--color-primary);
+  --bg-inverse-strong: var(--color-primary-900);
 
   --fg-default:      var(--color-ink);
   --fg-muted:        var(--color-gray-600);
   --fg-subtle:       var(--color-gray-500);
   --fg-on-brand:     var(--color-white);
-  --fg-on-orange:    var(--color-white);
-  --fg-link:         var(--color-brand-blue);
-  --fg-link-hover:   var(--color-orange-600);
+  --fg-on-secondary: var(--color-white);
+  --fg-link:         var(--color-primary);
+  --fg-link-hover:   var(--color-secondary-600);
 
-  --accent-primary:    var(--color-brand-blue);
-  --accent-secondary:  var(--color-brand-orange);
+  --accent-primary:    var(--color-primary);
+  --accent-secondary:  var(--color-secondary);
 
   --border-default:  var(--color-gray-200);
   --border-strong:   var(--color-gray-300);
-  --border-brand:    var(--color-brand-blue);
-  --border-focus:    var(--color-brand-orange);
+  --border-brand:    var(--color-primary);
+  --border-focus:    var(--color-secondary);
 
   /* -------- Breakpoints --------------------------------------------- */
   /* CSS custom properties cannot be used inside @media query conditions,
@@ -232,8 +232,8 @@
   --z-popover:   1300;
 
   /* -------- Focus rings (3px halo around focused element) ------------ */
-  --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-brand-blue) 15%, transparent);
-  --focus-ring-accent:  0 0 0 3px color-mix(in srgb, var(--color-brand-orange) 35%, transparent);
+  --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  --focus-ring-accent:  0 0 0 3px color-mix(in srgb, var(--color-secondary) 35%, transparent);
   --focus-ring-danger:  0 0 0 3px color-mix(in srgb, var(--color-red-600) 18%, transparent);
 
   /* -------- Overlays --------------------------------------------------*/

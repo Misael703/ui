@@ -109,13 +109,13 @@ export const Colors: StoryObj = {
     <div>
       <SectionTitle>Brand</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 480 }}>
-        <Swatch token="color-brand-blue" invert />
-        <Swatch token="color-brand-orange" invert />
+        <Swatch token="color-primary" invert />
+        <Swatch token="color-secondary" invert />
       </div>
 
       <SectionTitle>Escalas brand</SectionTitle>
-      <Scale name="Blue" />
-      <Scale name="Orange" />
+      <Scale name="Primary" />
+      <Scale name="Secondary" />
 
       <SectionTitle>Status</SectionTitle>
       <Scale name="Green" />
@@ -406,7 +406,7 @@ export const Spacing: StoryObj = {
           <React.Fragment key={n}>
             <Caption>--space-{n}</Caption>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ background: 'var(--color-brand-orange)', height: 16, width: `var(--space-${n})`, borderRadius: 2 }} />
+              <div style={{ background: 'var(--color-secondary)', height: 16, width: `var(--space-${n})`, borderRadius: 2 }} />
               <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>{n * 4}px</span>
             </div>
           </React.Fragment>
@@ -427,7 +427,7 @@ export const Radii: StoryObj = {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16, maxWidth: 720 }}>
         {['none', 'sm', 'md', 'lg', 'xl', 'pill'].map((r) => (
           <div key={r} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ height: 64, background: 'var(--color-brand-blue)', borderRadius: `var(--radius-${r})` }} />
+            <div style={{ height: 64, background: 'var(--color-primary)', borderRadius: `var(--radius-${r})` }} />
             <Caption>--radius-{r}</Caption>
           </div>
         ))}
@@ -491,7 +491,7 @@ function MotionTrack({
           top: 4,
           width: 24,
           height: 24,
-          background: 'var(--color-brand-orange)',
+          background: 'var(--color-secondary)',
           borderRadius: 4,
           animation: `motion-demo-slide ${durationMs}ms ${easing} 0s 1 forwards`,
         }}
@@ -631,7 +631,7 @@ export const Logos: StoryObj = {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
               {list.map((l) => (
                 <div key={l.path} style={{
-                  background: l.bg === 'dark' ? 'var(--color-brand-blue)' : 'var(--bg-surface)',
+                  background: l.bg === 'dark' ? 'var(--color-primary)' : 'var(--bg-surface)',
                   border: '1px solid var(--border-default)',
                   borderRadius: 12,
                   padding: 24,
@@ -690,7 +690,7 @@ export const InvertedSurfaces: StoryObj = {
 
       <section className="surface-inverse surface-inverse--dark" style={{ padding: 24, borderRadius: 12 }}>
         <h3 className="h3" style={{ marginTop: 0 }}>Hero en azul más oscuro</h3>
-        <p>Misma utilidad, preset alterno <code>--dark</code> = <code>var(--color-blue-900)</code>.</p>
+        <p>Misma utilidad, preset alterno <code>--dark</code> = <code>var(--color-primary-900)</code>.</p>
       </section>
 
       <div data-tone="inverse" style={{ background: '#1a1a1a', padding: 24, borderRadius: 12 }}>
