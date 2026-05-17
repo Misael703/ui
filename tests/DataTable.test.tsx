@@ -220,6 +220,19 @@ describe('Accordion', () => {
     fireEvent.click(screen.getByText('Uno'));
     expect(screen.getByText('contenido uno')).toBeInTheDocument();
   });
+
+  it('wires trigger and panel with ARIA (controls / labelledby / region)', () => {
+    render(
+      <Accordion defaultOpen={['a']}>
+        <AccordionItem id="a" title="Uno">contenido uno</AccordionItem>
+      </Accordion>
+    );
+    const trigger = screen.getByRole('button', { name: 'Uno' });
+    const panel = screen.getByRole('region', { name: 'Uno' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('aria-controls', panel.id);
+    expect(panel).toHaveAttribute('aria-labelledby', trigger.id);
+  });
 });
 
 describe('Breadcrumbs', () => {

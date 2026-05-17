@@ -335,18 +335,32 @@ export function AccordionItem({ id, title, children }: { id: string; title: Reac
   const ctx = React.useContext(AccordionContext);
   if (!ctx) throw new Error('<AccordionItem> must be used inside <Accordion>');
   const isOpen = ctx.open.has(id);
+  const reactId = React.useId();
+  const triggerId = `accordion-trigger-${reactId}`;
+  const panelId = `accordion-panel-${reactId}`;
   return (
     <div className={cx('accordion__item', isOpen && 'is-open')}>
       <button
         type="button"
+        id={triggerId}
         className="accordion__trigger"
         aria-expanded={isOpen}
+        aria-controls={panelId}
         onClick={() => ctx.toggle(id)}
       >
         <span>{title}</span>
         <span className="accordion__chev" aria-hidden="true"><ChevronDown size={14} /></span>
       </button>
-      {isOpen && <div className="accordion__panel">{children}</div>}
+      {isOpen && (
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={triggerId}
+          className="accordion__panel"
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 }
