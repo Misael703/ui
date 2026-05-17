@@ -2,6 +2,7 @@
 export * from './brand';
 export * from './utils/cx';
 export * from './utils/dateFormat';
+export * from './utils/types';
 export * from './locale';
 export * from './components/Button';
 export * from './components/Form';

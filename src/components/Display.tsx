@@ -3,12 +3,13 @@ import { cx } from '../utils/cx';
 import { X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { Slot } from './Primitives';
+import type { Extensible } from '../utils/types';
 
 export type CardAccent = 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
-  accent?: CardAccent;
+  accent?: Extensible<CardAccent>;
   /**
    * Render as the provided single child element instead of `<div>` (e.g.
    * a clickable card as `next/link`'s `<a>`). Card classes, ref and handlers
@@ -56,7 +57,7 @@ export type BadgeVariant =
   | 'primary' | 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: BadgeVariant;
+  variant?: Extensible<BadgeVariant>;
   dot?: boolean;
 }
 
@@ -73,7 +74,7 @@ export function Badge({ variant = 'neutral', dot, className, children, ...rest }
 export type AlertVariant = 'info' | 'success' | 'warning' | 'danger';
 
 export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
-  variant?: AlertVariant;
+  variant?: Extensible<AlertVariant>;
   title?: React.ReactNode;
   icon?: React.ReactNode;
   onClose?: () => void;
