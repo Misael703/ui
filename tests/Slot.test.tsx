@@ -3,6 +3,7 @@ import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Slot, Slottable } from '../src/components/Primitives';
 import { Button } from '../src/components/Button';
+import { Card } from '../src/components/Display';
 
 describe('Slot', () => {
   it('renders the child element and merges className', () => {
@@ -77,5 +78,28 @@ describe('Button asChild', () => {
     const btn = screen.getByRole('button', { name: 'Borrar' });
     expect(btn.tagName).toBe('BUTTON');
     expect(btn.className).toContain('btn--danger');
+  });
+});
+
+describe('Card asChild', () => {
+  it('renders the element with card classes instead of a div', () => {
+    const { container } = render(
+      <Card asChild interactive accent="brand">
+        <a href="/p">Producto</a>
+      </Card>,
+    );
+    const link = screen.getByRole('link', { name: 'Producto' });
+    expect(link.tagName).toBe('A');
+    expect(link.className).toContain('card');
+    expect(link.className).toContain('card--interactive');
+    expect(link.className).toContain('card--accent-brand');
+    expect(container.querySelector('div.card')).toBeNull();
+  });
+
+  it('renders a <div> when asChild is not set (regression)', () => {
+    const { container } = render(<Card>contenido</Card>);
+    const div = container.querySelector('div.card');
+    expect(div).toBeInTheDocument();
+    expect(div).toHaveTextContent('contenido');
   });
 });
