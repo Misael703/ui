@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Slot, Slottable } from './Primitives';
+import type { Extensible } from '../utils/types';
 
 export type ButtonVariant =
   | 'primary'
@@ -16,7 +17,9 @@ export type ButtonVariant =
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
+  /** Known variants autocomplete; any string is accepted for consumer-defined
+   *  variants (style `.btn--<value>` outside `@layer elalba`). */
+  variant?: Extensible<ButtonVariant>;
   size?: ButtonSize;
   loading?: boolean;
   iconLeft?: React.ReactNode;
