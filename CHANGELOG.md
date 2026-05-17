@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-05-17
+
+**Minor.** Adds the `appshell__foot-text` collapse convention. CSS-only,
+additive, no breaking changes; drop-in.
+
+### Added
+- **`appshell__foot-text` convention** (mirror of `appshell__brand-text`,
+  v1.2.0). Wrap the textual part of `AppShell`'s `footer` slot (version
+  label, env tag) in `<span className="appshell__foot-text">`; it collapses
+  away with the 72px rail instead of wrapping onto two lines and overlapping
+  the collapse toggle. The kit renders `{footer}` raw (like `{brand}`), so
+  the consumer adopts the class the same way as `brand-text`. Demonstrated
+  by the `Layout/AppShell › FooterTextColapsable` story.
+
 ## [1.7.1] — 2026-05-17
 
 **Patch.** Two kit bug fixes. Ships in `dist`; no breaking changes, drop-in.

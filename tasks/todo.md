@@ -676,6 +676,19 @@ Causa raíz bug: `Overlay.tsx` backdrop `onClick=onClose` + diálogo `stopPropag
 ---
 ---
 
+# v1.8.0 — appshell__foot-text (gap del collapse, espejo de brand-text)
+
+**Fecha:** 2026-05-17 · **Estado:** completo, commits hechos, sin push/publish · **Base:** 1.7.1 → **1.8.0** (`feat` aditivo, CSS-only, sin breaking → MINOR). Rama `feat/appshell-foot-text-v1.8.0`.
+
+- Bug reportado (screenshots): en colapsado, el `footer` ("Despachos · v0.1") se parte en 2 líneas y se solapa con el toggle/avatar en el riel de 72px. Causa: v1.2.0 dio `appshell__brand-text` para el brand (arriba) pero NUNCA el equivalente para el `footer` (abajo); el kit renderiza `{footer}` crudo igual que `{brand}`.
+- Fix: convención `appshell__foot-text` (CSS espejo exacto de `appshell__brand-text`: opacity:0/max-width:0 al colapsar + white-space:nowrap). Sin tocar TSX. Story `FooterTextColapsable`.
+- **Implicación consumer (igual que brand-text):** la app despachos debe envolver el label de versión en `<span className="appshell__foot-text">…</span>` (1 línea). El kit aporta el mecanismo, no puede auto-ocultar un ReactNode opaco (mismo razonamiento documentado para brand en v1.2.0).
+- Verificación: `tsc` limpio · **vitest 349/349** · `npm run build` OK · `build-storybook` exit 0 · `lint` exit 0. (CSS-convention: se valida por Storybook, jsdom no testea colapso visual — igual que brand-text en v1.2.0.)
+- Se publica (dist), drop-in. Recomendación: merge + publish. Nada pusheado/publicado aún.
+
+---
+---
+
 ## Review v1.7.0 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Hecho (3 commits en `feat/grid-pickers-and-backdrop-fix-v1.7.0`):**
