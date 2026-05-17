@@ -40,6 +40,13 @@ export const TimelineDemo: StoryObj = {
   ),
 };
 
+/**
+ * Operable por teclado (WAI-ARIA TreeView, desde v1.3.0). Da foco al árbol con
+ * Tab y prueba: ↑/↓ mueven entre nodos visibles, →/← expanden/colapsan o saltan
+ * a hijo/padre, Inicio/Fin van al primero/último, Enter/Espacio seleccionan. El
+ * chevron es decorativo (fuera del orden de tabulación); el estado se expone en
+ * el `treeitem` vía `aria-expanded`.
+ */
 export const TreeDemo: StoryObj = {
   render: () => {
     const [selected, setSelected] = React.useState('cemento');

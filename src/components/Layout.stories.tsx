@@ -76,6 +76,13 @@ export const TooltipEnContextoSticky: StoryObj = {
   ),
 };
 
+/**
+ * **Deprecado (desde v1.3.0).** Usa `Separator` (ver _Layout/Separator_).
+ * `Divider` se mantiene como alias no-breaking: delega en `Separator` con
+ * `decorative={false}` (conserva `role="separator"`, `aria-orientation` y las
+ * clases `divider`/`divider--vertical`, sin cambio visual). En código nuevo,
+ * importa `Separator`.
+ */
 export const DividerHorizontal: StoryObj = {
   render: () => (
     <div style={{ width: 320 }}>

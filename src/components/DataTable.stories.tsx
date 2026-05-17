@@ -263,6 +263,12 @@ export const DataTableConPaginacion: StoryObj = {
   },
 };
 
+/**
+ * Cada `AccordionItem` cablea el trigger con el panel vía ARIA (desde v1.3.0):
+ * el botón lleva `aria-controls` + `aria-expanded`; el panel abierto lleva
+ * `id`, `role="region"` y `aria-labelledby` (ids estables con `React.useId()`).
+ * El panel se desmonta al cerrar; el comportamiento no cambió.
+ */
 export const AccordionBasico: StoryObj = {
   render: () => (
     <Accordion defaultOpen={['envio']}>
