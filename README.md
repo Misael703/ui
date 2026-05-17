@@ -123,6 +123,32 @@ A partir de v0.4.5 el kit mitiga este problema en `Card` usando `box-shadow inse
 
 ---
 
+## Costo del CSS (hoja única)
+
+El kit entrega **una sola hoja de estilos** (`@misael703/ui/styles.css`,
+~123 KB sin comprimir, **~19 KB gzip**) con el CSS de todos los componentes.
+No hay code-split de CSS por componente.
+
+Implicación: si tu app usa 3 componentes, igual carga el CSS de los 43. El
+**JS sí es tree-shakeable** (un `.mjs` por componente; tu bundler descarta lo
+que no importas), pero el CSS no se divide.
+
+Es una decisión consciente, no un descuido:
+
+- Para apps internas con muchos componentes (barritas, marginapp) los ~19 KB
+  gzip se amortizan y el costo marginal de cada componente extra es ~0.
+- Hacer code-split de CSS obligaría a importar el CSS por componente y rompería
+  el modelo de una línea `import "@misael703/ui/styles.css"`. Para un kit
+  interno se prioriza esa simplicidad sobre los KB.
+- Si solo necesitas los tokens (sin CSS de componentes), importa
+  `@misael703/ui/tokens.css` (~7 KB).
+
+Si en el futuro el peso importa para un consumidor concreto, el camino es
+exponer entradas CSS por componente sin quitar la hoja única (aditivo, no
+breaking).
+
+---
+
 ## Componentes
 
 | Categoría | Componentes |
