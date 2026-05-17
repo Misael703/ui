@@ -149,6 +149,25 @@ breaking).
 
 ---
 
+## Blocks (copy-paste)
+
+Recetas de página listas para copiar, **no se publican en el paquete**
+(viven en `src/blocks/`, fuera de `dist`). Componen los componentes del kit
+en secciones reales. Mirálas renderizadas en Storybook bajo **Blocks/**:
+
+| Block | Compone |
+|---|---|
+| Data table page | FilterPanel + TableToolbar + DataTable + BulkActionBar + TablePagination |
+| Admin dashboard | AppShell + PageHeader + Kpi + DataTable |
+| Auth screen | Card + FormField + Input + Logo (se ve branded con el preset El Alba) |
+| Checkout | AddressForm + OrderSummary + PromoCodeInput + FreeShippingProgress |
+
+Para usar uno: copia el `.tsx` desde `src/blocks/` a tu app y cambia el
+import `from '../index'` por `from '@misael703/ui'`. Son puntos de partida,
+no componentes configurables: una vez copiado, el código es tuyo.
+
+---
+
 ## Componentes
 
 | Categoría | Componentes |
