@@ -5,6 +5,33 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] — 2026-05-17
+
+**Patch. Docs/Storybook only — no shipped code changes.** Stories are not part
+of the published package (`files: ["dist"]`), so this does not affect runtime
+consumers; the only npm-visible delta is the README copy.
+
+### Changed
+- **Storybook synced with v1.3.0**: `Divider` stories note the deprecation and
+  point to `Separator`; `Tree` documents the WAI-ARIA keyboard model;
+  `Accordion` documents its ARIA wiring; `Menubar` / `Modal` document their
+  keyboard/focus model.
+- **Neutral Spanish (tú, not vos)** in Storybook copy and README (fixes voseo:
+  `Notá`/`Envolvé`/`Mirá`/`pasá`/`querés`/`agregá`/`podés`/`andá`/`usás`/…).
+- **Honest titles + regression hygiene**: `FloatingPortal` moved to
+  `Internal/Regression/`; `Display3` / `Layout` meta titles now describe their
+  real contents; the sticky-tooltip story is documented user-facing.
+
+### Added
+- **Interactive Playground stories with controls** for `Badge`, `Input`,
+  `NumberInput`, `Toggle` and `DataTable` (Button already had this).
+
+### Fixed
+- `console.log` in Calendar/FileUpload stories replaced with
+  `@storybook/addon-actions` `action()`; removed an unused `base` prop in the
+  Foundations `Scale` helper; cross-linked `Foundations/Logos` ↔
+  `Foundations/Logo`.
+
 ## [1.3.0] — 2026-05-17
 
 **Minor.** Production audit remediation: accessibility fixes, internal

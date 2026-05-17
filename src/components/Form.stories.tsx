@@ -75,3 +75,14 @@ export const InputGroupConPrefijo: StoryObj = {
     </div>
   ),
 };
+
+/** Playground interactivo: usa Controls para probar `invalid` y `disabled`. */
+export const InputPlayground: StoryObj<typeof Input> = {
+  args: { placeholder: 'SKU del producto', invalid: false, disabled: false },
+  argTypes: {
+    placeholder: { control: 'text' },
+    invalid: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+  },
+  render: (args) => <Input {...args} />,
+};

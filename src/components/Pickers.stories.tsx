@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { Combobox, DatePicker, FileUpload } from './Pickers';
+import { action } from '@storybook/addon-actions';
 
 export default { title: 'Forms/Pickers', tags: ['autodocs'] } as Meta;
 
@@ -60,6 +61,6 @@ export const DatePickerFormatos: StoryObj = {
 
 export const FileUploadBasico: StoryObj = {
   render: () => (
-    <FileUpload onFiles={(f) => console.log(f)} hint="PDF o imagen, máx 5MB" accept="application/pdf,image/*" />
+    <FileUpload onFiles={action('files')} hint="PDF o imagen, máx 5MB" accept="application/pdf,image/*" />
   ),
 };

@@ -263,6 +263,12 @@ export const DataTableConPaginacion: StoryObj = {
   },
 };
 
+/**
+ * Cada `AccordionItem` cablea el trigger con el panel vía ARIA (desde v1.3.0):
+ * el botón lleva `aria-controls` + `aria-expanded`; el panel abierto lleva
+ * `id`, `role="region"` y `aria-labelledby` (ids estables con `React.useId()`).
+ * El panel se desmonta al cerrar; el comportamiento no cambió.
+ */
 export const AccordionBasico: StoryObj = {
   render: () => (
     <Accordion defaultOpen={['envio']}>
@@ -282,4 +288,45 @@ export const BreadcrumbsBasico: StoryObj = {
       { label: 'Taladro percutor' },
     ]}/>
   ),
+};
+
+interface DataTablePlaygroundArgs {
+  stickyHeader: boolean;
+  selectable: boolean;
+  loading: boolean;
+  mobileLayout: 'table' | 'cards';
+}
+
+/** Playground interactivo: alterna `stickyHeader`/`selectable`/`loading`/`mobileLayout`. */
+export const DataTablePlayground: StoryObj = {
+  args: { stickyHeader: false, selectable: false, loading: false, mobileLayout: 'table' },
+  argTypes: {
+    stickyHeader: { control: 'boolean' },
+    selectable: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    mobileLayout: { control: 'inline-radio', options: ['table', 'cards'] },
+  },
+  render: (args) => {
+    const a = args as unknown as DataTablePlaygroundArgs;
+    const [sel, setSel] = React.useState<Set<string>>(new Set());
+    return (
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        ariaLabel="Productos"
+        stickyHeader={a.stickyHeader}
+        selectable={a.selectable}
+        loading={a.loading}
+        mobileLayout={a.mobileLayout}
+        selectedKeys={sel}
+        onSelectionChange={setSel}
+        columns={[
+          { key: 'name', header: 'Producto' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'stock', header: 'Stock', align: 'right' },
+          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+        ]}
+      />
+    );
+  },
 };

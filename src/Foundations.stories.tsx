@@ -83,7 +83,7 @@ function rgbToHex(rgb: string): string {
   return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
 }
 
-const Scale = ({ name, base = 600 }: { name: string; base?: number }) => {
+const Scale = ({ name }: { name: string }) => {
   const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   return (
     <div>
@@ -544,7 +544,7 @@ export const Motion: StoryObj = {
         <SectionTitle>Easings</SectionTitle>
         <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 16 }}>
           Misma duración (<code>--duration-slow</code>, 320ms a {DEMO_SCALE}× = {320 * DEMO_SCALE}ms),
-          distinta curva. Notá cómo el cuadrado arranca y termina diferente en cada fila.
+          distinta curva. Nota cómo el cuadrado arranca y termina diferente en cada fila.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, alignItems: 'center', marginBottom: 24 }}>
           {easings.map(([k, bezier, desc]) => (
@@ -621,6 +621,8 @@ export const Logos: StoryObj = {
         <p style={{ color: 'var(--fg-muted)', maxWidth: 640, marginBottom: 24 }}>
           Las variantes <strong>light bg</strong> se diseñaron para fondos claros (logo en colores brand sobre blanco).
           Las <strong>dark bg</strong> tienen el logo invertido para fondos oscuros (azul corporativo, negro, etc).
+          {' '}Esto es la galería de assets crudos; para el componente con su API
+          (variantes, responsive, alt) ve a <strong>Foundations/Logo</strong>.
         </p>
         {Object.entries(grouped).map(([type, list]) => (
           <div key={type}>
@@ -711,7 +713,7 @@ export const Localization: StoryObj = {
       <div style={{ display: 'grid', gap: 24 }}>
         <SectionTitle>Localization (LocaleProvider)</SectionTitle>
         <p style={{ color: 'var(--fg-muted)', fontSize: 14, margin: 0 }}>
-          ~80 strings hardcoded en español viven en <code>esMessages</code>. Envolvé tu árbol en{' '}
+          ~80 strings hardcoded en español viven en <code>esMessages</code>. Envuelve tu árbol en{' '}
           <code>{`<LocaleProvider messages={{...}}>`}</code> para overridear todo o algunas keys.
           Sin provider, todo sale en español (default).
         </p>
@@ -722,7 +724,7 @@ export const Localization: StoryObj = {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <Button onClick={() => setOpenEs(true)}>Abrir modal</Button>
               <Modal open={openEs} onClose={() => setOpenEs(false)} title="Confirmar acción">
-                <p>Mirá el botón ✕ arriba a la derecha — su <code>aria-label</code> es la key del locale.</p>
+                <p>Mira el botón ✕ de arriba a la derecha: su <code>aria-label</code> es la key del locale.</p>
               </Modal>
               <DataTable rows={[]} rowKey={(r: { id: string }) => r.id} columns={cols} />
               <Pagination page={1} pageSize={10} total={25} onPageChange={() => {}} />
@@ -754,7 +756,7 @@ export const Localization: StoryObj = {
         </div>
 
         <p style={{ color: 'var(--fg-muted)', fontSize: 13, marginTop: 8 }}>
-          Tip: pasá solo las keys que querés cambiar — el resto cae a <code>esMessages</code> vía
+          Tip: pasa solo las keys que quieres cambiar; el resto cae a <code>esMessages</code> vía
           shallow merge. Templates como <code>{`{from}–{to} de {total}`}</code> se resuelven con el
           helper <code>format()</code> exportado del kit.
         </p>

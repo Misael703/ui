@@ -139,3 +139,17 @@ export const ProductCardDemo: StoryObj = {
     </div>
   ),
 };
+
+/** Playground interactivo: usa el panel Controls para probar `variant` y `dot`. */
+export const BadgePlayground: StoryObj<typeof Badge> = {
+  args: { children: 'Activo', variant: 'success' },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['primary', 'accent', 'success', 'warning', 'danger', 'info', 'neutral'],
+    },
+    dot: { control: 'boolean' },
+    children: { control: 'text' },
+  },
+  render: (args) => <Badge {...args} />,
+};

@@ -31,3 +31,20 @@ export const KpiBasico: StoryObj = {
     </div>
   ),
 };
+
+/** Playground interactivo: usa Controls para `min`/`max`/`step`/`prefix`/`suffix`. */
+export const NumberInputPlayground: StoryObj<typeof NumberInput> = {
+  args: { min: 0, max: 99, step: 1, suffix: 'u', disabled: false },
+  argTypes: {
+    min: { control: 'number' },
+    max: { control: 'number' },
+    step: { control: 'number' },
+    prefix: { control: 'text' },
+    suffix: { control: 'text' },
+    disabled: { control: 'boolean' },
+  },
+  render: (args) => {
+    const [v, setV] = React.useState<number | null>(1);
+    return <NumberInput {...args} value={v} onChange={setV} />;
+  },
+};

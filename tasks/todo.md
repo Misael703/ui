@@ -575,3 +575,42 @@ consolidación interna + tooling, sin breaking → MINOR) cuando se apruebe.
 - Dark mode: diferido por decisión del usuario.
 - API pública: `startOfMonth`/`addMonths`/`isSameDay`/`buildMonthGrid` ahora exportados vía barrel (`export * from './utils/dateFormat'`) — aditivo, no-breaking, consistente con `formatDate`/`resolveDateFormat` ya públicos.
 - **Nada commiteado/pusheado/publicado** (regla no-push-without-approval). Sugiere bump `1.2.0 → 1.3.0` (fixes a11y + consolidación interna, sin breaking → MINOR) cuando se apruebe.
+
+---
+---
+
+# v1.3.1 — Storybook overhaul (docs only, no component changes)
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.3.0` → **`1.3.1`** (solo `docs(storybook)`/`fix(docs)`, sin breaking → PATCH). Rama `docs/storybook-overhaul-v1.3.1`.
+Origen: review honesto del Storybook (skill frontend-design). 6 prioridades.
+
+## Fases
+- [ ] **A — Sync v1.3.0**: nota `@deprecated` en `Divider` stories → `Separator`; nota+`play` de teclado en `Tree`; demo ARIA de `Accordion`.
+- [ ] **B — Copy `vos`→`tú`**: barrido en stories + `README.md:122` (convención del kit: español neutro, tú).
+- [ ] **C — Taxonomía/regresión**: fixtures internas (FloatingPortal, Tooltip sticky) a namespace `Internal/`; `Overlays`→`Overlay`; quitar em dash; títulos honestos (Layout grab-bag, Display3).
+- [ ] **D — Controls/argTypes**: `component`+`args`+`argTypes`+story Playground en núcleo (Button, Form/Input, Card, Badge, Modal, DataTable). Aditivo, sin romper showcases.
+- [ ] **E — Limpieza**: `base` muerto en `Foundations Scale`; `console.log`→`action()`; consolidar `Foundations/Logos` vs `Foundations/Logo`.
+- [ ] **F — `play` functions**: teclado vivo en Tree/Menubar/Modal (documentación a11y).
+- [ ] **G — Release**: bump 1.3.1 + CHANGELOG; verificar `tsc`/`vitest`/`lint`/`build-storybook`.
+- [~] SB 8→9 upgrade: **DIFERIDO** (migración major, fuera de PR de docs; follow-up con su razón).
+
+## Review v1.3.1 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Hecho (7 commits atómicos en `docs/storybook-overhaul-v1.3.1`):**
+- A: notas autodocs v1.3.0 (Divider deprecado→Separator, Tree teclado, Accordion ARIA).
+- B: barrido `vos`→`tú` en Foundations.stories + README (em dashes neutralizados solo en líneas tocadas; purga global de em dash fuera de scope, anotada).
+- C: FloatingPortal → `Internal/Regression/`; títulos honestos Display3/Layout; story tooltip-sticky reescrita user-facing.
+- D: Playgrounds con controls (Badge, Input, NumberInput, Toggle, DataTable); showcases intactos. Migración CSF3 amplia de archivos multi-componente = follow-up (atada a split).
+- E: `console.log`→`action()`, `base` muerto removido, cross-link Logos↔Logo.
+- F: notas de teclado/foco Menubar y Modal (intent de "play" entregado como docs; play ejecutable + `@storybook/test` ofrecido como opt-in, no se mete dep de test en PR de docs).
+- G: bump 1.3.0→1.3.1 + CHANGELOG.
+
+**Verificación:** `tsc` limpio (por fase) · `npm run build-storybook` **exit 0** (41 stories + config compilan) · `npm run lint` exit 0 · **vitest 326/326**.
+
+**Diferido (con razón, no es omisión):**
+- SB 8→9: migración major, fuera de PR de docs.
+- `play()` ejecutable + `@storybook/test`: vitest ya verifica el teclado; no meter dep de test en docs. Opt-in si se pide.
+- Split de archivos multi-componente: refactor estructural, no docs.
+- Purga global de em dashes: fuera de scope (cientos, muchos en data).
+
+**Clave honesta:** los stories NO se publican (`files: ["dist"]`). Un publish 1.3.1 solo cambiaría el README en npm. **Recomendación: merge sin `npm publish`** (cero valor para consumidores). Nada pusheado/publicado (regla no-push-without-approval).

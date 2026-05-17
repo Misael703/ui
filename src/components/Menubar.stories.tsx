@@ -3,6 +3,12 @@ import { Menubar } from './Menubar';
 
 export default { title: 'Navigation/Menubar', tags: ['autodocs'] } as Meta;
 
+/**
+ * Navegable por teclado (patrón WAI-ARIA Menubar): Tab entra a la barra (roving
+ * tabindex), ←/→ mueven entre menús, ↓/Enter/Espacio abren el menú, ↑/↓ e
+ * Inicio/Fin recorren los ítems, Enter/Espacio seleccionan, Esc cierra y
+ * devuelve el foco al trigger.
+ */
 export const Basico: StoryObj = {
   render: () => (
     <Menubar

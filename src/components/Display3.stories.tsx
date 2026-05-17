@@ -2,8 +2,9 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { UserCell, StatusIndicator, Timeline, TimelineItem, Tree, Calendar } from './Display3';
 import { CheckCircle, Edit, Bell, Folder, Package } from './Icons';
+import { action } from '@storybook/addon-actions';
 
-export default { title: 'Data Display/Timeline & Tree', tags: ['autodocs'] } as Meta;
+export default { title: 'Data Display/People, Timeline, Tree & Calendar', tags: ['autodocs'] } as Meta;
 
 export const UserCellDemo: StoryObj = {
   render: () => (
@@ -40,6 +41,13 @@ export const TimelineDemo: StoryObj = {
   ),
 };
 
+/**
+ * Operable por teclado (WAI-ARIA TreeView, desde v1.3.0). Da foco al árbol con
+ * Tab y prueba: ↑/↓ mueven entre nodos visibles, →/← expanden/colapsan o saltan
+ * a hijo/padre, Inicio/Fin van al primero/último, Enter/Espacio seleccionan. El
+ * chevron es decorativo (fuera del orden de tabulación); el estado se expone en
+ * el `treeitem` vía `aria-expanded`.
+ */
 export const TreeDemo: StoryObj = {
   render: () => {
     const [selected, setSelected] = React.useState('cemento');
@@ -85,7 +93,7 @@ export const CalendarDemo: StoryObj = {
             { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5), label: 'Reunión equipo', tone: 'info' },
             { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5), label: 'Capacitación', tone: 'neutral' },
           ]}
-          onDayClick={(d) => console.log('click', d)}
+          onDayClick={action('day-click')}
         />
       </div>
     );
