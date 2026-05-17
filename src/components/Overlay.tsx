@@ -95,6 +95,10 @@ export function Modal({
   closeOnBackdrop = true, closeOnEsc = true, className,
 }: OverlayProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  // True only when the press both started AND ended on the backdrop itself.
+  // Fixes: press inside (e.g. text-selecting in an input) released over the
+  // backdrop must NOT dismiss.
+  const downOnBackdrop = React.useRef(false);
   const titleId = React.useId();
   const t = useLocale();
   // useDelayedUnmount keeps the DOM mounted during exit animation. The
@@ -109,7 +113,11 @@ export function Modal({
   return createPortal(
     <div
       className={cx('modal-backdrop', closing && 'is-closing')}
-      onClick={() => closeOnBackdrop && onClose()}
+      onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
+      onClick={(e) => {
+        if (closeOnBackdrop && downOnBackdrop.current && e.target === e.currentTarget) onClose();
+        downOnBackdrop.current = false;
+      }}
     >
       <div
         ref={ref}
@@ -117,7 +125,6 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         className={cx('modal', `modal--${size}`, closing && 'is-closing', className)}
-        onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="modal__header">
@@ -142,6 +149,10 @@ export function Drawer({
   closeOnBackdrop = true, closeOnEsc = true, className,
 }: DrawerProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  // True only when the press both started AND ended on the backdrop itself.
+  // Fixes: press inside (e.g. text-selecting in an input) released over the
+  // backdrop must NOT dismiss.
+  const downOnBackdrop = React.useRef(false);
   const titleId = React.useId();
   const t = useLocale();
   const { mounted, closing } = useDelayedUnmount(open, EXIT_MS);
@@ -152,7 +163,11 @@ export function Drawer({
   return createPortal(
     <div
       className={cx('drawer-backdrop', closing && 'is-closing')}
-      onClick={() => closeOnBackdrop && onClose()}
+      onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
+      onClick={(e) => {
+        if (closeOnBackdrop && downOnBackdrop.current && e.target === e.currentTarget) onClose();
+        downOnBackdrop.current = false;
+      }}
     >
       <div
         ref={ref}
@@ -160,7 +175,6 @@ export function Drawer({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         className={cx('drawer', `drawer--${side}`, closing && 'is-closing', className)}
-        onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="drawer__header">
