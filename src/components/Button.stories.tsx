@@ -34,3 +34,16 @@ export const AllSizes: S = {
     </div>
   ),
 };
+
+/**
+ * `asChild`: renderiza como el elemento hijo (aquí un `<a>`, en tu app sería
+ * `next/link`) conservando estilos, ref y handlers del Button. Polimorfismo
+ * sin wrappers, sin perder el modelo versionado.
+ */
+export const AsChildLink: S = {
+  render: () => (
+    <Button asChild variant="primary">
+      <a href="https://example.com" target="_blank" rel="noreferrer">Ir al catálogo</a>
+    </Button>
+  ),
+};
