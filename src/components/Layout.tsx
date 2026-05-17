@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Check } from './Icons';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
 
 // ---------- Tabs ---------------------------------------------------------
 interface TabsContextValue {
@@ -84,10 +86,78 @@ export interface TooltipProps {
 }
 
 export function Tooltip({ label, children, side = 'top' }: TooltipProps) {
+  const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef<HTMLSpanElement>(null);
+  const bubbleRef = React.useRef<HTMLSpanElement>(null);
+  const reactId = React.useId();
+  const bubbleId = `${reactId}-tooltip`;
+  const openTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clear = () => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  };
+  const show = () => {
+    clear();
+    openTimer.current = setTimeout(() => setOpen(true), 150);
+  };
+  const hide = () => {
+    clear();
+    closeTimer.current = setTimeout(() => setOpen(false), 80);
+  };
+
+  React.useEffect(() => () => clear(), []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const pos = usePopoverPosition(wrapRef, bubbleRef, {
+    open,
+    side,
+    align: 'center',
+    offset: 8,
+  });
+
+  const child = React.cloneElement(children, {
+    'aria-describedby': open ? bubbleId : children.props['aria-describedby'],
+  });
+
   return (
-    <span className={cx('tooltip', `tooltip--${side}`)} data-tooltip={typeof label === 'string' ? label : undefined}>
-      {children}
-      <span className="tooltip__bubble" role="tooltip">{label}</span>
+    <span
+      ref={wrapRef}
+      className={cx('tooltip', `tooltip--${side}`)}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+    >
+      {child}
+      {open && (
+        <Portal>
+          <span
+            ref={bubbleRef}
+            id={bubbleId}
+            role="tooltip"
+            className={cx('tooltip__bubble', 'is-floating')}
+            style={{
+              position: 'absolute',
+              top: pos.top,
+              left: pos.left,
+              opacity: pos.ready ? 1 : 0,
+              visibility: pos.ready ? 'visible' : 'hidden',
+            }}
+          >
+            {label}
+          </span>
+        </Portal>
+      )}
     </span>
   );
 }

@@ -243,6 +243,7 @@
   --z-toast:     200;
   --z-tooltip:   1000;
   --z-popover:   1300;
+  --z-floating:  1300;   /* shared Portal/usePopoverPosition panels; above --z-overlay (Modal/Drawer) */
 
   /* -------- Focus rings (3px halo around focused element) ------------ */
   --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);

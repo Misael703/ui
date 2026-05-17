@@ -6,6 +6,9 @@ import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Ico
 import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { useDismiss } from '../hooks/useDismiss';
 
 // ---------- MultiCombobox -----------------------------------------------
 export interface MultiComboboxOption<T = string> {
@@ -46,7 +49,6 @@ export function MultiCombobox<T = string>({
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
-  const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
   // Build the lookup Set once per `value` change, not on every keystroke or
@@ -58,22 +60,21 @@ export function MultiCombobox<T = string>({
     [options, query, filter]
   );
 
-  React.useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target)) return;
-      if (listRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, []);
+  const pos = usePopoverPosition(wrapRef, listRef, {
+    open,
+    side: 'bottom',
+    align: 'start',
+    offset: 4,
+    matchAnchorWidth: true,
+  });
 
-  React.useEffect(() => {
-    if (!open || !wrapRef.current) return;
-    const t = wrapRef.current.getBoundingClientRect();
-    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX, width: t.width });
-  }, [open]);
+  // Escape is handled by the input's onKeyDown; only outside-click here.
+  useDismiss({
+    open,
+    onDismiss: () => setOpen(false),
+    refs: [wrapRef, listRef],
+    closeOnEscape: false,
+  });
 
   const toggle = (v: T) => {
     if (selSet.has(v)) onChange(value.filter((x) => x !== v));
@@ -121,14 +122,21 @@ export function MultiCombobox<T = string>({
           onKeyDown={onKey}
         />
       </div>
-      {open && typeof document !== 'undefined' && createPortal(
+      {open && (
+        <Portal>
         <ul
           ref={listRef}
           id={listboxId}
           role="listbox"
           aria-multiselectable="true"
-          className="multicombo__list"
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
+          className={cx('multicombo__list', 'is-floating')}
+          style={{
+            position: 'absolute',
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
+            visibility: pos.ready ? 'visible' : 'hidden',
+          }}
         >
           {filtered.length === 0 ? (
             <li className="multicombo__empty">{empty}</li>
@@ -154,8 +162,8 @@ export function MultiCombobox<T = string>({
               );
             })
           )}
-        </ul>,
-        document.body
+        </ul>
+        </Portal>
       )}
     </div>
   );

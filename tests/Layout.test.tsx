@@ -41,10 +41,14 @@ describe('Tabs', () => {
 });
 
 describe('Tooltip', () => {
-  it('renders children and tooltip label', () => {
+  it('renders children and shows the tooltip on hover', async () => {
     render(<Tooltip label="Info"><span>Trigger</span></Tooltip>);
     expect(screen.getByText('Trigger')).toBeInTheDocument();
-    expect(screen.getByRole('tooltip')).toHaveTextContent('Info');
+    // Tooltip is now JS-driven: not in the DOM until hover/focus.
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    const wrap = screen.getByText('Trigger').parentElement as HTMLElement;
+    fireEvent.mouseEnter(wrap);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Info');
   });
 });
 

@@ -5,6 +5,42 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-05-17
+
+**Minor.** Shared floating primitive (no public API changes; drop-in).
+
+### Added
+- **`Portal`** — SSR-safe body portal.
+- **`usePopoverPosition(anchorRef, contentRef, opts)`** — rect-based,
+  document-relative positioning with viewport flip + clamp, repositioning
+  on capture-phase scroll of *any* ancestor and on resize.
+- **`useDismiss`** — shared outside-click / Escape / focus-return.
+- **`--z-floating`** token + `.is-floating` layer, above `--z-overlay`
+  (Modal/Drawer) so panels opened inside a modal aren't covered.
+
+### Fixed
+- **Floating panels no longer clip inside `overflow` containers.**
+  `Menu` (and `Popover`, `ContextMenu`, `HoverCard`, `Combobox`,
+  `MultiCombobox`, `Tooltip`) now render through `Portal` +
+  `usePopoverPosition`, so a `Menu` inside a `DataTable`/`Card` is no
+  longer cut off and follows the trigger on scroll.
+- **`Menu` keyboard navigation** wired: ArrowUp/Down, Home/End,
+  Enter/Space, Escape (returns focus to the trigger), roving `tabindex`.
+- **`AppShell` collapsed rail (Bug 2):** the expand toggle and `footer`
+  slot stay inside the 72px rail (centered, no overlap/clip) and the
+  brand clamps even without a `brandCollapsed` slot. The collapse
+  toggle now exposes `aria-expanded`.
+
+### Changed
+- `Tooltip` is now JS-driven (hover/focus, Escape, `aria-describedby`)
+  and portaled, so it escapes `overflow:hidden`. It no longer renders a
+  CSS arrow (`::after`) and is not in the DOM until shown.
+- `Combobox`/`MultiCombobox`/`ContextMenu`/`HoverCard`/`Popover`
+  positioning unified on the shared hook (adds flip + scroll/resize
+  reposition). Native `<select>`-based `SortDropdown` was left as-is
+  (browser-rendered popups already escape overflow). `NavigationMenu`
+  and `Menubar` keep their own logic (out of scope; tracked debt).
+
 ## [1.0.1] — 2026-05-15
 
 **Patch.** Fixes a gap in the El Alba preset introduced in 1.0.0.
