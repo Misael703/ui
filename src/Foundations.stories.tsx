@@ -83,7 +83,7 @@ function rgbToHex(rgb: string): string {
   return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
 }
 
-const Scale = ({ name, base = 600 }: { name: string; base?: number }) => {
+const Scale = ({ name }: { name: string }) => {
   const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   return (
     <div>
@@ -621,6 +621,8 @@ export const Logos: StoryObj = {
         <p style={{ color: 'var(--fg-muted)', maxWidth: 640, marginBottom: 24 }}>
           Las variantes <strong>light bg</strong> se diseñaron para fondos claros (logo en colores brand sobre blanco).
           Las <strong>dark bg</strong> tienen el logo invertido para fondos oscuros (azul corporativo, negro, etc).
+          {' '}Esto es la galería de assets crudos; para el componente con su API
+          (variantes, responsive, alt) ve a <strong>Foundations/Logo</strong>.
         </p>
         {Object.entries(grouped).map(([type, list]) => (
           <div key={type}>

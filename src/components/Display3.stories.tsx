@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { UserCell, StatusIndicator, Timeline, TimelineItem, Tree, Calendar } from './Display3';
 import { CheckCircle, Edit, Bell, Folder, Package } from './Icons';
+import { action } from '@storybook/addon-actions';
 
 export default { title: 'Data Display/People, Timeline, Tree & Calendar', tags: ['autodocs'] } as Meta;
 
@@ -92,7 +93,7 @@ export const CalendarDemo: StoryObj = {
             { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5), label: 'Reunión equipo', tone: 'info' },
             { date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5), label: 'Capacitación', tone: 'neutral' },
           ]}
-          onDayClick={(d) => console.log('click', d)}
+          onDayClick={action('day-click')}
         />
       </div>
     );
