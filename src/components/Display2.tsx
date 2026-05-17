@@ -2,6 +2,9 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronUp, ChevronDown } from './Icons';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { useDismiss } from '../hooks/useDismiss';
 
 // ---------- Avatar ------------------------------------------------------
 export interface AvatarProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -80,34 +83,78 @@ export interface MenuProps {
 export function Menu({ trigger, items, align = 'start', className }: MenuProps) {
   const [open, setOpen] = React.useState(false);
   const [active, setActive] = React.useState(0);
-  const ref = React.useRef<HTMLDivElement>(null);
+  const wrapRef = React.useRef<HTMLSpanElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 
+  // Positions within `items` that are focusable menu items (no
+  // separators/labels/disabled). `active` indexes into this list.
   const enabledIdx = items
-    .map((it, i) => 'type' in it ? -1 : (it.disabled ? -1 : i))
+    .map((it, i) => ('type' in it ? -1 : it.disabled ? -1 : i))
     .filter((i) => i >= 0);
+
+  const pos = usePopoverPosition(wrapRef, panelRef, {
+    open,
+    side: 'bottom',
+    align,
+    offset: 6,
+  });
+
+  const focusTrigger = React.useCallback(() => {
+    wrapRef.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.focus();
+  }, []);
+
+  // Outside-click closes; Escape is handled on the panel so it can also
+  // return focus to the trigger (WAI-ARIA menu button pattern).
+  useDismiss({
+    open,
+    onDismiss: () => setOpen(false),
+    refs: [wrapRef, panelRef],
+    closeOnEscape: false,
+  });
+
+  React.useEffect(() => {
+    if (open) setActive(0);
+  }, [open]);
 
   React.useEffect(() => {
     if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
+    const realIdx = enabledIdx[active];
+    if (realIdx != null) itemRefs.current[realIdx]?.focus();
+  }, [open, active, enabledIdx]);
 
   const select = (i: number) => {
     const it = items[i];
-    if (!it || 'type' in it) return;
-    if (it.disabled) return;
+    if (!it || 'type' in it || it.disabled) return;
     it.onSelect?.();
     setOpen(false);
+    focusTrigger();
+  };
+
+  const onPanelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpen(false);
+      focusTrigger();
+    } else if (e.key === 'Tab') {
+      setOpen(false);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive((a) => Math.min(a + 1, enabledIdx.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive((a) => Math.max(a - 1, 0));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActive(Math.max(enabledIdx.length - 1, 0));
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const realIdx = enabledIdx[active];
+      if (realIdx != null) select(realIdx);
+    }
   };
 
   const triggerEl = React.cloneElement(trigger, {
@@ -115,44 +162,66 @@ export function Menu({ trigger, items, align = 'start', className }: MenuProps) 
       trigger.props.onClick?.(e);
       setOpen((o) => !o);
     },
+    onKeyDown: (e: React.KeyboardEvent) => {
+      trigger.props.onKeyDown?.(e);
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpen(true);
+      }
+    },
     'aria-haspopup': 'menu',
     'aria-expanded': open,
   });
 
   return (
-    <div ref={ref} className={cx('menu', className)} style={{ position: 'relative', display: 'inline-block' }}>
+    <span ref={wrapRef} className={cx('menu', className)} style={{ display: 'inline-block' }}>
       {triggerEl}
       {open && (
-        <div role="menu" className={cx('menu__panel', `menu__panel--${align}`)}>
-          {items.map((it, i) => {
-            if ('type' in it && it.type === 'separator') return <div key={i} className="menu__sep" role="separator" />;
-            if ('type' in it && it.type === 'label') return <div key={i} className="menu__label">{it.label}</div>;
-            const item = it as MenuItemProps;
-            const isActive = enabledIdx[active] === i;
-            return (
-              <button
-                key={i}
-                type="button"
-                role="menuitem"
-                disabled={item.disabled}
-                className={cx('menu__item', isActive && 'is-active', item.destructive && 'is-destructive')}
-                onMouseEnter={() => setActive(enabledIdx.indexOf(i))}
-                onClick={() => select(i)}
-              >
-                {item.icon && <span className="menu__icon" aria-hidden="true">{item.icon}</span>}
-                <span className="menu__body">
-                  <span className="menu__label-row">
-                    <span>{item.label}</span>
-                    {item.shortcut && <kbd className="menu__kbd">{item.shortcut}</kbd>}
+        <Portal>
+          <div
+            ref={panelRef}
+            role="menu"
+            className="menu__panel"
+            onKeyDown={onPanelKeyDown}
+            style={{
+              position: 'absolute',
+              top: pos.top,
+              left: pos.left,
+              visibility: pos.ready ? 'visible' : 'hidden',
+            }}
+          >
+            {items.map((it, i) => {
+              if ('type' in it && it.type === 'separator') return <div key={i} className="menu__sep" role="separator" />;
+              if ('type' in it && it.type === 'label') return <div key={i} className="menu__label">{it.label}</div>;
+              const item = it as MenuItemProps;
+              const isActive = enabledIdx[active] === i;
+              return (
+                <button
+                  key={i}
+                  ref={(el) => { itemRefs.current[i] = el; }}
+                  type="button"
+                  role="menuitem"
+                  tabIndex={isActive ? 0 : -1}
+                  disabled={item.disabled}
+                  className={cx('menu__item', isActive && 'is-active', item.destructive && 'is-destructive')}
+                  onMouseEnter={() => setActive(enabledIdx.indexOf(i))}
+                  onClick={() => select(i)}
+                >
+                  {item.icon && <span className="menu__icon" aria-hidden="true">{item.icon}</span>}
+                  <span className="menu__body">
+                    <span className="menu__label-row">
+                      <span>{item.label}</span>
+                      {item.shortcut && <kbd className="menu__kbd">{item.shortcut}</kbd>}
+                    </span>
+                    {item.description && <span className="menu__desc">{item.description}</span>}
                   </span>
-                  {item.description && <span className="menu__desc">{item.description}</span>}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
+          </div>
+        </Portal>
       )}
-    </div>
+    </span>
   );
 }
 

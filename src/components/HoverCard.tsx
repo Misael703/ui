@@ -1,7 +1,8 @@
 'use client';
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
 
 export type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -27,7 +28,6 @@ export function HoverCard({
   contentClassName,
 }: HoverCardProps) {
   const [open, setOpen] = React.useState(false);
-  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
   const triggerRef = React.useRef<HTMLSpanElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const openTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,33 +49,12 @@ export function HoverCard({
 
   React.useEffect(() => () => clear(), []);
 
-  React.useEffect(() => {
-    if (!open || !triggerRef.current || !contentRef.current) return;
-    const t = triggerRef.current.getBoundingClientRect();
-    const c = contentRef.current.getBoundingClientRect();
-    let top = 0;
-    let left = 0;
-    if (placement === 'bottom') { top = t.bottom + offset; left = t.left + (t.width - c.width) / 2; }
-    else if (placement === 'top') { top = t.top - c.height - offset; left = t.left + (t.width - c.width) / 2; }
-    else if (placement === 'right') { left = t.right + offset; top = t.top + (t.height - c.height) / 2; }
-    else { left = t.left - c.width - offset; top = t.top + (t.height - c.height) / 2; }
-    left = Math.max(8, Math.min(left, window.innerWidth - c.width - 8));
-    top = Math.max(8, Math.min(top, window.innerHeight - c.height - 8));
-    setCoords({ top: top + window.scrollY, left: left + window.scrollX });
-  }, [open, placement, offset]);
-
-  const panel = open && (
-    <div
-      ref={contentRef}
-      role="tooltip"
-      className={cx('hover-card__content', contentClassName)}
-      style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-    >
-      {children}
-    </div>
-  );
+  const pos = usePopoverPosition(triggerRef, contentRef, {
+    open,
+    side: placement,
+    align: 'center',
+    offset,
+  });
 
   return (
     <span
@@ -86,7 +65,25 @@ export function HoverCard({
       onBlur={onLeave}
     >
       <span ref={triggerRef} className="hover-card__trigger">{trigger}</span>
-      {panel && typeof document !== 'undefined' && createPortal(panel, document.body)}
+      {open && (
+        <Portal>
+          <div
+            ref={contentRef}
+            role="tooltip"
+            className={cx('hover-card__content', 'is-floating', contentClassName)}
+            style={{
+              position: 'absolute',
+              top: pos.top,
+              left: pos.left,
+              visibility: pos.ready ? 'visible' : 'hidden',
+            }}
+            onMouseEnter={onEnter}
+            onMouseLeave={onLeave}
+          >
+            {children}
+          </div>
+        </Portal>
+      )}
     </span>
   );
 }

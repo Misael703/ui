@@ -40,3 +40,15 @@ export * from './components/Resizable';
 export * from './components/Menubar';
 export * from './components/NavigationMenu';
 export * from './components/Collapsible';
+
+// Shared floating primitive (Portal + positioning hook + dismiss helper).
+export * from './components/Portal';
+export { usePopoverPosition, useDismiss } from './hooks';
+export type {
+  PopoverSide,
+  PopoverAlign,
+  VirtualElement,
+  UsePopoverPositionOptions,
+  PopoverPosition,
+  UseDismissOptions,
+} from './hooks';

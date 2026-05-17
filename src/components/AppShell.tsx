@@ -139,6 +139,7 @@ export function AppShell({
             type="button"
             className="appshell__collapse"
             onClick={() => setCollapsed(!collapsed)}
+            aria-expanded={!collapsed}
             aria-label={collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu']}
             title={collapsed ? t['appshell.expand'] : t['appshell.collapse']}
           >

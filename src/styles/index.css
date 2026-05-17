@@ -1894,9 +1894,15 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 /* ---------- Menu (dropdown) ---------- */
+/* Shared layer for body-portaled floating panels (Portal +
+   usePopoverPosition). Above --z-overlay so menus/popovers opened from
+   inside a Modal/Drawer are not covered. */
+.is-floating.is-floating { z-index: var(--z-floating); }
+
 .menu { position: relative; display: inline-block; }
 .menu__panel {
-  position: absolute; top: calc(100% + 6px); z-index: var(--z-dropdown);
+  /* Position is set inline (portaled to body via usePopoverPosition). */
+  z-index: var(--z-floating);
   min-width: 220px; max-width: 320px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
@@ -1905,8 +1911,6 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 6px;
   display: flex; flex-direction: column; gap: 2px;
 }
-.menu__panel--start { left: 0; }
-.menu__panel--end { right: 0; }
 .menu__sep { height: 1px; background: var(--border-default); margin: 4px 0; }
 .menu__label {
   padding: 6px 10px;
@@ -2222,7 +2226,20 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display); font-weight: 700;
   text-transform: uppercase; letter-spacing: var(--tracking-wide);
 }
-.appshell.is-collapsed .appshell__brand { padding: 16px 12px; }
+.appshell.is-collapsed .appshell__brand { padding: 16px 12px; overflow: hidden; }
+/* Collapsed rail (72px): stack the footer slot above a centered toggle so
+   neither falls outside the rail nor overlaps (Bug 2). The base foot is a
+   space-between row and the toggle has margin-left:auto — both wrong at
+   72px; reset to a centered column. */
+.appshell.is-collapsed .appshell__sidebar-foot {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+.appshell.is-collapsed .appshell__collapse { margin: 0 auto; }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
 .appshell__navlabel-section {

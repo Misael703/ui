@@ -5,6 +5,9 @@ import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { useDismiss } from '../hooks/useDismiss';
 
 // ---------- Combobox -----------------------------------------------------
 export interface ComboboxOption<T = string> {
@@ -44,7 +47,6 @@ export function Combobox<T = string>({
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
-  const [coords, setCoords] = React.useState<{ top: number; left: number; width: number } | null>(null);
   // Stable per-instance listbox id so multiple Comboboxes don't collide on aria-controls.
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
@@ -58,22 +60,22 @@ export function Combobox<T = string>({
     [options, query, filter]
   );
 
-  React.useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target)) return;
-      if (listRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, []);
+  const pos = usePopoverPosition(wrapRef, listRef, {
+    open,
+    side: 'bottom',
+    align: 'start',
+    offset: 4,
+    matchAnchorWidth: true,
+  });
 
-  React.useEffect(() => {
-    if (!open || !wrapRef.current) return;
-    const t = wrapRef.current.getBoundingClientRect();
-    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX, width: t.width });
-  }, [open]);
+  // Escape is handled by the input's onKeyDown; here we only need
+  // outside-click (closeOnEscape: false avoids a double close).
+  useDismiss({
+    open,
+    onDismiss: () => setOpen(false),
+    refs: [wrapRef, listRef],
+    closeOnEscape: false,
+  });
 
   React.useEffect(() => { setActive(0); }, [query, open]);
 
@@ -123,13 +125,20 @@ export function Combobox<T = string>({
           aria-label={locale['picker.clearSelection']}
         ><X size={16} /></button>
       )}
-      {open && typeof document !== 'undefined' && createPortal(
+      {open && (
+        <Portal>
         <ul
           ref={listRef}
           id={listboxId}
           role="listbox"
-          className="combobox__list"
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left, width: coords.width } : { position: 'absolute', visibility: 'hidden' }}
+          className={cx('combobox__list', 'is-floating')}
+          style={{
+            position: 'absolute',
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
+            visibility: pos.ready ? 'visible' : 'hidden',
+          }}
         >
           {filtered.length === 0 ? (
             <li className="combobox__empty">{empty}</li>
@@ -155,8 +164,8 @@ export function Combobox<T = string>({
               </li>
             ))
           )}
-        </ul>,
-        document.body
+        </ul>
+        </Portal>
       )}
     </div>
   );
