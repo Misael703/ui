@@ -381,7 +381,7 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--color-gray-300);
   border-radius: var(--radius-pill);
   position: relative;
-  transition: background var(--duration-fast);
+  transition: background var(--duration-fast) var(--ease-standard);
   flex: none;
 }
 .switch__track::after {
@@ -1294,31 +1294,6 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .accordion__item { border-bottom: 1px solid var(--border-default); }
 .accordion__item:last-child { border-bottom: 0; }
-.accordion__head {
-  width: 100%;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 24px;
-  background: transparent;
-  border: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-md);
-  font-weight: 700;
-  color: var(--fg-default);
-  cursor: pointer;
-  text-align: left;
-  transition: background var(--duration-fast);
-}
-.accordion__head:hover { background: var(--bg-subtle); }
-.accordion__chevron { transition: transform var(--duration-base); flex: none; }
-.accordion__item.open .accordion__chevron { transform: rotate(180deg); }
-.accordion__body {
-  padding: 0 24px 18px;
-  color: var(--fg-muted);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  display: none;
-}
-.accordion__item.open .accordion__body { display: block; }
 
 /* ---------- File upload -------------------------------------------------- */
 .upload {
