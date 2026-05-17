@@ -354,3 +354,229 @@ export function FileUpload({
     </div>
   );
 }
+
+// ---------- GridPickerField (shared shell: YearPicker / MonthPicker) ------
+interface GridCell {
+  key: string;
+  label: React.ReactNode;
+  selected?: boolean;
+  /** Dimmed (outside the current decade) — YearPicker only. */
+  outside?: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
+interface GridPickerFieldProps {
+  rootClass: string;
+  displayValue: string;
+  placeholder: string;
+  ariaLabel: string;
+  navTitle: React.ReactNode;
+  prevLabel: string;
+  nextLabel: string;
+  onPrev: () => void;
+  onNext: () => void;
+  cells: GridCell[];
+  disabled?: boolean;
+  invalid?: boolean;
+  id?: string;
+  className?: string;
+}
+
+function GridPickerField({
+  rootClass, displayValue, placeholder, ariaLabel, navTitle,
+  prevLabel, nextLabel, onPrev, onNext, cells,
+  disabled, invalid, id, className,
+}: GridPickerFieldProps) {
+  const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
+
+  // Same floating primitive as DatePicker (Portal + flip/clamp + dismiss).
+  const pos = usePopoverPosition(wrapRef, popoverRef, {
+    open,
+    side: 'bottom',
+    align: 'start',
+    offset: 4,
+  });
+  useDismiss({ open, onDismiss: () => setOpen(false), refs: [wrapRef, popoverRef] });
+
+  return (
+    <div
+      ref={wrapRef}
+      className={cx(rootClass, 'gridpicker', invalid && 'is-invalid', disabled && 'is-disabled', className)}
+    >
+      <input
+        id={id}
+        type="text"
+        readOnly
+        className="gridpicker__input"
+        placeholder={placeholder}
+        disabled={disabled}
+        value={displayValue}
+        onFocus={() => setOpen(true)}
+        onClick={() => setOpen(true)}
+        aria-invalid={invalid || undefined}
+      />
+      <button
+        type="button"
+        className="gridpicker__toggle"
+        onClick={() => setOpen((o) => !o)}
+        disabled={disabled}
+        aria-label={ariaLabel}
+      >
+        <CalendarIcon size={16} />
+      </button>
+      {open && (
+        <Portal>
+          <div
+            ref={popoverRef}
+            className={cx('gridpicker__popover', 'is-floating')}
+            role="dialog"
+            style={{
+              position: 'absolute',
+              top: pos.top,
+              left: pos.left,
+              visibility: pos.ready ? 'visible' : 'hidden',
+            }}
+          >
+            <div className="gridpicker__nav">
+              <button type="button" onClick={onPrev} aria-label={prevLabel}><ChevronLeft size={16} /></button>
+              <span className="gridpicker__title">{navTitle}</span>
+              <button type="button" onClick={onNext} aria-label={nextLabel}><ChevronRight size={16} /></button>
+            </div>
+            <div className="gridpicker__grid">
+              {cells.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  className={cx('gridpicker__cell', c.selected && 'is-selected', c.outside && 'is-out')}
+                  disabled={c.disabled}
+                  onClick={() => { c.onSelect(); setOpen(false); }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Portal>
+      )}
+    </div>
+  );
+}
+
+// ---------- YearPicker ---------------------------------------------------
+export interface YearPickerProps {
+  value: number | null;
+  onChange: (year: number | null) => void;
+  minYear?: number;
+  maxYear?: number;
+  placeholder?: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  id?: string;
+  className?: string;
+}
+
+export function YearPicker({
+  value, onChange, minYear, maxYear, placeholder,
+  disabled, invalid, id, className,
+}: YearPickerProps) {
+  const t = useLocale();
+  const base = value ?? new Date().getFullYear();
+  const [decade, setDecade] = React.useState(Math.floor(base / 10) * 10);
+
+  React.useEffect(() => {
+    if (value != null) setDecade(Math.floor(value / 10) * 10);
+  }, [value]);
+
+  const cells: GridCell[] = Array.from({ length: 12 }, (_, i) => {
+    const year = decade - 1 + i;
+    return {
+      key: String(year),
+      label: year,
+      selected: value === year,
+      outside: year < decade || year > decade + 9,
+      disabled: (minYear != null && year < minYear) || (maxYear != null && year > maxYear),
+      onSelect: () => onChange(year),
+    };
+  });
+
+  return (
+    <GridPickerField
+      rootClass="yearpicker"
+      displayValue={value != null ? String(value) : ''}
+      placeholder={placeholder ?? t['picker.selectYear']}
+      ariaLabel={t['picker.openCalendar']}
+      navTitle={`${decade}-${decade + 9}`}
+      prevLabel={t['picker.prevDecade']}
+      nextLabel={t['picker.nextDecade']}
+      onPrev={() => setDecade((d) => d - 10)}
+      onNext={() => setDecade((d) => d + 10)}
+      cells={cells}
+      disabled={disabled}
+      invalid={invalid}
+      id={id}
+      className={className}
+    />
+  );
+}
+
+// ---------- MonthPicker --------------------------------------------------
+export interface MonthPickerProps {
+  value: Date | null;
+  onChange: (date: Date | null) => void;
+  minDate?: Date;
+  maxDate?: Date;
+  placeholder?: string;
+  disabled?: boolean;
+  invalid?: boolean;
+  id?: string;
+  className?: string;
+}
+
+export function MonthPicker({
+  value, onChange, minDate, maxDate, placeholder,
+  disabled, invalid, id, className,
+}: MonthPickerProps) {
+  const t = useLocale();
+  const months = t['calendar.months'];
+  const base = value ?? new Date();
+  const [year, setYear] = React.useState(base.getFullYear());
+
+  React.useEffect(() => {
+    if (value) setYear(value.getFullYear());
+  }, [value]);
+
+  const monthStart = (y: number, m: number) => new Date(y, m, 1);
+  const outOfRange = (m: number) =>
+    (minDate != null && monthStart(year, m) < monthStart(minDate.getFullYear(), minDate.getMonth())) ||
+    (maxDate != null && monthStart(year, m) > monthStart(maxDate.getFullYear(), maxDate.getMonth()));
+
+  const cells: GridCell[] = months.map((name, m) => ({
+    key: String(m),
+    label: name,
+    selected: !!value && value.getFullYear() === year && value.getMonth() === m,
+    disabled: outOfRange(m),
+    onSelect: () => onChange(new Date(year, m, 1)),
+  }));
+
+  return (
+    <GridPickerField
+      rootClass="monthpicker"
+      displayValue={value ? `${months[value.getMonth()]} ${value.getFullYear()}` : ''}
+      placeholder={placeholder ?? t['picker.selectMonth']}
+      ariaLabel={t['picker.openCalendar']}
+      navTitle={String(year)}
+      prevLabel={t['picker.prevYear']}
+      nextLabel={t['picker.nextYear']}
+      onPrev={() => setYear((y) => y - 1)}
+      onNext={() => setYear((y) => y + 1)}
+      cells={cells}
+      disabled={disabled}
+      invalid={invalid}
+      id={id}
+      className={className}
+    />
+  );
+}

@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] — 2026-05-17
+
+**Minor.** New pickers + a real overlay dismiss fix. Ships in `dist`; no
+breaking changes (additive components + locale keys; the fix only makes
+dismissal more correct). Drop-in via version bump.
+
+### Added
+- **`YearPicker`**: decade grid with `<<`/`>>` decade nav, boundary years
+  dimmed, `value: number`, `minYear`/`maxYear`. 
+- **`MonthPicker`**: 12-month grid with prev/next year nav, `value: Date`,
+  `minDate`/`maxDate`. Both share the floating primitive used by `DatePicker`
+  (Portal + position + dismiss) and a new `.gridpicker` style.
+- Locale keys: `picker.prevYear`, `picker.nextYear`, `picker.prevDecade`,
+  `picker.nextDecade`, `picker.selectYear`, `picker.selectMonth`.
+
+### Fixed
+- **`Modal` / `Drawer` backdrop dismiss is now press-origin aware.** A press
+  that started inside the dialog (e.g. selecting text in an input) and was
+  released over the backdrop fired a `click` whose target was the backdrop,
+  closing the overlay. The backdrop now closes only when the press both
+  started and ended on the backdrop itself (`mousedown` origin tracked); the
+  dialog's `stopPropagation` was removed (the guard supersedes it).
+
 ## [1.6.1] — 2026-05-17
 
 **Patch. Docs/recipes only — not shipped.** Workstream C of the versatility
