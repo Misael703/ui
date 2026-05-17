@@ -112,14 +112,14 @@ El reverso: **si tu reset global no está en un layer, gana sobre el kit**. El c
 
 Tres formas de evitarlo, ordenadas de menos a más invasiva:
 
-1. **Envolver tus estilos en un layer también** — agregá `@import "tailwindcss"` (Tailwind v4) o `@layer base, components, utilities;` (Tailwind v3) explícitamente, y asegurate de que tus utilidades vivan dentro de layers. Cuando ambos están layered, el orden de capas controla quién gana.
+1. **Envolver tus estilos en un layer también**: agrega `@import "tailwindcss"` (Tailwind v4) o `@layer base, components, utilities;` (Tailwind v3) explícitamente, y asegúrate de que tus utilidades vivan dentro de layers. Cuando ambos están layered, el orden de capas controla quién gana.
 2. **Desactivar el preflight** — en `tailwind.config.js`: `corePlugins: { preflight: false }`. Te pierde el reset pero el kit queda intacto.
-3. **Override puntual desde tu app** — si solo te molesta un componente, podés re-establecer la propiedad afuera de cualquier layer:
+3. **Override puntual desde tu app**: si solo te molesta un componente, puedes re-establecer la propiedad afuera de cualquier layer:
    ```css
    .card[class*="card--accent-"] { border-style: solid; }
    ```
 
-A partir de v0.4.5 el kit mitiga este problema en `Card` usando `box-shadow inset` para la accent rail en vez de `border-left`. Otros componentes con bordes finos (`Input`, `Select`, `Table`) siguen dependiendo de `border-*` y son afectados por el preflight — si te pasa, andá por la opción (1) o (2).
+A partir de v0.4.5 el kit mitiga este problema en `Card` usando `box-shadow inset` para la accent rail en vez de `border-left`. Otros componentes con bordes finos (`Input`, `Select`, `Table`) siguen dependiendo de `border-*` y son afectados por el preflight. Si te pasa, usa la opción (1) o (2).
 
 ---
 
@@ -270,7 +270,7 @@ Heredan `color` del padre y aceptan `size`, `strokeWidth`, `className` y `title`
 
 ### Fuentes (opcional)
 
-Si no usás `next/font`, podés cargar Outfit (display) + DM Sans (body) empaquetadas con el kit. Ambas son variable fonts, total ~80 KB:
+Si no usas `next/font`, puedes cargar Outfit (display) + DM Sans (body) empaquetadas con el kit. Ambas son variable fonts, total ~80 KB:
 
 ```ts
 // app/layout.tsx
@@ -315,7 +315,7 @@ Los tokens viven en `:root`. La paleta de marca y los tokens semánticos están 
 .my-card { background: var(--bg-surface); color: var(--fg-default); }
 ```
 
-¿Solo querés los tokens (sin los componentes)? Importá únicamente `tokens.css`:
+¿Solo quieres los tokens (sin los componentes)? Importa únicamente `tokens.css`:
 
 ```ts
 import '@misael703/ui/tokens.css';
@@ -323,7 +323,7 @@ import '@misael703/ui/tokens.css';
 
 ### Superficies invertidas (zonas con bg oscuro)
 
-El kit resetea `color` en `<p>`, `<h1>`–`<h6>`, anchors y `.caption` para mantener consistencia tipográfica. Cuando metés esos elementos dentro de un footer / hero / sidebar oscuro, el color heredado del kit gana sobre el `color` del padre (especificidad). Para invertir el subtree completo en una línea, usá `.surface-inverse`:
+El kit resetea `color` en `<p>`, `<h1>`–`<h6>`, anchors y `.caption` para mantener consistencia tipográfica. Cuando metes esos elementos dentro de un footer / hero / sidebar oscuro, el color heredado del kit gana sobre el `color` del padre (especificidad). Para invertir el subtree completo en una línea, usa `.surface-inverse`:
 
 ```html
 <footer class="surface-inverse surface-inverse--brand">

@@ -544,7 +544,7 @@ export const Motion: StoryObj = {
         <SectionTitle>Easings</SectionTitle>
         <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 16 }}>
           Misma duración (<code>--duration-slow</code>, 320ms a {DEMO_SCALE}× = {320 * DEMO_SCALE}ms),
-          distinta curva. Notá cómo el cuadrado arranca y termina diferente en cada fila.
+          distinta curva. Nota cómo el cuadrado arranca y termina diferente en cada fila.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, alignItems: 'center', marginBottom: 24 }}>
           {easings.map(([k, bezier, desc]) => (
@@ -711,7 +711,7 @@ export const Localization: StoryObj = {
       <div style={{ display: 'grid', gap: 24 }}>
         <SectionTitle>Localization (LocaleProvider)</SectionTitle>
         <p style={{ color: 'var(--fg-muted)', fontSize: 14, margin: 0 }}>
-          ~80 strings hardcoded en español viven en <code>esMessages</code>. Envolvé tu árbol en{' '}
+          ~80 strings hardcoded en español viven en <code>esMessages</code>. Envuelve tu árbol en{' '}
           <code>{`<LocaleProvider messages={{...}}>`}</code> para overridear todo o algunas keys.
           Sin provider, todo sale en español (default).
         </p>
@@ -722,7 +722,7 @@ export const Localization: StoryObj = {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <Button onClick={() => setOpenEs(true)}>Abrir modal</Button>
               <Modal open={openEs} onClose={() => setOpenEs(false)} title="Confirmar acción">
-                <p>Mirá el botón ✕ arriba a la derecha — su <code>aria-label</code> es la key del locale.</p>
+                <p>Mira el botón ✕ de arriba a la derecha: su <code>aria-label</code> es la key del locale.</p>
               </Modal>
               <DataTable rows={[]} rowKey={(r: { id: string }) => r.id} columns={cols} />
               <Pagination page={1} pageSize={10} total={25} onPageChange={() => {}} />
@@ -754,7 +754,7 @@ export const Localization: StoryObj = {
         </div>
 
         <p style={{ color: 'var(--fg-muted)', fontSize: 13, marginTop: 8 }}>
-          Tip: pasá solo las keys que querés cambiar — el resto cae a <code>esMessages</code> vía
+          Tip: pasa solo las keys que quieres cambiar; el resto cae a <code>esMessages</code> vía
           shallow merge. Templates como <code>{`{from}–{to} de {total}`}</code> se resuelven con el
           helper <code>format()</code> exportado del kit.
         </p>
