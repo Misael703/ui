@@ -515,3 +515,63 @@ TSX sin cambios → cero riesgo de breaking.**
 - **Fase C cambio de fallback**: ver trade-off arriba — validar en revisión de plan.
 - **jsdom**: no valida píxeles; "no recortado/reubica" se cubre por estructura (portal target) + Storybook.
 - **NavigationMenu refs por-trigger**: hoy un solo `panelRef`; con varios triggers, asegurar que el ref del panel corresponde al `openId` actual (un panel abierto a la vez — el patrón Menu de v1.1.0 ya resuelve esto, replicar).
+
+---
+---
+
+# v1.3.0 — Auditoría de producción: remediación
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.2.0` → **`1.3.0`** (fixes a11y + feature dark mode, sin breaking → MINOR)
+**Informe completo:** `~/.claude/plans/necesito-evaluar-el-ui-soft-hedgehog.md`
+**Contexto:** auditoría con estándares de producción vs shadcn. Kit interno multi-app, poda conservadora. Veredicto 16/20 técnico — atacar ejes 3/4.
+
+## Tareas (orden por impacto)
+
+- [ ] **[P1] `Tree` operable por teclado** (`src/components/Display3.tsx`)
+  - [x] Roving tabindex + patrón WAI-ARIA TreeView (↑↓→← Home End Enter/Espacio)
+  - [x] `role="treeitem"` en la fila focuseable; `<li role="none">`; chevron `tabIndex=-1` `aria-hidden` fuera del tab order
+  - [x] Manejador de teclado centralizado en `<ul role="tree">` (delegación; query DOM = orden visual)
+  - [x] Focus ring `:focus-visible` en `.tree__row` (`src/styles/index.css`) — convención del kit (`box-shadow: var(--focus-ring-accent)`)
+  - [x] Import muerto `useLocale` removido de Display3
+  - [x] `tests/Tree.test.tsx` (roles, roving tabindex, selectedId inicial, ArrowRight/Left expand-collapse, ArrowDown foco, Enter selecciona)
+  - [x] Regresión propia cazada: removí import `useLocale` por un grep erróneo → lo usa `Calendar`. Restaurado. `tests/Display3.test.tsx` actualizado al contrato a11y correcto (chevron decorativo, `aria-expanded` en treeitem)
+  - [x] `npm test` verde sin regresiones — **325/325**, `tsc` limpio, `npm run build` OK
+- [x] **[P2]** Wiring ARIA de `Accordion` (`src/components/DataTable.tsx`): `React.useId()` → `id` trigger/panel + `aria-controls` + `role="region"` + `aria-labelledby`. Mantiene unmount-on-close (sin cambio de comportamiento). Test ARIA en `tests/DataTable.test.tsx`. **326/326**, tsc limpio
+- [~] **[P2]** Dark mode global — **DIFERIDO** por decisión del usuario (2026-05-17). Las apps quizá no lo necesitan; esfuerzo redirigido a consolidación. Deuda anotada.
+- [~] **[P2]** Consolidación:
+  - [x] `Divider` (Layout.tsx) → alias deprecado de `Separator` (Primitives.tsx). `forwardRef`, `decorative={false}` preserva `role="separator"`+`aria-orientation`, mantiene clases `divider`/`divider--vertical` (cero regresión visual/a11y para barritas/marginapp). JSDoc `@deprecated`. Tests Layout/Divider intactos.
+  - [x] Helpers de calendario duplicados (`startOfMonth`/`addMonths`/`isSameDay` byte-idénticos en Pickers/AdvancedPickers/Display3 + `buildMonthGrid` en 2) → única fuente en `src/utils/dateFormat.ts`. Pickers y AdvancedPickers consumen `buildMonthGrid`; Display3 solo los 3 helpers. **326/326**, tsc limpio, build OK, 0 helpers locales restantes.
+  - [x] **Decisión técnica:** `Calendar` (Display3) NO se fusiona al `buildMonthGrid` — usa un grid fijo de 42 celdas con días de meses adyacentes (modelo distinto a propósito vs el picker compacto con `null`s). Fusionarlo habría sido regresión visual. Es divergencia intencional, no duplicación.
+  - [ ] Reagrupar Display2/3·InputsExtra por dominio — **NO hecho, requiere confirmación** (churn de import paths alto en tests/stories, valor funcional ~0 para kit interno que ya funciona en prod; recomiendo diferir)
+- [x] **[P3]** Gate de calidad: ESLint 9 flat (`eslint.config.mjs`: @eslint/js + typescript-eslint + react-hooks + jsx-a11y + eslint-config-prettier) + Prettier (`.prettierrc.json`/`.prettierignore`). Scripts `lint`/`lint:fix`/`format`/`format:check`. Step `Lint` añadido a `publish.yml` antes de `Run tests`. **0 errores, 87 warnings** (deuda preexistente visible, no bloquea). `rules-of-hooks`=error en código shipped (0 violaciones), off en `*.stories.tsx` (los render de stories llaman hooks inline; react-hooks v7 los sobre-marca). ESLint fijado a `^9` (jsx-a11y no soporta v10). `npm run lint` exit 0, tsc limpio, 326/326.
+  - [ ] **Follow-up flagged:** `prettier --write .` repo-wide NO ejecutado (sería diff de ~todos los archivos, ruido que no debe mezclarse con los fixes de auditoría). One-shot separado cuando se decida.
+- [x] **[P3]** CSS: **documentado** (decisión: no code-split). Sección "Costo del CSS (hoja única)" en README con números reales (~123 KB raw / **~19 KB gzip**; tokens.css ~7 KB) y el porqué (code-split rompería el import de una línea; costo marginal ~0 para apps internas). Camino aditivo no-breaking si algún consumidor lo necesita.
+- [x] **[P3]** Doc de diseño: `DESIGN.md` (derivado fielmente del SSOT `_root.css`/`_typography.css`) + `PRODUCT.md` (`register: product`, grounded en código/README/uso real; partes estratégicas marcadas _(refine)_). Loader impeccable ahora `hasProduct:true hasDesign:true`. Sin `teach` interactivo (el usuario pidió ejecutar, no interrogatorio).
+
+## Review v1.3.0 (2026-05-17) — a11y + consolidación; commits/PR pendientes
+
+**Hecho (sin commitear, sin push):**
+- **P1 `Tree`**: keyboard-operable (WAI-ARIA TreeView: roving tabindex, ↑↓→← Home End Enter/Espacio; manejador delegado en `<ul role=tree>`; query DOM = orden visual). `role=treeitem` en la fila, `<li role=none>`, chevron decorativo (`tabIndex=-1` `aria-hidden`). Focus ring con la convención del kit. Cerró el único fallo WCAG nivel A del informe.
+- **P2 `Accordion`**: `React.useId()` → wiring `aria-controls`/`role=region`/`aria-labelledby`; unmount-on-close preservado (sin cambio de comportamiento).
+- **P2 `Divider`→`Separator`**: una sola implementación; `Divider` alias deprecado no-breaking.
+- **P2 calendarios**: triplicación de helpers de fecha + `buildMonthGrid` eliminada → `utils/dateFormat.ts`. `Calendar` queda con su grid propio (divergencia intencional documentada).
+- Tests nuevos: `tests/Tree.test.tsx` (7), ARIA en `tests/DataTable.test.tsx` (1). `tests/Display3.test.tsx` actualizado al contrato a11y correcto.
+- Lección registrada en `tasks/lessons.md` (regresión propia: borrar import por grep sin verificar con tsc).
+
+- **P3 gate de calidad**: ESLint 9 flat + Prettier + step en CI. 0 errores / 87 warnings (deuda visible). `rules-of-hooks` error en shipped (0), off en stories.
+
+**Verificación:** `tsc --noEmit` limpio · **vitest 326/326** (0 regresiones) · `npm run build` OK (solo warnings `use client` CJS preexistentes/benignos) · `npm run lint` exit 0.
+
+**Pendiente / decisiones abiertas:**
+- Reagrupar por dominio (Display2/3, InputsExtra): recomiendo **diferir** (churn alto, valor bajo, kit interno estable).
+- P3: ESLint+Prettier gate, decisión CSS code-split, `PRODUCT.md`/`DESIGN.md`. **TODOS HECHOS.**
+
+**Cierre v1.3.0 (2026-05-17):** todos los ítems accionables del roadmap hechos;
+dark mode y reagrupar-por-dominio diferidos por decisión del usuario. Verificación
+final consolidada: `npm run lint` exit 0 · `tsc --noEmit` limpio · **vitest 326/326** ·
+`npm run build` OK. Working tree sin commitear/push/publicar (regla
+no-push-without-approval). Bump sugerido 1.2.0 → **1.3.0** (fixes a11y +
+consolidación interna + tooling, sin breaking → MINOR) cuando se apruebe.
+- Dark mode: diferido por decisión del usuario.
+- API pública: `startOfMonth`/`addMonths`/`isSameDay`/`buildMonthGrid` ahora exportados vía barrel (`export * from './utils/dateFormat'`) — aditivo, no-breaking, consistente con `formatDate`/`resolveDateFormat` ya públicos.
+- **Nada commiteado/pusheado/publicado** (regla no-push-without-approval). Sugiere bump `1.2.0 → 1.3.0` (fixes a11y + consolidación interna, sin breaking → MINOR) cuando se apruebe.
