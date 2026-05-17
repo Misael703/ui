@@ -5,6 +5,11 @@ import { Button } from './Button';
 
 export default { title: 'Overlay/Modal & Drawer', tags: ['autodocs'] } as Meta;
 
+/**
+ * Foco gestionado (a11y): al abrir, el foco entra al diálogo y queda atrapado
+ * (Tab/Shift+Tab ciclan dentro); Esc cierra; al cerrar, el foco vuelve al
+ * disparador. `role="dialog"` + `aria-modal` + `aria-labelledby` al título.
+ */
 export const ModalBasico: StoryObj = {
   render: () => {
     const [o, setO] = React.useState(false);
