@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Combobox, DatePicker, FileUpload } from './Pickers';
+import { Combobox, DatePicker, FileUpload, YearPicker, MonthPicker } from './Pickers';
 import { action } from '@storybook/addon-actions';
 
 export default { title: 'Forms/Pickers', tags: ['autodocs'] } as Meta;
@@ -63,4 +63,20 @@ export const FileUploadBasico: StoryObj = {
   render: () => (
     <FileUpload onFiles={action('files')} hint="PDF o imagen, máx 5MB" accept="application/pdf,image/*" />
   ),
+};
+
+/** Selector de año: grid de década con `<<`/`>>`, años de borde atenuados. */
+export const YearPickerBasico: StoryObj = {
+  render: () => {
+    const [y, setY] = React.useState<number | null>(2025);
+    return <YearPicker value={y} onChange={setY} minYear={2000} maxYear={2030} />;
+  },
+};
+
+/** Selector de mes: grid 3×4 de meses, navegación por año. */
+export const MonthPickerBasico: StoryObj = {
+  render: () => {
+    const [m, setM] = React.useState<Date | null>(new Date(2026, 4, 1));
+    return <MonthPicker value={m} onChange={setM} />;
+  },
 };

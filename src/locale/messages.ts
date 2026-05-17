@@ -119,6 +119,12 @@ export interface UiKitMessages {
   'picker.selectRange': string;
   'picker.searchCommands': string;
   'picker.commandPalette': string;
+  'picker.prevYear': string;
+  'picker.nextYear': string;
+  'picker.prevDecade': string;
+  'picker.nextDecade': string;
+  'picker.selectYear': string;
+  'picker.selectMonth': string;
   /**
    * Single-letter weekday initials used by compact calendar grids (DatePicker,
    * DateRangePicker). Mon-first to match the kit's calendars.
