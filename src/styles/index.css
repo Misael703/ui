@@ -75,7 +75,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-weight: 700;
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
@@ -408,7 +408,7 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   background: var(--bg-subtle);
   color: var(--fg-default);
   border: 1px solid var(--border-default);
@@ -473,7 +473,7 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--color-primary);
   font-size: var(--text-sm);
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   letter-spacing: 0.02em;
   flex: none;
   position: relative;
@@ -562,7 +562,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   color: var(--fg-muted);
 }
 .kpi-card__value {
@@ -631,7 +631,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--text-2xs);
   letter-spacing: var(--tracking-wide);
   padding: 4px 8px;
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
 }
 
 /* ---------- Alert / Banner ----------------------------------------------- */
@@ -831,7 +831,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-weight: 700;
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   color: var(--fg-muted);
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-default);
@@ -915,7 +915,7 @@ button, input, select, textarea { box-sizing: border-box; }
     font-weight: 600;
     color: var(--fg-muted);
     flex-shrink: 0;
-    text-transform: uppercase;
+    text-transform: var(--tt-label);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
   }
@@ -980,7 +980,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-xl);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
@@ -1024,7 +1024,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-xl);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
@@ -1182,7 +1182,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-xl);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   color: var(--fg-default);
   margin: 0 0 8px;
 }
@@ -1365,7 +1365,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-md);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   letter-spacing: var(--tracking-wide);
 }
 .tpl-nav__items { display: flex; gap: 4px; }
@@ -1398,10 +1398,10 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-sm);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
 }
 .tpl-sb__nav { padding: 12px; flex: 1; overflow-y: auto; }
-.tpl-sb__group { font-family: var(--font-body); font-weight: 700; font-size: var(--text-2xs); letter-spacing: var(--tracking-wider); text-transform: uppercase; color: var(--fg-subtle); padding: 12px 12px 6px; }
+.tpl-sb__group { font-family: var(--font-body); font-weight: 700; font-size: var(--text-2xs); letter-spacing: var(--tracking-wider); text-transform: var(--tt-label); color: var(--fg-subtle); padding: 12px 12px 6px; }
 .tpl-sb__link {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 12px;
@@ -1540,7 +1540,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .kpi__label {
   font-family: var(--font-body); font-size: var(--text-xs);
-  color: var(--fg-muted); text-transform: uppercase;
+  color: var(--fg-muted); text-transform: var(--tt-label);
   letter-spacing: var(--tracking-wider);
 }
 .kpi__icon { color: var(--fg-muted); }
@@ -1649,7 +1649,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .datepicker__dow {
   text-align: center; font-size: var(--text-2xs); color: var(--fg-muted);
-  padding: 4px 0; text-transform: uppercase;
+  padding: 4px 0; text-transform: var(--tt-label);
 }
 .datepicker__day {
   height: 32px; border: none; background: transparent;
@@ -1915,7 +1915,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .menu__label {
   padding: 6px 10px;
   font-family: var(--font-body); font-size: var(--text-2xs); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-subtle);
 }
 .menu__item {
@@ -1946,7 +1946,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .stat--center { align-items: center; text-align: center; }
 .stat__label {
   font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-muted);
 }
 .stat__value {
@@ -2094,7 +2094,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__month { font-family: var(--font-body); }
 .daterange__title {
   font-family: var(--font-display); font-weight: 700;
-  font-size: var(--text-sm); text-transform: uppercase;
+  font-size: var(--text-sm); text-transform: var(--tt-title);
   letter-spacing: var(--tracking-wide);
   text-align: center; margin-bottom: 8px;
 }
@@ -2103,7 +2103,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .daterange__dow {
   font-family: var(--font-body); font-weight: 700; font-size: 0.625rem;
-  letter-spacing: var(--tracking-wider); text-transform: uppercase;
+  letter-spacing: var(--tracking-wider); text-transform: var(--tt-label);
   color: var(--fg-subtle); text-align: center; padding: 4px 0;
 }
 .daterange__day {
@@ -2179,7 +2179,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .cmdk__group {
   padding: 8px 10px 4px;
   font-family: var(--font-body); font-size: var(--text-2xs); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-subtle);
 }
 .cmdk__item {
@@ -2224,9 +2224,27 @@ button, input, select, textarea { box-sizing: border-box; }
   align-items: center;
   justify-content: center;
   font-family: var(--font-display); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+  text-transform: var(--tt-title); letter-spacing: var(--tracking-wide);
 }
 .appshell.is-collapsed .appshell__brand { padding: 16px 12px; overflow: hidden; }
+/* Brand text opt-out: wrap any textual part of `brand` in
+   <span class="appshell__brand-text"> and it collapses away with the rail
+   while the logo/mark stays. Mirrors the navlabel collapse below, so a
+   single `brand` works in both states without a separate `brandCollapsed`.
+   The global prefers-reduced-motion guard already neutralizes the
+   transition. */
+.appshell__brand-text {
+  overflow: hidden;
+  transition: opacity var(--duration-fast, 150ms) ease,
+              max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+.appshell.is-collapsed .appshell__brand-text {
+  opacity: 0;
+  max-width: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
 /* Collapsed rail (72px): stack the footer slot above a centered toggle so
    neither falls outside the rail nor overlaps (Bug 2). The base foot is a
    space-between row and the toggle has margin-left:auto — both wrong at
@@ -2245,7 +2263,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__navlabel-section {
   padding: 10px 12px 4px;
   font-family: var(--font-body); font-size: var(--text-2xs); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-subtle);
 }
 .appshell.is-collapsed .appshell__navlabel-section { display: none; }
@@ -2445,7 +2463,7 @@ button, input, select, textarea { box-sizing: border-box; }
      desktop scale. clamp() handles the fluid step natively. */
   font-size: clamp(var(--text-xl), 3vw + 0.75rem, var(--text-3xl));
   line-height: 1.1;
-  text-transform: uppercase; letter-spacing: var(--tracking-tight);
+  text-transform: var(--tt-title); letter-spacing: var(--tracking-tight);
   margin: 0; color: var(--fg-default);
 }
 .page-header__desc { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
@@ -2560,7 +2578,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Calendar (vista mes) -------------------------------------- */
 .calendar { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; font-family: var(--font-body); }
 .calendar__head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); }
-.calendar__title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-md); text-transform: uppercase; color: var(--fg-default); }
+.calendar__title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-md); text-transform: var(--tt-title); color: var(--fg-default); }
 .calendar__nav {
   width: 32px; height: 32px; border-radius: var(--radius-sm);
   background: transparent; border: 0; cursor: pointer;
@@ -2576,7 +2594,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--fg-muted);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   letter-spacing: var(--tracking-wider);
 }
 .calendar__day {
@@ -2711,7 +2729,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .codeblock__meta { display: flex; gap: var(--space-3); align-items: center; }
 .codeblock__filename { color: var(--color-gray-200); font-size: var(--text-xs); font-weight: 700; }
-.codeblock__lang { color: var(--color-gray-400); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: var(--tracking-wider); }
+.codeblock__lang { color: var(--color-gray-400); font-size: var(--text-2xs); text-transform: var(--tt-label); letter-spacing: var(--tracking-wider); }
 .codeblock__copy {
   background: transparent; border: 0; cursor: pointer;
   color: var(--color-gray-200); font-size: var(--text-xs);
@@ -2848,7 +2866,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .comment__time { font-size: var(--text-xs); color: var(--fg-subtle); }
 .comment__tag {
   font-size: var(--text-2xs); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   background: var(--color-yellow-200); color: var(--color-yellow-900);
   padding: 0 var(--space-2); border-radius: var(--radius-sm);
 }
@@ -2902,7 +2920,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .diff__head > div {
   background: var(--bg-subtle); padding: var(--space-2) var(--space-3);
   font-weight: 700; color: var(--fg-muted); font-size: var(--text-xs);
-  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wide);
   border-bottom: 1px solid var(--border-default);
 }
 .diff__row { display: contents; }
@@ -2928,7 +2946,7 @@ button, input, select, textarea { box-sizing: border-box; }
   .diff__row > div { padding: var(--space-2) var(--space-3); border-bottom: 0; }
   .diff__row { padding-bottom: var(--space-2); border-bottom: 1px solid var(--border-default); }
   .diff__row:last-child { border-bottom: 0; }
-  .diff__field { background: var(--bg-subtle); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+  .diff__field { background: var(--bg-subtle); font-size: var(--text-xs); text-transform: var(--tt-label); letter-spacing: var(--tracking-wide); }
   /* The before/after labels come from a data-label attribute set by
      DiffViewer (read from the locale dict) — keeps the strings i18n-able. */
   .diff__before[data-label]::before,
@@ -3114,7 +3132,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- PromoCodeInput -------------------------------------------- */
 .promo { display: flex; flex-direction: column; gap: var(--space-2); }
 .promo__row { display: flex; gap: var(--space-2); }
-.promo__input { flex: 1; text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+.promo__input { flex: 1; text-transform: var(--tt-label); letter-spacing: var(--tracking-wide); }
 .promo__message { font-size: var(--text-xs); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 .promo__message--success { color: var(--color-green-800); background: var(--color-green-50); }
 .promo__message--error { color: var(--color-red-800); background: var(--color-red-50); }
@@ -3220,7 +3238,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .hero__eyebrow {
   color: var(--hero-fg);
   font-size: var(--text-sm); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--tracking-wider);
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   opacity: 0.85;
 }
 .hero__title {
@@ -3230,7 +3248,7 @@ button, input, select, textarea { box-sizing: border-box; }
      a 52px headline overflowing 360px screens. */
   font-size: clamp(var(--text-3xl), 5vw + 1rem, var(--text-5xl));
   line-height: var(--leading-tight);
-  text-transform: uppercase; letter-spacing: var(--tracking-tight);
+  text-transform: var(--tt-title); letter-spacing: var(--tracking-tight);
   margin: 0;
 }
 .hero--sm .hero__title { font-size: var(--text-3xl); }
@@ -3324,7 +3342,7 @@ button, input, select, textarea { box-sizing: border-box; }
   gap: var(--space-5);
   min-width: 480px;
 }
-.category-nav__group-title { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-wider); color: var(--fg-muted); margin-bottom: var(--space-2); }
+.category-nav__group-title { font-size: var(--text-xs); font-weight: 700; text-transform: var(--tt-label); letter-spacing: var(--tracking-wider); color: var(--fg-muted); margin-bottom: var(--space-2); }
 .category-nav__group-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 .category-nav__group-items a { color: var(--fg-default); font-size: var(--text-sm); text-decoration: none; padding: var(--space-1) 0; border: 0; }
 .category-nav__group-items a:hover { color: var(--color-primary); }
