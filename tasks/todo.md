@@ -405,3 +405,113 @@ Fases A–E completas: primitiva (`Portal`+`usePopoverPosition`+token z) → ree
 4. **DatePicker/DateRangePicker fuera**: ya portalean; conversión del calendario es follow-up explícito (no scope creep silencioso).
 
 **Bug 3 (Switch) — hallazgo, NO se cambió código:** 4 tests que simulan 1 click en track / 1 en label / 1 en input (equiv. Space) / toggle controlado → `onChange` se dispara **exactamente 1 vez** y el estado togglea 1 vez. El componente del kit ya cumple el acceptance. El doble PATCH (false/true neto cero) del reporte NO se reproduce en una simulación DOM fiel: causa probable consumer-side (React StrictMode dev doble-invoca; o `checked`+`onChange` mal cableado; o doble binding / `<label htmlFor>` externo). El kit ya mitiga el vector browser clásico (`.switch input{pointer-events:none}`). Entrego los tests como guardia de regresión + esta conclusión; no parcheo un componente correcto a ciegas. Necesito el uso real del Switch en la app consumidora para reproducir si persiste.
+
+---
+---
+
+# v1.2.0 — Cerrar deuda de la primitiva flotante + AppShell brand colapsado + opt-out de mayúsculas
+
+**Fecha:** 2026-05-17 · **Estado:** PLAN, pendiente de validación · **Rama:** crear `feat/floating-convergence-appshell-caps`
+**Base:** `1.1.0` → **`1.2.0`** (todo backward-compatible: convergencia interna, comportamiento nuevo opt-in, API pública intacta → MINOR).
+
+## Decisiones validadas por el usuario (2026-05-17)
+1. **Item 1 — teclado INCLUIDO**: NavigationMenu/Menubar reciben navegación completa por teclado (igual que Menu en v1.1.0).
+2. **Item 1b (nuevo)**: AppShell colapsado — el texto del brand debe **desaparecer**, no recortarse (captura: "Despachos · v0.1" sangrando junto al mark "N" en el riel de 72px).
+3. **Item 3 — 2 tokens**: `--tt-label` (micro) + `--tt-title` (display), default `uppercase`, override a `none`.
+4. **Item 4 (Switch)**: **DIFERIDO** — fuera de esta tanda hasta tener el uso real que falla. No se toca.
+
+## Hallazgos de investigación (read-only, hecha)
+- **NavigationMenu** (`NavigationMenu.tsx`) y **Menubar** (`Menubar.tsx`): ya portalean con `createPortal`, pero usan `positionPanel` manual (`top:bottom+scrollY,left:left+scrollX`) → sin flip, sin clamp, sin reposición en scroll de ancestros ni resize. Dismiss duplicado (su propio `useEffect` mousedown+Escape). **Sin** navegación por teclado (solo Escape + mouse `onMouseEnter`).
+- **DatePicker** (`Pickers.tsx:174-364`) y **DateRangePicker** (`AdvancedPickers.tsx:172-525`): sus hermanos Combobox/MultiCombobox **en los mismos archivos** ya usan la primitiva (`usePopoverPosition`/`useDismiss`/`<Portal>` ya importados, líneas 8-11). El calendario sigue con `coords` manual + `getBoundingClientRect()` + `createPortal` crudo (Pickers `211/228/270/275`, AdvancedPickers `218/233/316/322`).
+- **Primitiva v1.1.0** (estable, no se toca): `usePopoverPosition(anchorRef, contentRef, {open,side,align,offset,matchAnchorWidth}) → {top,left,side,ready,width}`; `useDismiss({open,onDismiss,refs,closeOnEscape,closeOnOutsideClick,returnFocusRef})`; `<Portal>` SSR-safe.
+- **AppShell brand**: `AppShell.tsx:123-125` → `<div className="appshell__brand">{collapsed ? (brandCollapsed ?? brand) : brand}</div>`. Colapsado sin `brandCollapsed` ⇒ renderiza el `brand` completo; única defensa `.appshell.is-collapsed .appshell__brand{overflow:hidden}` (`index.css:2229`) → solo recorta (bug de la captura). El kit **no puede** entrar a un `ReactNode` opaco a ocultar "el texto"; las navlabels sí colapsan limpio porque el kit controla `<span class="appshell__navlabel">` (`index.css:2283-2291`, patrón `opacity:0;max-width:0`).
+- **Mayúsculas**: `text-transform:uppercase` vive en **base** `src/styles/index.css` (~20 ocurrencias), no en el preset. Dos clases reales: **micro** (eyebrow 78, badge/tag/pill 411, chip 476, kpi-label 565, banner-badge 634, table th 834, table-card label 918, navlabel-section 2248, …) y **display-title** (`font-display`+uppercase: modal__title 983, drawer__title 1027, empty__title 1185, appshell__brand 2227).
+
+## Restricciones (innegociables)
+Cero breaking de API pública (`NavigationMenuProps`/`MenubarProps`/`DatePickerProps`/`DateRangePickerProps`/`AppShellProps` idénticos); drop-in vía bump; SSR/Next intacto (Portal síncrono, guard `typeof document`); sin deps nuevas; a11y preservada/mejorada; default visual del kit **idéntico** tras item 3 (ambos tokens default `uppercase`).
+
+---
+
+## Fase A — Item 1: NavigationMenu + Menubar → primitiva + teclado ✅
+- [x] **NavigationMenu.tsx**: `createPortal`→`<Portal>`; quitado `coords`/`positionPanel`/`useEffect` de dismiss; `usePopoverPosition(anchorRef, panelRef, {open,side:'bottom',align:'start'})` + `useDismiss({refs:[rootRef,panelRef],closeOnEscape:false})`. `visibility` por `pos.ready`. Foco a links por query `.nav-menu__link` (uniforme default `<a>` y `linkAs`).
+  - [x] Teclado: trigger ArrowDown/Enter/Space abre + foco primer link; panel ArrowUp/Down/Home/End mueve foco, Escape cierra + foco trigger, Tab cierra. Foco solo en apertura por teclado (no roba foco al mouse).
+- [x] **Menubar.tsx**: misma conversión. Roving tabindex en triggers; ArrowLeft/Right entre menús (abre el hermano si hay uno abierto), ArrowDown/Enter/Space abre, ArrowUp/Down/Home/End dentro, Enter/Space selecciona, Escape cierra al trigger, Tab cierra. `role="menubar"`/`role="menu"` preservados.
+- [x] tsc limpio · vitest 307/307 (incl. NavigationMenu/Menubar tests existentes) sin regresiones.
+**Commit**: `feat(nav)!: route NavigationMenu/Menubar through floating primitive + keyboard nav` *(`!` no por breaking de API sino marca de comportamiento nuevo; si confunde, `feat(nav):` + nota en cuerpo)*
+
+## Fase B — Item 2: DatePicker + DateRangePicker → primitiva ✅
+- [x] **Pickers.tsx** `DatePicker`: borrado `coords`+2 `useEffect`; `usePopoverPosition(wrapRef,popoverRef,{open,side:'bottom',align:'start',offset:4})` + `useDismiss({refs:[wrapRef,popoverRef],returnFocusRef:inputRef})` + `<Portal>` + `is-floating`. Mejora a11y: Escape cierra + foco al input (antes no había). Grid de mes intacto.
+- [x] **AdvancedPickers.tsx** `DateRangePicker`: ídem (offset:6, returnFocusRef:triggerRef). Lógica de rango/hover/presets intacta.
+- [x] `DatePickerProps`/`DateRangePickerProps`/`DateRange` intactos. Imports `createPortal` no usados eliminados → **cero `createPortal` en `src`** (duplicación 100% cerrada). tsc limpio · vitest 307/307.
+**Commit**: `fix(pickers): route DatePicker/DateRangePicker calendar through floating primitive`
+
+## Fase C — Item 1b: AppShell brand colapsado (texto desaparece, no se recorta) ✅
+**DESVIACIÓN JUSTIFICADA del plan (regla "parar y re-planear"):** los mecanismos
+A y B eran lógicamente excluyentes — si B no renderiza `brand` cuando
+`collapsed && !brandCollapsed`, entonces A (`appshell__brand-text` oculta solo
+el texto dejando el logo) no puede funcionar para el consumer que usa la clase
+sin pasar `brandCollapsed`. Además nullear el `brand` es regresión para quien
+hoy pasa solo `brand`. **Resuelto del lado seguro: solo mecanismo A (CSS),
+TSX sin cambios → cero riesgo de breaking.**
+- [x] `index.css`: `.appshell__brand-text` (transición opacity+max-width) + `.appshell.is-collapsed .appshell__brand-text { opacity:0; max-width:0; margin:0; padding:0; pointer-events:none; }` — espejo exacto del patrón navlabel. `prefers-reduced-motion` ya cubierto por el guard global (`index.css:3616`).
+- [x] **TSX intacto** (`AppShell.tsx` sin cambios): `{collapsed ? (brandCollapsed ?? brand) : brand}` se mantiene → API y comportamiento existente preservados; el fix es 100% CSS opt-in.
+- [x] Stories `BrandTextColapsable` + `BrandTextColapsadoInicial` (caso "Despachos · v0.1": brand con mark + `<span className="appshell__brand-text">`, sin `brandCollapsed`).
+- [x] `AppShellProps` intacto. Verificado: con `brandCollapsed` → mark; brand con la clase → texto se va animado, mark queda; sin clase → comportamiento previo (no regresión).
+**Commit**: `fix(appshell): add appshell__brand-text convention so collapsed brand text vanishes`
+> CHANGELOG: `Added` la convención `appshell__brand-text`. NO es Fixed-con-cambio-de-comportamiento (TSX intacto), es feature aditiva opt-in.
+
+## Fase D — Item 3: opt-out de mayúsculas (`--tt-label` / `--tt-title`) ✅
+- [x] `_root.css`: `--tt-label: uppercase;` + `--tt-title: uppercase;` (capa tipográfica, tras tracking).
+- [x] Sweep **38 sitios** (no ~20): `index.css` 33 (10 title / 23 label) + `_typography.css` 5 (`.h1/.h2/.h3`→title, `.eyebrow/.label`→label). Categorización por `font-display`→title, resto→label, vía Node con aserción por línea (falla ruidoso si un nº no calza). El sweep de `_typography.css` se agregó porque omitirlo dejaba el opt-out parcial (el fallo silencioso del Riesgo).
+- [x] **El Alba preset NO tocado**: default global `uppercase` → preset pixel-idéntico.
+- [x] Story `Foundations/CapsOptOut` (default vs `--tt-*: none` lado a lado).
+- [x] **Red-flag del plan VERDE**: `grep -rF "text-transform: uppercase" src/styles src/presets` → **0**. tsc limpio · build:css OK · tokens en dist/styles.css y dist/tokens.css · vitest 307/307 (default visual idéntico).
+**Commit**: `feat(theme): add --tt-label/--tt-title tokens for uppercase opt-out`
+
+## Fase D — Item 3: opt-out de mayúsculas (`--tt-label` / `--tt-title`)
+- [ ] `src/styles/_root.css`: añadir defaults `--tt-label: uppercase;` y `--tt-title: uppercase;` (junto a la capa de tokens tipográficos). Documentar override (consumer o preset) a `none`.
+- [ ] Sweep en `index.css` (~20 ocurrencias): reemplazar `text-transform: uppercase` por `var(--tt-title)` en headings `font-display` (modal__title, drawer__title, empty__title, appshell__brand) y por `var(--tt-label)` en micro (eyebrow, badge/tag/pill, chip, kpi-label, banner-badge, table th, table-card label, navlabel-section, resto). Regla: `font-display`→title; el resto→label.
+- [ ] **El Alba preset NO cambia**: las mayúsculas son su firma de marca; default global sigue `uppercase` → visual del preset idéntico. El opt-out es para consumers que NO quieren caps (`:root{--tt-title:none}` o `--tt-label:none`).
+- [ ] Story en `Foundations` demostrando el opt-out (mismo componente con/sin caps). Visual diff: con defaults, **idéntico** a 1.1.0 (red flag si algo cambia → un selector quedó sin migrar).
+**Commit**: `feat(theme): add --tt-label/--tt-title tokens for uppercase opt-out`
+
+## Fase E — Tests + Stories ✅
+- [x] `tests/FloatingConvergence.test.tsx` (11): Nav portal/teclado(ArrowDown/Down/Home/End)/Escape+foco; Menubar portal/ArrowRight cambia menú/Escape+foco; DatePicker portal+selecciona día+dismiss outside; DateRangePicker portal; AppShell `brand-text` + mark presentes colapsado/expandido.
+- [x] Stories: `FloatingPortal.stories` extendida (Nav/Menubar/DatePicker/DateRangePicker en overflow); `AppShell` (`BrandTextColapsable`, `BrandTextColapsadoInicial`); `Foundations/CapsOptOut`.
+- [x] **vitest 318/318** (46 files, +11, 0 regresiones) · `tsc` limpio · `tsup build` OK (Menubar/NavigationMenu/Portal `.d.ts` emitidos) · `build-storybook` OK (solo warnings chunk-size preexistentes/benignos).
+
+## Fase F — Release prep (SIN publicar, SIN push, SIN PR sin OK) ✅ (commits pendientes de hacer)
+- [x] `package.json` `1.1.0 → 1.2.0`; `CHANGELOG.md` `[1.2.0]` (Added/Fixed/Changed, sin breaking).
+- [ ] Commits coherentes por fase (todos compilan). Rama `feat/floating-convergence-appshell-caps` (creada).
+- [ ] Diff + resumen. **PR, push y publish a npm SOLO con OK explícito** (regla no-push-without-approval; igual que v1.1.0).
+
+---
+
+## Review v1.2.0 (2026-05-17) — implementación completa, commits/PR pendientes
+
+**Hecho (Fases A–F):**
+- **A:** `NavigationMenu` + `Menubar` reescritos sobre la primitiva v1.1.0 (`Portal`+`usePopoverPosition`+`useDismiss`) + teclado completo. API pública intacta.
+- **B:** `DatePicker` (Pickers.tsx) + `DateRangePicker` (AdvancedPickers.tsx) por la primitiva. **`createPortal` eliminado de todo `src`** (duplicación 100% cerrada). Imports muertos quitados.
+- **C:** Convención CSS `appshell__brand-text` (espejo navlabel). **Desviación justificada:** solo mecanismo A (CSS), TSX intacto — el mecanismo B (nullear brand) era lógicamente excluyente con A y regresión; se descartó del lado seguro.
+- **D:** `--tt-label`/`--tt-title` en `_root.css`; sweep **38 sitios** (33 index.css + 5 _typography.css) vía Node con aserción por línea. El Alba preset intacto. Red-flag verde (0 `uppercase` hardcoded).
+- **E:** +11 tests, 3 stories nuevas/extendidas.
+- **F:** bump 1.2.0 + CHANGELOG.
+
+**Verificación:** `tsc` limpio · **vitest 318/318** (46 files, +11, 0 regresiones) · `tsup build` OK · `build-storybook` OK.
+
+**Bug cazado por los tests (no se habría visto sin testear en serio):** en `DatePicker`, `returnFocusRef: inputRef` + `onFocus→open` hacía que cerrar reabriera (loop). Resuelto alineando con el patrón Combobox del mismo archivo (sin `returnFocusRef`; Escape sigue cerrando por el default de `useDismiss`). `DateRangePicker` mantiene `returnFocusRef:triggerRef` (su trigger es `<button onClick>`, no `onFocus` → no reabre; a11y correcta).
+
+**Desviaciones del plan (justificadas):**
+1. Fase C: solo mecanismo A (CSS), sin tocar TSX (conflicto lógico A↔B; ruta segura sin breaking).
+2. Fase D: +5 sitios en `_typography.css` además de index.css (omitirlos dejaba el opt-out parcial — el fallo silencioso del Riesgo).
+3. `SortDropdown`/`NavigationMenu`/`Menubar` ya no son deuda; `<select>` nativo y calendarios internos fuera de scope como estaba previsto. Sin scope creep.
+
+## Fuera de scope (deuda anotada, follow-up explícito)
+- Item 4 Switch (diferido por decisión del usuario, hay tests de regresión).
+- SortDropdown (`<select>` nativo, no lo recorta overflow), calendario interno de pickers ya cubierto aquí.
+
+## Riesgos
+- **Sweep mayúsculas incompleto** → un selector queda con `uppercase` hardcoded mientras se documenta el opt-out → opt-out parcial silencioso. Mitigación: tras el sweep, `rg "text-transform: *uppercase" src/styles` debe dar **0** matches (todo via token); visual diff con defaults idéntico a 1.1.0.
+- **Fase C cambio de fallback**: ver trade-off arriba — validar en revisión de plan.
+- **jsdom**: no valida píxeles; "no recortado/reubica" se cubre por estructura (portal target) + Storybook.
+- **NavigationMenu refs por-trigger**: hoy un solo `panelRef`; con varios triggers, asegurar que el ref del panel corresponde al `openId` actual (un panel abierto a la vez — el patrón Menu de v1.1.0 ya resuelve esto, replicar).

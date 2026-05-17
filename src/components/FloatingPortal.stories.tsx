@@ -3,6 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Menu } from './Display2';
 import { Popover } from './Popover';
 import { AppShell } from './AppShell';
+import { NavigationMenu } from './NavigationMenu';
+import { Menubar } from './Menubar';
+import { DatePicker } from './Pickers';
+import { DateRangePicker } from './AdvancedPickers';
 
 export default {
   title: 'Overlays/Regression — Floating in Overflow',
@@ -57,6 +61,84 @@ export const PopoverInsideOverflow: StoryObj = {
       </div>
     </div>
   ),
+};
+
+/**
+ * v1.2.0: NavigationMenu mega-panel inside an overflow container — portaled
+ * to <body>, repositions on scroll, full keyboard nav (ArrowDown opens,
+ * arrows move, Escape closes to trigger).
+ */
+export const NavigationMenuInsideOverflow: StoryObj = {
+  render: () => (
+    <div style={scroller}>
+      <div style={{ height: 320 }}>
+        <NavigationMenu
+          items={[
+            { id: 'home', label: 'Inicio', href: '#' },
+            {
+              id: 'cat',
+              label: 'Catálogo',
+              featured: { id: 'f', label: 'Novedades', description: 'Lo último de la temporada' },
+              links: [
+                { id: 'a', label: 'Herramientas', href: '#', description: 'Manuales y eléctricas' },
+                { id: 'b', label: 'Fijaciones', href: '#' },
+                { id: 'c', label: 'Pinturas', href: '#' },
+              ],
+            },
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const MenubarInsideOverflow: StoryObj = {
+  render: () => (
+    <div style={scroller}>
+      <div style={{ height: 320 }}>
+        <Menubar
+          menus={[
+            { id: 'file', label: 'Archivo', items: [
+              { id: 'n', label: 'Nuevo', shortcut: '⌘N' },
+              { id: 'o', label: 'Abrir', shortcut: '⌘O' },
+              { id: 's1', separator: true },
+              { id: 'q', label: 'Salir' },
+            ] },
+            { id: 'edit', label: 'Editar', items: [
+              { id: 'u', label: 'Deshacer', shortcut: '⌘Z' },
+              { id: 'r', label: 'Rehacer', shortcut: '⇧⌘Z' },
+            ] },
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};
+
+export const DatePickerInsideOverflow: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<Date | null>(null);
+    return (
+      <div style={scroller}>
+        <div style={{ height: 320 }}>
+          <DatePicker value={v} onChange={setV} />
+        </div>
+      </div>
+    );
+  },
+};
+
+export const DateRangePickerInsideOverflow: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<{ from: Date | null; to: Date | null }>({ from: null, to: null });
+    return (
+      <div style={scroller}>
+        <div style={{ height: 320 }}>
+          <DateRangePicker value={v} onChange={setV} />
+        </div>
+      </div>
+    );
+  },
 };
 
 /**

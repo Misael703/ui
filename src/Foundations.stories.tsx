@@ -762,3 +762,49 @@ export const Localization: StoryObj = {
     );
   },
 };
+
+// =============================================================================
+// Caps opt-out (--tt-label / --tt-title)
+// =============================================================================
+
+const CapsSample = () => (
+  <div style={{ display: 'grid', gap: 14 }}>
+    <div><Caption>.h2 (--tt-title)</Caption><div className="h2">Heading display</div></div>
+    <div><Caption>.eyebrow (--tt-label)</Caption><div className="eyebrow">Eyebrow / overline</div></div>
+    <div><Caption>.label (--tt-label)</Caption><div className="label">Field label</div></div>
+    <div>
+      <Caption>.table th (--tt-label)</Caption>
+      <table className="table" style={{ width: '100%' }}>
+        <thead><tr><th>Producto</th><th>SKU</th></tr></thead>
+        <tbody><tr><td>—</td><td>—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+);
+
+/**
+ * `--tt-label` (micro: eyebrows, badges, table headers, KPI/section labels)
+ * y `--tt-title` (display headings: h1–h3, modal/drawer/empty titles,
+ * appshell brand) controlan el `text-transform`. Default `uppercase` → el
+ * look del kit no cambia. Un consumer o preset pone cualquiera de los dos
+ * en `none` (p. ej. `:root { --tt-title: none; }`) para quitar las
+ * mayúsculas sin forkear el CSS de los componentes. El preset El Alba no
+ * los toca: sus mayúsculas son firma de marca.
+ */
+export const CapsOptOut: StoryObj = {
+  render: () => (
+    <div>
+      <SectionTitle>Opt-out de mayúsculas</SectionTitle>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+        <div>
+          <h3 className="h3" style={{ marginTop: 0 }}>Default (uppercase)</h3>
+          <CapsSample />
+        </div>
+        <div style={{ ['--tt-title']: 'none', ['--tt-label']: 'none' } as React.CSSProperties}>
+          <h3 className="h3" style={{ marginTop: 0 }}>--tt-title / --tt-label: none</h3>
+          <CapsSample />
+        </div>
+      </div>
+    </div>
+  ),
+};

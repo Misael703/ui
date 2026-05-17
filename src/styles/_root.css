@@ -196,6 +196,16 @@
   --tracking-wide:   0.04em;
   --tracking-wider:  0.08em;
 
+  /* Text-transform opt-out hooks. Default `uppercase` keeps the kit's
+     look unchanged; a consumer or preset can set either to `none` to drop
+     all-caps without forking component CSS.
+       --tt-label: micro-typography (eyebrows, badges, table headers,
+                   KPI labels, section labels…)
+       --tt-title: display-font headings (modal/drawer/empty titles,
+                   appshell brand) */
+  --tt-label: uppercase;
+  --tt-title: uppercase;
+
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;
   --space-1:   4px;

@@ -1,6 +1,5 @@
 'use client';
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
 import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
@@ -215,24 +214,24 @@ export function DateRangePicker({
   const [hover, setHover] = React.useState<Date | null>(null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
 
-  React.useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target)) return;
-      if (popoverRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, []);
+  // Portaled to body (escapes overflow ancestors) with flip/clamp and
+  // scroll/resize reposition; Escape and outside-click return focus to the
+  // trigger (a11y) — same primitive as MultiCombobox above.
+  const pos = usePopoverPosition(wrapRef, popoverRef, {
+    open,
+    side: 'bottom',
+    align: 'start',
+    offset: 6,
+  });
 
-  React.useEffect(() => {
-    if (!open || !wrapRef.current) return;
-    const t = wrapRef.current.getBoundingClientRect();
-    setCoords({ top: t.bottom + 6 + window.scrollY, left: t.left + window.scrollX });
-  }, [open]);
+  useDismiss({
+    open,
+    onDismiss: () => setOpen(false),
+    refs: [wrapRef, popoverRef],
+    returnFocusRef: triggerRef,
+  });
 
   // Each panel renders ~42 Date cells. Without memoization, every
   // setHover() triggered a full rebuild of both panels' grids on every
@@ -302,6 +301,7 @@ export function DateRangePicker({
   return (
     <div ref={wrapRef} className={cx('daterange', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       <button
+        ref={triggerRef}
         id={id}
         type="button"
         className="daterange__trigger"
@@ -313,13 +313,19 @@ export function DateRangePicker({
         <span className="daterange__icon" aria-hidden="true"><CalendarIcon size={16} /></span>
         <span>{label}</span>
       </button>
-      {open && typeof document !== 'undefined' && createPortal(
+      {open && (
+        <Portal>
         <div
           ref={popoverRef}
-          className="daterange__popover"
+          className={cx('daterange__popover', 'is-floating')}
           role="dialog"
           onMouseLeave={() => setHover(null)}
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+          style={{
+            position: 'absolute',
+            top: pos.top,
+            left: pos.left,
+            visibility: pos.ready ? 'visible' : 'hidden',
+          }}
         >
           {presets && presets.length > 0 && (
             <ul className="daterange__presets">
@@ -345,8 +351,8 @@ export function DateRangePicker({
               <button type="button" className="daterange__apply" onClick={() => setOpen(false)} disabled={!value.from || !value.to}>{locale['common.apply']}</button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
+        </Portal>
       )}
     </div>
   );

@@ -1,0 +1,191 @@
+import * as React from 'react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { NavigationMenu } from '../src/components/NavigationMenu';
+import { Menubar } from '../src/components/Menubar';
+import { DatePicker } from '../src/components/Pickers';
+import { DateRangePicker } from '../src/components/AdvancedPickers';
+import { AppShell } from '../src/components/AppShell';
+
+// v1.2.0 — NavigationMenu / Menubar / DatePicker / DateRangePicker now route
+// through the shared floating primitive (Portal + usePopoverPosition +
+// useDismiss). jsdom has no layout, so these assert structure/behaviour
+// (portal target, dismiss, focus, keyboard) — pixels live in Storybook.
+
+const navItems = [
+  { id: 'home', label: 'Inicio', href: '/' },
+  {
+    id: 'prod',
+    label: 'Productos',
+    links: [
+      { id: 'a', label: 'Catálogo', href: '/catalogo' },
+      { id: 'b', label: 'Ofertas', href: '/ofertas' },
+      { id: 'c', label: 'Novedades', href: '/novedades' },
+    ],
+  },
+];
+
+describe('NavigationMenu — floating primitive + keyboard', () => {
+  it('portals the panel to document.body, escaping an overflow ancestor', () => {
+    const { container } = render(
+      <div data-testid="scroller" style={{ overflow: 'auto', height: 60 }}>
+        <NavigationMenu items={navItems} />
+      </div>
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Productos/ }));
+    const panel = screen.getByRole('menu');
+    const scroller = container.querySelector('[data-testid="scroller"]') as HTMLElement;
+    expect(scroller.contains(panel)).toBe(false);
+    expect(document.body.contains(panel)).toBe(true);
+  });
+
+  it('opens with ArrowDown and moves focus through links', () => {
+    render(<NavigationMenu items={navItems} />);
+    const trigger = screen.getByRole('button', { name: /Productos/ });
+    fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+    const links = screen.getAllByRole('menuitem');
+    expect(document.activeElement).toBe(links[0]);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(links[1]);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'End' });
+    expect(document.activeElement).toBe(links[2]);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Home' });
+    expect(document.activeElement).toBe(links[0]);
+  });
+
+  it('Escape closes the panel and returns focus to the trigger', () => {
+    render(<NavigationMenu items={navItems} />);
+    const trigger = screen.getByRole('button', { name: /Productos/ });
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+const menubarMenus = [
+  {
+    id: 'file',
+    label: 'Archivo',
+    items: [
+      { id: 'new', label: 'Nuevo' },
+      { id: 'open', label: 'Abrir' },
+    ],
+  },
+  {
+    id: 'edit',
+    label: 'Editar',
+    items: [{ id: 'undo', label: 'Deshacer' }],
+  },
+];
+
+describe('Menubar — floating primitive + roving', () => {
+  it('portals the panel to document.body', () => {
+    const { container } = render(
+      <div data-testid="scroller" style={{ overflow: 'auto', height: 60 }}>
+        <Menubar menus={menubarMenus} />
+      </div>
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Archivo' }));
+    const panel = screen.getByRole('menu');
+    const scroller = container.querySelector('[data-testid="scroller"]') as HTMLElement;
+    expect(scroller.contains(panel)).toBe(false);
+    expect(document.body.contains(panel)).toBe(true);
+  });
+
+  it('ArrowRight on an open menu switches to the sibling menu', () => {
+    render(<Menubar menus={menubarMenus} />);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Archivo' }));
+    expect(screen.getByRole('menuitem', { name: 'Abrir' })).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'ArrowRight' });
+    expect(screen.getByRole('menuitem', { name: 'Deshacer' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Abrir' })).not.toBeInTheDocument();
+  });
+
+  it('Escape closes and returns focus to the trigger', () => {
+    render(<Menubar menus={menubarMenus} />);
+    const trigger = screen.getByRole('menuitem', { name: 'Archivo' });
+    fireEvent.click(trigger);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+describe('DatePicker / DateRangePicker — calendar via primitive', () => {
+  it('DatePicker portals the calendar to body and selects a day', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <div data-testid="scroller" style={{ overflow: 'auto', height: 40 }}>
+        <DatePicker value={null} onChange={onChange} />
+      </div>
+    );
+    fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+    const dialog = screen.getByRole('dialog');
+    const scroller = container.querySelector('[data-testid="scroller"]') as HTMLElement;
+    expect(scroller.contains(dialog)).toBe(false);
+    expect(document.body.contains(dialog)).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: '15' }));
+    expect(onChange).toHaveBeenCalledOnce();
+    expect((onChange.mock.calls[0][0] as Date).getDate()).toBe(15);
+  });
+
+  it('DatePicker dismisses on outside pointer-down', () => {
+    render(
+      <>
+        <DatePicker value={null} onChange={() => {}} />
+        <button>outside</button>
+      </>
+    );
+    fireEvent.focus(screen.getByRole('textbox'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole('button', { name: 'outside' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('DateRangePicker portals the panel to body', () => {
+    const { container } = render(
+      <div data-testid="scroller" style={{ overflow: 'auto', height: 40 }}>
+        <DateRangePicker value={{ from: null, to: null }} onChange={() => {}} />
+      </div>
+    );
+    fireEvent.click(screen.getByRole('button'));
+    const dialog = screen.getByRole('dialog');
+    const scroller = container.querySelector('[data-testid="scroller"]') as HTMLElement;
+    expect(scroller.contains(dialog)).toBe(false);
+    expect(document.body.contains(dialog)).toBe(true);
+  });
+});
+
+describe('AppShell — appshell__brand-text convention', () => {
+  const sections = [{ items: [{ id: 'h', label: 'Home', href: '#' }] }];
+  const brand = (
+    <span>
+      <img data-testid="mark" alt="" />
+      <span className="appshell__brand-text">Despachos · v0.1</span>
+    </span>
+  );
+
+  it('keeps the mark and the brand-text span in the DOM when collapsed (CSS hides text, no clipping)', () => {
+    const { container } = render(
+      <AppShell sections={sections} brand={brand} collapsed>
+        x
+      </AppShell>
+    );
+    expect(container.querySelector('.appshell.is-collapsed')).toBeTruthy();
+    expect(screen.getByTestId('mark')).toBeInTheDocument();
+    const text = container.querySelector('.appshell__brand-text');
+    expect(text).toBeTruthy();
+    expect(text?.textContent).toBe('Despachos · v0.1');
+  });
+
+  it('renders the same brand markup when expanded', () => {
+    const { container } = render(
+      <AppShell sections={sections} brand={brand}>
+        x
+      </AppShell>
+    );
+    expect(container.querySelector('.appshell.is-collapsed')).toBeFalsy();
+    expect(container.querySelector('.appshell__brand-text')?.textContent).toBe('Despachos · v0.1');
+  });
+});

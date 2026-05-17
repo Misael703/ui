@@ -5,6 +5,48 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-05-17
+
+**Minor.** Closes the floating-primitive convergence debt + an uppercase
+theming opt-out (no public API changes; drop-in via version bump).
+
+### Added
+- **`NavigationMenu` / `Menubar` keyboard navigation.** ArrowUp/Down,
+  Home/End, Enter/Space, Escape (returns focus to the trigger), roving
+  `tabindex`. `Menubar` adds ArrowLeft/Right between menus (switches the
+  open menu when navigating between siblings).
+- **`appshell__brand-text` convention.** Wrap the textual part of
+  `AppShell`'s `brand` in `<span className="appshell__brand-text">` and
+  it collapses away with the rail while the logo/mark stays — no separate
+  `brandCollapsed` needed. Mirrors the nav-label collapse.
+- **`--tt-label` / `--tt-title` tokens** (default `uppercase`). Set
+  either to `none` (consumer or preset) to drop all-caps without forking
+  component CSS. `--tt-label` covers micro-typography (eyebrows, badges,
+  table headers, KPI/section labels); `--tt-title` covers display-font
+  headings (`.h1`–`.h3`, modal/drawer/empty titles, AppShell brand). The
+  El Alba preset is intentionally unchanged — its all-caps is brand
+  signature.
+
+### Fixed
+- **`NavigationMenu` / `Menubar` no longer clip inside `overflow`
+  containers.** Both now route through `Portal` + `usePopoverPosition` +
+  `useDismiss` (flip, clamp, reposition on capture-phase ancestor scroll
+  and resize), closing the convergence debt tracked in 1.1.0.
+- **`DatePicker` / `DateRangePicker` calendar** routed through the same
+  primitive; the popover is no longer clipped by a `Card`/table
+  `overflow` and follows the trigger on scroll. Also fixes a `DatePicker`
+  edge case where dismissing could immediately reopen (focus returned to
+  the focus-to-open input).
+- **`AppShell` collapsed brand** no longer bleeds clipped text out of the
+  72px rail when no `brandCollapsed` is provided — opt into the new
+  `appshell__brand-text` convention to drop the text and keep the mark.
+
+### Changed
+- Every floating panel in the kit now shares one primitive: `createPortal`
+  is fully removed from `src` (no duplicated portal/positioning logic
+  remains). Public props of `NavigationMenu`, `Menubar`, `DatePicker`,
+  `DateRangePicker` and `AppShell` are unchanged.
+
 ## [1.1.0] — 2026-05-17
 
 **Minor.** Shared floating primitive (no public API changes; drop-in).

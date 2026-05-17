@@ -23,7 +23,7 @@
   font-size: var(--text-6xl);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   color: var(--fg-default);
 }
 
@@ -32,7 +32,7 @@
   font-weight: 700;
   font-size: var(--text-4xl);
   line-height: var(--leading-snug);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   letter-spacing: var(--tracking-tight);
   color: var(--fg-default);
 }
@@ -42,7 +42,7 @@
   font-weight: 700;
   font-size: var(--text-2xl);
   line-height: var(--leading-snug);
-  text-transform: uppercase;
+  text-transform: var(--tt-title);
   color: var(--fg-default);
 }
 
@@ -58,7 +58,7 @@
   font-family: var(--font-body);
   font-weight: 700;
   font-size: var(--text-sm);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   letter-spacing: var(--tracking-wider);
   color: var(--accent-secondary);
 }
@@ -93,7 +93,7 @@ p {
   font-weight: 700;
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: var(--tt-label);
   color: var(--fg-default);
 }
 

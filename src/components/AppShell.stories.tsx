@@ -72,3 +72,40 @@ export const ConSidebar: StoryObj = {
 export const SidebarBrand: StoryObj = {
   render: () => <Shell theme="brand" />,
 };
+
+/**
+ * Brand con texto y **sin** `brandCollapsed`. El texto va envuelto en
+ * `<span className="appshell__brand-text">`: al colapsar el riel (botón
+ * chevron abajo) el texto desaparece animado y solo queda el mark — sin
+ * recortes. Reproduce el caso "Despachos · v0.1" sin necesidad de mantener
+ * un nodo `brandCollapsed` aparte.
+ */
+const BrandWithText = ({ collapsed }: { collapsed?: boolean }) => (
+  <div style={{ height: 'calc(100vh - 32px)' }}>
+    <AppShell
+      theme="brand"
+      defaultCollapsed={collapsed}
+      brand={
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Logo variant="mark" bg="dark" height={28} />
+          <span className="appshell__brand-text">Despachos · v0.1</span>
+        </span>
+      }
+      sections={sections}
+      user={<Avatar name="Misael Ocas" size={32} />}
+    >
+      <PageHeader title="Despacho" description="Riel colapsable sin brandCollapsed" />
+      <div style={{ padding: 24, border: '1px dashed var(--border-default)', borderRadius: 12, textAlign: 'center', color: 'var(--fg-muted)' }}>
+        Colapsa el riel con el chevron inferior: el texto del brand se va, el mark queda.
+      </div>
+    </AppShell>
+  </div>
+);
+
+export const BrandTextColapsable: StoryObj = {
+  render: () => <BrandWithText />,
+};
+
+export const BrandTextColapsadoInicial: StoryObj = {
+  render: () => <BrandWithText collapsed />,
+};

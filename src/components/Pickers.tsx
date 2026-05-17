@@ -1,6 +1,5 @@
 'use client';
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
@@ -208,26 +207,24 @@ export function DatePicker({
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
 
-  React.useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (wrapRef.current?.contains(target)) return;
-      if (popoverRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, []);
+  // Portaled to body (escapes overflow ancestors) with flip/clamp and
+  // scroll/resize reposition — same primitive as Combobox above. No
+  // returnFocusRef: the input opens on focus, so refocusing it on close
+  // would immediately reopen the calendar (Combobox omits it for the same
+  // reason). Escape still closes via useDismiss's default handler.
+  const pos = usePopoverPosition(wrapRef, popoverRef, {
+    open,
+    side: 'bottom',
+    align: 'start',
+    offset: 4,
+  });
 
-  // Position popover relative to trigger; portal'd to body so overflow ancestors
-  // don't clip and absolute coords (document-relative) match the offset parent.
-  React.useEffect(() => {
-    if (!open || !wrapRef.current) return;
-    const t = wrapRef.current.getBoundingClientRect();
-    setCoords({ top: t.bottom + 4 + window.scrollY, left: t.left + window.scrollX });
-  }, [open]);
+  useDismiss({
+    open,
+    onDismiss: () => setOpen(false),
+    refs: [wrapRef, popoverRef],
+  });
 
   React.useEffect(() => {
     if (value) setView(startOfMonth(value));
@@ -267,12 +264,18 @@ export function DatePicker({
         disabled={disabled}
         aria-label={locale['picker.openCalendar']}
       ><CalendarIcon size={16} /></button>
-      {open && typeof document !== 'undefined' && createPortal(
+      {open && (
+        <Portal>
         <div
           ref={popoverRef}
-          className="datepicker__popover"
+          className={cx('datepicker__popover', 'is-floating')}
           role="dialog"
-          style={coords ? { position: 'absolute', top: coords.top, left: coords.left } : { position: 'absolute', visibility: 'hidden' }}
+          style={{
+            position: 'absolute',
+            top: pos.top,
+            left: pos.left,
+            visibility: pos.ready ? 'visible' : 'hidden',
+          }}
         >
           <div className="datepicker__nav">
             <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
@@ -299,8 +302,8 @@ export function DatePicker({
               );
             })}
           </div>
-        </div>,
-        document.body
+        </div>
+        </Portal>
       )}
     </div>
   );
