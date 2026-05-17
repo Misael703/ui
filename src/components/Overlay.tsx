@@ -6,9 +6,10 @@ import { X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
 
-// Exit animation duration in ms. Must match the `is-closing` keyframes
-// in src/styles/index.css (`.modal-backdrop`, `.drawer-backdrop`).
-const EXIT_MS = 200;
+// Exit animation duration in ms. Must match `--duration-exit` and the
+// `is-closing` keyframes in src/styles/index.css (`.modal-backdrop`,
+// `.drawer-backdrop`).
+const EXIT_MS = 150;
 
 export interface OverlayProps {
   open: boolean;

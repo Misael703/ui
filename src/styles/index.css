@@ -1053,11 +1053,11 @@ button, input, select, textarea { box-sizing: border-box; }
 @keyframes sink { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(8px) scale(0.98); } }
 @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(20px); opacity: 0; } }
 @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-20px); opacity: 0; } }
-.modal-backdrop.is-closing { animation: fadeOut var(--duration-base) var(--ease-standard) forwards; }
-.modal.is-closing { animation: sink var(--duration-base) var(--ease-standard) forwards; }
-.drawer-backdrop.is-closing { animation: fadeOut var(--duration-base) var(--ease-standard) forwards; }
-.drawer--right.is-closing { animation: slideOut var(--duration-base) var(--ease-standard) forwards; }
-.drawer--left.is-closing { animation: slideOutLeft var(--duration-base) var(--ease-standard) forwards; }
+.modal-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
+.modal.is-closing { animation: sink var(--duration-exit) var(--ease-standard) forwards; }
+.drawer-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
+.drawer--right.is-closing { animation: slideOut var(--duration-exit) var(--ease-standard) forwards; }
+.drawer--left.is-closing { animation: slideOutLeft var(--duration-exit) var(--ease-standard) forwards; }
 
 /* Mobile bottom-sheet: at <600px the drawer slides in from the bottom
    instead of from the side. Native pattern on iOS/Android — feels less
@@ -1076,7 +1076,7 @@ button, input, select, textarea { box-sizing: border-box; }
   .drawer.is-closing,
   .drawer--right.is-closing,
   .drawer--left.is-closing {
-    animation: slideOutBottom var(--duration-base) var(--ease-standard) forwards;
+    animation: slideOutBottom var(--duration-exit) var(--ease-standard) forwards;
   }
 }
 
@@ -1158,7 +1158,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .toast--info    .toast__icon { color: var(--color-info); }
 @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-.toast.is-closing { animation: toastSlideOut var(--duration-base) var(--ease-standard) forwards; }
+.toast.is-closing { animation: toastSlideOut var(--duration-exit) var(--ease-standard) forwards; }
 
 /* ---------- Empty state ------------------------------------------------- */
 .empty {

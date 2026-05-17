@@ -252,6 +252,7 @@
   --duration-fast:   120ms;
   --duration-base:   200ms;
   --duration-slow:   320ms;
+  --duration-exit:   150ms;   /* ~75% of --duration-base: dismissals feel decisive */
 
   /* -------- Z-index scale -------------------------------------------- */
   --z-base:      1;
