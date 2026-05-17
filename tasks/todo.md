@@ -653,6 +653,31 @@ Blocks en `src/blocks/` (typecheck+lint+Storybook gratis; excluidos del tarball 
 - [ ] **C2** — blocks: **Admin dashboard** (AppShell + PageHeader + Kpi + Charts), **Auth/login** (preset El Alba), **Checkout** (CartDrawer + AddressForm + OrderSummary + PromoCodeInput).
 - [ ] **C3** — README "Blocks (copy-paste)" + bump 1.6.1 + CHANGELOG + verificación.
 
+# v1.7.0 — Backdrop press-origin fix + YearPicker + MonthPicker
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.6.1` → **`1.7.0`** (`fix`+`feat`, ship, sin breaking → MINOR). Rama `feat/grid-pickers-and-backdrop-fix-v1.7.0`.
+Causa raíz bug: `Overlay.tsx` backdrop `onClick=onClose` + diálogo `stopPropagation`; press dentro → suelta en backdrop dispara `click` con target=backdrop → cierra. NO es useDismiss (ese es mousedown-origin, correcto).
+
+## Fases
+- [ ] **1 — Fix Overlay** (Modal+Drawer): cierre de backdrop solo si press *empieza y termina* en el backdrop (`onMouseDown`+`onClick`, `e.target===e.currentTarget`); quitar `stopPropagation` del diálogo. Tests.
+- [ ] **2 — Pickers**: `GridPickerField` interno (shell DRY: input+toggle+Portal+usePopoverPosition+useDismiss+header nav+grid 3×4) → `YearPicker` (value:number) y `MonthPicker` (value:Date). CSS `.gridpicker*` en index.css. Export por barrel (Pickers ya re-exporta).
+- [ ] **3 — Stories + tests** (Pickers.stories + tests).
+- [ ] **4 — Release**: bump 1.7.0 + CHANGELOG + verificación (tsc/vitest/lint/build-storybook).
+
+## Review v1.7.0 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Hecho (3 commits en `feat/grid-pickers-and-backdrop-fix-v1.7.0`):**
+- F1 `fix(overlay)`: backdrop Modal/Drawer cierra solo si el press *empieza y termina* en el backdrop (`onMouseDown` origin + `e.target===e.currentTarget`); quitado `stopPropagation` del diálogo. Test viejo "closes on backdrop click" actualizado a secuencia realista (mousedown+click) + 3 tests del bug reportado. Causa raíz era Overlay, NO useDismiss.
+- F2/F3 `feat(pickers)`: `YearPicker` (década, value:number) + `MonthPicker` (año, value:Date) sobre `GridPickerField` interno (DRY del shell flotante, mismo primitive que DatePicker). CSS `.gridpicker`. 6 keys i18n. Story + 7 tests.
+- F4 `chore(release)`: bump 1.7.0 + CHANGELOG.
+
+**Verificación:** `tsc` limpio · **vitest 349/349** (+10, 0 regresiones) · `npm run build` OK · `build-storybook` exit 0 · `lint` exit 0.
+
+Se publica (`dist`), drop-in, sin breaking. Recomendación: merge + publish (bug real de Modal/Drawer en prod + 2 componentes nuevos). Nada pusheado/publicado aún (regla no-push-without-approval).
+
+---
+---
+
 ## Review v1.6.1 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Workstream C del roadmap de versatilidad.** Rama `docs/blocks-v1.6.1`.
