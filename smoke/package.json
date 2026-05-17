@@ -1,0 +1,26 @@
+{
+  "name": "@misael703/ui-smoke",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Smoke consumer: real Next.js App Router app that installs the packed kit tarball. Not shipped. Catches integration bugs Storybook can't (RSC boundaries, hydration, ESM/CJS, type exports, fonts).",
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 3100",
+    "check:esm": "node scripts/check-esm.mjs",
+    "check:cjs": "node scripts/check-cjs.cjs",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@misael703/ui": "file:.smoke-kit/kit.tgz",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.4.0"
+  }
+}

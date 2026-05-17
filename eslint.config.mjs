@@ -23,6 +23,8 @@ export default tseslint.config(
       '**/*.cjs',
       '*.config.*',
       '.storybook/**',
+      'smoke/**',
+      'scripts/**',
     ],
   },
   js.configs.recommended,

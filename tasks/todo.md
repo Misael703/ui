@@ -1,3 +1,59 @@
+# v1.9.0 listo; Finding C diagnosticado (residual prod-only artificial) (2026-05-17)
+
+**Finding C — diagnosticado a fondo:** la galería de 130 componentes daba #418. Dos causas reales encontradas y corregidas (artefactos del propio gallery/uso, no del kit consumidor): (1) entry `Table` anidaba `<table>` dentro de `K.Table` (HTML inválido); (2) `<Portal>` renderizado incondicionalmente en SSR (el `Portal` del kit devuelve null en server y portalea en client **por diseño** → mismatch si se usa en SSR sin gate; constraint real del kit registrado). Gallery ahora rende Portal vía `ClientOnly` (uso realista). **En `next dev` (React no-minificado) `/gallery` hidrata limpio.** Queda un **#418 solo en build de producción** (`next build`/`next start`) en la galería artificial de 130 componentes — escenario que **ningún consumidor real reproduce**. Las rutas representativas reales **`/` (RSC) y `/client` están VERDES** → el valor (el kit funciona en RSC y client) está probado. Drillear el residual prod-only de la mega-galería = ROI bajo; follow-up de scope del harness, no bloquea el kit.
+
+**v1.9.0 (A+B+3 UI) sigue listo para shippear** — son los fixes que tus apps necesitan (B = RSC crítico). Decisión del usuario pendiente: shippear v1.9.0 ahora vs seguir drilleando el residual de la galería. Sin push/publish.
+
+---
+---
+
+# v1.9.0 preparado: A+B+3 UI fixes; Finding C abierto (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` (megabranch: harness + A/B + 3 UI). 5 commits. Bump **1.9.0** + CHANGELOG. **Sin push/publish.**
+
+Además de A/B (abajo), 3 bugs UI reportados — **RESUELTOS** (CSS/JSDoc/story; `tsc`/`lint`/`vitest 349`/`build-storybook` verdes):
+- **Tabs ilegibles**: `.tabs__tab` era 700 + `--fg-muted` + tracking wide @14px → 600 + `--fg-default` + tracking normal + primary en hover.
+- **Sticky header no pega**: `.table-wrap` es `overflow-x:auto` → ÉL es el scroll container del sticky, no un wrapper externo. `.table-wrap--sticky` ahora scrollea vertical (`max-height:70vh`, override por `className`). JSDoc + story corregidos. (El contrato anterior "envolver en overflow-y:auto" era imposible.)
+- **Notch en esquina con toolbar**: `.table-toolbar + .table-wrap` quita borde/radius superior → se unen sin doble borde / esquina blanca.
+
+**Decisiones abiertas para el usuario:** (1) cómo subir esta megabranch (harness no se publica; A/B + UI sí valen release v1.9.0); (2) **Finding C (gallery #418 hydration) sigue abierto** — no bloquea el kit (es un fallo del test smoke, no de un consumidor), pero indica que ALGÚN componente SSR-mismatchea; diagnóstico = ciclo aparte.
+
+---
+---
+
+# Findings A & B RESUELTOS + harness validó; Finding C NUEVO (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` (harness + fix A/B). Sin push/publish.
+
+- **A — RESUELTO.** `package.json` `exports` por-condición (`import.types`→`.d.mts`, `require.types`→`.d.ts`) + `"type": "commonjs"`. publint del tarball: **limpio** (warning de masquerading eliminado; solo queda sugerencia opcional `engines.node`, fuera de scope).
+- **B — RESUELTO + validado por el harness.** Causa: esbuild **strippea** las directivas `"use client"` al bundlear (banner/plugin también se pierden con splitting). Fix robusto: `scripts/add-use-client.mjs` antepone `'use client';` a los 196 JS de `dist/` **post-tsup** (nada lo strippea ya); cableado en `build`. El kit entero pasa a ser client boundary (trade-off documentado: importar un util puro desde un RSC también arrastra boundary; futura subpath server-safe podría refinarlo). Validación: `smoke:ci` → `next build` del Server Component `/` **pasa**; rutas `/`, `/client` y test anti-rot **verdes**. Plugin `esbuild-plugin-preserve-directives` probado y descartado (no sobrevive al splitting) + devDep removida.
+- **C — NUEVO (lo cazó el harness ya funcionando).** `/gallery` falla con **React #418 (hydration mismatch)**: el SSR de algún componente del gallery ≠ cliente. No estaba en los bugs pedidos (A/B); emergió al destrabar B. Repro: `npm run smoke:ci` (Playwright, ruta `/gallery`). Diagnóstico pendiente: correr `next dev` (React no-minificado) para que nombre el elemento, o bisecar el registry; sospechosos: componentes con `new Date()`/no-determinismo en render bajo SSR, o un ejemplo del propio gallery. Registrado, no parcheado a ciegas.
+
+**Gates del kit tras el fix:** `tsc` limpio · `lint` 0 · **vitest 349/349** · `build-storybook` no reverificado (build de kit cambió solo `dist`; src intacto). Sin push/publish.
+
+---
+---
+
+# Smoke consumer harness + 2 kit findings (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` · Harness completo. **smoke:ci RED por bug real del kit (correcto).** Sin push/publish. NO es release (no toca build/publish del kit).
+
+## Qué se construyó
+`smoke/`: app Next 16.2 / React 19 App Router que instala el **tarball empacado** del kit (`npm run build` → `npm pack` → install `.tgz`), nunca `src/`. Rutas: `/` (Server Component importando el kit → caza boundary RSC), `/client`, `/gallery` (todos los componentes públicos, SSR→hydrate), `next/font/local` con los woff2 del paquete. Script raíz `smoke:ci` + workflow `.github/workflows/smoke.yml` (PRs a `main`): build→pack→publint(hard)+attw(soft)→install tgz→ESM/CJS resolution→`next build`→Playwright (falla ante console.error / pageerror / hydration 418·421·423·425 / no-200) + test anti-rot (falla si un componente público nuevo no está en la gallery). Guards: eslint/vitest/.gitignore del kit excluyen `smoke/`. La gallery se iteró hasta tipar 1:1 contra los **types publicados** (esa iteración ya es valor).
+
+## Hallazgos del kit (REGISTRADOS, no parcheados — fuera de scope: tocan build/exports)
+- **B (crítico).** `'use client'` NO sobrevive al build publicado (tsup lo descarta en CJS; el barrel `index.*` reexporta todo sin boundary). Un Server Component que importa `@misael703/ui` rompe: `next build` → `TypeError: e.createContext is not a function` al recolectar `/`. Storybook nunca lo vio (sin RSC). Repro: `npm run smoke:ci` (paso 6). Fix = ciclo aparte (preservar directivas en tsup / boundary del barrel); luego smoke:ci verde y corre la demo del bug deliberado.
+- **A.** publint: `exports["."].types` se interpreta CJS bajo `import` → types ambiguos (masquerading). Fix: separar `import.types` (`.d.mts`) / `require.types` (`.d.ts`). Menores: sin `type` field, sin `engines.node`.
+
+## Clases de bug que atrapa (con el kit sano)
+RSC boundary / `use client` faltante · hydration (ICU/locale/Date/SSR) · resolución ESM/CJS · type exports rotos (gallery tipada + publint) · fuentes/SSR (next/font) · regresión de cobertura (anti-rot) · ruta no-200.
+
+## Correr local
+`npm run smoke:ci` desde `~/projects/ui_kit` (requiere red: npm install Next/React/Playwright + chromium).
+
+---
+---
+
 # v1.0.0 — Generic kit rebrand + preset architecture
 
 ## Goal
