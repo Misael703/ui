@@ -111,3 +111,27 @@ without wrappers, using the right pattern for each API shape:
 Do not add `asChild` to elements constrained by their parent (`<li>` under
 `<ul>`, `<option>` under `<select>`): it would emit invalid markup. Use the
 render-prop or keep the semantic wrapper.
+
+## Extending variants (consumer-defined, no fork)
+
+Variant props are **open enums** (`Extensible<T>`): known values autocomplete,
+any string is accepted. The kit emits a BEM class from the value
+(`variant="x"` → `btn--x`, `badge--x`, `card--accent-x`, `alert--x`). To add a
+brand-specific variant without forking:
+
+1. Pass it: `<Button variant="brand-x">`. No type error (since v1.6.0).
+2. Style the emitted class in your own CSS, **outside** `@layer elalba` so it
+   wins by the layer order the kit already establishes:
+
+   ```css
+   /* your app, unlayered */
+   .btn--brand-x {
+     background: var(--my-brand);
+     color: #fff;
+   }
+   ```
+
+Open today: `Button.variant`, `Badge.variant`, `Alert.variant`, `Card.accent`.
+The same `Extensible<T>` type is exported for forks/consumers to reuse on
+their own components. Unknown values are safe at runtime: these components only
+interpolate the class, they do not switch on the value.

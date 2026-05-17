@@ -5,6 +5,7 @@ import { Modal } from './components/Overlay';
 import { DataTable } from './components/DataTable';
 import { Pagination } from './components/Inputs';
 import { Button } from './components/Button';
+import { Badge } from './components/Display';
 
 const meta: Meta = {
   title: 'Foundations',
@@ -807,6 +808,35 @@ export const CapsOptOut: StoryObj = {
           <h3 className="h3" style={{ marginTop: 0 }}>--tt-title / --tt-label: none</h3>
           <CapsSample />
         </div>
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * Variantes extensibles por el consumidor (`Extensible<T>`, desde v1.6.0).
+ * `variant="brand-x"` no es error de tipo; el kit emite `btn--brand-x` /
+ * `badge--brand-x` y tú lo estilas en tu CSS (aquí, un `<style>` sin layer
+ * que gana sobre `@layer elalba`). Sin fork.
+ */
+export const ExtendingVariants: StoryObj = {
+  render: () => (
+    <div>
+      <style>{`
+        .btn--brand-x { background: #6d28d9; color: #fff; border-color: #6d28d9; }
+        .btn--brand-x:hover { background: #5b21b6; }
+        .badge--brand-x { background: #ede9fe; color: #5b21b6; }
+      `}</style>
+      <SectionTitle>Variante definida por el consumidor</SectionTitle>
+      <p className="body-sm" style={{ color: 'var(--fg-muted)', marginBottom: 16, maxWidth: 560 }}>
+        <code>variant="brand-x"</code> sin error de TS. El kit emite la clase BEM;
+        el estilo vive en tu app, fuera de <code>@layer elalba</code>.
+      </p>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Button variant="brand-x">Acción brand-x</Button>
+        <Button variant="brand-x" disabled>Disabled</Button>
+        <Badge variant="brand-x">brand-x</Badge>
+        <Button variant="primary">primary (sin tocar)</Button>
       </div>
     </div>
   ),
