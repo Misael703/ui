@@ -48,6 +48,10 @@ softRun(`npx -y @arethetypeswrong/cli "${tgz}"`);
 
 stage('4/7 install tarball into smoke (real consumer)');
 rmSync(join(smoke, 'node_modules', '@misael703'), { recursive: true, force: true });
+// Regenerate the lock against the just-built tarball. The kit is a `file:`
+// dep whose integrity hash changes every build, so any pre-existing lock
+// (committed or cached) would fail `npm install` with EINTEGRITY.
+rmSync(join(smoke, 'package-lock.json'), { force: true });
 run('npm install --no-audit --no-fund', smoke);
 run('npm install --no-audit --no-fund ./.smoke-kit/kit.tgz', smoke);
 
