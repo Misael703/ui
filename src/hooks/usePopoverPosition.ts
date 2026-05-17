@@ -19,7 +19,9 @@ export interface UsePopoverPositionOptions {
 }
 
 export interface PopoverPosition {
-  /** Document-relative coords (use with `position: absolute` in a body portal). */
+  /** Viewport-relative coords (use with `position: fixed` in a body portal).
+   *  Fixed strategy stays correct inside transformed/fixed ancestors (e.g. a
+   *  Modal) and scroll containers; the hook recomputes on scroll/resize. */
   top: number;
   left: number;
   /** Side actually used after flipping; useful for arrow/animation origin. */
@@ -34,8 +36,9 @@ const GUTTER = 8;
 
 /**
  * Positions a floating panel relative to an anchor, for panels portaled to
- * `document.body`. Computes document-relative coords from
- * `getBoundingClientRect()`, flips to the opposite side when the preferred
+ * `document.body`. Computes viewport-relative coords from
+ * `getBoundingClientRect()` (use with `position: fixed`), flips to the
+ * opposite side when the preferred
  * side doesn't fit the viewport, clamps into the viewport, and recomputes
  * on scroll of *any* ancestor (capture-phase) and on resize
  * (rAF-coalesced). Listeners are torn down on close/unmount.
@@ -46,7 +49,7 @@ const GUTTER = 8;
  * ```tsx
  * const pos = usePopoverPosition(triggerRef, contentRef, { open, side: 'bottom' });
  * <Portal><div ref={contentRef} style={{
- *   position: 'absolute', top: pos.top, left: pos.left,
+ *   position: 'fixed', top: pos.top, left: pos.left,
  *   visibility: pos.ready ? 'visible' : 'hidden',
  * }} /></Portal>
  * ```
@@ -104,8 +107,8 @@ export function usePopoverPosition(
     top = Math.max(GUTTER, Math.min(top, vh - c.height - GUTTER));
 
     setPos({
-      top: top + window.scrollY,
-      left: left + window.scrollX,
+      top,
+      left,
       side: chosen,
       ready: true,
       width: matchAnchorWidth ? a.width : undefined,

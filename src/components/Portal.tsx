@@ -23,7 +23,7 @@ export interface PortalProps {
  * ```tsx
  * {open && (
  *   <Portal>
- *     <div role="menu" style={{ position: 'absolute', top, left }} />
+ *     <div role="menu" style={{ position: 'fixed', top, left }} />
  *   </Portal>
  * )}
  * ```

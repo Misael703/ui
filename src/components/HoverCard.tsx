@@ -72,7 +72,7 @@ export function HoverCard({
             role="tooltip"
             className={cx('hover-card__content', 'is-floating', contentClassName)}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               visibility: pos.ready ? 'visible' : 'hidden',

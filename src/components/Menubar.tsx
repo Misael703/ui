@@ -217,7 +217,7 @@ export function Menubar({ menus, className, ariaLabel = 'Barra de menús' }: Men
                   className="menubar__list"
                   onKeyDown={onPanelKeyDown}
                   style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: pos.top,
                     left: pos.left,
                     visibility: pos.ready ? 'visible' : 'hidden',

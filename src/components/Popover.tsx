@@ -88,7 +88,7 @@ export function Popover({
             aria-label={ariaLabel}
             className={cx('popover__content', contentClassName)}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               visibility: pos.ready ? 'visible' : 'hidden',

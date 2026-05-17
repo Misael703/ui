@@ -664,6 +664,18 @@ Causa raíz bug: `Overlay.tsx` backdrop `onClick=onClose` + diálogo `stopPropag
 - [ ] **3 — Stories + tests** (Pickers.stories + tests).
 - [ ] **4 — Release**: bump 1.7.0 + CHANGELOG + verificación (tsc/vitest/lint/build-storybook).
 
+# v1.7.1 — Fix posicionamiento flotante + clear de Combobox
+
+**Fecha:** 2026-05-17 · **Estado:** completo, commits hechos, sin push/publish · **Base:** 1.7.0 → **1.7.1** (`fix`, ship, sin breaking → PATCH). Rama `fix/floating-fixed-strategy-v1.7.1`.
+
+- Bug A (reportado): Combobox dropdown descolocado dentro de Modal. Causa: `usePopoverPosition` devolvía coords documento (+scroll) para `position:absolute`; dentro de Modal `position:fixed`+scroll-lock el espacio de coords falla y el clamp lo pega abajo-izquierda. Fix: hook devuelve coords viewport; los 12 popovers portaleados usan `position:fixed` (estrategia Floating UI; el hook ya reposiciona en scroll/resize). CSS `*__popover position:absolute` se deja (siempre overrideado por el inline; fuente única).
+- Bug B: `.combobox__clear` pill 22×22 sin flex-centering → X descentrada. Fix CSS (inline-flex centering).
+- Verificación: `tsc` limpio · **vitest 349/349** (0 regresiones) · `npm run build` OK · `build-storybook` exit 0 · `lint` exit 0.
+- 2 commits fix + release. Se publica (dist), drop-in, no breaking. Recomendación: merge + publish (defectos reales en prod). Nada pusheado/publicado aún.
+
+---
+---
+
 ## Review v1.7.0 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Hecho (3 commits en `feat/grid-pickers-and-backdrop-fix-v1.7.0`):**

@@ -177,7 +177,7 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                     aria-label={typeof item.label === 'string' ? item.label : undefined}
                     onKeyDown={onPanelKeyDown}
                     style={{
-                      position: 'absolute',
+                      position: 'fixed',
                       top: pos.top,
                       left: pos.left,
                       visibility: pos.ready ? 'visible' : 'hidden',
