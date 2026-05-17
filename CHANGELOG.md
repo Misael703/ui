@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] — 2026-05-17
+
+**Patch.** Two kit bug fixes. Ships in `dist`; no breaking changes, drop-in.
+
+### Fixed
+- **Portaled popovers now use a fixed positioning strategy.**
+  `usePopoverPosition` returned document-relative coords (rect +
+  `scrollX/scrollY`) for `position: absolute` panels. Inside a
+  `position: fixed` `Modal` (with scroll-lock) that coordinate space is
+  wrong and the viewport clamp pinned panels to the bottom-left (e.g. the
+  `Combobox` dropdown displaced when used in a Modal). The hook now returns
+  viewport-relative coords and every portaled panel (Combobox, DatePicker,
+  DateRangePicker, MultiCombobox, YearPicker, MonthPicker, Popover,
+  HoverCard, Tooltip, ContextMenu, Menu, Menubar, NavigationMenu) renders
+  with `position: fixed`. It already recomputes on capture-phase ancestor
+  scroll + resize, so panels stay glued. Correct now inside fixed/transformed
+  ancestors and scroll containers.
+- **`Combobox` clear (×) button is centered.** `.combobox__clear` was a
+  22×22 pill with no flex centering, so the icon sat off-center. Added
+  `inline-flex` centering.
+
 ## [1.7.0] — 2026-05-17
 
 **Minor.** New pickers + a real overlay dismiss fix. Ships in `dist`; no
