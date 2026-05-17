@@ -132,7 +132,7 @@ export function Combobox<T = string>({
           role="listbox"
           className={cx('combobox__list', 'is-floating')}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: pos.top,
             left: pos.left,
             width: pos.width,
@@ -260,7 +260,7 @@ export function DatePicker({
           className={cx('datepicker__popover', 'is-floating')}
           role="dialog"
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: pos.top,
             left: pos.left,
             visibility: pos.ready ? 'visible' : 'hidden',
@@ -434,7 +434,7 @@ function GridPickerField({
             className={cx('gridpicker__popover', 'is-floating')}
             role="dialog"
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               visibility: pos.ready ? 'visible' : 'hidden',

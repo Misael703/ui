@@ -184,7 +184,7 @@ export function Menu({ trigger, items, align = 'start', className }: MenuProps) 
             className="menu__panel"
             onKeyDown={onPanelKeyDown}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               visibility: pos.ready ? 'visible' : 'hidden',

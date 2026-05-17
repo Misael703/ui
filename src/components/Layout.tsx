@@ -148,7 +148,7 @@ export function Tooltip({ label, children, side = 'top' }: TooltipProps) {
             role="tooltip"
             className={cx('tooltip__bubble', 'is-floating')}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               opacity: pos.ready ? 1 : 0,

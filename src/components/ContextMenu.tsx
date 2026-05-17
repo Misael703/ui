@@ -67,7 +67,7 @@ export function ContextMenu({ items, children, className, menuClassName, ariaLab
             aria-label={ariaLabel}
             className={cx('context-menu__menu', 'is-floating', menuClassName)}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: pos.top,
               left: pos.left,
               visibility: pos.ready ? 'visible' : 'hidden',

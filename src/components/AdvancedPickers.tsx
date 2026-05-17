@@ -130,7 +130,7 @@ export function MultiCombobox<T = string>({
           aria-multiselectable="true"
           className={cx('multicombo__list', 'is-floating')}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: pos.top,
             left: pos.left,
             width: pos.width,
@@ -307,7 +307,7 @@ export function DateRangePicker({
           role="dialog"
           onMouseLeave={() => setHover(null)}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: pos.top,
             left: pos.left,
             visibility: pos.ready ? 'visible' : 'hidden',
