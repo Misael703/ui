@@ -75,6 +75,41 @@ describe('usePopoverPosition — reposition listeners', () => {
     add.mockRestore();
     remove.mockRestore();
   });
+
+  // Regression — Finding D (v1.9.x). On the first open the matchAnchorWidth
+  // panel is measured before its `width: a.width` constraint applies, so its
+  // getBoundingClientRect().width is the inflated natural width. The viewport
+  // clamp must use the width the panel *will* have (the anchor width), not the
+  // measured one, or `left` gets yanked to the gutter for a near-edge anchor.
+  it('matchAnchorWidth: clamps with the anchor width, not the inflated measured width', () => {
+    const rect = (r: Partial<DOMRect>): DOMRect => r as DOMRect;
+    const anchorEl = document.createElement('div');
+    const contentEl = document.createElement('ul');
+    // Anchor near the right edge of the 1024px jsdom viewport.
+    anchorEl.getBoundingClientRect = () =>
+      rect({ left: 800, right: 1000, top: 100, bottom: 130, width: 200, height: 30 });
+    // Unconstrained <ul>: long labels don't wrap → inflated natural width.
+    contentEl.getBoundingClientRect = () =>
+      rect({ left: 0, right: 900, top: 0, bottom: 200, width: 900, height: 200 });
+    const anchor = { current: anchorEl } as React.RefObject<HTMLElement>;
+    const content = { current: contentEl } as React.RefObject<HTMLElement>;
+
+    const { result } = renderHook(() =>
+      usePopoverPosition(anchor, content, {
+        open: true,
+        side: 'bottom',
+        align: 'start',
+        offset: 4,
+        matchAnchorWidth: true,
+      })
+    );
+
+    // Bug would clamp to vw - 900 - 8 = 116; the fix keeps it at the anchor's
+    // left (816 still fits 200px wide in a 1024 viewport).
+    expect(result.current.left).toBe(800);
+    expect(result.current.width).toBe(200);
+    expect(result.current.ready).toBe(true);
+  });
 });
 
 describe('Bug 2 — AppShell collapsed control', () => {
