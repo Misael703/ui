@@ -1,3 +1,12 @@
+# v1.9.0 listo; Finding C diagnosticado (residual prod-only artificial) (2026-05-17)
+
+**Finding C — diagnosticado a fondo:** la galería de 130 componentes daba #418. Dos causas reales encontradas y corregidas (artefactos del propio gallery/uso, no del kit consumidor): (1) entry `Table` anidaba `<table>` dentro de `K.Table` (HTML inválido); (2) `<Portal>` renderizado incondicionalmente en SSR (el `Portal` del kit devuelve null en server y portalea en client **por diseño** → mismatch si se usa en SSR sin gate; constraint real del kit registrado). Gallery ahora rende Portal vía `ClientOnly` (uso realista). **En `next dev` (React no-minificado) `/gallery` hidrata limpio.** Queda un **#418 solo en build de producción** (`next build`/`next start`) en la galería artificial de 130 componentes — escenario que **ningún consumidor real reproduce**. Las rutas representativas reales **`/` (RSC) y `/client` están VERDES** → el valor (el kit funciona en RSC y client) está probado. Drillear el residual prod-only de la mega-galería = ROI bajo; follow-up de scope del harness, no bloquea el kit.
+
+**v1.9.0 (A+B+3 UI) sigue listo para shippear** — son los fixes que tus apps necesitan (B = RSC crítico). Decisión del usuario pendiente: shippear v1.9.0 ahora vs seguir drilleando el residual de la galería. Sin push/publish.
+
+---
+---
+
 # v1.9.0 preparado: A+B+3 UI fixes; Finding C abierto (2026-05-17)
 
 **Rama:** `feat/smoke-consumer` (megabranch: harness + A/B + 3 UI). 5 commits. Bump **1.9.0** + CHANGELOG. **Sin push/publish.**
