@@ -109,3 +109,38 @@ export const BrandTextColapsable: StoryObj = {
 export const BrandTextColapsadoInicial: StoryObj = {
   render: () => <BrandWithText collapsed />,
 };
+
+/**
+ * Footer con texto colapsable. Igual que `appshell__brand-text` pero para el
+ * slot `footer`: envuelve el label de versión en
+ * `<span className="appshell__brand-text">`-equivalente
+ * `<span className="appshell__foot-text">` y al colapsar el riel el texto
+ * desaparece animado en vez de partirse y solaparse con el toggle (caso
+ * "Despachos · v0.1"). Colapsa el riel con el chevron inferior.
+ */
+const FootWithText = ({ collapsed }: { collapsed?: boolean }) => (
+  <div style={{ height: 'calc(100vh - 32px)' }}>
+    <AppShell
+      theme="brand"
+      defaultCollapsed={collapsed}
+      brand={<Logo variant="horizontal" bg="dark" height={32} />}
+      brandCollapsed={<Logo variant="mark" bg="dark" height={32} />}
+      sections={sections}
+      footer={<span className="appshell__foot-text">Despachos · v0.1</span>}
+      user={<Avatar name="Misael Ocas" size={32} />}
+    >
+      <PageHeader title="Usuarios" description="Footer colapsable sin solape" />
+      <div style={{ padding: 24, border: '1px dashed var(--border-default)', borderRadius: 12, textAlign: 'center', color: 'var(--fg-muted)' }}>
+        Colapsa el riel: "Despachos · v0.1" se va, el toggle queda centrado.
+      </div>
+    </AppShell>
+  </div>
+);
+
+export const FooterTextColapsable: StoryObj = {
+  render: () => <FootWithText />,
+};
+
+export const FooterTextColapsadoInicial: StoryObj = {
+  render: () => <FootWithText collapsed />,
+};

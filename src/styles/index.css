@@ -2281,6 +2281,23 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 0;
   pointer-events: none;
 }
+/* Footer text opt-out — mirror of appshell__brand-text for the `footer` slot.
+   Wrap any textual part of `footer` (version label, env tag…) in
+   <span class="appshell__foot-text"> and it collapses away with the rail
+   instead of wrapping/overlapping the collapse toggle in the 72px rail. */
+.appshell__foot-text {
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity var(--duration-fast, 120ms) ease,
+              max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.appshell.is-collapsed .appshell__foot-text {
+  opacity: 0;
+  max-width: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
 /* Collapsed rail (72px): stack the footer slot above a centered toggle so
    neither falls outside the rail nor overlaps (Bug 2). The base foot is a
    space-between row and the toggle has margin-left:auto — both wrong at
