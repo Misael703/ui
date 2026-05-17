@@ -76,14 +76,22 @@ export function usePopoverPosition(
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
+    // With matchAnchorWidth the panel is rendered at `width: a.width`. On the
+    // very first open `pos.width` is still undefined, so the just-mounted node
+    // measures at its unconstrained natural width — using that inflated
+    // `c.width` in the clamp below would yank `left` to the viewport edge and
+    // the position never gets re-measured. Use the width the panel *will*
+    // have, which is correct by construction.
+    const cw = matchAnchorWidth ? a.width : c.width;
+
     let chosen: PopoverSide = side;
     if (side === 'bottom' && a.bottom + offset + c.height > vh && a.top - offset - c.height >= 0) {
       chosen = 'top';
     } else if (side === 'top' && a.top - offset - c.height < 0 && a.bottom + offset + c.height <= vh) {
       chosen = 'bottom';
-    } else if (side === 'right' && a.right + offset + c.width > vw && a.left - offset - c.width >= 0) {
+    } else if (side === 'right' && a.right + offset + cw > vw && a.left - offset - cw >= 0) {
       chosen = 'left';
-    } else if (side === 'left' && a.left - offset - c.width < 0 && a.right + offset + c.width <= vw) {
+    } else if (side === 'left' && a.left - offset - cw < 0 && a.right + offset + cw <= vw) {
       chosen = 'right';
     }
 
@@ -93,17 +101,17 @@ export function usePopoverPosition(
       top = chosen === 'bottom' ? a.bottom + offset : a.top - c.height - offset;
       left =
         align === 'start' ? a.left
-        : align === 'end' ? a.right - c.width
-        : a.left + (a.width - c.width) / 2;
+        : align === 'end' ? a.right - cw
+        : a.left + (a.width - cw) / 2;
     } else {
-      left = chosen === 'right' ? a.right + offset : a.left - c.width - offset;
+      left = chosen === 'right' ? a.right + offset : a.left - cw - offset;
       top =
         align === 'start' ? a.top
         : align === 'end' ? a.bottom - c.height
         : a.top + (a.height - c.height) / 2;
     }
 
-    left = Math.max(GUTTER, Math.min(left, vw - c.width - GUTTER));
+    left = Math.max(GUTTER, Math.min(left, vw - cw - GUTTER));
     top = Math.max(GUTTER, Math.min(top, vh - c.height - GUTTER));
 
     setPos({

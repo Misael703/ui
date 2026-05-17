@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] — 2026-05-17
+
+**Patch.** Positioning fix. No public API change.
+
+### Fixed
+- **`Combobox` / `MultiCombobox`: first open no longer jumps to the viewport
+  edge.** With `matchAnchorWidth`, on the first open the floating list was
+  measured before its `width: anchorWidth` constraint applied, so the viewport
+  clamp used the inflated natural width and yanked `left` to the gutter (the
+  panel appeared far left, over the sidebar); a second open looked correct
+  because the width was cached. `usePopoverPosition` now clamps and flips with
+  the width the panel *will* have (the anchor width) when `matchAnchorWidth` is
+  set, so the first open is positioned correctly. Regression test added.
+
 ## [1.9.0] — 2026-05-17
 
 **Minor.** RSC support + packaging + UI fixes. Drop-in (no public API change),

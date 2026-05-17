@@ -35,3 +35,7 @@ smoke/node_modules/
 smoke/test-results/
 smoke/playwright-report/
 smoke/.smoke-kit/
+# Self-invalidating: the kit is a `file:` tarball dep whose integrity hash
+# changes on every kit build, so a committed lock breaks `npm install` on the
+# next change. Third-party versions stay pinned via exact deps in package.json.
+smoke/package-lock.json
