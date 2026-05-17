@@ -631,6 +631,36 @@ Sí toca `index.css`/`_root.css` (se publican) → valor real para consumidores.
 - [ ] **5 — Gaps puntuales**: solo donde el estado es abrupto (Button press, Accordion chevron, Tab indicator, Switch thumb) con evidencia por componente.
 - [ ] **6 — Release**: bump 1.4.0 + CHANGELOG; verificación completa.
 
+# v1.5.0 — Slot / asChild (Workstream A del roadmap de versatilidad)
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.4.0` → **`1.5.0`** (`feat` aditivo, `asChild` default false → no breaking → MINOR). Rama `feat/slot-aschild-v1.5.0`.
+Objetivo: polimorfismo estilo shadcn sin Radix ni romper el modelo versionado. Decisión usuario: arrancar por A.
+
+## Fases
+- [ ] **A1** — `Slot` + `Slottable` + `composeRefs`/`mergeProps` en `Primitives.tsx` (cero deps, sin `any`); `Button asChild`; tests.
+- [ ] **A2** — rollout `asChild` a set curado: Card interactive, ListGroupItem, Breadcrumbs item, Tab, Menu/MenuItem, Chip.
+- [ ] **A3** — AppShell `linkAs` → `asChild` (mantener `linkAs` como alias deprecado).
+- [ ] **A4** — stories `asChild` + DESIGN.md (contrato de polimorfismo).
+- [ ] **A5** — bump 1.5.0 + CHANGELOG + verificación (tsc/vitest/lint/build-storybook).
+
+## Review v1.5.0 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Hecho (5 commits en `feat/slot-aschild-v1.5.0`):**
+- A1 `feat(primitives)`: `Slot`+`Slottable`+`composeRefs`/`mergeProps` (cero deps, sin `any`, React 18/19-safe); `Button asChild`. Tests Slot/Button (7).
+- A2 `feat(card)`: `Card asChild`. **Reframe honesto:** set curado reducido a Button+Card; ListGroupItem (`<li>`), Chip (estructura interna), Tab (compound), Breadcrumbs/Menu (array-driven) → asChild sería defecto; diferidos con razón (render-prop).
+- A3: **corregido** — `AppShell.linkAs` NO se convierte (es el patrón correcto para API array; convertir sería regresión). Sin cambio de código; contrato documentado.
+- A4 `docs(storybook)`: stories asChild (Button/Card) + sección "Polymorphism" en DESIGN.md (dos patrones).
+- A5 `chore(release)`: bump 1.5.0 + CHANGELOG.
+
+**Verificación:** `tsc` limpio · **vitest 335/335** (0 regresiones, +9) · `npm run build-storybook` exit 0 · `npm run lint` exit 0.
+
+**Roadmap versatilidad — estado:** A (Slot/asChild) ✅ hecho. Pendientes: **C (Blocks)** y **B (variantes extensibles)** + el follow-up `renderLink` para Breadcrumbs/Menu (patrón documentado, no implementado).
+
+**Clave:** se publica (`dist`), drop-in, no breaking. Recomendación: merge **y** publish (valor real: polimorfismo para barritas/Next.js). Nada pusheado/publicado aún (regla no-push-without-approval).
+
+---
+---
+
 ## Review v1.4.0 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Hecho (6 commits atómicos en `feat/motion-refinement-v1.4.0`):**

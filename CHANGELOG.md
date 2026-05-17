@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] — 2026-05-17
+
+**Minor.** Polymorphism (`asChild`), Workstream A of the versatility roadmap.
+Ships in `dist`; no breaking changes (`asChild` defaults to `false`, behavior
+unchanged; drop-in via version bump).
+
+### Added
+- **`Slot` and `Slottable`** primitives (dependency-free, no Radix): merge
+  `className` / handlers / `ref` / ARIA onto a consumer-provided element and
+  preserve sibling content. Exported from the barrel.
+- **`asChild`** on **`Button`** and **`Card`**: render as the provided child
+  element (e.g. `next/link`'s `<a>`) while keeping the kit's classes, ref,
+  handlers, and Button's icons/loading. `composeRefs`/`mergeProps` handle
+  ref + prop merging; React 18/19 safe.
+
+### Notes
+- Scope was deliberately limited to `Button` + `Card` (the clean,
+  high-value, children-based targets). `asChild` is intentionally **not**
+  added to parent-constrained elements (`ListGroupItem` is `<li>` under
+  `<ul>`), components with injected internal structure (`Chip`), compound
+  widgets (`Tab`), or data/array-driven APIs (`Breadcrumbs`, `Menu`,
+  `AppShell`) — those use a render-prop instead (`AppShell.linkAs` is
+  unchanged; it is the correct pattern for its array API). See `DESIGN.md`
+  "Polymorphism".
+
 ## [1.4.0] — 2026-05-17
 
 **Minor.** Motion refinement (no public API changes; drop-in via version bump).
