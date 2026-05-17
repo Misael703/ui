@@ -5,6 +5,40 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] — 2026-05-17
+
+**Minor.** Motion refinement (no public API changes; drop-in via version bump).
+Unlike 1.3.1, this ships in `dist` and affects runtime consumers (better
+default feel).
+
+### Added
+- **Exponential ease-out family**: `--ease-out-quart` / `--ease-out-quint` /
+  `--ease-out-expo` tokens.
+- **`--duration-exit`** (150ms, ~75% of `--duration-base`) for dismissals.
+
+### Changed
+- `--ease-standard` and `--ease-out` now resolve to the quint curve
+  (confident deceleration) instead of the flat Material/CSS defaults. Token
+  names are preserved, so this is a feel change, not a breaking one. The whole
+  kit decelerates more decisively without adding any new motion.
+- Exit animations (modal/drawer/toast backdrops and panels, plus the
+  `useDelayedUnmount` delay) now run at `--duration-exit` instead of
+  `--duration-base`: entrances unchanged, dismissals snappier.
+- `.switch__track` background transition now carries `--ease-standard`.
+
+### Fixed
+- **`prefers-reduced-motion`**: `useDelayedUnmount` no longer keeps overlays
+  mounted for the (now invisible) exit duration; it unmounts immediately for
+  reduced-motion users. SSR/jsdom-safe.
+- `var()` motion fallbacks aligned with real token values (`--duration-base`
+  220→200ms, `--duration-fast` 150→120ms, `--ease-standard` fallbacks → the
+  real curve). No behavioral change; consistency only.
+
+### Removed
+- Dead legacy accordion CSS (`.accordion__head` / `__chevron` / `__body` /
+  `.accordion__item.open`, 25 lines) superseded by the
+  trigger/chev/panel/is-open implementation and unreachable.
+
 ## [1.3.1] — 2026-05-17
 
 **Patch. Docs/Storybook only — no shipped code changes.** Stories are not part

@@ -381,7 +381,7 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--color-gray-300);
   border-radius: var(--radius-pill);
   position: relative;
-  transition: background var(--duration-fast);
+  transition: background var(--duration-fast) var(--ease-standard);
   flex: none;
 }
 .switch__track::after {
@@ -1053,11 +1053,11 @@ button, input, select, textarea { box-sizing: border-box; }
 @keyframes sink { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(8px) scale(0.98); } }
 @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(20px); opacity: 0; } }
 @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-20px); opacity: 0; } }
-.modal-backdrop.is-closing { animation: fadeOut var(--duration-base) var(--ease-standard) forwards; }
-.modal.is-closing { animation: sink var(--duration-base) var(--ease-standard) forwards; }
-.drawer-backdrop.is-closing { animation: fadeOut var(--duration-base) var(--ease-standard) forwards; }
-.drawer--right.is-closing { animation: slideOut var(--duration-base) var(--ease-standard) forwards; }
-.drawer--left.is-closing { animation: slideOutLeft var(--duration-base) var(--ease-standard) forwards; }
+.modal-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
+.modal.is-closing { animation: sink var(--duration-exit) var(--ease-standard) forwards; }
+.drawer-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
+.drawer--right.is-closing { animation: slideOut var(--duration-exit) var(--ease-standard) forwards; }
+.drawer--left.is-closing { animation: slideOutLeft var(--duration-exit) var(--ease-standard) forwards; }
 
 /* Mobile bottom-sheet: at <600px the drawer slides in from the bottom
    instead of from the side. Native pattern on iOS/Android — feels less
@@ -1076,7 +1076,7 @@ button, input, select, textarea { box-sizing: border-box; }
   .drawer.is-closing,
   .drawer--right.is-closing,
   .drawer--left.is-closing {
-    animation: slideOutBottom var(--duration-base) var(--ease-standard) forwards;
+    animation: slideOutBottom var(--duration-exit) var(--ease-standard) forwards;
   }
 }
 
@@ -1158,7 +1158,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .toast--info    .toast__icon { color: var(--color-info); }
 @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-.toast.is-closing { animation: toastSlideOut var(--duration-base) var(--ease-standard) forwards; }
+.toast.is-closing { animation: toastSlideOut var(--duration-exit) var(--ease-standard) forwards; }
 
 /* ---------- Empty state ------------------------------------------------- */
 .empty {
@@ -1294,31 +1294,6 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .accordion__item { border-bottom: 1px solid var(--border-default); }
 .accordion__item:last-child { border-bottom: 0; }
-.accordion__head {
-  width: 100%;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 24px;
-  background: transparent;
-  border: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-md);
-  font-weight: 700;
-  color: var(--fg-default);
-  cursor: pointer;
-  text-align: left;
-  transition: background var(--duration-fast);
-}
-.accordion__head:hover { background: var(--bg-subtle); }
-.accordion__chevron { transition: transform var(--duration-base); flex: none; }
-.accordion__item.open .accordion__chevron { transform: rotate(180deg); }
-.accordion__body {
-  padding: 0 24px 18px;
-  color: var(--fg-muted);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  display: none;
-}
-.accordion__item.open .accordion__body { display: block; }
 
 /* ---------- File upload -------------------------------------------------- */
 .upload {
@@ -2206,7 +2181,7 @@ button, input, select, textarea { box-sizing: border-box; }
   display: grid;
   grid-template-columns: 248px 1fr;
   min-height: 100vh; background: var(--bg-canvas);
-  transition: grid-template-columns var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  transition: grid-template-columns var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .appshell.is-collapsed { grid-template-columns: 72px 1fr; }
 .appshell__sidebar {
@@ -2235,8 +2210,8 @@ button, input, select, textarea { box-sizing: border-box; }
    transition. */
 .appshell__brand-text {
   overflow: hidden;
-  transition: opacity var(--duration-fast, 150ms) ease,
-              max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  transition: opacity var(--duration-fast, 120ms) ease,
+              max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .appshell.is-collapsed .appshell__brand-text {
   opacity: 0;
@@ -2290,13 +2265,13 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__navlabel {
   flex: 1; min-width: 0; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap;
-  transition: opacity var(--duration-fast, 150ms) ease, max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .appshell__navbadge {
   background: var(--color-secondary-100); color: var(--color-secondary-800);
   font-size: var(--text-2xs); font-weight: 700;
   padding: 1px 8px; border-radius: var(--radius-pill);
-  transition: opacity var(--duration-fast, 150ms) ease, max-width var(--duration-base, 220ms) var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .appshell.is-collapsed .appshell__navlabel,
 .appshell.is-collapsed .appshell__navbadge {
@@ -2309,7 +2284,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell.is-collapsed .appshell__navchildren { display: none; }
 .appshell__navlabel-section {
-  transition: opacity var(--duration-fast, 150ms) ease, visibility 0s linear 0s;
+  transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear 0s;
 }
 .appshell.is-collapsed .appshell__navlabel-section {
   opacity: 0;
@@ -2319,7 +2294,7 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 0;
   overflow: hidden;
   /* Delay visibility:hidden until after the opacity fade completes. */
-  transition: opacity var(--duration-fast, 150ms) ease, visibility 0s linear var(--duration-fast, 150ms);
+  transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear var(--duration-fast, 120ms);
 }
 .appshell__navchildren { padding-left: 28px; }
 .appshell__navitem--depth-1 { padding: 8px 10px; font-size: var(--text-sm); font-weight: 500; }
@@ -3368,7 +3343,7 @@ button, input, select, textarea { box-sizing: border-box; }
   min-width: 200px;
   max-width: 320px;
   font-size: var(--text-sm);
-  animation: popover-fade var(--duration-fast, 150ms) var(--ease-standard, ease-out);
+  animation: popover-fade var(--duration-fast, 120ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 @keyframes popover-fade {
   from { opacity: 0; transform: translateY(-4px); }
@@ -3389,7 +3364,7 @@ button, input, select, textarea { box-sizing: border-box; }
   min-width: 220px;
   max-width: 320px;
   font-size: var(--text-sm);
-  animation: popover-fade var(--duration-fast, 150ms) var(--ease-standard, ease-out);
+  animation: popover-fade var(--duration-fast, 120ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* ---------- ContextMenu ------------------------------------------------ */
@@ -3428,7 +3403,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 500;
-  transition: background var(--duration-fast, 150ms), color var(--duration-fast, 150ms), border-color var(--duration-fast, 150ms);
+  transition: background var(--duration-fast, 120ms), color var(--duration-fast, 120ms), border-color var(--duration-fast, 120ms);
 }
 .toggle--sm { padding: 4px var(--space-2); font-size: var(--text-xs); height: 28px; }
 .toggle--md { padding: 6px var(--space-3); font-size: var(--text-sm); height: 36px; }
@@ -3486,7 +3461,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   caret-color: var(--color-primary);
-  transition: border-color var(--duration-fast, 150ms), box-shadow var(--duration-fast, 150ms);
+  transition: border-color var(--duration-fast, 120ms), box-shadow var(--duration-fast, 120ms);
 }
 .input-otp__slot:focus { outline: none; border-color: var(--border-focus, var(--color-primary)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent); }
 .input-otp.is-invalid .input-otp__slot { border-color: var(--color-danger); }
@@ -3504,7 +3479,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .carousel:focus { outline: none; }
 .carousel:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); border-radius: var(--radius-md); }
 .carousel__viewport { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
-.carousel__track { display: flex; transition: transform 320ms var(--ease-standard, ease-out); }
+.carousel__track { display: flex; transition: transform 320ms var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1)); }
 .carousel__slide { flex: 0 0 100%; min-width: 0; }
 .carousel__control {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -3527,7 +3502,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-pill);
   background: var(--border-strong, var(--border-default));
   border: 0; cursor: pointer; padding: 0;
-  transition: background var(--duration-fast, 150ms), width var(--duration-fast, 150ms);
+  transition: background var(--duration-fast, 120ms), width var(--duration-fast, 120ms);
 }
 .carousel__dot.is-active { background: var(--color-primary); width: 24px; }
 
@@ -3540,7 +3515,7 @@ button, input, select, textarea { box-sizing: border-box; }
   flex: none;
   background: var(--border-default);
   position: relative;
-  transition: background var(--duration-fast, 150ms);
+  transition: background var(--duration-fast, 120ms);
 }
 .resizable__handle:hover, .resizable__handle:focus-visible { background: var(--color-primary); }
 .resizable__handle--horizontal { width: 4px; cursor: col-resize; }
@@ -3595,7 +3570,7 @@ button, input, select, textarea { box-sizing: border-box; }
   text-decoration: none;
 }
 .nav-menu__trigger:hover, .nav-menu__trigger.is-open { background: var(--bg-subtle); color: var(--color-primary); }
-.nav-menu__chevron { transition: transform var(--duration-fast, 150ms); }
+.nav-menu__chevron { transition: transform var(--duration-fast, 120ms); }
 .nav-menu__trigger.is-open .nav-menu__chevron { transform: rotate(180deg); }
 .nav-menu__panel {
   position: absolute; top: calc(100% + 8px); left: 0;

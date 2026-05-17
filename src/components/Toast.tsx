@@ -12,9 +12,9 @@ const VARIANT_ICON = {
   info: Info,
 } as const;
 
-// Exit animation duration. Must match `.toast.is-closing` keyframes
-// (`toastSlideOut`) in src/styles/index.css.
-const EXIT_MS = 200;
+// Exit animation duration. Must match `--duration-exit` and the
+// `.toast.is-closing` keyframes (`toastSlideOut`) in src/styles/index.css.
+const EXIT_MS = 150;
 
 export interface ToastItem {
   id: string;
