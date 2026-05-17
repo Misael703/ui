@@ -107,9 +107,11 @@ export interface DataTableProps<T> {
   loading?: boolean;
   /**
    * Sticky-position the table header so it stays visible while the body
-   * scrolls. Requires the consumer to constrain the wrapper's height
-   * (e.g. wrapping `<DataTable>` in a `max-height: 60vh; overflow-y: auto`
-   * container) — without that, sticky has nothing to stick relative to.
+   * scrolls. The wrapper itself becomes the vertical scroll container
+   * (the table is already overflow-x:auto, so an outer scroller can't reach
+   * the header). Defaults to `max-height: 70vh`; override by passing a
+   * `className` with a different `max-height`. Do NOT wrap `<DataTable>` in
+   * your own `overflow-y:auto` container — that breaks the sticky context.
    */
   stickyHeader?: boolean;
   /**

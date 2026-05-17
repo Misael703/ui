@@ -718,14 +718,13 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 12px 18px;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--fg-muted);
+  font-weight: 600;
+  color: var(--fg-default);
   cursor: pointer;
   transition: color var(--duration-fast), border-color var(--duration-fast);
   margin-bottom: -1px;
-  letter-spacing: var(--tracking-wide);
 }
-.tabs__tab:hover { color: var(--fg-default); }
+.tabs__tab:hover { color: var(--color-primary); }
 .tabs__tab.is-active {
   color: var(--color-primary);
   border-bottom-color: var(--color-secondary);
@@ -874,6 +873,15 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 600px) {
   .table-pagination { justify-content: center; }
 }
+.table-wrap--sticky {
+  /* `.table-wrap` is overflow-x:auto, which makes IT the nearest scroll
+     container — so a sticky thead sticks to it, not to an outer wrapper.
+     The sticky variant must therefore scroll vertically itself. Default cap
+     is overridable: pass a className with a different max-height to
+     <DataTable>. */
+  overflow-y: auto;
+  max-height: 70vh;
+}
 .table-wrap--sticky .table thead th {
   position: sticky;
   top: 0;
@@ -947,6 +955,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .table-toolbar > .input,
 .table-toolbar > .input-wrap,
 .table-toolbar > .select { flex: 1 1 200px; min-width: 0; }
+/* When a DataTable sits directly under a toolbar, seam them: drop the
+   table-wrap's own top border + radius so there is no double border or
+   white rounded-corner notch where the two meet. */
+.table-toolbar + .table-wrap {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
 
 /* ---------- Modal & drawer ---------------------------------------------- */
 .modal-backdrop {

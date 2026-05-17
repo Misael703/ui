@@ -142,21 +142,25 @@ export const ConError: StoryObj = {
   ),
 };
 
-/** Sticky header: el thead se mantiene visible mientras se scrolea el body.
- * Requiere envolver la tabla en un contenedor con altura limitada y `overflow-y: auto`. */
+/** Sticky header: el thead queda visible al scrollear el body. El propio
+ * wrapper es el contenedor de scroll (no lo envuelvas en tu propio
+ * `overflow-y:auto`). Default `max-height:70vh`; aquí se override con un
+ * `className`. */
 export const StickyHeader: StoryObj = {
   render: () => {
     const manyRows = Array.from({ length: 30 }, (_, i) => ({
       id: String(i + 1),
       name: `Producto ${i + 1}`,
       sku: `SKU-${String(i + 1).padStart(3, '0')}`,
-      stock: Math.floor(Math.random() * 100),
-      price: Math.floor(Math.random() * 200000) + 10000,
+      stock: (i * 7) % 100,
+      price: 10000 + i * 4500,
     }));
     return (
-      <div style={{ height: 320, overflowY: 'auto', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+      <>
+        <style>{'.sticky-demo{max-height:300px}'}</style>
         <DataTable
           stickyHeader
+          className="sticky-demo"
           rows={manyRows}
           rowKey={(r) => r.id}
           ariaLabel="Inventario"
@@ -167,7 +171,7 @@ export const StickyHeader: StoryObj = {
             { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
           ]}
         />
-      </div>
+      </>
     );
   },
 };
