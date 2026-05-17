@@ -16,6 +16,14 @@ import * as React from 'react';
  * return <div className={cx('modal', closing && 'is-closing')} />
  * ```
  */
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 export function useDelayedUnmount(open: boolean, durationMs: number) {
   const [mounted, setMounted] = React.useState(open);
   const [closing, setClosing] = React.useState(false);
@@ -28,10 +36,14 @@ export function useDelayedUnmount(open: boolean, durationMs: number) {
     }
     if (!mounted) return;
     setClosing(true);
+    // The global prefers-reduced-motion guard makes the exit animation
+    // instant; don't keep the element mounted for the (now invisible)
+    // duration, it would just block/delay for those users.
+    const delay = prefersReducedMotion() ? 0 : durationMs;
     const handle = setTimeout(() => {
       setMounted(false);
       setClosing(false);
-    }, durationMs);
+    }, delay);
     return () => clearTimeout(handle);
   }, [open, durationMs, mounted]);
 
