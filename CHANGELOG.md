@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] — 2026-05-17
+
+**Minor.** RSC support + packaging + UI fixes. Drop-in (no public API change),
+but consumption semantics change: the package is now a client boundary.
+
+### Fixed
+- **RSC: a Next Server Component can import the kit again.** `'use client'`
+  was stripped by the bundler, so importing the kit from a Server Component
+  crashed (`React.createContext is not a function`). It is now re-applied to
+  every emitted JS post-build. The whole package is a client boundary —
+  importing a pure util (`cx`, `formatDate`) from an RSC also pulls a client
+  boundary; acceptable, a future server-safe subpath could refine this.
+- **Package types no longer masquerade.** `exports["."]` and
+  `exports["./presets/elalba-defaults"]` use per-condition types
+  (`import` → `.d.mts`, `require` → `.d.ts`); added `"type": "commonjs"`.
+  `publint` is clean.
+- **Tabs are readable.** Inactive tabs were bold (700) + low-contrast
+  (`--fg-muted`) + wide tracking at 14px. Now weight 600, `--fg-default`,
+  normal tracking, primary on hover.
+- **`DataTable stickyHeader` actually sticks.** `.table-wrap` is
+  `overflow-x:auto`, so it (not an outer wrapper) is the sticky scroll
+  container; the sticky variant now scrolls vertically itself
+  (`max-height:70vh`, overridable via `className`). Do not wrap `<DataTable>`
+  in your own `overflow-y:auto` container.
+- **No corner notch under a toolbar.** A `DataTable` directly after a
+  `TableToolbar` drops the wrap's top border/radius so the two seam cleanly
+  (was a double border / white rounded-corner artifact).
+
 ## [1.8.0] — 2026-05-17
 
 **Minor.** Adds the `appshell__foot-text` collapse convention. CSS-only,
