@@ -9,7 +9,7 @@ import { DatePicker } from './Pickers';
 import { DateRangePicker } from './AdvancedPickers';
 
 export default {
-  title: 'Overlays/Regression — Floating in Overflow',
+  title: 'Internal/Regression/Floating in overflow',
   tags: ['autodocs'],
 } as Meta;
 

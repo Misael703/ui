@@ -8,7 +8,7 @@ import {
 import { Button } from './Button';
 import { Badge } from './Display';
 
-export default { title: 'Layout/Container & Stack', tags: ['autodocs'] } as Meta;
+export default { title: 'Layout/Stack, Grid & Tabs', tags: ['autodocs'] } as Meta;
 
 export const TabsBasicos: StoryObj = {
   render: () => (
@@ -34,11 +34,9 @@ export const TooltipBasico: StoryObj = {
 };
 
 /**
- * Regression guard for v0.3.4 fix: `.tooltip__bubble` used to sit at
- * `z-index: var(--z-sticky)` (=60), losing the stack against sticky table
- * headers and similar elements. Now it uses `var(--z-tooltip)` (=1000).
- * Hover the icon button in the first row — the tooltip should clear the
- * sticky `<thead>` instead of disappearing behind it.
+ * Tooltip dentro de una tabla con `<thead>` sticky. El bubble se portalea a
+ * `document.body`, así que queda por encima del header fijo en lugar de
+ * recortarse detrás. Pasa el mouse por "Editar" en cualquier fila.
  */
 export const TooltipEnContextoSticky: StoryObj = {
   render: () => (
