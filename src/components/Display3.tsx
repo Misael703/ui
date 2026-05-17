@@ -4,6 +4,7 @@ import { cx } from '../utils/cx';
 import { Avatar } from './Display2';
 import { ChevronRight, ChevronDown } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { startOfMonth, addMonths, isSameDay } from '../utils/dateFormat';
 
 // ---------- UserCell ----------------------------------------------------
 export interface UserCellProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -92,19 +93,128 @@ export interface TreeProps extends Omit<React.HTMLAttributes<HTMLUListElement>, 
   onSelect?: (id: string) => void;
 }
 
-export function Tree({ nodes, defaultExpanded = [], selectedId, onSelect, className, ...rest }: TreeProps) {
+function firstNodeId(nodes: TreeNodeData[]): string | undefined {
+  return nodes[0]?.id;
+}
+
+export function Tree({
+  nodes,
+  defaultExpanded = [],
+  selectedId,
+  onSelect,
+  className,
+  onKeyDown,
+  ...rest
+}: TreeProps) {
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set(defaultExpanded));
-  const toggle = (id: string) => {
+  const [activeId, setActiveId] = React.useState<string | undefined>(undefined);
+  const rootRef = React.useRef<HTMLUListElement>(null);
+
+  // Roving tabindex: one treeitem is tabbable at a time. Falls back to the
+  // selected node, then the first node, so the tree is reachable on first Tab.
+  const effectiveActive = activeId ?? selectedId ?? firstNodeId(nodes);
+
+  const toggle = React.useCallback((id: string) => {
     setExpanded((curr) => {
       const next = new Set(curr);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
+  }, []);
+
+  const visibleItems = (): HTMLElement[] =>
+    Array.from(rootRef.current?.querySelectorAll<HTMLElement>('[role="treeitem"]') ?? []);
+
+  const focusItem = (el: HTMLElement | undefined): void => {
+    if (!el) return;
+    setActiveId(el.dataset.treeId);
+    el.focus();
   };
+
+  // WAI-ARIA TreeView keyboard model. Focus lives on the treeitem element;
+  // querySelectorAll returns items in DOM order, which equals visual order
+  // (collapsed branches are not rendered, so they are not navigable).
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>): void => {
+    onKeyDown?.(e);
+    const targetEl = (e.target as HTMLElement).closest<HTMLElement>('[role="treeitem"]');
+    if (!targetEl || !rootRef.current?.contains(targetEl)) return;
+    const list = visibleItems();
+    const idx = list.indexOf(targetEl);
+    if (idx === -1) return;
+    const id = targetEl.dataset.treeId;
+    if (!id) return;
+    const depth = Number(targetEl.dataset.depth ?? 0);
+    const expandedAttr = targetEl.getAttribute('aria-expanded');
+    const hasChildren = expandedAttr !== null;
+    const isOpen = expandedAttr === 'true';
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        focusItem(list[Math.min(idx + 1, list.length - 1)]);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        focusItem(list[Math.max(idx - 1, 0)]);
+        break;
+      case 'Home':
+        e.preventDefault();
+        focusItem(list[0]);
+        break;
+      case 'End':
+        e.preventDefault();
+        focusItem(list[list.length - 1]);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        if (hasChildren && !isOpen) toggle(id);
+        else if (hasChildren && isOpen) focusItem(list[idx + 1]);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (hasChildren && isOpen) {
+          toggle(id);
+        } else {
+          for (let i = idx - 1; i >= 0; i--) {
+            const candidate = list[i];
+            if (candidate && Number(candidate.dataset.depth ?? 0) < depth) {
+              focusItem(candidate);
+              break;
+            }
+          }
+        }
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        onSelect?.(id);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <ul role="tree" className={cx('tree', className)} {...rest}>
+    <ul
+      ref={rootRef}
+      role="tree"
+      className={cx('tree', className)}
+      onKeyDown={handleKeyDown}
+      {...rest}
+    >
       {nodes.map((n) => (
-        <TreeNode key={n.id} node={n} depth={0} expanded={expanded} toggle={toggle} selectedId={selectedId} onSelect={onSelect} />
+        <TreeNode
+          key={n.id}
+          node={n}
+          depth={0}
+          expanded={expanded}
+          toggle={toggle}
+          selectedId={selectedId}
+          activeId={effectiveActive}
+          onSelect={onSelect}
+          onFocusItem={setActiveId}
+        />
       ))}
     </ul>
   );
@@ -116,26 +226,47 @@ interface TreeNodeProps {
   expanded: Set<string>;
   toggle: (id: string) => void;
   selectedId?: string;
+  activeId?: string;
   onSelect?: (id: string) => void;
+  onFocusItem: (id: string) => void;
 }
 
-function TreeNode({ node, depth, expanded, toggle, selectedId, onSelect }: TreeNodeProps) {
+function TreeNode({
+  node,
+  depth,
+  expanded,
+  toggle,
+  selectedId,
+  activeId,
+  onSelect,
+  onFocusItem,
+}: TreeNodeProps) {
   const hasChildren = !!(node.children && node.children.length);
   const isOpen = expanded.has(node.id);
   const isSelected = selectedId === node.id;
-  const t = useLocale();
+  const isActive = activeId === node.id;
   return (
-    <li role="treeitem" aria-expanded={hasChildren ? isOpen : undefined} aria-selected={isSelected} className="tree__node">
+    <li role="none" className="tree__node">
       <div
+        role="treeitem"
+        data-tree-id={node.id}
+        data-depth={depth}
+        aria-expanded={hasChildren ? isOpen : undefined}
+        aria-selected={isSelected}
+        tabIndex={isActive ? 0 : -1}
         className={cx('tree__row', isSelected && 'is-selected')}
         style={{ paddingLeft: `calc(var(--space-2) + var(--space-4) * ${depth})` }}
-        onClick={() => onSelect?.(node.id)}
+        onClick={() => {
+          onFocusItem(node.id);
+          onSelect?.(node.id);
+        }}
       >
         {hasChildren ? (
           <button
             type="button"
+            tabIndex={-1}
+            aria-hidden="true"
             className="tree__chev"
-            aria-label={isOpen ? t['calendar.collapse'] : t['calendar.expand']}
             onClick={(e) => { e.stopPropagation(); toggle(node.id); }}
           >
             {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -150,7 +281,17 @@ function TreeNode({ node, depth, expanded, toggle, selectedId, onSelect }: TreeN
       {hasChildren && isOpen && (
         <ul role="group" className="tree__children">
           {node.children!.map((c) => (
-            <TreeNode key={c.id} node={c} depth={depth + 1} expanded={expanded} toggle={toggle} selectedId={selectedId} onSelect={onSelect} />
+            <TreeNode
+              key={c.id}
+              node={c}
+              depth={depth + 1}
+              expanded={expanded}
+              toggle={toggle}
+              selectedId={selectedId}
+              activeId={activeId}
+              onSelect={onSelect}
+              onFocusItem={onFocusItem}
+            />
           ))}
         </ul>
       )}
@@ -172,12 +313,6 @@ export interface CalendarProps extends React.HTMLAttributes<HTMLDivElement> {
   events?: CalendarEvent[];
   onMonthChange?: (m: Date) => void;
   onDayClick?: (d: Date) => void;
-}
-
-function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 export function Calendar({ month: monthProp, events = [], onMonthChange, onDayClick, className, ...rest }: CalendarProps) {

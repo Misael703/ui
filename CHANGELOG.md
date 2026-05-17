@@ -5,6 +5,50 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] — 2026-05-17
+
+**Minor.** Production audit remediation: accessibility fixes, internal
+consolidation, and a quality gate. No public API breaks (drop-in via version
+bump); `Divider` is kept as a deprecated alias and the new date utilities are
+additive.
+
+### Fixed
+- **`Tree` is now fully keyboard-operable** (WAI-ARIA TreeView): roving
+  `tabindex`, ArrowUp/Down to move, ArrowRight/Left to expand/collapse or move
+  to child/parent, Home/End, Enter/Space to select. The focusable element is
+  the treeitem row; the disclosure chevron is decorative and out of the tab
+  order. Closes a WCAG 2.1.1 (Keyboard) failure where the row was a
+  non-focusable `div`.
+- **`Accordion` trigger and panel are ARIA-wired**: `aria-controls`,
+  `role="region"` and `aria-labelledby` via `React.useId()`. The
+  unmount-on-close behavior is unchanged.
+
+### Changed
+- **`Divider` is now a deprecated alias of `Separator`.** It delegates to
+  `Separator` with `decorative={false}`, preserving `role="separator"`,
+  `aria-orientation` and the legacy `divider` / `divider--vertical` classes:
+  zero visual or behavioral change for existing consumers. New code should use
+  `Separator`.
+- **Calendar grid helpers deduplicated.** `startOfMonth`, `addMonths`,
+  `isSameDay` and `buildMonthGrid` (previously copied verbatim across
+  `Pickers`, `AdvancedPickers` and `Display3`) now live in
+  `utils/dateFormat` and are exported from the public barrel (additive).
+  `DatePicker` / `DateRangePicker` consume the shared grid; the full-month
+  `Calendar` intentionally keeps its distinct 42-cell model.
+
+### Added
+- **`DESIGN.md` and `PRODUCT.md`**: design-system source of truth (derived
+  from the token files) and product/brand context.
+- **Lint & format gate.** ESLint 9 flat config (typescript-eslint,
+  eslint-plugin-react-hooks, eslint-plugin-jsx-a11y, eslint-config-prettier)
+  and Prettier, with `lint` / `lint:fix` / `format` / `format:check` scripts.
+  CI runs `npm run lint` before tests. `react-hooks/rules-of-hooks` is an
+  error in shipped code (zero violations) and off in `*.stories.tsx`.
+  Pre-existing style debt is surfaced as warnings; the gate fails on errors
+  only.
+- **README "Costo del CSS (hoja única)"** documenting the single-stylesheet
+  tradeoff (~19 KB gzip) and why CSS is not code-split.
+
 ## [1.2.0] — 2026-05-17
 
 **Minor.** Closes the floating-primitive convergence debt + an uppercase

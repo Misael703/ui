@@ -41,11 +41,18 @@ describe('Tree', () => {
     { id: 'b', label: 'Cat B' },
   ];
 
-  it('expands and collapses on chevron click', () => {
-    render(<Tree nodes={nodes} />);
+  it('expands and collapses on chevron click and exposes aria-expanded', () => {
+    const { container } = render(<Tree nodes={nodes} />);
     expect(screen.queryByText('Sub A1')).toBeNull();
-    fireEvent.click(screen.getByLabelText('Expandir'));
+    // The disclosure twistie is decorative (aria-hidden) per the WAI-ARIA
+    // TreeView pattern; state is exposed on the treeitem via aria-expanded.
+    const item = screen.getByRole('treeitem', { name: 'Cat A' });
+    expect(item).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(container.querySelector('.tree__chev') as HTMLElement);
     expect(screen.getByText('Sub A1')).toBeInTheDocument();
+    expect(screen.getByRole('treeitem', { name: 'Cat A' })).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(container.querySelector('.tree__chev') as HTMLElement);
+    expect(screen.queryByText('Sub A1')).toBeNull();
   });
 
   it('calls onSelect with node id', () => {

@@ -4,6 +4,7 @@ import { cx } from '../utils/cx';
 import { Check } from './Icons';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { Separator } from './Primitives';
 
 // ---------- Tabs ---------------------------------------------------------
 interface TabsContextValue {
@@ -167,16 +168,27 @@ export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
   orientation?: 'horizontal' | 'vertical';
 }
 
-export function Divider({ orientation = 'horizontal', className, ...rest }: DividerProps) {
+/**
+ * @deprecated Use `Separator` instead. `Divider` is a non-breaking alias kept
+ * for existing consumers: it delegates to `Separator` with `decorative={false}`
+ * (preserving the original `role="separator"` semantics) and keeps emitting the
+ * legacy `divider` / `divider--vertical` classes so styling is unchanged. New
+ * code should import `Separator`.
+ */
+export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(function Divider(
+  { orientation = 'horizontal', className, ...rest },
+  ref
+) {
   return (
-    <div
-      role="separator"
-      aria-orientation={orientation}
+    <Separator
+      ref={ref}
+      orientation={orientation}
+      decorative={false}
       className={cx('divider', orientation === 'vertical' && 'divider--vertical', className)}
       {...rest}
     />
   );
-}
+});
 
 // ---------- Stack / HStack / VStack -------------------------------------
 type SpaceToken = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12 | 16 | 20 | 24;

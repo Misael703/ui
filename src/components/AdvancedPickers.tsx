@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
-import { resolveDateFormat, formatDate, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
 import { Portal } from './Portal';
@@ -169,20 +169,6 @@ export function MultiCombobox<T = string>({
 }
 
 // ---------- DateRangePicker --------------------------------------------
-function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-function buildMonthGrid(view: Date, offset: number) {
-  const m = addMonths(view, offset);
-  const startDow = (m.getDay() + 6) % 7;
-  const days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-  const cells: (Date | null)[] = [];
-  for (let i = 0; i < startDow; i++) cells.push(null);
-  for (let d = 1; d <= days; d++) cells.push(new Date(m.getFullYear(), m.getMonth(), d));
-  return { m, cells };
-}
 export interface DateRange { from: Date | null; to: Date | null }
 
 export interface DateRangePickerProps {
@@ -270,7 +256,7 @@ export function DateRangePicker({
     : locale['picker.selectRange'];
 
   const renderMonth = (offset: number) => {
-    const { m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
+    const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
     return (
       <div className="daterange__month">
         <div className="daterange__title">{months[m.getMonth()]} {m.getFullYear()}</div>

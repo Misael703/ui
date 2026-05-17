@@ -1,0 +1,7 @@
+dist
+storybook-static
+node_modules
+coverage
+src/fonts
+package-lock.json
+CHANGELOG.md

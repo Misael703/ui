@@ -113,3 +113,50 @@ function safeDate(y: number, mo: number, d: number): Date | null {
   }
   return dt;
 }
+
+// ---------- Calendar helpers (shared by the date pickers) ----------------
+// Previously duplicated verbatim in Pickers.tsx, AdvancedPickers.tsx and
+// Display3.tsx. Single source now; behavior is unchanged.
+
+/** First day of `d`'s month at local midnight. */
+export function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+/** `d` shifted by `n` months, normalized to the first of that month. */
+export function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
+/** True when `a` and `b` are the same calendar day (local time). */
+export function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+/**
+ * Compact month grid used by the date pickers: leading `null`s pad the days
+ * before the 1st of a Monday-first week, followed by one `Date` per day of the
+ * month (no adjacent-month spillover). The full-month `Calendar` uses a
+ * different fixed 42-cell model on purpose, so it does not consume this.
+ *
+ * @param view   Any date within the reference month.
+ * @param offset Months to add to `view` (0 = same month, 1 = next, ...).
+ */
+export function buildMonthGrid(
+  view: Date,
+  offset = 0
+): { month: Date; cells: (Date | null)[] } {
+  const month = addMonths(view, offset);
+  const startDow = (month.getDay() + 6) % 7; // Monday = 0
+  const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const cells: (Date | null)[] = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= days; d++) {
+    cells.push(new Date(month.getFullYear(), month.getMonth(), d));
+  }
+  return { month, cells };
+}

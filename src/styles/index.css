@@ -2558,6 +2558,7 @@ button, input, select, textarea { box-sizing: border-box; }
   transition: background var(--duration-fast);
 }
 .tree__row:hover { background: var(--bg-subtle); }
+.tree__row:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
 .tree__row.is-selected { background: var(--color-primary-100); color: var(--color-primary); font-weight: 700; }
 .tree__chev {
   flex: none;

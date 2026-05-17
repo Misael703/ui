@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
-import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
@@ -171,12 +171,6 @@ export function Combobox<T = string>({
 }
 
 // ---------- DatePicker (text + calendar popover) -------------------------
-function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
 export interface DatePickerProps {
   value: Date | null;
   onChange: (date: Date | null) => void;
@@ -230,12 +224,7 @@ export function DatePicker({
     if (value) setView(startOfMonth(value));
   }, [value]);
 
-  const monthStart = view;
-  const startDow = (monthStart.getDay() + 6) % 7; // Mon=0
-  const daysInMonth = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
-  const cells: (Date | null)[] = [];
-  for (let i = 0; i < startDow; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(view.getFullYear(), view.getMonth(), d));
+  const { cells } = buildMonthGrid(view, 0);
 
   const isDisabled = (d: Date) =>
     (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
