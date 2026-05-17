@@ -15,6 +15,16 @@ function Ctrl<T>({ init, render }: { init: T; render: (v: T, set: (n: T) => void
   return <>{render(v, setV)}</>;
 }
 
+// Renders children only after client mount. `Portal` returns null during SSR
+// (typeof-document guard) and portals on the client, so an *unconditional*
+// SSR <Portal> hydration-mismatches by design — real consumers only open
+// portals on interaction (client). This mirrors that realistic usage.
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  return <>{mounted ? children : null}</>;
+}
+
 const cols = [
   { key: 'name', header: 'Producto', sortable: true },
   { key: 'sku', header: 'SKU' },
@@ -73,7 +83,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'VStack', node: <K.VStack gap={2}><div>1</div></K.VStack> },
   { name: 'KeyValue', node: <K.KeyValue><K.KeyValueRow label="A">b</K.KeyValueRow></K.KeyValue> },
   { name: 'ListGroup', node: <K.ListGroup><K.ListGroupItem>row</K.ListGroupItem></K.ListGroup> },
-  { name: 'Table', node: <K.Table><table><tbody><tr><td>x</td></tr></tbody></table></K.Table> },
+  { name: 'Table', node: <K.Table><tbody><tr><td>x</td></tr></tbody></K.Table> },
   { name: 'DataTable', node: <K.DataTable rows={rows} rowKey={(r) => r.id} columns={cols} ariaLabel="t" /> },
   { name: 'TablePagination', node: <Ctrl init={1} render={(v, s) => <K.TablePagination page={v} pageSize={10} total={50} onPageChange={s} />} /> },
   { name: 'TableToolbar', node: <K.TableToolbar><span>t</span></K.TableToolbar> },
@@ -140,7 +150,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'DonutChart', node: <em>import-only (consumer recharts)</em> },
   { name: 'Sparkline', node: <em>import-only (consumer recharts)</em> },
   { name: 'CommandPalette', node: <K.CommandPalette open={false} onClose={() => {}} items={[{ id: 'a', label: 'A', onRun: () => {} }]} /> },
-  { name: 'Portal', node: <K.Portal><span>portal</span></K.Portal> },
+  { name: 'Portal', node: <ClientOnly><K.Portal><span>portal</span></K.Portal></ClientOnly> },
   { name: 'Slot', node: <K.Slot><span>slot</span></K.Slot> },
 ];
 
