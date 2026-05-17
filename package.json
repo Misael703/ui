@@ -61,6 +61,7 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
+    "smoke:ci": "node scripts/smoke-ci.mjs",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {

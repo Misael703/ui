@@ -1,0 +1,32 @@
+name: Smoke consumer · Next App Router
+
+# Separate from publish.yml. Catches integration bugs Storybook can't:
+# RSC boundaries, hydration, ESM/CJS resolution, type exports, fonts/SSR.
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: Smoke consumer (build → pack → real Next app)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install kit deps
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright
+
+      - name: Run smoke pipeline
+        run: npm run smoke:ci
