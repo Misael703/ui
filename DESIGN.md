@@ -91,3 +91,23 @@ Components must use these, never raw scale stops or hex.
 - Custom (no Radix). Accessibility is owned by the kit: semantic roles, ARIA
   wiring, keyboard nav, focus trap/restore in overlays. WAI-ARIA patterns for
   composite widgets (TreeView, Accordion, Menu, Menubar, Combobox).
+
+## Polymorphism (two patterns, on purpose)
+
+The kit lets a component render as a consumer element (e.g. `next/link`)
+without wrappers, using the right pattern for each API shape:
+
+- **`asChild` (children-based components).** Pass `asChild` and a single
+  child element; the kit merges its class, `ref`, handlers and ARIA onto it
+  via `Slot`/`Slottable` (dependency-free). Default `false` (no change).
+  Supported today: **`Button`**, **`Card`**. The single child must be a valid
+  element; injected affordances (Button icons/spinner) are preserved.
+- **Render-prop (data/array-driven components).** When a component renders a
+  generated list (nav, breadcrumbs, menus), `asChild` cannot express
+  "render each of N items as a Link". The correct pattern is a render-prop:
+  `AppShell`'s `linkAs` is the canonical example. Future `Breadcrumbs`/`Menu`
+  link support will use a `renderLink`-style prop, not `asChild`.
+
+Do not add `asChild` to elements constrained by their parent (`<li>` under
+`<ul>`, `<option>` under `<select>`): it would emit invalid markup. Use the
+render-prop or keep the semantic wrapper.

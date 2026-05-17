@@ -2,30 +2,35 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { Slot } from './Primitives';
 
 export type CardAccent = 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
   accent?: CardAccent;
+  /**
+   * Render as the provided single child element instead of `<div>` (e.g.
+   * a clickable card as `next/link`'s `<a>`). Card classes, ref and handlers
+   * are merged onto it. Default `false` (identical behavior).
+   */
+  asChild?: boolean;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
-  { interactive, accent, className, ...rest },
+  { interactive, accent, className, asChild = false, ...rest },
   ref
 ) {
-  return (
-    <div
-      ref={ref}
-      className={cx(
-        'card',
-        interactive && 'card--interactive',
-        accent && `card--accent-${accent}`,
-        className
-      )}
-      {...rest}
-    />
+  const cls = cx(
+    'card',
+    interactive && 'card--interactive',
+    accent && `card--accent-${accent}`,
+    className
   );
+  if (asChild) {
+    return <Slot ref={ref as React.Ref<HTMLElement>} className={cls} {...rest} />;
+  }
+  return <div ref={ref} className={cls} {...rest} />;
 });
 
 export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

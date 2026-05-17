@@ -153,3 +153,18 @@ export const BadgePlayground: StoryObj<typeof Badge> = {
   },
   render: (args) => <Badge {...args} />,
 };
+
+/**
+ * `asChild`: una Card clickeable que renderiza como `<a>` (en tu app,
+ * `next/link`). Conserva clases, ref y handlers; sin wrapper extra.
+ */
+export const CardAsChildLink: StoryObj = {
+  render: () => (
+    <Card asChild interactive accent="brand" style={{ maxWidth: 360, display: 'block', textDecoration: 'none' }}>
+      <a href="https://example.com">
+        <CardHeader>Pedido #1042</CardHeader>
+        <CardBody>Toda la card es un enlace. Northwind Builders, 14 ítems.</CardBody>
+      </a>
+    </Card>
+  ),
+};
