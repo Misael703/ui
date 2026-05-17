@@ -1,3 +1,17 @@
+# v1.9.0 preparado: A+B+3 UI fixes; Finding C abierto (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` (megabranch: harness + A/B + 3 UI). 5 commits. Bump **1.9.0** + CHANGELOG. **Sin push/publish.**
+
+Además de A/B (abajo), 3 bugs UI reportados — **RESUELTOS** (CSS/JSDoc/story; `tsc`/`lint`/`vitest 349`/`build-storybook` verdes):
+- **Tabs ilegibles**: `.tabs__tab` era 700 + `--fg-muted` + tracking wide @14px → 600 + `--fg-default` + tracking normal + primary en hover.
+- **Sticky header no pega**: `.table-wrap` es `overflow-x:auto` → ÉL es el scroll container del sticky, no un wrapper externo. `.table-wrap--sticky` ahora scrollea vertical (`max-height:70vh`, override por `className`). JSDoc + story corregidos. (El contrato anterior "envolver en overflow-y:auto" era imposible.)
+- **Notch en esquina con toolbar**: `.table-toolbar + .table-wrap` quita borde/radius superior → se unen sin doble borde / esquina blanca.
+
+**Decisiones abiertas para el usuario:** (1) cómo subir esta megabranch (harness no se publica; A/B + UI sí valen release v1.9.0); (2) **Finding C (gallery #418 hydration) sigue abierto** — no bloquea el kit (es un fallo del test smoke, no de un consumidor), pero indica que ALGÚN componente SSR-mismatchea; diagnóstico = ciclo aparte.
+
+---
+---
+
 # Findings A & B RESUELTOS + harness validó; Finding C NUEVO (2026-05-17)
 
 **Rama:** `feat/smoke-consumer` (harness + fix A/B). Sin push/publish.
