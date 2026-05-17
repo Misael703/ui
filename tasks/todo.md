@@ -1,3 +1,23 @@
+# Smoke consumer harness + 2 kit findings (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` · Harness completo. **smoke:ci RED por bug real del kit (correcto).** Sin push/publish. NO es release (no toca build/publish del kit).
+
+## Qué se construyó
+`smoke/`: app Next 16.2 / React 19 App Router que instala el **tarball empacado** del kit (`npm run build` → `npm pack` → install `.tgz`), nunca `src/`. Rutas: `/` (Server Component importando el kit → caza boundary RSC), `/client`, `/gallery` (todos los componentes públicos, SSR→hydrate), `next/font/local` con los woff2 del paquete. Script raíz `smoke:ci` + workflow `.github/workflows/smoke.yml` (PRs a `main`): build→pack→publint(hard)+attw(soft)→install tgz→ESM/CJS resolution→`next build`→Playwright (falla ante console.error / pageerror / hydration 418·421·423·425 / no-200) + test anti-rot (falla si un componente público nuevo no está en la gallery). Guards: eslint/vitest/.gitignore del kit excluyen `smoke/`. La gallery se iteró hasta tipar 1:1 contra los **types publicados** (esa iteración ya es valor).
+
+## Hallazgos del kit (REGISTRADOS, no parcheados — fuera de scope: tocan build/exports)
+- **B (crítico).** `'use client'` NO sobrevive al build publicado (tsup lo descarta en CJS; el barrel `index.*` reexporta todo sin boundary). Un Server Component que importa `@misael703/ui` rompe: `next build` → `TypeError: e.createContext is not a function` al recolectar `/`. Storybook nunca lo vio (sin RSC). Repro: `npm run smoke:ci` (paso 6). Fix = ciclo aparte (preservar directivas en tsup / boundary del barrel); luego smoke:ci verde y corre la demo del bug deliberado.
+- **A.** publint: `exports["."].types` se interpreta CJS bajo `import` → types ambiguos (masquerading). Fix: separar `import.types` (`.d.mts`) / `require.types` (`.d.ts`). Menores: sin `type` field, sin `engines.node`.
+
+## Clases de bug que atrapa (con el kit sano)
+RSC boundary / `use client` faltante · hydration (ICU/locale/Date/SSR) · resolución ESM/CJS · type exports rotos (gallery tipada + publint) · fuentes/SSR (next/font) · regresión de cobertura (anti-rot) · ruta no-200.
+
+## Correr local
+`npm run smoke:ci` desde `~/projects/ui_kit` (requiere red: npm install Next/React/Playwright + chromium).
+
+---
+---
+
 # v1.0.0 — Generic kit rebrand + preset architecture
 
 ## Goal
