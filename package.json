@@ -4,6 +4,7 @@
   "description": "Generic React + TypeScript UI kit, optimized for Next.js. Tokens, accessible components, runtime-configurable theming via presets.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",
+  "type": "commonjs",
   "private": false,
   "repository": {
     "type": "git",
@@ -27,9 +28,14 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./styles.css": "./dist/styles.css",
     "./fonts.css": "./dist/fonts.css",
@@ -37,9 +43,14 @@
     "./fonts/*": "./dist/fonts/*",
     "./presets/elalba": "./dist/presets/elalba/styles.css",
     "./presets/elalba-defaults": {
-      "types": "./dist/presets/elalba/defaults.d.ts",
-      "import": "./dist/presets/elalba/defaults.mjs",
-      "require": "./dist/presets/elalba/defaults.js"
+      "import": {
+        "types": "./dist/presets/elalba/defaults.d.mts",
+        "default": "./dist/presets/elalba/defaults.mjs"
+      },
+      "require": {
+        "types": "./dist/presets/elalba/defaults.d.ts",
+        "default": "./dist/presets/elalba/defaults.js"
+      }
     },
     "./presets/elalba-logos/*": "./dist/presets/elalba/logos/*"
   },
@@ -50,7 +61,7 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/ && mkdir -p dist/presets/elalba/logos && cp src/presets/elalba/logos/* dist/presets/elalba/logos/",
+    "build": "tsup && node scripts/add-use-client.mjs && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/ && mkdir -p dist/presets/elalba/logos && cp src/presets/elalba/logos/* dist/presets/elalba/logos/",
     "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css && mkdir -p dist/presets/elalba && postcss src/presets/elalba/styles.css -o dist/presets/elalba/styles.css",
     "dev": "tsup --watch",
     "lint": "eslint .",

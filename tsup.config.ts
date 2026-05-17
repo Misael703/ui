@@ -27,4 +27,8 @@ export default defineConfig({
   treeshake: true,
   splitting: true,
   sourcemap: true,
+  // NOTE: `'use client'` is added post-build by scripts/add-use-client.mjs.
+  // esbuild strips module-level "use client" string directives during
+  // bundling/splitting (a tsup banner/plugin gets stripped too), so it must
+  // be prepended after tsup runs. See that script for the why.
 });

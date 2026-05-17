@@ -1,3 +1,16 @@
+# Findings A & B RESUELTOS + harness validó; Finding C NUEVO (2026-05-17)
+
+**Rama:** `feat/smoke-consumer` (harness + fix A/B). Sin push/publish.
+
+- **A — RESUELTO.** `package.json` `exports` por-condición (`import.types`→`.d.mts`, `require.types`→`.d.ts`) + `"type": "commonjs"`. publint del tarball: **limpio** (warning de masquerading eliminado; solo queda sugerencia opcional `engines.node`, fuera de scope).
+- **B — RESUELTO + validado por el harness.** Causa: esbuild **strippea** las directivas `"use client"` al bundlear (banner/plugin también se pierden con splitting). Fix robusto: `scripts/add-use-client.mjs` antepone `'use client';` a los 196 JS de `dist/` **post-tsup** (nada lo strippea ya); cableado en `build`. El kit entero pasa a ser client boundary (trade-off documentado: importar un util puro desde un RSC también arrastra boundary; futura subpath server-safe podría refinarlo). Validación: `smoke:ci` → `next build` del Server Component `/` **pasa**; rutas `/`, `/client` y test anti-rot **verdes**. Plugin `esbuild-plugin-preserve-directives` probado y descartado (no sobrevive al splitting) + devDep removida.
+- **C — NUEVO (lo cazó el harness ya funcionando).** `/gallery` falla con **React #418 (hydration mismatch)**: el SSR de algún componente del gallery ≠ cliente. No estaba en los bugs pedidos (A/B); emergió al destrabar B. Repro: `npm run smoke:ci` (Playwright, ruta `/gallery`). Diagnóstico pendiente: correr `next dev` (React no-minificado) para que nombre el elemento, o bisecar el registry; sospechosos: componentes con `new Date()`/no-determinismo en render bajo SSR, o un ejemplo del propio gallery. Registrado, no parcheado a ciegas.
+
+**Gates del kit tras el fix:** `tsc` limpio · `lint` 0 · **vitest 349/349** · `build-storybook` no reverificado (build de kit cambió solo `dist`; src intacto). Sin push/publish.
+
+---
+---
+
 # Smoke consumer harness + 2 kit findings (2026-05-17)
 
 **Rama:** `feat/smoke-consumer` · Harness completo. **smoke:ci RED por bug real del kit (correcto).** Sin push/publish. NO es release (no toca build/publish del kit).
