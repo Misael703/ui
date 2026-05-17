@@ -643,6 +643,22 @@ Objetivo: polimorfismo estilo shadcn sin Radix ni romper el modelo versionado. D
 - [ ] **A4** — stories `asChild` + DESIGN.md (contrato de polimorfismo).
 - [ ] **A5** — bump 1.5.0 + CHANGELOG + verificación (tsc/vitest/lint/build-storybook).
 
+## Review v1.6.0 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Workstream B del roadmap de versatilidad.** Rama `feat/extensible-variants-v1.6.0`.
+- B1 `feat(types)`: `Extensible<T>` exportado; `variant`/`accent` de Button/Badge/Alert/Card → open enum (no-breaking, uniones exportadas intactas, solo interpolan clase). Test prueba compila + emite clase.
+- B2 `docs(storybook)`: DESIGN.md "Extending variants" + story `Foundations/ExtendingVariants` live. **Reframe honesto:** descartado el helper `variantClass` (YAGNI, nada interno lo usa; el contrato es CSS).
+- B3 `chore(release)`: bump 1.6.0 + CHANGELOG.
+
+**Verificación:** `tsc` limpio (open-enum compila; `variant="brand-x"` sin cast) · **vitest 339/339** (+4, 0 regresiones) · `build-storybook` exit 0 · `lint` exit 0.
+
+**Roadmap versatilidad:** A ✅ (v1.5.0), B ✅ (v1.6.0). Queda **C — Blocks** (recetas copy-paste, no se publica) + follow-up `renderLink` Breadcrumbs/Menu.
+
+Se publica (`.d.ts`), drop-in, no breaking. Recomendación: merge + publish. Nada pusheado/publicado aún (regla no-push-without-approval).
+
+---
+---
+
 ## Review v1.5.0 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Hecho (5 commits en `feat/slot-aschild-v1.5.0`):**

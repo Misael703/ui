@@ -5,6 +5,28 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] — 2026-05-17
+
+**Minor.** Consumer-extensible variants (Workstream B of the versatility
+roadmap). Ships in `dist` (`.d.ts`); no breaking changes (the exported unions
+are unchanged, only the prop types widen; drop-in via version bump).
+
+### Added
+- **`Extensible<T>`** type (exported): opens a closed string union for
+  consumer extension while keeping autocomplete for known values.
+- `variant` / `accent` on **`Button`**, **`Badge`**, **`Alert`**, **`Card`**
+  are now `Extensible<…>`: `variant="brand-x"` is no longer a type error.
+  The kit emits the BEM class (`btn--brand-x`, …); style it in your own CSS
+  outside `@layer elalba`. Documented in `DESIGN.md` "Extending variants"
+  with a live `Foundations/ExtendingVariants` story.
+
+### Notes
+- Safe at runtime: these components only interpolate the class, they do not
+  switch on the value.
+- The optional `variantClass` helper from the roadmap was intentionally
+  dropped (YAGNI: nothing internal consumes it; the CSS contract is the
+  extension point, not a JS helper).
+
 ## [1.5.0] — 2026-05-17
 
 **Minor.** Polymorphism (`asChild`), Workstream A of the versatility roadmap.
