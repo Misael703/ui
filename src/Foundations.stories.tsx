@@ -511,9 +511,10 @@ export const Motion: StoryObj = {
       ['slow', 320],
     ];
     const easings: Array<[string, string, string]> = [
-      ['standard', 'cubic-bezier(0.2, 0.8, 0.2, 1)', 'uso general (entra suave, sale suave)'],
-      ['in', 'cubic-bezier(0.4, 0, 1, 1)', 'entrada (arranca lento, acelera al final)'],
-      ['out', 'cubic-bezier(0, 0, 0.2, 1)', 'salida (arranca rápido, frena al final)'],
+      ['out-quint', 'cubic-bezier(0.22, 1, 0.36, 1)', 'estándar del kit (--ease-standard / --ease-out): decel. exponencial, confiada'],
+      ['out-expo', 'cubic-bezier(0.16, 1, 0.3, 1)', 'más decidida (overlays, reveals)'],
+      ['out-quart', 'cubic-bezier(0.25, 1, 0.5, 1)', 'más suave (microinteracciones)'],
+      ['in', 'cubic-bezier(0.4, 0, 1, 1)', '--ease-in: acelera al salir (elementos que se van)'],
     ];
 
     return (

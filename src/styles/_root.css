@@ -238,9 +238,17 @@
   --shadow-brand: 0 10px 30px rgba(0, 47, 135, 0.25);
 
   /* -------- Motion --------------------------------------------------- */
-  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
-  --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  /* Exponential ease-out family: confident deceleration, no bounce. UI
+     state changes decelerate decisively (preferred over the flatter
+     Material/CSS defaults). `--ease-standard` and `--ease-out` are kept as
+     names (no breaking change) but now resolve to the quint curve.
+     `--ease-in` stays an accelerate curve for elements leaving the screen. */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard:  var(--ease-out-quint);
+  --ease-out:       var(--ease-out-quint);
+  --ease-in:        cubic-bezier(0.4, 0, 1, 1);
   --duration-fast:   120ms;
   --duration-base:   200ms;
   --duration-slow:   320ms;
