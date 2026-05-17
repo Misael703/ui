@@ -5,6 +5,22 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] — 2026-05-17
+
+**Patch. Docs/recipes only — not shipped.** Workstream C of the versatility
+roadmap. Blocks live in `src/blocks/` and are excluded from the package
+(tsup entry is components-only, `files: ["dist"]`); no runtime change for
+consumers. Only npm-visible delta is the README.
+
+### Added
+- **Blocks (copy-paste recipes)**, browsable under `Blocks/` in Storybook,
+  composed from existing components: **Data table page** (filters + toolbar +
+  selectable table + bulk actions + pagination), **Admin dashboard** (AppShell
+  + PageHeader + KPI grid + table), **Auth screen** (centered card login),
+  **Checkout** (address form + order summary + promo + free-shipping). Each is
+  a starting point you copy and own, not a configurable component.
+- README "Blocks (copy-paste)" section.
+
 ## [1.6.0] — 2026-05-17
 
 **Minor.** Consumer-extensible variants (Workstream B of the versatility

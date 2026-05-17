@@ -643,6 +643,32 @@ Objetivo: polimorfismo estilo shadcn sin Radix ni romper el modelo versionado. D
 - [ ] **A4** — stories `asChild` + DESIGN.md (contrato de polimorfismo).
 - [ ] **A5** — bump 1.5.0 + CHANGELOG + verificación (tsc/vitest/lint/build-storybook).
 
+# v1.6.1 — Blocks (Workstream C del roadmap de versatilidad)
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.6.0` → **`1.6.1`** (docs/recetas, NO se publica en dist → PATCH; como v1.3.1). Rama `docs/blocks-v1.6.1`.
+Blocks en `src/blocks/` (typecheck+lint+Storybook gratis; excluidos del tarball por `tsup entry`=components-only y `files:["dist"]`). Recetas copy-paste estilo shadcn, componen lo existente.
+
+## Fases
+- [ ] **C1** — scaffold `src/blocks/` + sección `Blocks/*` en Storybook + block **Data-table page** (TableToolbar + FilterPanel + DataTable + TablePagination + BulkActionBar).
+- [ ] **C2** — blocks: **Admin dashboard** (AppShell + PageHeader + Kpi + Charts), **Auth/login** (preset El Alba), **Checkout** (CartDrawer + AddressForm + OrderSummary + PromoCodeInput).
+- [ ] **C3** — README "Blocks (copy-paste)" + bump 1.6.1 + CHANGELOG + verificación.
+
+## Review v1.6.1 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Workstream C del roadmap de versatilidad.** Rama `docs/blocks-v1.6.1`.
+- C1 `docs(blocks)`: scaffold `src/blocks/` (+README) + block **Data table page**.
+- C2 `docs(blocks)`: **Admin dashboard**, **Auth screen**, **Checkout**. Dashboard sin Charts a propósito (recharts/any = ruido en receta).
+- C3 `chore(release)`: README "Blocks (copy-paste)" + bump 1.6.1 + CHANGELOG.
+
+**Verificación:** `tsc` limpio · `npm run build` OK y **dist sin blocks** (excluidos por tsup entry + `files:["dist"]`) · `build-storybook` exit 0 (4 stories Blocks/) · `lint` exit 0 · **vitest 339/339** (sin tests nuevos: son recetas).
+
+**Clave:** NO se publica en dist; único delta npm-visible = README. Recomendación: **merge sin `npm publish`** (como v1.3.1). Nada pusheado/publicado aún.
+
+**Roadmap versatilidad — COMPLETO:** A ✅ (v1.5.0 Slot/asChild) · B ✅ (v1.6.0 variantes extensibles) · C ✅ (v1.6.1 blocks). Único follow-up vivo: `renderLink` para Breadcrumbs/Menu (patrón documentado en DESIGN.md, no implementado).
+
+---
+---
+
 ## Review v1.6.0 (2026-05-17) — completo, commits hechos, sin push/publish
 
 **Workstream B del roadmap de versatilidad.** Rama `feat/extensible-variants-v1.6.0`.
