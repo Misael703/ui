@@ -614,3 +614,35 @@ Origen: review honesto del Storybook (skill frontend-design). 6 prioridades.
 - Purga global de em dashes: fuera de scope (cientos, muchos en data).
 
 **Clave honesta:** los stories NO se publican (`files: ["dist"]`). Un publish 1.3.1 solo cambiaría el README en npm. **Recomendación: merge sin `npm publish`** (cero valor para consumidores). Nada pusheado/publicado (regla no-push-without-approval).
+
+---
+---
+
+# v1.4.0 — Motion refinement (skill impeccable/animate)
+
+**Fecha:** 2026-05-17 · **Estado:** EN CURSO · **Base:** `1.3.1` → **`1.4.0`** (`feat`/`fix`, sin breaking → MINOR). Rama `feat/motion-refinement-v1.4.0`.
+Sí toca `index.css`/`_root.css` (se publican) → valor real para consumidores. Register product (motion = estado, 150-250ms, sin coreografía/delight slop). Decisiones del usuario: Fase 1 = upgrade a ease-out exponencial; alcance = todo el plan.
+
+## Fases
+- [ ] **1 — Easing tokens**: `--ease-out-quart/quint/expo`; `--ease-out`/`--ease-standard` → quint; `--ease-in` se mantiene. Story Motion before/after.
+- [ ] **2 — Exit ~75%**: `--duration-exit: 150ms`; `EXIT_MS` 200→150 (Modal/Drawer/Toast); pares CSS `*Out` < `*In`.
+- [ ] **3 — Consistencia**: fallbacks `var(--token, X)` = valor real del token; reemplazar `ease`/ms crudos por tokens.
+- [ ] **4 — Reduced-motion JS**: `useDelayedUnmount` salta el delay si `prefers-reduced-motion: reduce`.
+- [ ] **5 — Gaps puntuales**: solo donde el estado es abrupto (Button press, Accordion chevron, Tab indicator, Switch thumb) con evidencia por componente.
+- [ ] **6 — Release**: bump 1.4.0 + CHANGELOG; verificación completa.
+
+## Review v1.4.0 (2026-05-17) — completo, commits hechos, sin push/publish
+
+**Hecho (6 commits atómicos en `feat/motion-refinement-v1.4.0`):**
+- F1 `feat(theme)`: familia ease-out exponencial; `--ease-standard`/`--ease-out`→quint (nombres preservados, no breaking); Motion story actualizada con las curvas reales.
+- F2 `feat(motion)`: `--duration-exit` 150ms; 7 exits CSS + `EXIT_MS` (Overlay/Toast) 200→150. Entradas intactas.
+- F3 `fix(motion)`: fallbacks `var()` alineados al valor real del token (28 refs). Sin cambio de comportamiento.
+- F4 `fix(a11y)`: `useDelayedUnmount` salta el delay bajo `prefers-reduced-motion` (SSR/jsdom-safe).
+- F5 `refactor(motion)`: removido bloque legacy accordion muerto (25 líneas, 0 refs TSX); `.switch__track` con token de easing. **Hallazgo honesto:** la capa de feedback ya estaba completa (button press, switch thumb, chevron, checkbox animados) → no inventé motion.
+- F6 `chore(release)`: bump 1.4.0 + CHANGELOG.
+
+**Verificación:** `tsc` limpio (por fase) · **vitest 326/326** (0 regresiones) · `npm run build-storybook` **exit 0** · `npm run lint` exit 0.
+
+**Diferido (con razón):** indicador deslizante de Tabs (requiere JS en Tabs.tsx, riesgo medio; el fade de color/borde actual no es "abrupto" → no justificado para kit product). Resto de fases del plan original (dark mode, reagrupar por dominio) siguen como antes.
+
+**Clave:** esto **sí se publica** (`_root.css`/`index.css` en `dist`) → mejora de feel real para barritas/marginapp. Sin breaking (nombres de token preservados). Recomendación: merge **y** publish (a diferencia de v1.3.1). Nada pusheado/publicado aún (regla no-push-without-approval).
