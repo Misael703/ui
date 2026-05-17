@@ -289,3 +289,44 @@ export const BreadcrumbsBasico: StoryObj = {
     ]}/>
   ),
 };
+
+interface DataTablePlaygroundArgs {
+  stickyHeader: boolean;
+  selectable: boolean;
+  loading: boolean;
+  mobileLayout: 'table' | 'cards';
+}
+
+/** Playground interactivo: alterna `stickyHeader`/`selectable`/`loading`/`mobileLayout`. */
+export const DataTablePlayground: StoryObj = {
+  args: { stickyHeader: false, selectable: false, loading: false, mobileLayout: 'table' },
+  argTypes: {
+    stickyHeader: { control: 'boolean' },
+    selectable: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    mobileLayout: { control: 'inline-radio', options: ['table', 'cards'] },
+  },
+  render: (args) => {
+    const a = args as unknown as DataTablePlaygroundArgs;
+    const [sel, setSel] = React.useState<Set<string>>(new Set());
+    return (
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        ariaLabel="Productos"
+        stickyHeader={a.stickyHeader}
+        selectable={a.selectable}
+        loading={a.loading}
+        mobileLayout={a.mobileLayout}
+        selectedKeys={sel}
+        onSelectionChange={setSel}
+        columns={[
+          { key: 'name', header: 'Producto' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'stock', header: 'Stock', align: 'right' },
+          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+        ]}
+      />
+    );
+  },
+};

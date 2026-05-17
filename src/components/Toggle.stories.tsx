@@ -59,3 +59,18 @@ export const ToggleGroupMultiple: StoryObj = {
     );
   },
 };
+
+/** Playground interactivo: usa Controls para `size`, `variant` y `disabled`. */
+export const TogglePlayground: StoryObj<typeof Toggle> = {
+  args: { children: 'Notificaciones', size: 'md', variant: 'default', disabled: false },
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    variant: { control: 'inline-radio', options: ['default', 'outline'] },
+    disabled: { control: 'boolean' },
+    children: { control: 'text' },
+  },
+  render: (args) => {
+    const [pressed, setPressed] = React.useState(false);
+    return <Toggle {...args} pressed={pressed} onPressedChange={setPressed} aria-label="Demo" />;
+  },
+};
