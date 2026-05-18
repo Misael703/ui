@@ -1042,3 +1042,12 @@ visuales de default en prod → SemVer minor honesto + CHANGELOG con
 before/after. **Nada commiteado/pusheado/publicado** (regla no-push-without-
 approval). Recomendación: revisar el resumen, luego commit (1 commit coherente,
 `feat`) + release vía GitHub Release cuando el owner dé OK.
+
+**Refinamiento consumer-driven (2026-05-18, dentro del mismo 1.10.0 sin
+release):** linkeando el kit en despachos-ferreteria-ui-mock-kit se detectó
+que `.combobox__input` hardcodeaba `padding:10px` → dentro de `.fields--dense`
+quedaba 41px vs 36px de Select/Input. Tokenizado a `--field-pad-y/-x` (mismo
+patrón que `.input/.select`); ahora los tres miden igual a cualquier densidad.
+CHANGELOG (bullet Combobox) actualizado; `tests/Contrast.test.tsx` + `tsup`
+verdes (cambio CSS-only; no re-corrí los 378 por ser CSS puro fuera del scope
+de vitest salvo Contrast). Sigue todo sin commit/push/publish.
