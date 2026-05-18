@@ -21,3 +21,19 @@ writing release metadata (version bump, CHANGELOG anchor) re-check
 `package.json` version + `git status` so you branch off the *current* baseline,
 not the one from session start. When the baseline moved under you, say so in the
 summary instead of silently overwriting.
+
+[2026-05-18] Context: local-linking the kit into a consumer (despachos mock) via
+a `file:` tarball to verify v1.10.0 before publish. After fixing a kit defect and
+re-`npm pack`+`npm install`, the consumer kept serving the OLD CSS. Two stacked
+causes: (1) a stale `next dev` from a previous session still held :3009
+(`EADDRINUSE` swallowed my new server → Playwright tested 1.8.0); (2) npm caches a
+`file:` tarball dep by the lockfile integrity, so a same-version tarball with new
+content is NOT re-extracted (even `rm -rf node_modules/@misael703` + reinstall
+restored the cached old copy).
+→ Rule: for a same-version local tarball link, a content change needs
+`rm -rf node_modules/<pkg> package-lock.json && npm install` (regenerate the
+lockfile so npm re-reads the tarball) — bumping the file or `.next` clear is not
+enough. And before trusting any browser verification, confirm the dev server is
+*yours*: free the port first (`lsof -ti tcp:PORT | xargs kill`) and check the
+dev log started clean, or you're QA-ing a ghost. Assert the change in the
+*served* CSS/DOM (computed style), not just in `node_modules` on disk.
