@@ -37,6 +37,25 @@ describe('Badge', () => {
     expect(screen.getByText('Activo')).toBeInTheDocument();
     expect(container.querySelector('.badge--success')).toBeInTheDocument();
   });
+
+  it('pulse implies a pulsing dot (one component covers a status column)', () => {
+    const { container } = render(
+      <Badge variant="success" pulse>En curso</Badge>
+    );
+    const dot = container.querySelector('.badge__dot');
+    expect(dot).not.toBeNull();
+    expect(dot!.classList.contains('is-pulsing')).toBe(true);
+    expect(dot).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('no dot by default; dot prop still works without pulse', () => {
+    const { container, rerender } = render(<Badge>Plano</Badge>);
+    expect(container.querySelector('.badge__dot')).toBeNull();
+    rerender(<Badge dot>Con punto</Badge>);
+    const dot = container.querySelector('.badge__dot');
+    expect(dot).not.toBeNull();
+    expect(dot!.classList.contains('is-pulsing')).toBe(false);
+  });
 });
 
 describe('Alert', () => {

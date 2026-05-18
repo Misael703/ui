@@ -1,9 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { FilterPanel, FilterSection, BulkActionBar, SortDropdown } from './Filters';
+import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from './Filters';
 import { Button } from './Button';
-import { Checkbox } from './Form';
+import { Checkbox, Select, Input } from './Form';
 import { Slider } from './InputsExtra';
+import { Combobox } from './Pickers';
 
 export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
@@ -75,6 +76,63 @@ export const SortDropdownDemo: StoryObj = {
           { value: 'urgent', label: 'Urgentes primero' },
         ]}
       />
+    );
+  },
+};
+
+/**
+ * FilterBar: la barra horizontal densa SOBRE una tabla (contraparte del
+ * FilterPanel vertical). Mezcla Select / Input / Combobox y todos quedan a
+ * la misma altura (36px vía `.fields--dense`), grilla pareja y responsiva,
+ * label en registro quieto. Reemplaza el flex-cluster hecho a mano.
+ */
+export const FilterBarDemo: StoryObj = {
+  render: () => {
+    const [estado, setEstado] = React.useState('all');
+    const [orden, setOrden] = React.useState('');
+    const [camion, setCamion] = React.useState<string | null>('all');
+    const [chofer, setChofer] = React.useState<string | null>('all');
+    return (
+      <div style={{ maxWidth: 1040 }}>
+        <FilterBar actions={<Button variant="outline" size="sm">Limpiar</Button>}>
+          <FilterField label="Estado">
+            <Select value={estado} onChange={(e) => setEstado(e.target.value)}>
+              <option value="all">Todos</option>
+              <option value="pending">Pendiente</option>
+              <option value="issued">Emitido</option>
+              <option value="delivered">Entregado</option>
+            </Select>
+          </FilterField>
+          <FilterField label="N° orden">
+            <Input value={orden} onChange={(e) => setOrden(e.target.value)} placeholder="Ej. 0010453" />
+          </FilterField>
+          <FilterField label="Cliente">
+            <Input placeholder="Buscar…" />
+          </FilterField>
+          <FilterField label="Camión">
+            <Combobox
+              value={camion}
+              onChange={setCamion}
+              options={[
+                { value: 'all', label: 'Todos' },
+                { value: 'GHJ-12', label: 'GHJ-12' },
+                { value: 'KLM-90', label: 'KLM-90' },
+              ]}
+            />
+          </FilterField>
+          <FilterField label="Chofer">
+            <Combobox
+              value={chofer}
+              onChange={setChofer}
+              options={[
+                { value: 'all', label: 'Todos' },
+                { value: 'r-pizarro', label: 'Rodrigo Pizarro' },
+                { value: 'h-salas', label: 'Hernán Salas' },
+              ]}
+            />
+          </FilterField>
+        </FilterBar>
+      </div>
     );
   },
 };

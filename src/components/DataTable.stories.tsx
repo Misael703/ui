@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination } from './DataTable';
-import { Badge } from './Display';
-import { Input } from './Form';
+import { Badge, Card, CardBody } from './Display';
+import { Input, Select } from './Form';
 import { Button } from './Button';
 
 export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
@@ -174,6 +174,108 @@ export const StickyHeader: StoryObj = {
       </>
     );
   },
+};
+
+/** P1 — fila navegable. El kit renderiza un `<a>`/`<button>` real estirado:
+ * operable por teclado, con nombre para lector de pantalla y foco visible en
+ * la fila. Markup de tabla válido (sin role hack en `<tr>`). */
+export const FilaInteractiva: StoryObj = {
+  render: () => (
+    <DataTable
+      rows={rows}
+      rowKey={(r) => r.id}
+      rowLabel={(r) => r.name}
+      ariaLabel="Productos"
+      rowHref={(r) => `#/productos/${r.id}`}
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+      ]}
+    />
+  ),
+};
+
+/** P5a — densidad legible POR DEFAULT (arriba) vs `density="comfortable"`
+ * (abajo, el layout previo a 1.10.0 que envolvía a 2 líneas). */
+export const Densidad: StoryObj = {
+  render: () => {
+    const cols = [
+      { key: 'name', header: 'Producto' },
+      { key: 'sku', header: 'SKU' },
+      { key: 'stock', header: 'Stock', align: 'right' as const },
+      { key: 'price', header: 'Precio', align: 'right' as const, accessor: (r: typeof rows[number]) => `$${r.price.toLocaleString('es-CL')}` },
+    ];
+    return (
+      <div style={{ display: 'grid', gap: 24 }}>
+        <DataTable rows={rows} rowKey={(r) => r.id} ariaLabel="Compact" columns={cols} />
+        <DataTable rows={rows} rowKey={(r) => r.id} ariaLabel="Comfortable" density="comfortable" columns={cols} />
+      </div>
+    );
+  },
+};
+
+/** P5h — columna de acción `align:'right'` con un nodo React (flex de
+ * botones): ahora se alinea de verdad (antes flotaba a la izquierda). */
+export const ColumnaAccionAlineada: StoryObj = {
+  render: () => (
+    <DataTable
+      rows={rows}
+      rowKey={(r) => r.id}
+      ariaLabel="Productos"
+      columns={[
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        {
+          key: 'acc', header: 'Acciones', align: 'right',
+          accessor: () => (
+            <span style={{ display: 'inline-flex', gap: 8 }} data-row-interactive>
+              <Button size="sm" variant="outline">Editar</Button>
+              <Button size="sm" variant="danger">Borrar</Button>
+            </span>
+          ),
+        },
+      ]}
+    />
+  ),
+};
+
+/** P2 — DataTable dentro de un Card: el wrap es dueño de su borde/radio y
+ * el header sigue la esquina redondeada → sin notch. */
+export const TablaSobreCard: StoryObj = {
+  render: () => (
+    <Card>
+      <CardBody>
+        <DataTable
+          rows={rows}
+          rowKey={(r) => r.id}
+          ariaLabel="Productos"
+          columns={[
+            { key: 'name', header: 'Producto' },
+            { key: 'sku', header: 'SKU' },
+            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+          ]}
+        />
+      </CardBody>
+    </Card>
+  ),
+};
+
+/** P5i — fila densa de filtros: `.fields--dense` baja los controles a 36px
+ * para que ~7 filtros no envuelvan en desktop (el target táctil de 44px
+ * sigue siendo el default fuera de este contenedor). */
+export const FilaDensaDeFiltros: StoryObj = {
+  render: () => (
+    <div className="fields--dense" style={{ display: 'flex', gap: 8, flexWrap: 'nowrap' }}>
+      <Input placeholder="Buscar" />
+      <Select defaultValue=""><option value="">Bodega</option><option>Central</option></Select>
+      <Select defaultValue=""><option value="">Estado</option><option>Activo</option></Select>
+      <Select defaultValue=""><option value="">Categoría</option><option>Herramientas</option></Select>
+      <Input type="date" />
+      <Input type="date" />
+      <Button>Filtrar</Button>
+    </div>
+  ),
 };
 
 /** Card layout en mobile: a partir de <600px cada fila se renderiza como

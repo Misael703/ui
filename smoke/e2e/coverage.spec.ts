@@ -23,6 +23,7 @@ const COVERED_BY_PARENT = new Set([
   'InputGroupAddon', 'CollapsibleTrigger', 'CollapsibleContent',
   'DescriptionListItem', 'ResizablePanel', 'ResizableHandle',
   'ToggleGroupItem', 'TimelineItem', 'Lightbox', 'PageHeader', 'FilterSection',
+  'FilterField',
 ]);
 // Providers (wrap the gallery) + render helpers (no standalone visual).
 const NON_VISUAL = new Set(['LocaleProvider', 'ToastProvider', 'Slottable']);

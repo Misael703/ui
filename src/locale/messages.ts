@@ -26,6 +26,8 @@ export interface UiKitMessages {
   'table.selectAll': string;
   /** Template: "Seleccionar {label}" */
   'table.selectRow': string;
+  /** Template: "Ver {label}" — accessible name of an interactive row. */
+  'table.rowAction': string;
 
   // AppShell
   'appshell.mainNav': string;

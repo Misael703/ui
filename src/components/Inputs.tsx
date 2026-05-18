@@ -78,6 +78,9 @@ function pageList(current: number, total: number, siblings: number): (number | '
 export function Pagination({ page, pageSize, total, onPageChange, siblings = 1, className }: PaginationProps) {
   const t = useLocale();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  // Collapse entirely when everything fits one page (v1.10.0): a lone
+  // disabled pager was visual noise on every short/empty list.
+  if (totalPages <= 1) return null;
   const pages = pageList(page, totalPages, siblings);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);

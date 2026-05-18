@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FilterPanel, FilterSection, BulkActionBar, SortDropdown } from '../src/components/Filters';
+import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from '../src/components/Filters';
 
 describe('FilterPanel', () => {
   it('shows count badge and clear button when active', () => {
@@ -66,5 +66,61 @@ describe('SortDropdown', () => {
     );
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'old' } });
     expect(onChange).toHaveBeenCalledWith('old');
+  });
+});
+
+describe('FilterField', () => {
+  it('wires the label to the control so it is reachable by accessible name', () => {
+    render(
+      <FilterField label="Camión">
+        <input type="text" />
+      </FilterField>
+    );
+    // The real a11y guarantee: getByLabelText resolves the control.
+    expect(screen.getByLabelText('Camión')).toBe(screen.getByRole('textbox'));
+  });
+
+  it('respects a consumer-set id instead of overwriting it', () => {
+    render(
+      <FilterField label="Chofer">
+        <input type="text" id="mine" />
+      </FilterField>
+    );
+    const input = screen.getByRole('textbox');
+    expect(input.id).toBe('mine');
+    expect(screen.getByText('Chofer')).toHaveAttribute('for', 'mine');
+  });
+});
+
+describe('FilterBar', () => {
+  it('applies the kit-owned dense register and grids the fields', () => {
+    const { container } = render(
+      <FilterBar>
+        <FilterField label="Estado"><input /></FilterField>
+      </FilterBar>
+    );
+    const bar = container.querySelector('.filter-bar');
+    expect(bar).toHaveClass('fields--dense');
+    expect(container.querySelector('.filter-bar__fields .filter-field')).toBeInTheDocument();
+  });
+
+  it('renders the actions slot only when provided', () => {
+    const { container, rerender } = render(
+      <FilterBar><span>f</span></FilterBar>
+    );
+    expect(container.querySelector('.filter-bar__actions')).toBeNull();
+    rerender(
+      <FilterBar actions={<button>Limpiar</button>}><span>f</span></FilterBar>
+    );
+    expect(screen.getByText('Limpiar').closest('.filter-bar__actions')).toBeInTheDocument();
+  });
+
+  it('switches to fixed columns when `columns` is set', () => {
+    const { container } = render(
+      <FilterBar columns={4}><span>f</span></FilterBar>
+    );
+    const bar = container.querySelector('.filter-bar') as HTMLElement;
+    expect(bar).toHaveClass('filter-bar--fixed-cols');
+    expect(bar.style.getPropertyValue('--filter-cols')).toBe('4');
   });
 });

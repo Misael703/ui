@@ -126,3 +126,73 @@ export function SortDropdown<T extends string = string>({
     </label>
   );
 }
+
+// ---------- FilterBar / FilterField ------------------------------------
+// Horizontal, dense filter row (the bar ON TOP of a table) — the counterpart
+// to FilterPanel's vertical facet sidebar. Without this, consumers hand-roll
+// a flex cluster: heterogeneous control heights + the kit's loud brand label
+// register make a 7-field row wrap and look ragged. FilterBar owns the grid,
+// applies `.fields--dense` (36px controls, kit-owned), and FilterField uses a
+// deliberately quiet label register — without mutating the global `--tt-label`
+// brand token, so forms elsewhere are untouched.
+
+export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
+  actions?: React.ReactNode;
+  /** Min column width (px) before the responsive grid wraps. Default 160. */
+  minColWidth?: number;
+  /**
+   * Fixed column count instead of width-driven auto-fit. Use for a
+   * deterministic N-up row rather than wrapping by available width.
+   */
+  columns?: number;
+}
+
+export function FilterBar({
+  actions, minColWidth = 160, columns, className, children, style, ...rest
+}: FilterBarProps): React.JSX.Element {
+  const gridVars = {
+    ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
+    ...style,
+  } as React.CSSProperties;
+  return (
+    <div
+      className={cx('filter-bar', 'fields--dense', columns ? 'filter-bar--fixed-cols' : undefined, className)}
+      style={gridVars}
+      {...rest}
+    >
+      <div className="filter-bar__fields">{children}</div>
+      {actions != null && <div className="filter-bar__actions">{actions}</div>}
+    </div>
+  );
+}
+
+export interface FilterFieldProps {
+  label: React.ReactNode;
+  /** Override the auto-generated id (when the control sets its own id). */
+  htmlFor?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FilterField({
+  label, htmlFor, children, className,
+}: FilterFieldProps): React.JSX.Element {
+  const reactId = React.useId();
+  // Effective id, in priority order: explicit htmlFor → the control's own id
+  // → a generated one. Used for BOTH the label's `for` and the control, so a
+  // consumer-set id stays authoritative and the label still points at it.
+  const childId = React.isValidElement(children)
+    ? (children.props as { id?: string }).id
+    : undefined;
+  const id = htmlFor ?? childId ?? reactId;
+  const child = React.isValidElement(children)
+    ? React.cloneElement(children as React.ReactElement<{ id?: string }>, { id })
+    : children;
+  return (
+    <div className={cx('filter-field', className)}>
+      <label htmlFor={id} className="filter-field__label">{label}</label>
+      {child}
+    </div>
+  );
+}

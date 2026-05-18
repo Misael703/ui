@@ -129,6 +129,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'Testimonial', node: <K.Testimonial quote="bueno" author="M" /> },
   { name: 'CategoryNav', node: <K.CategoryNav categories={[{ id: 'a', label: 'A', groups: [] }]} /> },
   { name: 'FilterPanel', node: <K.FilterPanel activeCount={1} onClearAll={() => {}}><K.FilterSection title="S"><span>f</span></K.FilterSection></K.FilterPanel> },
+  { name: 'FilterBar', node: <K.FilterBar actions={<K.Button size="sm">x</K.Button>}><K.FilterField label="Estado"><K.Select><option>Todos</option></K.Select></K.FilterField></K.FilterBar> },
   { name: 'BulkActionBar', node: <K.BulkActionBar selectedCount={2} onClear={() => {}}><K.Button size="sm">x</K.Button></K.BulkActionBar> },
   { name: 'Rating', node: <K.Rating value={4} /> },
   { name: 'PriceDisplay', node: <K.PriceDisplay amount={5490} /> },
