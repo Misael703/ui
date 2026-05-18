@@ -76,4 +76,18 @@
      light sand; El Alba's secondary is a saturated orange, so restore the
      white-on-orange CTA from v0.7.1 (was --fg-on-orange before the rename). */
   --fg-on-secondary: var(--color-white);
+
+  /* v1.10.0 WCAG AA fix. The base now ships explicit warm-earth values for
+     these (the generic gray scale was below AA as body text); re-anchor
+     them to El Alba's cool slate so the brand undertone is preserved.
+       --fg-muted  → slate gray-600 #5b6173: ALREADY AA pre-1.10.0
+                     (6.17 surface / 5.66 subtle) — pixel-identical, no
+                     visual change, just made explicit.
+       --fg-subtle → was gray-500 #7e8495: BELOW AA as text (3.74 surface /
+                     3.43 subtle). Minimal cool-slate darkening to clear
+                     4.5:1 (5.16 surface / 4.74 subtle). This is the only
+                     El Alba visual delta in v1.10.0 (breaks v0.7.1
+                     pixel-identity by design — v0.7.1 was sub-AA). */
+  --fg-muted:  var(--color-gray-600);
+  --fg-subtle: #686d7c;
 }

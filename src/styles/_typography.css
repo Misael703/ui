@@ -93,7 +93,8 @@ p {
   font-weight: 700;
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
-  text-transform: var(--tt-label);
+  /* Form labels read as data, not as a shouting micro-label (v1.10.0). */
+  text-transform: var(--tt-data);
   color: var(--fg-default);
 }
 

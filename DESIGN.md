@@ -45,6 +45,15 @@ slate-tinted neutrals.
 `--border-{default,strong,brand,focus}`, `--accent-{primary,secondary}`.
 Components must use these, never raw scale stops or hex.
 
+**Contrast floor (v1.10.0).** `--fg-muted` and `--fg-subtle` are explicit,
+WCAG-AA-clearing values (not raw gray stops): the generic gray ramp shipped
+below 4.5:1 as body text on the kit's own surfaces (table headers on
+`--bg-subtle`, captions/placeholders on `--bg-canvas`). They keep each
+palette's undertone (warm earth / cool slate) and a perceptible
+muted↔subtle step; the gray scale stays the decorative ramp. Every
+`--fg-*` on every `--bg-*` it actually paints on is AA — enforced by
+`tests/Contrast.test.tsx`, which parses these token files directly.
+
 ## Typography
 
 - Families: display `Outfit`, body `DM Sans` (both bundled variable fonts,
@@ -53,9 +62,16 @@ Components must use these, never raw scale stops or hex.
   (fixed rem, not fluid — product register).
 - Weights `--weight-thin` 100 → `--weight-black` 900.
 - Leading 1.05 / 1.2 / 1.45 / 1.6; tracking -0.01em / 0 / 0.04em / 0.08em.
-- All-caps opt-out: `--tt-label` (micro: eyebrows, badges, table headers, KPI
-  labels) and `--tt-title` (display headings). Default `uppercase`; a consumer
-  or preset can set either to `none` without forking component CSS.
+- Text-transform role hooks (v1.10.0 — three roles, not two; restores the
+  type hierarchy that collapsed when everything shouted in caps at once):
+  - `--tt-label` **`uppercase`**: TRUE micro-labels only — eyebrows, badges,
+    KPI/section/group labels. The brand's caps texture lives here.
+  - `--tt-data` **`none`**: table headers + form labels. Column/field names
+    read as data, one step below the title.
+  - `--tt-title` **`none`**: display-font headings (page/modal/drawer/empty
+    titles, appshell brand) — human sentence case, clearly above the data.
+  A consumer or preset can still override any of the three without forking
+  component CSS.
 
 ## Spacing, radii, elevation
 
@@ -91,6 +107,22 @@ Components must use these, never raw scale stops or hex.
 - Custom (no Radix). Accessibility is owned by the kit: semantic roles, ARIA
   wiring, keyboard nav, focus trap/restore in overlays. WAI-ARIA patterns for
   composite widgets (TreeView, Accordion, Menu, Menubar, Combobox).
+- **DataTable owns its surface (v1.10.0).** `.table-wrap` is the single
+  surface authority: it draws the border, the radius, the horizontal
+  scroll and the corner clipping, and the filled header follows that
+  radius — so the table never produces a corner notch in *any* container.
+  Consequence: do **not** wrap `<DataTable>` in your own bordered /
+  rounded / `overflow` container (it doubles the border and re-introduces
+  the artifact). Drop it directly into a `Card` body.
+- **DataTable density is `compact` by default (v1.10.0).** The
+  readable-dense register (≈30px rows, `--text-xs`, single-line cells)
+  is the default because the kit serves data-heavy screens — "default =
+  product". `density="comfortable"` opts back into the airy 14/16 rows.
+- **Interactive rows.** `rowHref` / `onRowClick` render a real, stretched
+  `<a>` / `<button>` (keyboard-operable, SR-named, valid table markup —
+  never a role hack on `<tr>` or an onClick-only div). `renderRow` is the
+  data-driven render-prop escape hatch (same family as `AppShell.linkAs`;
+  not `asChild`, which would emit invalid markup on `<tr>`).
 
 ## Polymorphism (two patterns, on purpose)
 

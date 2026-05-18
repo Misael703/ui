@@ -220,11 +220,27 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
-  min-height: 44px;
+  /* Tokenized control metrics (v1.10.0). Default stays the 44px WCAG
+     2.5.5 touch target — that IS the product default and must not regress
+     for the mobile operators the kit serves. A dense desktop filter row
+     of ~7 controls used to wrap because 44px was hardcoded; wrap a row in
+     `.fields--dense` to drop every control (input/select/textarea AND
+     combobox) to a compact 36px together — kit-owned, no per-component
+     prop, default untouched. */
+  padding: var(--field-pad-y, 10px) var(--field-pad-x, 14px);
+  min-height: var(--field-min-h, 44px);
   width: 100%;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
+.fields--dense {
+  --field-min-h: 36px;
+  --field-pad-y: 6px;
+  --field-pad-x: 10px;
+}
+.fields--dense .input,
+.fields--dense .select,
+.fields--dense .textarea,
+.fields--dense .combobox__input { font-size: var(--text-sm); }
 .input::placeholder, .textarea::placeholder { color: var(--fg-subtle); }
 .input:hover:not(:disabled),
 .select:hover:not(:disabled),
@@ -404,8 +420,12 @@ button, input, select, textarea { box-sizing: border-box; }
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 700;
-  padding: 4px 10px;
+  /* Quieter by default (v1.10.0): a status column is many badges at once;
+     700 + 4/10 padding made each one shout and added weight to dense
+     tables. 600 + tighter padding reads as a calm chip. Case stays on
+     --tt-label (badges are true micro-labels — kept by the P4 decision). */
+  font-weight: 600;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
   letter-spacing: var(--tracking-wide);
   text-transform: var(--tt-label);
@@ -430,6 +450,12 @@ button, input, select, textarea { box-sizing: border-box; }
   border-color: transparent;
 }
 .badge__dot { width: 6px; height: 6px; border-radius: var(--radius-pill); background: currentColor; }
+/* `pulse` reuses the StatusIndicator keyframes so one Badge can own a
+   status column. Halo inherits the badge's variant color (currentColor). */
+.badge__dot.is-pulsing { animation: status-pulse 1.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .badge__dot.is-pulsing { animation: none; }
+}
 
 .chip {
   display: inline-flex;
@@ -756,7 +782,10 @@ button, input, select, textarea { box-sizing: border-box; }
   border: 1px solid var(--border-default);
   background: var(--bg-surface);
   font-family: var(--font-body);
-  font-weight: 700;
+  /* Lighter by default (v1.10.0): 700 made the pager compete with the
+     data; 500 keeps it present but quiet. Active page is still emphasized
+     by its filled --color-primary background. */
+  font-weight: 500;
   font-size: var(--text-sm);
   color: var(--fg-default);
   border-radius: var(--radius-sm);
@@ -816,6 +845,21 @@ button, input, select, textarea { box-sizing: border-box; }
   background-repeat: no-repeat;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
+  /* P2 — the DataTable OWNS its surface: border + radius + clipping +
+     scroll all live here, so it never produces a corner notch in ANY
+     container. `background-clip:padding-box` keeps the surface fill from
+     bleeding under the border into the rounded corner. Do NOT wrap
+     <DataTable> in your own bordered/rounded/overflow container — that
+     doubles the border and re-introduces the artifact (see DESIGN.md). */
+  background-clip: padding-box;
+}
+/* Filled header follows the wrap's rounded top corners so the square `th`
+   background can't poke past the radius — sticky or not, in any parent. */
+.table-wrap > .data-table thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg);
+}
+.table-wrap > .data-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg);
 }
 .table {
   width: 100%;
@@ -827,18 +871,25 @@ button, input, select, textarea { box-sizing: border-box; }
 .table th {
   background: var(--bg-subtle);
   text-align: left;
-  font-weight: 700;
+  /* Header recedes by default (v1.10.0): weight 600 (not 700) + muted +
+     sentence case via --tt-data, so column names sit BELOW the data they
+     label instead of competing with it. Was 700 + all-caps + wide track. */
+  font-weight: 600;
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wider);
-  text-transform: var(--tt-label);
+  letter-spacing: var(--tracking-normal);
+  text-transform: var(--tt-data);
   color: var(--fg-muted);
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
 }
 .data-table__sort {
   display: inline-flex; vertical-align: middle; margin-left: 4px;
-  opacity: 0.4;
+  /* Was 0.4 → faint glyph at 1.75:1, below the 3:1 UI minimum. 0.75 is
+     the minimal bump that clears 3:1 on the header (default 3.17 / El
+     Alba 3.34) while staying clearly secondary to the full-strength
+     active arrow (opacity 1 + --color-primary). */
+  opacity: 0.75;
 }
 .data-table__sort-btn {
   display: inline-flex; align-items: center; gap: 4px;
@@ -914,6 +965,11 @@ button, input, select, textarea { box-sizing: border-box; }
     padding: var(--space-2) 0;
     border: 0;
     text-align: left !important;
+    /* Cards stack vertically — the default nowrap/ellipsis would clip
+       values here, so let card cells wrap and show in full. */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
   .table-wrap--cards .table td:not(:last-child) {
     border-bottom: 1px solid var(--border-subtle);
@@ -934,15 +990,44 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--color-primary);
 }
 .table td {
-  padding: 14px 16px;
+  /* Density-legible BY DEFAULT (v1.10.0). The readable-dense mode used to
+     exist only as opt-in `.table--compact`; the default shipped 14px/16px
+     rows that wrapped to two lines on dense screens (driver #1 of the
+     "heaviness"). Default is now the compact register; `white-space:nowrap`
+     keeps one row = one line (the wrap was the real defect). Opt back into
+     the airy layout with `density="comfortable"` (.table--comfortable). */
+  padding: 8px 12px;
+  font-size: var(--text-xs);
   border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .table tr:last-child td { border-bottom: 0; }
 .table tbody tr { transition: background var(--duration-fast); }
 .table tbody tr:hover { background: var(--bg-subtle); }
+/* `.table--compact` is now identical to the base — kept idempotent so any
+   consumer that already opted in keeps working (no breaking change). */
 .table--compact th, .table--compact td { padding: 8px 12px; font-size: var(--text-xs); }
+/* Opt-out: restore the pre-1.10.0 roomy density (and its wrapping). */
+.table--comfortable th { padding: 14px 16px; }
+.table--comfortable td {
+  padding: 14px 16px;
+  font-size: var(--text-sm);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
 .table__num { font-family: var(--font-mono); text-align: right; }
+/* Column `align` honored for element children too (v1.10.0). text-align
+   already handles text + inline(-flex) (e.g. a Badge); the margin rule
+   adds the block/flex case (an action-column wrapper) so `align:'right'`
+   no longer floats a flex cell to the left. */
+.table td.table__align-right  { text-align: right; }
+.table td.table__align-center { text-align: center; }
+.table td.table__align-right  > * { margin-left: auto; }
+.table td.table__align-center > * { margin-inline: auto; }
 
 .table-toolbar {
   display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
@@ -1550,12 +1635,24 @@ button, input, select, textarea { box-sizing: border-box; }
 .combobox { position: relative; display: inline-block; min-width: 220px; }
 .combobox__input {
   width: 100%;
-  height: 40px; padding: 0 36px 0 12px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
+  /* Reads as a real form field (v1.10.0), consistent with .input/.select:
+     same border token, radius, height and a chevron affordance — was a
+     borderline-plain text box (lighter border, sm radius, no chevron) that
+     looked like static text ("Todos") rather than a dropdown control. */
+  min-height: var(--field-min-h, 44px);
+  /* Same tokenized metrics as .input/.select so the three line up at any
+     density (`.fields--dense` compacts all of them together). Extra right
+     padding is fixed: it reserves room for the chevron, not density. */
+  padding: var(--field-pad-y, 10px) 38px var(--field-pad-y, 10px) var(--field-pad-x, 14px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
   background: var(--bg-surface);
   color: var(--fg-default);
-  font-family: var(--font-body); font-size: var(--text-sm);
+  font-family: var(--font-body); font-size: var(--text-md);
+  /* Chevron — same SVG/technique as .select so the two line up. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235b6173' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 .combobox__input:focus { outline: none; box-shadow: var(--focus-ring-accent); }
 .combobox.is-invalid .combobox__input { border-color: var(--color-danger); }
@@ -1732,6 +1829,39 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- DataTable extras ---------- */
 .data-table tr.is-selected { background: var(--color-primary-50); }
+/* Interactive row (rowHref / onRowClick): a real, stretched control owns
+   accessibility — keyboard operability, visible focus, SR name — with no
+   role hack on <tr> and no onClick-only div. */
+.data-table tr.is-clickable { position: relative; cursor: pointer; }
+.data-table tr.is-clickable:hover { background: var(--bg-subtle); }
+.data-table tr.is-clickable:focus-within {
+  box-shadow: inset 0 0 0 2px var(--border-focus);
+}
+.data-table__rowlink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* Visually empty — the row's own cells stay the visible content. */
+  font-size: 0;
+  color: transparent;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+/* The focus ring is shown on the row via :focus-within, not on the
+   (invisible, full-bleed) control itself. */
+.data-table__rowlink:focus,
+.data-table__rowlink:focus-visible { outline: none; }
+/* Selection checkbox and any consumer cell content marked
+   `data-row-interactive` stay clickable above the stretched control
+   (the standard stretched-link layering caveat). */
+.data-table tr.is-clickable .data-table__cell--above,
+.data-table tr.is-clickable [data-row-interactive] {
+  position: relative;
+  z-index: 2;
+}
 .data-table__th { display: inline-flex; align-items: center; gap: 6px; }
 .data-table__sort { color: var(--fg-muted); font-size: var(--text-2xs); }
 
@@ -2871,6 +3001,35 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .filter-section__head:hover { color: var(--color-primary); }
 .filter-section__body { padding: 0 var(--space-2) var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* FilterBar: horizontal dense filter row. The bar is a flex row so the
+   field grid grows and the actions slot hugs the right edge. */
+.filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3) var(--space-4); }
+.filter-bar__fields {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--filter-col-min, 160px), 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+.filter-bar--fixed-cols .filter-bar__fields {
+  grid-template-columns: repeat(var(--filter-cols, 4), minmax(0, 1fr));
+}
+.filter-bar__actions { display: flex; align-items: flex-end; gap: var(--space-2); }
+/* Combobox is inline-block min-width:220 by default; in a filter cell it must
+   fill the cell, not impose its own width. */
+.filter-bar .combobox { min-width: 0; width: 100%; display: block; }
+.filter-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.filter-field__label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--fg-muted);
+  /* Deliberately quiet: a dense scannable bar needs a secondary label, not
+     the loud El Alba --tt-label uppercase register. Set directly (no
+     var(--tt-label)) so the global brand token stays untouched for forms. */
+  text-transform: none;
+  letter-spacing: normal;
+}
 
 /* ---------- BulkActionBar --------------------------------------------- */
 .bulk-bar {

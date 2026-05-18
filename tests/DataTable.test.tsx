@@ -206,6 +206,106 @@ describe('DataTable', () => {
     expect(numCell!.textContent).toBe('1500');
     expect((numCell as HTMLElement).style.textAlign).toBe('right');
   });
+
+  // ---- v1.10.0: density, interactive rows, alignment ------------------
+  it('density defaults to compact (no comfortable class)', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    const table = container.querySelector('table')!;
+    expect(table.classList.contains('table--comfortable')).toBe(false);
+  });
+
+  it('density="comfortable" opts back into the airy layout', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} density="comfortable" />
+    );
+    expect(container.querySelector('table.table--comfortable')).not.toBeNull();
+  });
+
+  it('non-interactive rows are unchanged (no link/button, no is-clickable)', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
+    );
+    expect(container.querySelector('.data-table__rowlink')).toBeNull();
+    expect(container.querySelector('tr.is-clickable')).toBeNull();
+  });
+
+  it('rowHref makes each row a real, SR-named, keyboard-operable link', () => {
+    render(
+      <DataTable
+        columns={cols}
+        rows={rows}
+        rowKey={(r) => r.id}
+        rowLabel={(r) => r.name}
+        rowHref={(r) => `/productos/${r.id}`}
+      />
+    );
+    // One real <a> per row, with an accessible name and a valid href —
+    // not an onClick-only div, no role hack on <tr>.
+    const a1 = screen.getByRole('link', { name: 'Ver Taladro' });
+    const a2 = screen.getByRole('link', { name: 'Ver Sierra' });
+    expect(a1).toHaveAttribute('href', '/productos/1');
+    expect(a2).toHaveAttribute('href', '/productos/2');
+    // The link is focusable (native <a href>), so the row is keyboard-
+    // operable; Enter activates natively.
+    a1.focus();
+    expect(a1).toHaveFocus();
+  });
+
+  it('onRowClick renders a real <button> and activates by click', () => {
+    const onRow = vi.fn();
+    render(
+      <DataTable
+        columns={cols}
+        rows={rows}
+        rowKey={(r) => r.id}
+        rowLabel={(r) => r.name}
+        onRowClick={onRow}
+      />
+    );
+    const btn = screen.getByRole('button', { name: 'Ver Taladro' });
+    fireEvent.click(btn);
+    expect(onRow).toHaveBeenCalledWith(rows[0]);
+  });
+
+  it('renderRow is the escape hatch and suppresses the built-in control', () => {
+    const { container } = render(
+      <DataTable
+        columns={cols}
+        rows={rows}
+        rowKey={(r) => r.id}
+        rowHref={(r) => `/x/${r.id}`}
+        renderRow={({ cells, rowKey }) => (
+          <tr key={rowKey} data-custom-row={rowKey}>{cells}</tr>
+        )}
+      />
+    );
+    expect(container.querySelector('tr[data-custom-row="1"]')).not.toBeNull();
+    // Consumer owns interactivity → kit does not inject its own control.
+    expect(container.querySelector('.data-table__rowlink')).toBeNull();
+  });
+
+  it('align is honored for React-node cells (table__align-right class)', () => {
+    const cellCols = [
+      { key: 'name', header: 'Nombre' },
+      {
+        key: 'act',
+        header: 'Acciones',
+        align: 'right' as const,
+        accessor: () => <button type="button">Editar</button>,
+      },
+    ];
+    const { container } = render(
+      <DataTable columns={cellCols} rows={rows} rowKey={(r) => r.id} />
+    );
+    const actCell = container.querySelectorAll('tbody td')[1] as HTMLElement;
+    expect(actCell.classList.contains('table__align-right')).toBe(true);
+    expect(actCell.style.textAlign).toBe('right');
+    // Left columns stay byte-identical (no extra alignment class).
+    const nameCell = container.querySelectorAll('tbody td')[0] as HTMLElement;
+    expect(nameCell.className).toBe('');
+  });
 });
 
 describe('Accordion', () => {

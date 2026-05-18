@@ -17,6 +17,25 @@ describe('Pagination', () => {
     expect(screen.getByLabelText('Página anterior')).toBeDisabled();
   });
 
+  it('collapses (renders nothing) when everything fits one page', () => {
+    const { container } = render(
+      <Pagination page={1} pageSize={10} total={7} onPageChange={() => {}} />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('collapses when the list is empty', () => {
+    const { container } = render(
+      <Pagination page={1} pageSize={10} total={0} onPageChange={() => {}} />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('still renders when there is more than one page', () => {
+    render(<Pagination page={1} pageSize={10} total={11} onPageChange={() => {}} />);
+    expect(screen.getByLabelText('Página siguiente')).toBeInTheDocument();
+  });
+
   it('respects LocaleProvider override for prev/next/range', () => {
     render(
       <LocaleProvider

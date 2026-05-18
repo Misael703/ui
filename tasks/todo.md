@@ -1,3 +1,124 @@
+# Finding F — paginación "rota" = screenshot kit 1.8.0 stale (2026-05-17)
+
+Imagen reportada: pager solitario "1–6 de 6 ‹ 1 ›" + notch blanco en esquina
+del Card. **Ninguna de las dos es bug ni mala implementación:** el mock-kit
+consume `@misael703/ui@1.8.0`. v1.10.0 ya resuelve ambos: (1) `Pagination`
+`if (totalPages<=1) return null` (Inputs.tsx:83) → pager 1-página desaparece;
+(2) DataTable dueño de su superficie (border-radius/overflow propios) → sin
+seam tabla-sobre-Card (el `.app-card-clip` ya es obsoleto y el consumidor lo
+quitó). Detalle de uso: `Pagination` pelado vs `TablePagination` (idiomático
+para pager pegado a DataTable; trae rows-per-page). **Decisión UX tomada:**
+1 página → colapsar todo (como está v1.10.0), SIN cambio de código. Acción
+real pendiente (post-release, repos aparte): bumpear consumidores de 1.8.0 →
+v1.10.0; el kit correcto no entrega valor hasta que las apps bumpeen.
+
+---
+---
+
+# Finding E — "se rompió todo con el kit" en filtros Despachos = composición, no bug (2026-05-17)
+
+**Reportado:** la pantalla Despachos hecha con el kit (mock-kit) se ve rota
+(combobox, espacios, labels) vs la versión sin kit (mock no-kit). Comparación
+de código real, no especulación:
+
+- mock no-kit (`despachos-ferreteria-ui-mock/.../despachos/page.tsx:176+`) usa
+  un primitive propio `FilterBar` + `FilterField` y **fija cada control**:
+  `Select/Input className="h-9 w-40|w-36|w-44"`, `FilterField min-w-[160px]`.
+  Uniformidad = disciplina de layout hecha a mano.
+- mock-kit (`despachos-ferreteria-ui-mock-kit/.../despachos/page.tsx:122-181`)
+  usa `<div className="app-cluster">` (= `flex; flex-wrap:wrap; gap:space-3`,
+  `globals.css:75`) + `FormField`, sin normalizar altura ni ancho, comboboxes
+  envueltos en `<div style={{width:160|180}}>`, inline `alignItems:'flex-end'`
+  peleando con el `center` del cluster → 7 campos sin grid → "Despachado por"
+  wrappea a fila 2, alturas dispares, ring del Combobox enfocado pega con el
+  vecino (parece "una caja sobre dos campos").
+
+**Causas (todas composición/registro, NINGÚN bug del kit):**
+1. **Gap kit:** no existe primitive `FilterBar`/fila-de-filtros. El kit da las
+   piezas, no la capa de layout que hace que se vea uniforme.
+2. **Registro:** `Label` del kit → `text-transform: var(--tt-label)`; el preset
+   El Alba pone `--tt-label: uppercase` + `.field__label` weight 700/fg-default
+   → labels GRITONES (mayúscula/bold/contraste full). Es la marca El Alba por
+   diseño; no hay `size`/`tone="muted"` en FormField/Label para bajarlo en una
+   barra de filtros densa.
+3. **Gap kit:** `Select`/`Input`/`Combobox` no comparten token de altura ni
+   shell de trigger → fila mixta sale despareja por defecto. `Combobox`
+   (input+clear-× +portal) no es visualmente intercambiable con `Select`
+   (chevron). (Sumado a Finding D, ya resuelto en 1.9.1, se veía peor.)
+4. **Consumidor:** `app-cluster` (wrap genérico) en vez de grid; sin pin de
+   altura/ancho; inline `alignItems:'flex-end'`.
+
+**Fix consumidor (sin tocar kit): se ve ~como el target ya** — grid real,
+una altura para todos los controles, ritmo de anchos, sin el flex-end inline.
+**Gaps kit (candidatos v1.10.0):** (a) primitive `FilterBar`; (b) registro
+quieto/`size` en FormField+Label; (c) token de altura de control compartido
+Select/Input/Combobox; (d) Combobox intercambiable con Select.
+
+**Estado:** Paso 1 (quick-fix consumidor) HECHO — `.app-filter-grid` +
+`fields--dense` forward-compat en mock-kit, tsc limpio. Paso 2 (primitive
+kit, v1.10.0) APROBADO, en implementación.
+
+## Paso 2 — FilterBar/FilterField (kit v1.10.0) — checklist
+
+- [x] `src/components/Filters.tsx`: `FilterBar` + `FilterField` (+ interfaces)
+- [x] `src/styles/index.css`: `.filter-bar*` / `.filter-field*` (reusa
+      `.fields--dense`; label quieto sin tocar `--tt-label`; combobox fill)
+- [x] Barrel: auto vía `export * from './components/Filters'` (verificado en
+      `dist/index.d.ts`)
+- [x] `Filters.stories.tsx`: `FilterBarDemo` (despachos 7 campos mixtos)
+- [x] `tests/Filters.test.tsx`: label↔control id (+ id de consumidor gana),
+      grid+fields--dense, actions slot, columns fijas
+- [x] `smoke/gallery/registry.tsx`: ENTRY `FilterBar`
+- [x] `smoke/e2e/coverage.spec.ts`: `FilterField` → COVERED_BY_PARENT
+- [x] `CHANGELOG.md`: bullet en `[1.10.0] ### Added`
+- [x] Gates: tsc limpio · ESLint 0 errores · vitest 383/383 · build (dist OK)
+      · build-storybook OK
+- [ ] Sin commit/push/release (ciclo v1.10.0 lo secuencia el usuario)
+
+**Review:** `FilterBar`/`FilterField` añadidos a la familia `Filters`. 2 bugs
+atrapados por los gates y corregidos: (1) `columns && 'str'` daba `0` numérico
+no asignable a `cx` → check de truthiness; (2) `FilterField` no reconciliaba
+el `id` propio del control en el `for` del label (mismo patrón laxo que
+`FormField`) → id efectivo `htmlFor ?? id-control ?? generado`, **más correcto
+que `FormField`**. El quick-fix del consumidor (Paso 1) sigue intacto; cuando
+el mock-kit bumpee a un kit con `.fields--dense` (este v1.10.0) los controles
+caen a 36px y queda como el target.
+
+---
+---
+
+# Finding D — Combobox/MultiCombobox: primer open mal posicionado (2026-05-17)
+
+**Síntoma (reportado, despachos):** la primera vez que se abre un `Combobox`,
+el panel sale clampeado al borde izquierdo del viewport (encima del sidebar);
+al cerrarlo y reabrirlo aparece bien.
+
+**Causa raíz:** `usePopoverPosition.ts:106` clampea `left` con
+`vw - c.width - GUTTER`, donde `c.width = contentEl.getBoundingClientRect().width`.
+En el primer open el estado del hook aún no tiene `width` (`pos.width === undefined`),
+así que el `<ul>` se monta **sin** la restricción de `matchAnchorWidth` →
+ancho natural inflado (`position:fixed; left:0`, labels sin envolver). `compute()`
+corre una sola vez, mide ese ancho inflado, el clamp tira `left` al borde y
+**no se vuelve a medir** (effect deps `[open, compute]` no cambian tras el
+`setPos`). En el segundo open el estado conserva `width` del cierre previo
+(al cerrar solo se hace `ready:false`), el `<ul>` ya nace con el ancho correcto
+y posiciona bien. Afecta a los 2 consumidores con `matchAnchorWidth: true`
+(`Combobox`, `MultiCombobox`); fix centralizado en el hook.
+
+**Estado: RESUELTO (v1.9.1).** Enfoque elegido: funcional con `a.width`. En
+`compute()` se introdujo `const cw = matchAnchorWidth ? a.width : c.width` y se
+usa `cw` en el flip left/right y en el clamp horizontal (la altura sigue con
+`c.height` — residual teórico aceptado: combobox = opciones de 1 línea, no
+envuelven). Fix centralizado → arregla `Combobox` y `MultiCombobox`. Regresión
+en `tests/FloatingPortal.test.tsx` (rects inyectados: ancla pegada al borde
+derecho + `<ul>` con ancho natural inflado → `left` debe quedar en el ancla, no
+clampeado al gutter). Gates: `tsc` OK, vitest 366/366, ESLint 0 errores.
+CHANGELOG `[1.9.1]` + `package.json` → 1.9.1. Sin commit/push/release (pendiente
+confirmación del usuario).
+
+---
+---
+
 # v1.9.0 listo; Finding C diagnosticado (residual prod-only artificial) (2026-05-17)
 
 **Finding C — diagnosticado a fondo:** la galería de 130 componentes daba #418. Dos causas reales encontradas y corregidas (artefactos del propio gallery/uso, no del kit consumidor): (1) entry `Table` anidaba `<table>` dentro de `K.Table` (HTML inválido); (2) `<Portal>` renderizado incondicionalmente en SSR (el `Portal` del kit devuelve null en server y portalea en client **por diseño** → mismatch si se usa en SSR sin gate; constraint real del kit registrado). Gallery ahora rende Portal vía `ClientOnly` (uso realista). **En `next dev` (React no-minificado) `/gallery` hidrata limpio.** Queda un **#418 solo en build de producción** (`next build`/`next start`) en la galería artificial de 130 componentes — escenario que **ningún consumidor real reproduce**. Las rutas representativas reales **`/` (RSC) y `/client` están VERDES** → el valor (el kit funciona en RSC y client) está probado. Drillear el residual prod-only de la mega-galería = ROI bajo; follow-up de scope del harness, no bloquea el kit.
@@ -824,3 +945,100 @@ Se publica (`.d.ts`), drop-in, no breaking. Recomendación: merge + publish. Nad
 **Diferido (con razón):** indicador deslizante de Tabs (requiere JS en Tabs.tsx, riesgo medio; el fade de color/borde actual no es "abrupto" → no justificado para kit product). Resto de fases del plan original (dark mode, reagrupar por dominio) siguen como antes.
 
 **Clave:** esto **sí se publica** (`_root.css`/`index.css` en `dist`) → mejora de feel real para barritas/marginapp. Sin breaking (nombres de token preservados). Recomendación: merge **y** publish (a diferencia de v1.3.1). Nada pusheado/publicado aún (regla no-push-without-approval).
+
+---
+
+## Plan v1.10.0 (2026-05-17) — data-density / legibilidad (consumer despachos)
+
+**Baseline real:** repo en v1.9.0 (no v1.8.0). Ya resuelto en v1.9.0: contraste de tab
+inactivo (17.49/18.70 medido), `stickyHeader`, notch de seam bajo `TableToolbar`.
+Decisiones del owner: P4 = title-case + micro-caps reales · release = CHANGELOG
+manual v1.10.0 (sin Changesets) · densidad = `.table--compact` como default + prop
+`density` de opt-out.
+
+### Medición de contraste (WCAG 2.x, hex/hex) — FALLAS a corregir
+- [ ] `--fg-subtle` falla como texto normal en AMBAS paletas (2.31–2.52 default /
+      3.43–3.74 El Alba; objetivo 4.5) — captions, placeholders, combobox desc.
+- [ ] `--fg-muted` falla solo en paleta default sobre `bg-canvas` (4.46) y
+      `bg-subtle`=header de tabla (4.40). El Alba pasa (slate más oscuro).
+- [ ] Glyph de orden `opacity:.4` falla 3:1 UI (1.39/1.58) en ambas.
+
+### P1 — DataTable: interactividad de fila (API aditiva)
+- [ ] `onRowClick?(row)`, `rowHref?(row)`, `renderRow?` (render-prop estilo
+      `AppShell.linkAs`; NO `asChild` en `<tr>`/`<td>`).
+- [ ] A11y dueña del kit: operable por teclado (Enter/Espacio), `:focus-visible`,
+      semántica/SR correctos; fila no-interactiva sin cambios.
+- [ ] Story + test de teclado + a11y addon verde. Cero cambios en usages actuales.
+
+### P2 — DataTable dueño de su superficie (notch en Card)
+- [ ] `.table-wrap` recorta su propia esquina (borde+radio+overflow) en cualquier
+      contenedor; decisión documentada en DESIGN.md. Story tabla-sobre-Card.
+
+### P3 — Contraste a AA en los DEFAULTS (delta mínimo, sin lavar marca)
+- [ ] Subir `--fg-subtle` (default + El Alba) y `--fg-muted` (solo default) al hex
+      mínimo que pase 4.5 en la peor superficie; mantener subtono. Before→after en
+      CHANGELOG.
+- [ ] Test de regresión de contraste (vitest) con la tabla de ratios.
+
+### P4 — Jerarquía por mayúsculas (decisión: title-case + micro-caps)
+- [ ] `--tt-title: none` (default + El Alba). Separar `.table th` y `.label` del
+      hook all-caps (nuevo token, default `none`); `--tt-label` queda solo para
+      micro-labels reales (badge, eyebrow, KPI). Story before/after.
+
+### P5 — Defaults que shipean ilegibles (cambiar el DEFAULT)
+- [ ] a) Densidad legible por default: `.table--compact` como base + prop
+      `density?: 'comfortable'|'compact'` (default compact).
+- [ ] b) `white-space`/truncado/column-sizing default → datos no envuelven a 2 líneas.
+- [ ] c) Badge default más liviano (peso/borde/padding) + variante quieta.
+- [ ] d) Combobox trigger lee como campo (caja/altura/chevron) coherente con Select/Input.
+- [ ] e) Pagination colapsa con `pages ≤ 1`; peso liviano por default.
+- [ ] f) `Badge pulse` opcional (columna de estado con un solo componente).
+- [ ] g) Header de tabla recede por default (`th` deja de competir, peso/color).
+- [ ] h) `align` respetado cuando la celda es nodo React (acción `align:'right'`).
+- [ ] i) Altura de control de filtro: densidad/`size` o tokenizar (no forzar wrap
+      de la fila de ~7 filtros en desktop; 44px táctil sigue disponible).
+
+### Cierre
+- [x] Cada fix: story + test de regresión + a11y verde + `npm test` + `tsup`,
+      verificado contra `dist` rebuildeado (no solo src).
+- [x] CHANGELOG v1.10.0 + bump package.json (sin atribución Claude). Blast
+      radius en barritas/marginapp/despachos en el resumen.
+- [x] NO push/publish/release sin aprobación explícita (nada commiteado).
+
+---
+
+## Review v1.10.0 (2026-05-17) — completo, SIN commit/push/publish
+
+**Baseline cambió a mitad de sesión:** otro proceso agregó **v1.9.1** (fix de
+posicionamiento Combobox/`usePopoverPosition` + su test). Áreas disjuntas de
+las mías (tokens/DataTable/Badge/Pagination/CSS); suite completa verde con su
+test incluido → sin conflicto. Mi release sube **1.9.1 → 1.10.0**.
+
+**Hecho (todo P1–P5, sin P4 pendiente — decidido por el owner):**
+- P3 contraste: `--fg-muted`/`--fg-subtle` a AA en ambas paletas, delta mínimo,
+  subtono preservado. `tests/Contrast.test.tsx` parsea los token files reales
+  (16 asserts). Glyph de orden 0.4→0.75 (≥3:1). El Alba: `--fg-muted` re-anclado
+  a su slate (pixel-idéntico), `--fg-subtle` único delta visual (rompe
+  pixel-identity v0.7.1 a propósito, era sub-AA).
+- P4 (decisión owner = title-case + micro-caps): `--tt-title:none`, nuevo
+  `--tt-data:none` (th + form label), `--tt-label:uppercase` solo micro-labels.
+- P5a/b/g densidad compacta por default + `.table--comfortable` opt-out +
+  `white-space:nowrap`/ellipsis + header que recede.
+- P5h `align` autoritativo para nodos React (clase `table__align-*`; left sin
+  cambio).
+- P1 `rowHref`/`onRowClick`/`renderRow` + `density` — control estirado real
+  (a/button), teclado + SR + foco; aditivo, default off.
+- P5c/f Badge liviano + `pulse`. P5d Combobox como campo. P5e Pagination
+  colapsa ≤1 pág + peso 500. P5i `.fields--dense` (44px sigue default).
+- P2 `.table-wrap` dueño de superficie + header sigue el radio; DESIGN.md.
+
+**Verificación:** `tsc` limpio · **vitest 378/378** (+12, 0 regresiones) ·
+`npm run build` exit 0 (cambios confirmados en `dist/styles.css`,
+`dist/presets/elalba/styles.css`, `dist/components/DataTable.d.ts` + chunks) ·
+`npm run build-storybook` exit 0 · `npm run lint` exit 0.
+
+**Clave:** API aditiva (barrel solo gana exports, no breaking). Cambios
+visuales de default en prod → SemVer minor honesto + CHANGELOG con
+before/after. **Nada commiteado/pusheado/publicado** (regla no-push-without-
+approval). Recomendación: revisar el resumen, luego commit (1 commit coherente,
+`feat`) + release vía GitHub Release cuando el owner dé OK.

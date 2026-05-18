@@ -39,3 +39,5 @@ smoke/.smoke-kit/
 # changes on every kit build, so a committed lock breaks `npm install` on the
 # next change. Third-party versions stay pinned via exact deps in package.json.
 smoke/package-lock.json
+# Next regenerates this on every build/typecheck; tracking it is pure churn.
+smoke/next-env.d.ts

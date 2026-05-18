@@ -59,12 +59,24 @@ export type BadgeVariant =
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: Extensible<BadgeVariant>;
   dot?: boolean;
+  /**
+   * Pulsing status dot. Lets ONE component cover a "status" column
+   * (previously you had to mix `StatusIndicator` + `Badge`, which read
+   * inconsistently). Implies a dot. Respects `prefers-reduced-motion`.
+   */
+  pulse?: boolean;
 }
 
-export function Badge({ variant = 'neutral', dot, className, children, ...rest }: BadgeProps) {
+export function Badge({ variant = 'neutral', dot, pulse, className, children, ...rest }: BadgeProps) {
+  const showDot = dot || pulse;
   return (
     <span className={cx('badge', `badge--${variant}`, className)} {...rest}>
-      {dot && <span className="badge__dot" aria-hidden="true" />}
+      {showDot && (
+        <span
+          className={cx('badge__dot', pulse && 'is-pulsing')}
+          aria-hidden="true"
+        />
+      )}
       {children}
     </span>
   );

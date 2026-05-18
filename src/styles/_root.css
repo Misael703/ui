@@ -124,8 +124,15 @@
   --bg-inverse-strong: var(--color-primary-900);
 
   --fg-default:      var(--color-ink);
-  --fg-muted:        var(--color-gray-600);
-  --fg-subtle:       var(--color-gray-500);
+  /* WCAG AA debt fix (v1.10.0). The gray-600/500 stops shipped BELOW 4.5:1
+     as body text on the kit's own surfaces (table headers on --bg-subtle,
+     captions/placeholders on --bg-canvas): measured 4.40 / 2.31–2.52. These
+     are now explicit, minimal-delta values that clear 4.5:1 on the worst
+     surface while keeping the warm undertone and a perceptible muted↔subtle
+     step. The gray scale stays the decorative ramp (borders, fills). The El
+     Alba preset re-points these to its cool slate (see presets/elalba). */
+  --fg-muted:        #6b6560;   /* on surface 5.74 · canvas 5.34 · subtle 5.27 */
+  --fg-subtle:       #726c66;   /* on surface 5.18 · canvas 4.82 · subtle 4.75 */
   --fg-on-brand:     var(--color-white);
   /* Secondary base is light (sand) in the default palette → dark text.
      The El Alba preset (dark orange secondary) flips this back to white. */
@@ -196,15 +203,21 @@
   --tracking-wide:   0.04em;
   --tracking-wider:  0.08em;
 
-  /* Text-transform opt-out hooks. Default `uppercase` keeps the kit's
-     look unchanged; a consumer or preset can set either to `none` to drop
-     all-caps without forking component CSS.
-       --tt-label: micro-typography (eyebrows, badges, table headers,
-                   KPI labels, section labels…)
-       --tt-title: display-font headings (modal/drawer/empty titles,
-                   appshell brand) */
+  /* Text-transform role hooks. A consumer or preset can override any of
+     these to re-tune the all-caps register without forking component CSS.
+     v1.10.0 restored the type hierarchy: when every role shouted in caps
+     (title + headers + form labels + badges at once) the size/weight
+     staircase collapsed and dense screens read as "illegible" even at AA.
+       --tt-label: TRUE micro-labels only — eyebrows, badges, KPI labels,
+                   section/group labels. Stays `uppercase` (brand texture).
+       --tt-data:  table headers + form labels. `none` so column/field
+                   names read as data, one clear step below the title.
+       --tt-title: display-font headings (page/modal/drawer/empty titles,
+                   appshell brand). `none` so titles are human sentence
+                   case and sit clearly above the data. */
   --tt-label: uppercase;
-  --tt-title: uppercase;
+  --tt-data:  none;
+  --tt-title: none;
 
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;

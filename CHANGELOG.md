@@ -5,6 +5,96 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] — 2026-05-17
+
+**Minor.** Data-density / legibility pass driven by a data-heavy consumer
+(despachos: tables + 7-filter rows + status columns). API additions are
+purely additive (the `src/index.ts` barrel only gains exports — no removed
+or renamed exports, no breaking change). Several **defaults change visually**
+in production consumers (barritas / marginapp / despachos): this is
+intentional — an illegible default was the defect. SemVer-honest minor.
+
+### Added
+
+- **`DataTable` interactive rows.** `rowHref(row)` and `onRowClick(row)`
+  make every row navigable: the kit renders a real, stretched `<a>` /
+  `<button>` that is keyboard-operable, screen-reader-named (`table.rowAction`
+  → "Ver {label}"), with the focus ring on the row — valid table markup, no
+  `role` hack on `<tr>`, no onClick-only div. `renderRow({row,cells,rowKey})`
+  is the data-driven render-prop escape hatch (same family as
+  `AppShell.linkAs`; deliberately not `asChild`). All optional; default off →
+  existing usages render byte-identically.
+- **`DataTable` `density` prop** (`'comfortable' | 'compact'`, default
+  `'compact'`).
+- **`Badge` `pulse` prop** — pulsing status dot so ONE component can own a
+  status column (previously needed `StatusIndicator` + `Badge` mixed).
+  Respects `prefers-reduced-motion`.
+- **`--tt-data` text-transform hook** (`none`) for table headers + form
+  labels; **`.fields--dense`** container utility (drops controls to 36px
+  for dense desktop filter rows; the 44px touch default is unchanged).
+- **`FilterBar` / `FilterField`** — the horizontal dense filter row that
+  sits on top of a table (counterpart to `FilterPanel`'s vertical facet
+  sidebar). `FilterBar` owns a responsive grid and applies `.fields--dense`
+  so a mixed Select/Input/Combobox row is uniform; `FilterField` uses a
+  deliberately quiet label register (no `--tt-label` mutation, so forms are
+  untouched) and wires the label to its control. Props: `actions`,
+  `minColWidth`, `columns`. Replaces the hand-rolled flex cluster.
+- **`tests/Contrast.test.tsx`** — WCAG regression guard that parses the
+  real token files and resolves the `var()` chains.
+
+### Changed (visual — affects prod consumers)
+
+- **Contrast to WCAG AA.** `--fg-muted` / `--fg-subtle` shipped below 4.5:1
+  as body text on the kit's own surfaces. Minimal-delta, undertone-preserving
+  fix in both palettes (gray scale untouched):
+
+  | token · worst surface | before | after |
+  |---|---|---|
+  | default `--fg-muted` · table header (`--bg-subtle`) | 4.40 ✗ | **5.27** ✓ |
+  | default `--fg-muted` · `--bg-canvas` | 4.46 ✗ | **5.34** ✓ |
+  | default `--fg-subtle` · `--bg-canvas` | 2.34 ✗ | **4.82** ✓ |
+  | default `--fg-subtle` · `--bg-subtle` | 2.31 ✗ | **4.75** ✓ |
+  | El Alba `--fg-subtle` · `--bg-surface` | 3.74 ✗ | **5.16** ✓ |
+  | El Alba `--fg-subtle` · `--bg-subtle` | 3.43 ✗ | **4.74** ✓ |
+  | inactive sort glyph (UI, 3:1) | 1.75 ✗ | **3.17 / 3.34** ✓ |
+
+  `--fg-muted` default `#78716c → #6b6560`; `--fg-subtle` default
+  `#a8a29e → #726c66`; El Alba `--fg-subtle` `#7e8495 → #686d7c` (El Alba
+  `--fg-muted` re-anchored to its slate `--color-gray-600` `#5b6173`,
+  already AA — pixel-identical). **El Alba note:** this breaks
+  `@misael703/elalba-ui@0.7.1` pixel-identity *by design* — v0.7.1
+  `--fg-subtle` was sub-AA.
+- **Type hierarchy restored.** `--tt-title` and `--tt-data` default to
+  `none` (was `uppercase`): page/modal titles are sentence case; table
+  headers and form labels read as data. `--tt-label` stays `uppercase`
+  for true micro-labels only (badges, eyebrows, KPI labels). Headings,
+  table `th`, form `Label`, and the appshell brand are no longer all-caps.
+- **`DataTable` density-legible by default.** Cell padding `14px 16px →
+  8px 12px`, font `--text-sm → --text-xs`, `white-space:nowrap` +
+  ellipsis (cells no longer wrap to two lines — the #1 "heaviness"
+  driver). `density="comfortable"` (`.table--comfortable`) restores the
+  old 14/16 + wrapping. `.table--compact` kept idempotent.
+- **Table header recedes.** `th` weight `700 → 600`, sentence case, normal
+  tracking, padding `12/16 → 8/12` — it labels the data instead of
+  competing with it.
+- **`align` honored for element cells.** A right/centered column whose cell
+  is a React node (e.g. an action `<button>` / flex wrapper) now actually
+  aligns (was floated left; `text-align` alone doesn't move a block/flex
+  child). Left columns are byte-identical (no extra class).
+- **`Badge` quieter by default.** Weight `700 → 600`, padding `4px 10px →
+  3px 8px`.
+- **`Pagination` collapses** to nothing when everything fits one page (was
+  a lone disabled pager); button weight `700 → 500`.
+- **`Combobox` trigger reads as a field.** Border `--border-default →
+  --border-strong`, radius `--radius-sm → --radius-md`, a chevron
+  affordance, and the **same tokenized metrics** (`--field-min-h` /
+  `--field-pad-*`) as `Select`/`Input` so all three line up at any
+  density — including inside `.fields--dense` (was a plain text box with
+  hardcoded height/padding that stayed tall in dense filter rows).
+- **DataTable owns its surface.** `.table-wrap` clips to its own radius and
+  the filled header follows it — no corner notch in any container. Do not
+  wrap `<DataTable>` in your own bordered/rounded/overflow container.
+
 ## [1.9.1] — 2026-05-17
 
 **Patch.** Positioning fix. No public API change.

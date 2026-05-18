@@ -64,6 +64,19 @@ export const Badges: StoryObj = {
   ),
 };
 
+/** P5f — `pulse`: un solo Badge cubre una columna de estado (antes había
+ * que mezclar StatusIndicator + Badge). Respeta prefers-reduced-motion. */
+export const BadgePulse: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <Badge variant="success" pulse>En curso</Badge>
+      <Badge variant="warning" pulse>Esperando</Badge>
+      <Badge variant="danger" pulse>Caído</Badge>
+      <Badge variant="neutral" dot>Inactivo</Badge>
+    </div>
+  ),
+};
+
 export const Alerts: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

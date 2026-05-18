@@ -18,15 +18,30 @@ interface DataTableRowProps<T> {
   selectAriaLabel: string;
   columns: Column<T>[];
   onToggle: (k: string) => void;
+  /** Resolved from `rowHref(row)` — makes the row a navigable link. */
+  href?: string;
+  /** Resolved from `onRowClick(row)` — makes the row activate a callback. */
+  onActivate?: () => void;
+  /** Accessible name for the stretched row control (e.g. "Ver Taladro"). */
+  actionLabel?: string;
+  /** Full-control escape hatch (see `DataTableProps.renderRow`). */
+  renderRow?: (args: {
+    row: T;
+    cells: React.ReactNode;
+    rowKey: string;
+  }) => React.ReactNode;
 }
 
 function DataTableRowImpl<T>({
   row, rowK, selected, selectable, selectAriaLabel, columns, onToggle,
+  href, onActivate, actionLabel, renderRow,
 }: DataTableRowProps<T>) {
-  return (
-    <tr className={cx(selected && 'is-selected')}>
+  const interactive = !renderRow && (!!href || !!onActivate);
+
+  const cells = (
+    <>
       {selectable && (
-        <td>
+        <td className={cx(interactive && 'data-table__cell--above')}>
           <Checkbox
             checked={selected}
             onChange={() => onToggle(rowK)}
@@ -34,7 +49,7 @@ function DataTableRowImpl<T>({
           />
         </td>
       )}
-      {columns.map((c) => {
+      {columns.map((c, ci) => {
         const align = c.align ?? (c.numeric ? 'right' : 'left');
         const value = c.accessor
           ? c.accessor(row)
@@ -48,14 +63,55 @@ function DataTableRowImpl<T>({
         return (
           <td
             key={c.key}
-            className={cx(c.numeric && 'table__num')}
+            // `table__align-*` makes alignment authoritative for ANY cell
+            // content. `text-align` alone silently fails for a block/flex
+            // child (e.g. an action column of buttons → floated left); the
+            // class adds the matching `margin` auto so element children
+            // honor `align` too. Left cells emit no extra class → byte-
+            // identical to pre-1.10.0 (zero regression for the default).
+            className={cx(
+              c.numeric && 'table__num',
+              align !== 'left' && `table__align-${align}`,
+            )}
             style={{ textAlign: align }}
             data-label={label}
           >
+            {/* Stretched row control: a real <a>/<button> in the first
+                data cell, overlaying the whole row (the <tr> is the
+                positioned ancestor). Keyboard-operable + SR-labelled +
+                valid table markup — no role hacks, no onClick-only div.
+                Visually empty; the cells stay the visible content. Other
+                interactive cell content opts above it via
+                `data-table__cell--above` (stretched-link pattern). */}
+            {interactive && ci === 0 && (
+              href ? (
+                <a
+                  href={href}
+                  className="data-table__rowlink"
+                  aria-label={actionLabel}
+                  onClick={onActivate}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="data-table__rowlink"
+                  aria-label={actionLabel}
+                  onClick={onActivate}
+                />
+              )
+            )}
             {value as React.ReactNode}
           </td>
         );
       })}
+    </>
+  );
+
+  if (renderRow) return <>{renderRow({ row, cells, rowKey: rowK })}</>;
+
+  return (
+    <tr className={cx(selected && 'is-selected', interactive && 'is-clickable')}>
+      {cells}
     </tr>
   );
 }
@@ -130,6 +186,41 @@ export interface DataTableProps<T> {
    * when the key isn't human-readable (e.g. a UUID).
    */
   rowLabel?: (row: T) => string;
+  /**
+   * Body density. Default `'compact'` (v1.10.0): a readable-dense register
+   * (~30px rows, `--text-xs`, single-line cells) — the right default for
+   * the data-heavy screens this kit serves ("default = product"). Pass
+   * `'comfortable'` to opt back into the pre-1.10.0 airy 14px/16px rows
+   * (which wrap to two lines).
+   */
+  density?: 'comfortable' | 'compact';
+  /**
+   * Makes every row a navigable link. The kit renders a real, keyboard-
+   * operable, screen-reader-labelled `<a>` stretched over the row — valid
+   * table markup (no `role` hacks, no `asChild` on `<tr>`, never an
+   * onClick-only div). One Tab stop per row; Enter activates; the focus
+   * ring shows on the row. Additive; combinable with `onRowClick`.
+   */
+  rowHref?: (row: T) => string;
+  /**
+   * Makes every row activate a callback (pointer **and** keyboard).
+   * Renders a real stretched `<button>` with the same a11y guarantees as
+   * `rowHref`. Prefer `rowHref` when the action is navigation.
+   */
+  onRowClick?: (row: T) => void;
+  /**
+   * Full-control escape hatch — the render-prop polymorphism the kit uses
+   * for data/array-driven components (cf. `AppShell.linkAs`; deliberately
+   * NOT `asChild`, which would emit invalid markup on `<tr>`). Receives the
+   * row, the kit-rendered `cells`, and the row key; return your own row
+   * element (e.g. a framework `<Link>` wrapping a `<tr>`). When set,
+   * `rowHref`/`onRowClick` are ignored (you own row interactivity & a11y).
+   */
+  renderRow?: (args: {
+    row: T;
+    cells: React.ReactNode;
+    rowKey: string;
+  }) => React.ReactNode;
   className?: string;
 }
 
@@ -150,6 +241,7 @@ export function DataTable<T>({
   selectable, selectedKeys, onSelectionChange,
   empty, error, loading, stickyHeader, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
+  density = 'compact', rowHref, onRowClick, renderRow,
 }: DataTableProps<T>) {
   const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
@@ -199,7 +291,13 @@ export function DataTable<T>({
         className,
       )}
     >
-      <table className="table data-table" aria-label={ariaLabel}>
+      <table
+        className={cx(
+          'table data-table',
+          density === 'comfortable' && 'table--comfortable',
+        )}
+        aria-label={ariaLabel}
+      >
         <thead>
           <tr>
             {selectable && (
@@ -278,6 +376,8 @@ export function DataTable<T>({
             rows.map((r) => {
               const k = rowKey(r);
               const label = rowLabel ? rowLabel(r) : k;
+              const href = rowHref?.(r);
+              const onActivate = onRowClick ? () => onRowClick(r) : undefined;
               return (
                 <DataTableRow
                   key={k}
@@ -288,6 +388,10 @@ export function DataTable<T>({
                   selectAriaLabel={format(t['table.selectRow'], { label })}
                   columns={columns}
                   onToggle={toggleRow}
+                  href={href}
+                  onActivate={onActivate}
+                  actionLabel={format(t['table.rowAction'], { label })}
+                  renderRow={renderRow}
                 />
               );
             })
