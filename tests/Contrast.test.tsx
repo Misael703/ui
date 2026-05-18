@@ -92,3 +92,62 @@ function run(name: string, map: Record<string, string>) {
 
 run('default palette', baseMap);
 run('El Alba preset', elalbaMap);
+
+/**
+ * El Alba primary↔secondary button swap (preset-only).
+ *
+ * The owner accepted, eyes open (2026-05-18), a DELIBERATE brand exception:
+ * the El Alba PRIMARY button is the exact brand orange #ff671d + white,
+ * which is 2.91:1 — below WCAG AA. This is not negligence and not silent
+ * debt: it is encoded here so it (a) cannot drift, (b) cannot get worse,
+ * (c) trips this test if anyone "fixes" it to AA (forcing a conscious
+ * re-decision and removal of the exception). Everything else on both
+ * buttons must remain strictly AA — the exception is exactly one surface
+ * pair (+ its hover), nothing more.
+ */
+describe('El Alba button swap — preset-only, documented exception', () => {
+  const INDEX = resolve(__dirname, '../src/styles/index.css');
+  const css = readFileSync(INDEX, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('.btn--primary/.btn--secondary are tokenized with the original fallback', () => {
+    expect(css).toMatch(/\.btn--primary\s*\{[^}]*var\(--btn-primary-bg,\s*var\(--color-primary\)\)/);
+    expect(css).toMatch(/\.btn--secondary\s*\{[^}]*var\(--btn-secondary-bg,\s*var\(--color-secondary\)\)/);
+  });
+
+  it('swaps the colour families in El Alba (primary←secondary, secondary←primary)', () => {
+    // Primary carries the exact brand SECONDARY orange (#ff671d); secondary
+    // carries the brand PRIMARY blue — that is the swap.
+    expect(tok(elalbaMap, '--btn-primary-bg')).toBe(tok(elalbaMap, '--color-secondary'));
+    expect(tok(elalbaMap, '--btn-secondary-bg')).toBe(tok(elalbaMap, '--color-primary'));
+  });
+
+  it('SECONDARY stays strictly AA (the swap must not break the blue side)', () => {
+    const sfg = tok(elalbaMap, '--btn-secondary-fg');
+    for (const [label, bg] of [
+      ['secondary bg', tok(elalbaMap, '--btn-secondary-bg')],
+      ['secondary hover', tok(elalbaMap, '--btn-secondary-bg-hover')],
+    ] as Array<[string, string]>) {
+      const r = contrast(sfg, bg);
+      expect(r, `${label}: ${sfg} on ${bg} = ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('PRIMARY is the pinned sub-AA brand exception (bounded both ways)', () => {
+    const pfg = tok(elalbaMap, '--btn-primary-fg');
+    const base = contrast(pfg, tok(elalbaMap, '--btn-primary-bg'));
+    const hover = contrast(pfg, tok(elalbaMap, '--btn-primary-bg-hover'));
+    // Acknowledged values: white/#ff671d = 2.91, white/#ff8344 = 2.44.
+    // Lower bound: cannot get WORSE than the known hover (2.44).
+    // Upper bound: stays BELOW AA — if it ever reaches 4.5 this fails on
+    // purpose, so the exception is reviewed and removed, not left stale.
+    expect(base, `primary base = ${base.toFixed(2)}:1 (expected ~2.91, sub-AA brand exception)`).toBeCloseTo(2.91, 1);
+    expect(hover, `primary hover = ${hover.toFixed(2)}:1 (expected ~2.44, sub-AA brand exception)`).toBeCloseTo(2.44, 1);
+    expect(base).toBeLessThan(4.5);
+    expect(hover).toBeGreaterThanOrEqual(2.4);
+  });
+
+  it('does not define --btn-* in the default palette (fallback governs)', () => {
+    expect(baseMap['--btn-primary-bg']).toBeUndefined();
+    expect(baseMap['--btn-secondary-bg']).toBeUndefined();
+  });
+});
