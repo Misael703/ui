@@ -90,12 +90,16 @@ p {
 
 .label {
   font-family: var(--font-body);
-  font-weight: 700;
+  /* The label is scaffolding; the value is the content. It recedes by
+     default (post-1.10.0): muted foreground + medium weight, so the field
+     value reads as primary. Still AA on every surface it paints — see
+     tests/Contrast.test.tsx (--fg-muted floor). 1.10.0 fixed only the
+     case (--tt-data → none); this fixes the weight/colour. */
+  font-weight: 500;
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
-  /* Form labels read as data, not as a shouting micro-label (v1.10.0). */
   text-transform: var(--tt-data);
-  color: var(--fg-default);
+  color: var(--fg-muted);
 }
 
 .caption {

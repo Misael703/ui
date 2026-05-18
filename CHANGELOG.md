@@ -5,6 +5,59 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] — 2026-05-18
+
+**Minor.** Quiet-defaults follow-up to 1.10.0, driven by building a real
+dense table (driver list) + an edit modal. Additive API (`Badge` gains an
+optional `tone`); three defaults change visually in prod consumers
+(barritas / despachos) — intentional, the loud default was the defect.
+
+### Added
+- **`Badge` `tone` prop** (`'data'` default · `'label'`). `'data'` is the
+  quiet data-chip register: sentence case, tinted text (`--fg-muted`), no
+  hard border — it reads as metadata in a dense table. `'label'` opts into
+  the brand micro-label (uppercase texture) for eyebrows / kickers / tags.
+  Backward-compatible at the type level (new optional prop); orthogonal to
+  `variant`.
+- **`Badge` `appearance` prop** (`'soft'` default · `'solid'` · `'outline'`),
+  orthogonal to `variant` (the colour role). `'soft'` is the tinted chip
+  (unchanged default). `'solid'` is a filled chip (the variant's deep
+  `--color-*-800` tone + white text); `variant="neutral" appearance="solid"`
+  is the dark/ink tag. `'outline'` is a hairline chip (transparent fill,
+  the deep tone for text + border). Both reuse the variant's already-shipped
+  AA text token, so contrast is AA by construction — measured worst cases:
+  solid white-on-tone ≥ **5.5:1** (warning yellow-800; El Alba accent
+  5.47), outline tone-on-surface ≥ **5.56:1**. Supersedes the legacy
+  `variant="solid"` / `"solid-orange"` magic strings (kept, not removed).
+- **`.badge--info`** filled in: the `info` variant existed in the union
+  since forever but had no CSS (it fell back to neutral). Soft register,
+  same shape as the other status variants. Contrast info-800/info-50 =
+  **7.85:1** ✓.
+
+### Changed (visual — affects prod consumers)
+- **`Badge` default is now the data-chip register.** Was uppercase
+  (`--tt-label`) + ink (`--fg-default`) + a hard `--border-default` ring —
+  it shouted as a status/type/price chip in dense tables. Now sentence
+  case, `--fg-muted`, no hard border. Neutral contrast on `--bg-subtle`:
+  default 16.0 → **5.27**, El Alba 17.2 → **5.66** (both still AA). Brand
+  caps are not lost — opt in with `tone="label"`. The 1.10.0 P4 decision
+  ("badges are micro-labels, keep caps") only held for eyebrow badges; it
+  did not cover badges that carry a data value.
+- **Form `Label` recedes.** `.label` was weight `700` + ink
+  (`--fg-default`) — the scaffold weighed as much as the value. Now weight
+  `500` + `--fg-muted`. Still AA on every surface it paints (default
+  canvas 5.34 / surface 5.74 · El Alba 6.17 — guarded by
+  `Contrast.test.tsx`). 1.10.0 fixed only the case (`--tt-data`); this
+  fixes the weight/colour.
+
+### Fixed
+- **`Modal` body never scrolls horizontally.** `.modal__body` had
+  `overflow-y:auto` with no `overflow-x`, which per the CSS spec computes
+  `overflow-x:auto` → an ugly horizontal scrollbar on slightly-wide
+  content. Now `overflow-x:hidden; overflow-y:auto; min-width:0` so a
+  flex/grid child (e.g. a 2-column form) reflows/clips instead of forcing
+  a blowout the consumer never asked for.
+
 ## [1.10.0] — 2026-05-17
 
 **Minor.** Data-density / legibility pass driven by a data-heavy consumer

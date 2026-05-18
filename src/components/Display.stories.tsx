@@ -64,6 +64,97 @@ export const Badges: StoryObj = {
   ),
 };
 
+/**
+ * Registros de Badge (post-1.10.0). **Default = data-chip quieto**: sentence
+ * case, texto tintado, sin borde duro — lee como metadato en una tabla densa
+ * (status, tipo, "Clase A4", un precio). `tone="label"` = micro-label de
+ * marca: la textura en mayúsculas para eyebrows / kickers / tags cortos.
+ * Escena canónica: la columna de dato usa el default; los tags de marca
+ * optan por `tone="label"`.
+ */
+export const BadgeRegisters: StoryObj = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 24, maxWidth: 560 }}>
+      <div>
+        <div style={{ font: '600 12px/1 var(--font-body)', color: 'var(--fg-muted)', marginBottom: 8 }}>
+          Columna de dato — default (quieto)
+        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>
+          <tbody>
+            {[
+              ['0010402', 'Envío', 'success', 'Entregado'],
+              ['0010403', 'Retiro', 'warning', 'Pendiente'],
+              ['0010404', 'Envío', 'danger', 'Cancelado'],
+            ].map(([n, tipo, v, estado]) => (
+              <tr key={n} style={{ borderTop: '1px solid var(--border-default)' }}>
+                <td style={{ padding: '8px 12px', fontVariantNumeric: 'tabular-nums' }}>{n}</td>
+                <td style={{ padding: '8px 12px' }}><Badge>{tipo}</Badge></td>
+                <td style={{ padding: '8px 12px' }}><Badge variant={v as 'success'}>{estado}</Badge></td>
+                <td style={{ padding: '8px 12px' }}><Badge variant="neutral">Clase A4</Badge></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div style={{ font: '600 12px/1 var(--font-body)', color: 'var(--fg-muted)', marginBottom: 8 }}>
+          Micro-label de marca — opt-in <code>tone="label"</code>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Badge tone="label">Nuevo</Badge>
+          <Badge variant="accent" tone="label">Oferta</Badge>
+          <Badge variant="primary" tone="label">Beta</Badge>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * Eje `appearance` (ortogonal a `variant`). `soft` (default) = chip tintado;
+ * `solid` = relleno (tono profundo del variant + blanco); `outline` = hairline
+ * (transparente, tono profundo en texto+borde). `variant="neutral"
+ * appearance="solid"` = tag oscuro/ink. Escena del mock: status pills,
+ * brand tags, count.
+ */
+export const BadgeAppearances: StoryObj = {
+  render: () => {
+    const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <span style={{ width: 110, font: '600 11px/1 var(--font-body)', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{label}</span>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>{children}</div>
+      </div>
+    );
+    return (
+      <div style={{ display: 'grid', gap: 20 }}>
+        <Row label="Status pills">
+          <Badge variant="success" dot tone="label">En stock</Badge>
+          <Badge variant="warning" dot tone="label">Stock bajo</Badge>
+          <Badge variant="danger" dot tone="label">Sin stock</Badge>
+          <Badge variant="info" dot tone="label">Cotización</Badge>
+        </Row>
+        <Row label="Brand tags">
+          <Badge variant="primary" appearance="solid" tone="label">Nuevo</Badge>
+          <Badge variant="accent" appearance="solid" tone="label">−20%</Badge>
+          <Badge variant="primary" appearance="outline" tone="label">Patio</Badge>
+          <Badge variant="neutral" appearance="solid" tone="label">Premium</Badge>
+        </Row>
+        <Row label="Count · dot">
+          <Badge variant="accent" appearance="solid">12</Badge>
+          <Badge variant="primary" appearance="solid">99+</Badge>
+          <StatusIndicatorDot tone="success" />
+          <StatusIndicatorDot tone="danger" />
+        </Row>
+      </div>
+    );
+  },
+};
+
+function StatusIndicatorDot({ tone }: { tone: 'success' | 'danger' }) {
+  const color = tone === 'success' ? 'var(--color-success)' : 'var(--color-danger)';
+  return <span aria-label={tone} style={{ width: 10, height: 10, borderRadius: 999, background: color, display: 'inline-block' }} />;
+}
+
 /** P5f — `pulse`: un solo Badge cubre una columna de estado (antes había
  * que mezclar StatusIndicator + Badge). Respeta prefers-reduced-motion. */
 export const BadgePulse: StoryObj = {
