@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from './Button';
+import { Button, ButtonGroup } from './Button';
 
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button',
@@ -31,6 +31,28 @@ export const AllSizes: S = {
       <Button {...a} size="sm">Pequeño</Button>
       <Button {...a} size="md">Mediano</Button>
       <Button {...a} size="lg">Grande</Button>
+    </div>
+  ),
+};
+
+/**
+ * `ButtonGroup`: agrupa botones como un control segmentado (los bordes
+ * internos se colapsan; `role="group"`, configurable). Útil para acciones
+ * relacionadas o un toggle de vista.
+ */
+export const Grouped: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+      <ButtonGroup aria-label="Vista">
+        <Button variant="outline">Lista</Button>
+        <Button variant="outline">Tarjetas</Button>
+        <Button variant="outline">Tabla</Button>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Acciones">
+        <Button>Guardar</Button>
+        <Button variant="outline">Duplicar</Button>
+        <Button variant="ghost">Cancelar</Button>
+      </ButtonGroup>
     </div>
   ),
 };

@@ -420,25 +420,49 @@ button, input, select, textarea { box-sizing: border-box; }
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  /* Quieter by default (v1.10.0): a status column is many badges at once;
-     700 + 4/10 padding made each one shout and added weight to dense
-     tables. 600 + tighter padding reads as a calm chip. Case stays on
-     --tt-label (badges are true micro-labels — kept by the P4 decision). */
+  /* Default register is the quiet DATA-CHIP (post-1.10.0). The P4 decision
+     ("badges are micro-labels, keep caps") only held for eyebrow/tag
+     badges; in a dense table the overwhelming real use is a data value
+     (status, type, "Clase A4", a price) where caps + ink + a hard ring
+     shout and break the scan. So the default now reads as metadata:
+     sentence case, tinted text, no hard border. The brand caps texture is
+     not lost — it moves to the opt-in `.badge--label` register below. */
   font-weight: 600;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
   letter-spacing: var(--tracking-wide);
-  text-transform: var(--tt-label);
+  text-transform: none;
   background: var(--bg-subtle);
-  color: var(--fg-default);
-  border: 1px solid var(--border-default);
+  color: var(--fg-muted);
+  border: 1px solid transparent;
   white-space: nowrap;
+  /* Per-variant deep tone, consumed by the solid/outline appearances.
+     Neutral (no variant rule) → ink: `variant="neutral" appearance="solid"`
+     is the dark PREMIUM tag. Each .badge--<variant> overrides it below. */
+  --badge-ink: var(--color-gray-800);
 }
-.badge--primary { background: var(--color-primary-100); color: var(--color-primary-800); border-color: var(--color-primary-200); }
-.badge--accent { background: var(--color-secondary-100); color: var(--color-secondary-800); border-color: var(--color-secondary-200); }
-.badge--success { background: var(--color-green-50); color: var(--color-green-800); border-color: var(--color-green-200); }
-.badge--warning { background: var(--color-yellow-50); color: var(--color-yellow-800); border-color: var(--color-yellow-200); }
-.badge--danger { background: var(--color-red-50); color: var(--color-red-800); border-color: var(--color-red-200); }
+/* Opt-in brand micro-label register: eyebrows, kickers, "NUEVO" tags —
+   the caps texture that used to be every badge's default. The variant
+   tints still apply on top (e.g. <Badge variant="accent" tone="label">). */
+.badge--label { text-transform: var(--tt-label); }
+.badge--primary { background: var(--color-primary-100); color: var(--color-primary-800); border-color: var(--color-primary-200); --badge-ink: var(--color-primary-800); }
+.badge--accent { background: var(--color-secondary-100); color: var(--color-secondary-800); border-color: var(--color-secondary-200); --badge-ink: var(--color-secondary-800); }
+.badge--success { background: var(--color-green-50); color: var(--color-green-800); border-color: var(--color-green-200); --badge-ink: var(--color-green-800); }
+.badge--warning { background: var(--color-yellow-50); color: var(--color-yellow-800); border-color: var(--color-yellow-200); --badge-ink: var(--color-yellow-800); }
+.badge--danger { background: var(--color-red-50); color: var(--color-red-800); border-color: var(--color-red-200); --badge-ink: var(--color-red-800); }
+/* Was missing in 1.10.0 (variant existed in the union, no CSS → fell back to
+   neutral). Soft register, same shape as the others. */
+.badge--info { background: var(--color-info-50); color: var(--color-info-800); border-color: var(--color-info-200); --badge-ink: var(--color-info-800); }
+/* Appearance axis, orthogonal to variant. Both reuse the per-variant
+   --badge-ink, which is the variant's already-shipped AA text token
+   (--color-*-800): solid = white on that token (AA by symmetry — it's
+   proven AA as text on near-white, so the reverse holds); outline = that
+   token as text + border on the surface (white is lighter than the soft
+   tint, so contrast only improves). Placed after the variant rules so it
+   wins. Legacy .badge--solid/.badge--solid-orange below are superseded but
+   kept (no break). */
+.badge--app-solid { background: var(--badge-ink); color: var(--color-white); border-color: transparent; }
+.badge--app-outline { background: transparent; color: var(--badge-ink); border-color: var(--badge-ink); }
 .badge--solid {
   background: var(--color-primary);
   color: var(--color-white);
@@ -1085,7 +1109,12 @@ button, input, select, textarea { box-sizing: border-box; }
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
-.modal__body { padding: 24px; overflow-y: auto; }
+/* Pit of success: `overflow-y:auto` alone makes the browser compute
+   `overflow-x:auto` too (CSS spec), so slightly-wide content produced an
+   ugly horizontal scrollbar. Clip on x, scroll only on y; `min-width:0`
+   lets a flex/grid child (e.g. a 2-col form) reflow instead of forcing a
+   blowout the consumer never asked for. */
+.modal__body { padding: 24px; overflow-x: hidden; overflow-y: auto; min-width: 0; }
 .modal__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;

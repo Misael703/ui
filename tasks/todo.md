@@ -1,3 +1,60 @@
+# Tanda post-1.10.0 — P1 Badge data-chip · P2 Label recesión · P3 Modal overflow-x (2026-05-18)
+
+Apila sobre 1.10.0 (en prod). Principio: el default ES el producto (no "pase
+prop / override"). Evidencia leída: DESIGN/PRODUCT/CHANGELOG + CSS de Badge,
+.label (_typography.css:91), .modal__body (index.css:1088), tokens _root.css +
+preset elalba. Sin codear aún (plan + medición + decisión de marca).
+
+## Medición de contraste (hex/hex, AA texto 4.5)
+
+P1 — Badge neutral, `color` sobre `--bg-subtle`:
+| palette | elemento | antes (ink) | después (--fg-muted) | AA |
+|---|---|---|---|---|
+| default | #1c1917 → #6b6560 / bg #f5f5f4 | 16.0 | **5.27** | ✓ |
+| El Alba | #0c1220 → #5b6173 / bg #f4f5f8 | 17.2 | **5.66** | ✓ |
+
+P2 — `.label` ink→--fg-muted (peor superficie):
+| palette | sup | después | AA |
+|---|---|---|---|
+| default | canvas #fef5ef | 5.34 | ✓ |
+| default | surface #fff | 5.74 | ✓ |
+| El Alba | surface/canvas #fff | 6.17 | ✓ |
+(ambos ya enforced por tests/Contrast.test.tsx; el cambio es color+peso, no rompe AA)
+
+## Defectos (causa exacta)
+- **P1** `.badge` (index.css:419): neutral `color:var(--fg-default)` (ink) +
+  `border:1px solid var(--border-default)` (duro) + `text-transform:var(--tt-label)`
+  (uppercase, decisión P4). Para chip de DATO en tabla densa: grita, rompe escaneo.
+- **P2** `.label` (_typography.css:91): `font-weight:700; color:var(--fg-default)`
+  (ink). 1.10.0 arregló el CASE (--tt-data→none) pero NO la recesión: el label
+  pesa igual que el valor que etiqueta.
+- **P3** `.modal__body` (index.css:1088): `overflow-y:auto` sin `overflow-x`
+  → por spec CSS computa overflow-x:auto → scrollbar horizontal con contenido
+  apenas ancho. `.modal` ya tiene overflow:hidden + flex column.
+
+## Blast radius (medido en consumers)
+- barritas: 4 files importan kit; 1 `<Badge variant="accent">` = **chip de
+  precio $X** (dato, no eyebrow). marginapp: 0 Badge. despachos: Badge vía
+  wrappers DispatchStatus/TypeBadge = **status/tipo en tabla densa** (dato).
+  → El uso real de Badge en TODOS los consumers es chip-de-dato, no micro-label
+  de marca. Refuerza flip de default, pero es decisión del owner.
+
+## Plan (tras decisión de marca + tu OK)
+1. Repro que FALLA primero: story+test escena canónica (tabla densa con
+   columna Badge de dato + barra de filtros con labels + Modal grid 2-col).
+2. P1 no-marca (fix directo de default): neutral badge ink→--fg-muted,
+   ablandar/quitar borde duro del registro de dato. P1 marca: según tu decisión.
+3. P2: `.label` color→--fg-muted + peso 700→500/600 (recesión; AA medido ✓).
+4. P3: `.modal__body { overflow-x:hidden; overflow-y:auto; min-width:0 }`.
+5. API aditiva backward-compat; story+test regresión c/u; a11y addon;
+   `npm test`; `tsup` OK verificado en artefacto; Changeset+CHANGELOG;
+   SemVer minor. Sin push/publish/release sin tu OK.
+
+**FRENADO: decisión de marca P1 (default de `<Badge>`) — pendiente del owner.**
+
+---
+---
+
 # Finding F — paginación "rota" = screenshot kit 1.8.0 stale (2026-05-17)
 
 Imagen reportada: pager solitario "1–6 de 6 ‹ 1 ›" + notch blanco en esquina

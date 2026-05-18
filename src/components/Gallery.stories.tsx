@@ -1,5 +1,7 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ImageGallery } from './Gallery';
+import { ImageGallery, Lightbox } from './Gallery';
+import { Button } from './Button';
 
 export default { title: 'Patterns/Gallery', tags: ['autodocs'] } as Meta;
 
@@ -24,4 +26,28 @@ export const ThumbsLeft: StoryObj = {
       <ImageGallery images={images} thumbnailPosition="left" />
     </div>
   ),
+};
+
+/**
+ * Visor a pantalla completa controlado. `role="dialog"` + `aria-modal`;
+ * Esc cierra, ←/→ navegan (cuando se pasa `onChange`). Click en el backdrop
+ * cierra; click en la imagen no.
+ */
+export const LightboxViewer: StoryObj = {
+  render: () => {
+    const [open, setOpen] = React.useState(false);
+    const [index, setIndex] = React.useState(0);
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Abrir visor</Button>
+        <Lightbox
+          open={open}
+          onClose={() => setOpen(false)}
+          images={images}
+          index={index}
+          onChange={setIndex}
+        />
+      </>
+    );
+  },
 };

@@ -65,12 +65,41 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
    * inconsistently). Implies a dot. Respects `prefers-reduced-motion`.
    */
   pulse?: boolean;
+  /**
+   * Typographic register. `'data'` (default) is the quiet data-chip:
+   * sentence case, tinted, no hard border — it reads as metadata in a
+   * dense table. `'label'` is the brand micro-label: uppercase texture
+   * for eyebrows, kickers and short tags. Opt into `'label'` only when
+   * the badge is a label, not a value.
+   */
+  tone?: 'data' | 'label';
+  /**
+   * Surface intensity, orthogonal to `variant` (which is the colour
+   * role). `'soft'` (default) is the tinted chip. `'solid'` is a filled
+   * chip (the variant's deep tone + white text). `'outline'` is a hairline
+   * chip (transparent fill, the variant's deep tone for text + border).
+   * `variant="neutral" appearance="solid"` is the dark/ink tag. Supersedes
+   * the legacy `variant="solid"` / `"solid-orange"` magic strings (still
+   * supported, not removed).
+   */
+  appearance?: 'soft' | 'solid' | 'outline';
 }
 
-export function Badge({ variant = 'neutral', dot, pulse, className, children, ...rest }: BadgeProps) {
+export function Badge({
+  variant = 'neutral', dot, pulse, tone = 'data', appearance = 'soft', className, children, ...rest
+}: BadgeProps) {
   const showDot = dot || pulse;
   return (
-    <span className={cx('badge', `badge--${variant}`, className)} {...rest}>
+    <span
+      className={cx(
+        'badge',
+        `badge--${variant}`,
+        tone === 'label' && 'badge--label',
+        appearance !== 'soft' && `badge--app-${appearance}`,
+        className
+      )}
+      {...rest}
+    >
       {showDot && (
         <span
           className={cx('badge__dot', pulse && 'is-pulsing')}

@@ -42,3 +42,29 @@ export const DrawerLateral: StoryObj = {
     );
   },
 };
+
+/**
+ * Pit of success (post-1.10.0): un grid de 2 columnas que antes provocaba
+ * scrollbar horizontal feo ahora se contiene/reflowea con gracia. El body
+ * clipea en x y sólo scrollea en y.
+ */
+export const ModalGridDosColumnas: StoryObj = {
+  render: () => {
+    const [o, setO] = React.useState(true);
+    return (
+      <>
+        <Button onClick={() => setO(true)}>Abrir Modal</Button>
+        <Modal open={o} onClose={() => setO(false)} title="Editar chofer" size="md">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {['Nombre', 'RUT', 'Patente asignada', 'Teléfono de contacto largo', 'Email', 'Licencia clase'].map((l) => (
+              <label key={l} style={{ display: 'grid', gap: 4, minWidth: 0 }}>
+                <span className="label">{l}</span>
+                <input className="input" placeholder={l} />
+              </label>
+            ))}
+          </div>
+        </Modal>
+      </>
+    );
+  },
+};
