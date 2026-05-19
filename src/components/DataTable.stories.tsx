@@ -444,3 +444,53 @@ export const DataTablePlayground: StoryObj = {
     );
   },
 };
+
+/**
+ * GOLD STANDARD (acceptance, v1.14.0). A dense "Órdenes de despacho" table
+ * with a filter toolbar, secondary eco lines and data-chip badges inside a
+ * rounded Card — **rendered entirely by kit defaults, zero consumer
+ * override**. Mono = bundled JetBrains Mono (`.cell-mono`), eco line =
+ * `.cell-meta` (11px/--fg-meta, recedes), primary cell ~14px, header
+ * receded + tracked, one divider, no seam, quiet data-chip badges.
+ */
+export const GoldStandard: StoryObj = {
+  render: () => {
+    const data = [
+      { id: '1', doc: '0010402', eco: 'Factura electrónica', cliente: 'Comercial Andes', rut: '76.512.340-9', dir: 'Av. Vicuña Mackenna 1240, Ñuñoa', fecha: '14-05-2026', tipo: 'Envío', estado: 'Entregado', clase: 'Clase A4' },
+      { id: '2', doc: '0010403', eco: 'Boleta electrónica', cliente: 'Ferretería Sur', rut: '77.108.220-K', dir: 'Los Carrera 880, Concepción', fecha: '14-05-2026', tipo: 'Retiro', estado: 'Pendiente', clase: 'Clase A4' },
+      { id: '3', doc: '0010404', eco: 'Factura electrónica', cliente: 'Distribuidora Pacífico', rut: '76.990.110-2', dir: 'Ruta 68 Km 14, Pudahuel', fecha: '13-05-2026', tipo: 'Envío', estado: 'Cancelado', clase: 'Clase B2' },
+    ];
+    const estadoVariant = (e: string) => (e === 'Entregado' ? 'success' : e === 'Pendiente' ? 'warning' : 'danger') as 'success';
+    return (
+      <Card>
+        <CardBody style={{ padding: 0 }}>
+          <DataTable
+            rows={data}
+            rowKey={(r) => r.id}
+            ariaLabel="Órdenes de despacho"
+            toolbar={
+              <TableToolbar>
+                <div className="grow"><Input placeholder="Buscar N° doc, cliente…" /></div>
+                <Select aria-label="Estado"><option>Todos</option><option>Entregado</option><option>Pendiente</option></Select>
+                <Button variant="outline" size="sm">Filtros</Button>
+              </TableToolbar>
+            }
+            columns={[
+              { key: 'doc', header: 'N° documento', accessor: (r) => (
+                <><span className="cell-mono">{r.doc}</span><span className="cell-meta">{r.eco}</span></>
+              ) },
+              { key: 'cliente', header: 'Cliente', accessor: (r) => (
+                <><span>{r.cliente}</span><span className="cell-meta cell-mono">{r.rut}</span></>
+              ) },
+              { key: 'dir', header: 'Dirección', accessor: (r) => <div className="cell-wrap" style={{ maxWidth: 220 }}>{r.dir}</div> },
+              { key: 'fecha', header: 'Fecha', accessor: (r) => <span className="cell-mono">{r.fecha}</span> },
+              { key: 'tipo', header: 'Tipo', accessor: (r) => <Badge>{r.tipo}</Badge> },
+              { key: 'estado', header: 'Estado', accessor: (r) => <Badge variant={estadoVariant(r.estado)} dot>{r.estado}</Badge> },
+              { key: 'clase', header: 'Clase', accessor: (r) => <Badge variant="neutral">{r.clase}</Badge> },
+            ]}
+          />
+        </CardBody>
+      </Card>
+    );
+  },
+};

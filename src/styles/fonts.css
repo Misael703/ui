@@ -12,10 +12,11 @@
  *
  * Ambas fonts shipean bajo SIL Open Font License 1.1. Ver `dist/fonts/OFL.txt`.
  *
- *   - Outfit (display) — Google Fonts / The Outfit Project Authors
- *   - DM Sans (body)   — Google Fonts / Colophon Foundry, Jonny Pinhorn
+ *   - Outfit (display)        — Google Fonts / The Outfit Project Authors
+ *   - DM Sans (body)          — Google Fonts / Colophon Foundry, J. Pinhorn
+ *   - JetBrains Mono (mono)   — Google Fonts / The JetBrains Mono Authors
  *
- * Ambas son variable fonts: un solo woff2 cubre el rango de weights completo.
+ * Las tres son variable fonts: un solo woff2 cubre el rango de weights.
  */
 
 /* Outfit — variable; `font-weight: 100 900` cubre thin→black en 44 KB. */
@@ -37,6 +38,20 @@
   src: url("./fonts/DMSans-VariableFont_wght.woff2") format("woff2-variations"),
        url("./fonts/DMSans-VariableFont_wght.woff2") format("woff2");
   font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* JetBrains Mono — variable; `font-weight: 100 800` covers thin→extrabold
+   in 72 KB. Latin (U+0000–U+00FF) → complete for Spanish. The kit's
+   default `--font-mono`; tabular-nums datasets (doc numbers, RUT, plates)
+   now render identically across every OS instead of falling back to the
+   system mono stack. */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/JetBrainsMono-VariableFont_wght.woff2") format("woff2-variations"),
+       url("./fonts/JetBrainsMono-VariableFont_wght.woff2") format("woff2");
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }

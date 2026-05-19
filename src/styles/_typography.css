@@ -110,6 +110,37 @@ p {
   color: var(--fg-subtle);
 }
 
+/* First-class secondary/eco line (e.g. "Factura electrónica" under a doc
+   number, RUT under a customer name). Recedes on its own — 11px / lh 16,
+   the `--fg-meta` role — so a consumer never hand-tunes size+colour to get
+   a secondary cell line. `display:block` stacks it under the primary line. */
+.cell-meta {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-2xs);
+  line-height: var(--leading-normal);
+  color: var(--fg-meta);
+}
+
+/* Tabular/code cell (doc number, RUT, plate): the bundled mono +
+   tabular-nums so columns of numbers align and read identically on every
+   OS. A class, not inline font tuning — the kit owns the default. */
+.cell-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Opt a single cell out of the table's `white-space:nowrap` so a free-text
+   column (address, notes, long titles) wraps to multiple lines instead of
+   pushing the whole table into horizontal scroll. Apply to a child element
+   of the accessor — e.g. `<div className="cell-wrap">{r.address}</div>`.
+   `overflow-wrap:anywhere` breaks pathological long tokens (URLs/IDs). */
+.cell-wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* Mono font for any <code> or .mono — applies regardless of context. */
 code, .mono {
   font-family: var(--font-mono);

@@ -133,6 +133,14 @@
      Alba preset re-points these to its cool slate (see presets/elalba). */
   --fg-muted:        #6b6560;   /* on surface 5.74 · canvas 5.34 · subtle 5.27 */
   --fg-subtle:       #726c66;   /* on surface 5.18 · canvas 4.82 · subtle 4.75 */
+  /* Decorative meta/eco role (secondary cell line, "RUT under name", doc
+     echo). Separated from the ESSENTIAL --fg-muted so marking text as
+     secondary recedes on its own without consumers hand-tuning a colour.
+     = the lightest grey the kit ships that still clears AA on every
+     surface it paints (it IS --fg-subtle; both palettes keep it AA, the
+     El Alba preset re-points it with the others). Enforced by
+     Contrast.test. Retune here, never by overriding cells. */
+  --fg-meta:         var(--fg-subtle);
   --fg-on-brand:     var(--color-white);
   /* Secondary base is light (sand) in the default palette → dark text.
      The El Alba preset (dark orange secondary) flips this back to white. */
@@ -162,7 +170,7 @@
   /* -------- Type families -------------------------------------------- */
   --font-display: "Outfit", "Helvetica Neue", Arial, sans-serif;
   --font-body:    "DM Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* -------- Weight scale -------------------------------------------
      Both bundled families (Outfit 100–900, DM Sans 100–1000) are
@@ -200,6 +208,7 @@
 
   --tracking-tight:  -0.01em;
   --tracking-normal: 0;
+  --tracking-snug:   0.02em;  /* small positive — recessed table headers */
   --tracking-wide:   0.04em;
   --tracking-wider:  0.08em;
 

@@ -899,12 +899,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .table th {
   background: var(--bg-subtle);
   text-align: left;
-  /* Header recedes by default (v1.10.0): weight 600 (not 700) + muted +
-     sentence case via --tt-data, so column names sit BELOW the data they
-     label instead of competing with it. Was 700 + all-caps + wide track. */
-  font-weight: 600;
+  /* Header recedes by default. v1.10.0: 700→600, all-caps→sentence
+     (--tt-data), muted. v1.14.0: 600→500 + a touch of tracking
+     (--tracking-snug) to match the gold from-scratch header — lighter and
+     calmer, sits clearly BELOW the data. Colour unchanged (--fg-muted,
+     5.27:1 on --bg-subtle, AA); weight/tracking don't affect contrast. */
+  font-weight: 500;
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-snug);
   text-transform: var(--tt-data);
   color: var(--fg-muted);
   padding: 8px 12px;
@@ -1027,9 +1029,12 @@ button, input, select, textarea { box-sizing: border-box; }
      rows that wrapped to two lines on dense screens (driver #1 of the
      "heaviness"). Default is now the compact register; `white-space:nowrap`
      keeps one row = one line (the wrap was the real defect). Opt back into
-     the airy layout with `density="comfortable"` (.table--comfortable). */
+     the airy layout with `density="comfortable"` (.table--comfortable).
+     v1.14.0: primary cell text --text-xs→--text-sm (~12→14px) to match the
+     gold from-scratch table; the eco/secondary line uses `.cell-meta`
+     (11px / --fg-meta). Padding stays compact (8·12). */
   padding: 8px 12px;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
   white-space: nowrap;
@@ -1038,7 +1043,10 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .table tr:last-child td { border-bottom: 0; }
 .table tbody tr { transition: background var(--duration-fast); }
-.table tbody tr:hover { background: var(--bg-subtle); }
+/* Row-hover uses --bg-muted (one stop darker than --bg-subtle). The
+   v1.11 neutral data-chip ships with bg=--bg-subtle, so hovering a row
+   with --bg-subtle made the chip invisible (same colour as the row). */
+.table tbody tr:hover { background: var(--bg-muted); }
 /* `.table--compact` is now identical to the base — kept idempotent so any
    consumer that already opted in keeps working (no breaking change). */
 .table--compact th, .table--compact td { padding: 8px 12px; font-size: var(--text-xs); }
