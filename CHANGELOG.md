@@ -5,6 +5,61 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] — 2026-05-19
+
+**Minor.** "Gold standard" pass: the kit renders a dense DataTable + filter
+toolbar like the from-scratch reference **by default, no consumer
+override**. Additive API/tokens; three visual defaults change in prod
+consumers (barritas / marginapp / despachos) — intentional, documented
+before→after.
+
+### Added
+- **Bundled mono — JetBrains Mono** (variable woff2, Latin, **72 KB**;
+  same self-hosted pattern as Outfit/DM Sans, OFL-1.1, OFL.txt updated).
+  `--font-mono` default is now `"JetBrains Mono", ui-monospace, …` instead
+  of the system stack — tabular datasets (doc numbers, RUT, plates) render
+  identically on every OS. Kit font payload 84 KB → **156 KB** (+72 KB);
+  consumers that don't import `fonts.css` are unaffected (token falls back
+  to the system stack as before).
+- **`--fg-meta` role token** + **`.cell-meta`** (11px / lh16 / `--fg-meta`)
+  and **`.cell-mono`** (`--font-mono` + tabular-nums) helpers. A
+  secondary/eco cell line (e.g. "Factura electrónica" under a doc number,
+  RUT under a customer) recedes on its own — no hand-tuned size/colour.
+  `--fg-meta` is a distinct role separated from the essential `--fg-muted`,
+  set to the lightest grey the kit ships that still clears WCAG AA on every
+  surface it paints (= `--fg-subtle`; AA-enforced in both palettes by
+  `Contrast.test.tsx`). **No accessibility exception.**
+- **`--tracking-snug`** token (`0.02em`).
+- **`.cell-wrap`** utility — opt one cell out of the table's
+  `white-space:nowrap` so a free-text column (address, notes) wraps to
+  multiple lines instead of pushing the whole table into horizontal scroll.
+  Apply to a child of the accessor (`<div className="cell-wrap" …>`);
+  `overflow-wrap:anywhere` also breaks pathological long tokens.
+
+### Changed (visual — affects prod consumers)
+- **DataTable primary cell text `--text-xs` → `--text-sm`** (≈12 → 14px).
+  Compact padding (8·12) is unchanged; the eco line uses `.cell-meta`
+  (11px). Matches the gold table's primary/secondary size split.
+- **Table header lighter + tracked.** `.table th` `font-weight` 600 → 500,
+  `letter-spacing` `--tracking-normal` → `--tracking-snug`. Colour
+  unchanged (`--fg-muted`, 5.27:1 on `--bg-subtle`, AA — weight/tracking
+  don't affect contrast). (1.10.0 had already moved 700→600 + caps→sentence
+  + muted; 1.13.0 added the one-divider/no-seam surface.)
+
+### Fixed
+- **Row-hover no longer hides the neutral data-chip badge.** `.table tbody
+  tr:hover` was `--bg-subtle`, the same token the v1.11 quiet badge uses
+  for its background — neutral chips (e.g. "Envío", "Clase A4")
+  disappeared on hover. Row-hover is now `--bg-muted` (one stop darker;
+  already a kit semantic); variant chips (tinted `-50/-100`) unaffected.
+  Pinned by `GoldStandard.test.tsx` so the two tokens can never collide
+  again.
+
+### Unchanged (verified, must remain)
+- Badge default stays the quiet data-chip (v1.11.0); DataTable density
+  stays compact-by-default (v1.10.0); the `toolbar`-owned single surface
+  with no seam (v1.13.0). Guarded by `tests/GoldStandard.test.tsx`.
+
 ## [1.13.0] — 2026-05-19
 
 **Minor.** Additive `DataTable` `toolbar` prop (no-toolbar output is

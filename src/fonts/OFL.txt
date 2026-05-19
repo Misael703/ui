@@ -10,6 +10,10 @@ SIL Open Font License, Version 1.1.
     Copyright 2019 Google LLC.
     (https://github.com/googlefonts/dm-fonts)
 
+  - JetBrains Mono
+    Copyright 2020 The JetBrains Mono Project Authors
+    (https://github.com/JetBrains/JetBrainsMono)
+
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 -----------------------------------------------------------

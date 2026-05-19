@@ -70,6 +70,11 @@ function pairs(map: Record<string, string>): Pair[] {
     { label: 'fg-subtle on bg-surface (caption/placeholder)', fg: T('--fg-subtle'), bg: T('--bg-surface'), min: 4.5 },
     { label: 'fg-subtle on bg-canvas', fg: T('--fg-subtle'), bg: T('--bg-canvas'), min: 4.5 },
     { label: 'fg-subtle on bg-subtle', fg: T('--fg-subtle'), bg: T('--bg-subtle'), min: 4.5 },
+    // Meta/eco role (.cell-meta). Distinct token from --fg-muted; must
+    // clear AA on every surface a secondary cell line can paint on.
+    { label: 'fg-meta on bg-surface (cell eco line)', fg: T('--fg-meta'), bg: T('--bg-surface'), min: 4.5 },
+    { label: 'fg-meta on bg-canvas', fg: T('--fg-meta'), bg: T('--bg-canvas'), min: 4.5 },
+    { label: 'fg-meta on bg-subtle (eco line on hovered row)', fg: T('--fg-meta'), bg: T('--bg-subtle'), min: 4.5 },
     { label: 'fg-default on bg-surface', fg: T('--fg-default'), bg: T('--bg-surface'), min: 4.5 },
     { label: 'fg-link on bg-surface', fg: T('--fg-link'), bg: T('--bg-surface'), min: 4.5 },
   ];

@@ -28,3 +28,13 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* JetBrains Mono — variable; covers thin→extrabold in 72 KB. */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../src/fonts/JetBrainsMono-VariableFont_wght.woff2") format("woff2-variations"),
+       url("../src/fonts/JetBrainsMono-VariableFont_wght.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}

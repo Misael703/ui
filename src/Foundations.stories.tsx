@@ -141,6 +141,7 @@ export const Colors: StoryObj = {
         <Swatch token="fg-default" />
         <Swatch token="fg-muted" />
         <Swatch token="fg-subtle" />
+        <Swatch token="fg-meta" />
         <Swatch token="fg-on-brand" />
       </div>
 
@@ -173,8 +174,11 @@ export const Typography: StoryObj = {
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 18, marginTop: 4 }}>The quick brown fox jumps over the lazy dog</div>
         </div>
         <div>
-          <Caption>--font-mono · ui-monospace stack</Caption>
+          <Caption>--font-mono · JetBrains Mono (variable, bundled woff2, tabular-nums)</Caption>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, marginTop: 4 }}>const total = price * quantity;</div>
+          <div className="cell-mono" style={{ fontSize: 14, marginTop: 4 }}>
+            0010402 · 76.512.340-9 · GHJ·12<br />0010399 · 09.880.115-K · KLM·90
+          </div>
         </div>
       </div>
 
@@ -190,6 +194,13 @@ export const Typography: StoryObj = {
         <div><Caption>.body-sm</Caption><div className="body-sm">Body small — texto secundario, hints, metadata.</div></div>
         <div><Caption>.label</Caption><div className="label">Label · uppercase</div></div>
         <div><Caption>.caption</Caption><div className="caption">Caption — leyendas, footnotes, metadatos pequeños.</div></div>
+        <div>
+          <Caption>.cell-meta · línea eco/secundaria de celda (11px / --fg-meta, recede)</Caption>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 14 }}>
+            Comercial Andes Ltda.<span className="cell-meta">76.512.340-9 · Factura electrónica</span>
+          </div>
+        </div>
+        <div><Caption>.cell-mono · dato tabular (mono bundleada + tabular-nums)</Caption><div className="cell-mono">0010402 — $1.290.500</div></div>
         <div><Caption>code / .mono</Caption><div><code>const x = 42;</code></div></div>
       </div>
 
