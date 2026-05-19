@@ -54,6 +54,19 @@ muted↔subtle step; the gray scale stays the decorative ramp. Every
 `--fg-*` on every `--bg-*` it actually paints on is AA — enforced by
 `tests/Contrast.test.tsx`, which parses these token files directly.
 
+**Documented AA exception — El Alba primary button (v1.12.0).** One
+deliberate, owner-accepted (2026-05-18) departure from "accessibility is
+owned": in the **El Alba preset only**, the **primary** button is the exact
+brand orange `#ff671d` + white = **2.91:1** (hover `#ff8344` = 2.44:1),
+below WCAG AA. Brand fidelity was chosen over AA for this single surface,
+eyes open. It is not silent: `tests/Contrast.test.tsx` pins the exact
+sub-AA value (cannot drift or worsen; trips if "fixed", forcing conscious
+removal) and `CHANGELOG.md` records the decision. Scope is exactly this one
+button pair (+ hover); every other button/surface, in every palette,
+remains strictly AA. Revisit if the brand tolerates a darker orange or a
+dark label (both are AA — see the v1.12.0 CHANGELOG for the measured
+alternatives).
+
 ## Typography
 
 - Families: display `Outfit`, body `DM Sans` (both bundled variable fonts,

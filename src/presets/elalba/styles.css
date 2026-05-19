@@ -90,4 +90,23 @@
                      pixel-identity by design — v0.7.1 was sub-AA). */
   --fg-muted:  var(--color-gray-600);
   --fg-subtle: #686d7c;
+
+  /* Button primary↔secondary swap (El Alba only, buttons only — these
+     tokens are read solely by .btn--primary/.btn--secondary; links, focus
+     rings and badges keep the unswapped --color-* tokens).
+     PRIMARY = DELIBERATE BRAND EXCEPTION, owner-accepted 2026-05-18.
+     The exact brand orange #ff671d (--color-secondary) + white is 2.91:1
+     (hover #ff8344 = 2.44:1) — BELOW WCAG AA. The kit's "accessibility is
+     owned" guarantee is intentionally WAIVED for this single button:
+     brand fidelity chosen over AA by the kit owner, eyes open. This is
+     NOT silent debt — it is pinned and bounded in tests/Contrast.test.tsx
+     (must stay this exact sub-AA value; cannot drift) and called out in
+     CHANGELOG + DESIGN.md. Secondary stays the AA blue (#002f87 + white =
+     11.96:1; hover --color-primary-900 16.74:1). */
+  --btn-primary-bg:        var(--color-secondary);
+  --btn-primary-fg:        var(--color-white);
+  --btn-primary-bg-hover:  var(--color-secondary-500);
+  --btn-secondary-bg:        var(--color-primary);
+  --btn-secondary-fg:        var(--color-white);
+  --btn-secondary-bg-hover:  var(--color-primary-900);
 }

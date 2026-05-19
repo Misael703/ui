@@ -108,17 +108,21 @@ button, input, select, textarea { box-sizing: border-box; }
 .btn--block { display: flex; width: 100%; }
 
 /* variants */
+/* Button colour is tokenized so a preset can re-skin buttons WITHOUT
+   touching the global --color-* tokens (which links/focus/badges also
+   read). The fallback IS the original semantic token → the generic
+   default is byte-identical; only a preset that sets --btn-* changes. */
 .btn--primary {
-  background: var(--color-primary);
-  color: var(--fg-on-brand);
+  background: var(--btn-primary-bg, var(--color-primary));
+  color: var(--btn-primary-fg, var(--fg-on-brand));
 }
-.btn--primary:hover:not(:disabled) { background: var(--color-primary-900); }
+.btn--primary:hover:not(:disabled) { background: var(--btn-primary-bg-hover, var(--color-primary-900)); }
 
 .btn--secondary {
-  background: var(--color-secondary);
-  color: var(--fg-on-secondary);
+  background: var(--btn-secondary-bg, var(--color-secondary));
+  color: var(--btn-secondary-fg, var(--fg-on-secondary));
 }
-.btn--secondary:hover:not(:disabled) { background: var(--color-secondary-500); }
+.btn--secondary:hover:not(:disabled) { background: var(--btn-secondary-bg-hover, var(--color-secondary-500)); }
 
 .btn--outline {
   background: transparent;

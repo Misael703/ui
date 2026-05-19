@@ -5,6 +5,44 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] — 2026-05-18
+
+**Minor.** Buttons are now colour-tokenized so a preset can re-skin them
+without touching the global `--color-*` tokens. Additive; the generic
+default is byte-identical. **El Alba preset only**: the primary/secondary
+button colours are swapped, and the El Alba **primary** button carries a
+**deliberate, owner-accepted WCAG-AA exception** (see below) — a visible
+brand change in prod consumers on that preset (barritas).
+
+### Added
+- **Button colour tokens** — `.btn--primary` / `.btn--secondary` (and their
+  `:hover`) read `--btn-primary-bg` / `-fg` / `-bg-hover` and the secondary
+  equivalents, each with the original semantic token as the **fallback**.
+  A preset can re-skin buttons in isolation (links, focus rings, badges,
+  active states keep the unswapped `--color-*`). Default palette: no
+  `--btn-*` defined → fallback governs → pixel-identical, no change.
+
+### Changed (visual — El Alba preset only, affects barritas)
+- **Primary ↔ secondary button colours swapped in the El Alba preset.**
+  Secondary is now the brand blue (`--color-primary` `#002f87` + white =
+  **11.96:1** ✓ AA, hover `--color-primary-900` 16.74:1) — this also
+  retires the pre-existing sub-AA El Alba *secondary* button.
+
+### Accessibility exception (deliberate, owner-accepted 2026-05-18)
+- The El Alba **primary** button is the **exact brand orange** `#ff671d`
+  (`--color-secondary`) + white = **2.91:1** (hover `#ff8344` = **2.44:1**)
+  — **below WCAG AA**. The kit's "accessibility is owned" guarantee is
+  **intentionally waived for this single button**: the kit owner chose
+  brand fidelity over AA, eyes open, after reviewing the implications. This
+  is **not silent debt** — it is pinned and bounded in
+  `tests/Contrast.test.tsx` (the primary pair must stay this exact sub-AA
+  value: it cannot drift, cannot get worse, and if it is ever "fixed" to AA
+  the test fails so the exception is consciously removed) and annotated in
+  `DESIGN.md`. The exception is exactly one surface pair plus its hover;
+  every other El Alba (and default) button surface remains strictly AA.
+  Consumers on the El Alba preset (barritas) inherit this on the primary
+  CTA app-wide when they bump to `^1.12.0`.
+
 ## [1.11.0] — 2026-05-18
 
 **Minor.** Quiet-defaults follow-up to 1.10.0, driven by building a real

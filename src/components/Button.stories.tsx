@@ -36,6 +36,22 @@ export const AllSizes: S = {
 };
 
 /**
+ * Primary vs Secondary. Cambia el toolbar **Preset → El Alba**: el kit
+ * invierte los colores SOLO en ese preset y SOLO en botones — primary pasa
+ * a naranja profundo (`#b84300` + blanco, 5.47:1 AA) y secondary al azul de
+ * marca (`#002f87` + blanco, 11.96:1). Links/focus/badges no se invierten.
+ */
+export const PrimaryVsSecondary: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <Button variant="primary">Guardar pedido</Button>
+      <Button variant="secondary">Duplicar</Button>
+      <Button variant="primary" disabled>Guardar pedido</Button>
+    </div>
+  ),
+};
+
+/**
  * `ButtonGroup`: agrupa botones como un control segmentado (los bordes
  * internos se colapsan; `role="group"`, configurable). Útil para acciones
  * relacionadas o un toggle de vista.
