@@ -96,36 +96,44 @@ export const SinDatosCustom: StoryObj = {
   ),
 };
 
+/**
+ * Toolbar / filter zone + DataTable en UNA superficie redondeada. Se pasa
+ * por el prop `toolbar`: el DataTable **posee** la superficie
+ * (borde+radio+overflow), la toolbar queda clipeada al radio, hay UNA sola
+ * divisoria con el header y la esquina queda limpia — sin apilar
+ * card-border + filtro + header-top, sin costura. Esta ES la forma de
+ * combinar una toolbar con un DataTable; no los envuelvas a mano en tu
+ * propio contenedor bordeado (eso reintroduce la costura).
+ */
 export const ConToolbar: StoryObj = {
   render: () => {
     const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
     return (
-      <div style={{ border: '1px solid var(--border-default)', borderRadius: 12, overflow: 'hidden', background: 'var(--bg-surface)' }}>
-        <TableToolbar>
-          <div className="grow">
-            <Input placeholder="Buscar producto…" />
-          </div>
-          <Button variant="outline" size="sm">Filtros</Button>
-          <Button size="sm">Exportar</Button>
-        </TableToolbar>
-        <DataTable
-          rows={rows}
-          rowKey={(r) => r.id}
-          sort={sort}
-          onSortChange={setSort}
-          columns={[
-            { key: 'name', header: 'Producto', sortable: true },
-            { key: 'sku', header: 'SKU' },
-            { key: 'stock', header: 'Stock', sortable: true, align: 'right' },
-            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-          ]}
-        />
-      </div>
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        sort={sort}
+        onSortChange={setSort}
+        toolbar={
+          <TableToolbar>
+            <div className="grow"><Input placeholder="Buscar producto…" /></div>
+            <Button variant="outline" size="sm">Filtros</Button>
+            <Button size="sm">Exportar</Button>
+          </TableToolbar>
+        }
+        columns={[
+          { key: 'name', header: 'Producto', sortable: true },
+          { key: 'sku', header: 'SKU' },
+          { key: 'stock', header: 'Stock', sortable: true, align: 'right' },
+          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+        ]}
+      />
     );
   },
 };
 
 /** Estado de error: pasa `error` para mostrar un mensaje rojo con `role="alert"`. */
+
 export const ConError: StoryObj = {
   render: () => (
     <DataTable

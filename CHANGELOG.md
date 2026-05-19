@@ -5,6 +5,35 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] — 2026-05-19
+
+**Minor.** Additive `DataTable` `toolbar` prop (no-toolbar output is
+byte-identical) + a sticky-header colour fix that affects any consumer
+using `stickyHeader` (e.g. despachos).
+
+### Added
+- **`DataTable` `toolbar` prop** — a toolbar/filter zone that shares the
+  table's rounded surface. The DataTable owns ONE surface (`.table-surface`
+  = the single authority for border + radius + `overflow:hidden`): the
+  toolbar slot is clipped to the radius and carries the single divider, the
+  inner `.table-wrap` defers its border/radius but stays the scroll/sticky
+  context (unchanged), and the filled header drops its corner-rounding so
+  the strip is clean in the corner — no stacked card-border + filter-border
+  + header-top, no seam. Accepts any node (`<TableToolbar>`, `<FilterBar>`,
+  a custom row). The header band's own fill/typography is untouched
+  (geometry only). The legacy sibling pattern
+  (`<TableToolbar/><DataTable/>`, seamed via `.table-toolbar + .table-wrap`)
+  still works and is unchanged.
+
+### Fixed (visual — affects prod consumers using `stickyHeader`)
+- **Sticky header kept the grey band instead of turning white.**
+  `.table-wrap--sticky .table thead th` hardcoded `background:
+  var(--bg-surface)` (white), silently overriding the `--bg-subtle` grey
+  header band on every sticky table. A sticky header only needs an *opaque*
+  fill (so body rows don't show through on scroll) and `--bg-subtle` is
+  already opaque, so it now matches the non-sticky header. The band's
+  fill/typography is otherwise unchanged.
+
 ## [1.12.0] — 2026-05-18
 
 **Minor.** Buttons are now colour-tokenized so a preset can re-skin them

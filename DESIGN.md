@@ -127,6 +127,14 @@ alternatives).
   Consequence: do **not** wrap `<DataTable>` in your own bordered /
   rounded / `overflow` container (it doubles the border and re-introduces
   the artifact). Drop it directly into a `Card` body.
+- **Toolbar / filter zone = the `DataTable` `toolbar` prop (v1.13.0).** To
+  put a toolbar/filter row on the same rounded surface, pass it via
+  `toolbar` — the DataTable renders it inside `.table-surface` (the single
+  border+radius+`overflow:hidden` authority): one divider, header corner
+  squared, no seam. Hand-wrapping `<TableToolbar/>` + `<DataTable/>` in
+  your own bordered container is the anti-pattern. The bare sibling pattern
+  still works (legacy `.table-toolbar + .table-wrap`) but is not the
+  recommended path.
 - **DataTable density is `compact` by default (v1.10.0).** The
   readable-dense register (≈30px rows, `--text-xs`, single-line cells)
   is the default because the kit serves data-heavy screens — "default =
