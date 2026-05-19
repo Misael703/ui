@@ -221,6 +221,17 @@ export interface DataTableProps<T> {
     cells: React.ReactNode;
     rowKey: string;
   }) => React.ReactNode;
+  /**
+   * Toolbar / filter zone that shares the table's rounded surface. When
+   * set, the DataTable renders it INSIDE its own border+radius+overflow
+   * surface (`.table-surface`): the toolbar is clipped to the radius,
+   * there is exactly one divider between it and the header, and the
+   * header band's corner-rounding is dropped so the strip is clean in the
+   * corner — no card-border + filter-border + header-top stack, no seam.
+   * Accepts any node (`<TableToolbar>`, `<FilterBar>`, a custom row). The
+   * legacy sibling pattern (`<TableToolbar/><DataTable/>`) still works.
+   */
+  toolbar?: React.ReactNode;
   className?: string;
 }
 
@@ -241,7 +252,7 @@ export function DataTable<T>({
   selectable, selectedKeys, onSelectionChange,
   empty, error, loading, stickyHeader, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
-  density = 'compact', rowHref, onRowClick, renderRow,
+  density = 'compact', rowHref, onRowClick, renderRow, toolbar,
 }: DataTableProps<T>) {
   const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
@@ -282,7 +293,7 @@ export function DataTable<T>({
     else onSortChange(null);
   };
 
-  return (
+  const wrap = (
     <div
       className={cx(
         'table-wrap',
@@ -398,6 +409,16 @@ export function DataTable<T>({
           )}
         </tbody>
       </table>
+    </div>
+  );
+  // No toolbar → byte-identical legacy output. With a toolbar, the
+  // DataTable owns the single rounded+clipped+bordered surface; the inner
+  // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
+  // context, so existing behaviour is untouched.
+  return toolbar == null ? wrap : (
+    <div className="table-surface">
+      <div className="table-surface__bar">{toolbar}</div>
+      {wrap}
     </div>
   );
 }

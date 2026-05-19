@@ -965,7 +965,11 @@ button, input, select, textarea { box-sizing: border-box; }
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--bg-surface);
+  /* Keep the grey band (`--bg-subtle`), not white. A sticky header only
+     needs an OPAQUE fill so body rows don't show through on scroll —
+     `--bg-subtle` is already opaque, so it both stays on-brand and works.
+     (Was `--bg-surface`, which silently turned every sticky header white.) */
+  background: var(--bg-subtle);
   /* Sticky cells lose the bottom border the row would normally have, so
      paint one explicitly. */
   box-shadow: inset 0 -1px 0 var(--border-default);
@@ -1076,6 +1080,25 @@ button, input, select, textarea { box-sizing: border-box; }
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+/* `<DataTable toolbar=…>` — the DataTable owns ONE shared rounded surface.
+   `.table-surface` is the single authority: border + radius + overflow:
+   hidden (clips the toolbar slot AND the table to the radius). The slot
+   carries the ONE divider; the inner `.table-wrap` defers its border/
+   radius but stays the scroll/sticky context (unchanged); the filled
+   header drops its corner-rounding so the strip is clean in the corner —
+   no stacked card-border + filter-border + header-top, no seam. The
+   header band's own fill/typography is NOT touched (geometry only). */
+.table-surface {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.table-surface__bar { border-bottom: 1px solid var(--border-default); }
+.table-surface > .table-wrap { border: 0; border-radius: 0; }
+.table-surface .data-table thead tr:first-child th:first-child { border-top-left-radius: 0; }
+.table-surface .data-table thead tr:first-child th:last-child { border-top-right-radius: 0; }
 
 /* ---------- Modal & drawer ---------------------------------------------- */
 .modal-backdrop {
