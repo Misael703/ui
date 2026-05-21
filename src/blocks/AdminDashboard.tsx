@@ -1,15 +1,20 @@
 'use client';
 /**
- * Block: admin dashboard with the classic SIDEBAR shell (AppShell default,
- * `headerLayout="side"`). Composes AppShell + PageHeader + KPI grid + a
- * recent-activity DataTable.
+ * Block: admin dashboard. Uses the AppShell TOP-header variant
+ * (`headerLayout="top"`, v1.15.0) — full-width header above body with three
+ * slots (`header.{left, center, right}`), centered brand, collapsible
+ * sidebar that does NOT affect the header band.
  *
- * For the FULL-WIDTH header variant (gits.id-style top bar with center logo),
- * see the companion block `AppShellTop` — same shell, different `headerLayout`.
+ * Composition: AppShell + PageHeader + KPI grid + recent-activity DataTable.
+ *
+ * Why top by default: the brand band stays full-width on collapse, which
+ * reads better on the most common admin viewports (>= 1280px); on narrow
+ * screens the sidebar collapses to zero (not to a 72px rail) so content has
+ * its full horizontal room back.
  *
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
- * Drop a Chart in the KPI row if you need one (see Charts story; Charts take
- * a `recharts` prop, kept out of this recipe on purpose).
+ * Drop a Chart in the KPI row if you need one (see Charts story; Charts
+ * take a `recharts` prop, kept out of this recipe on purpose).
  */
 import * as React from 'react';
 import {
@@ -22,7 +27,7 @@ import {
   DataTable,
   Badge,
 } from '../index';
-import { Home, Package, Truck, Users, Settings, ShoppingCart } from '../components/Icons';
+import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell } from '../components/Icons';
 
 const sections = [
   {
@@ -50,18 +55,62 @@ const recent = [
 ];
 
 export function AdminDashboard(): React.ReactElement {
+  const [collapsed, setCollapsed] = React.useState(false);
+
   return (
     <div style={{ height: '100vh' }}>
       <AppShell
-        brand={<Logo variant="horizontal" bg="light" height={32} />}
-        brandCollapsed={<Logo variant="mark" bg="light" height={32} />}
+        headerLayout="top"
+        collapsed={collapsed}
+        onCollapsedChange={setCollapsed}
         sections={sections}
-        topbar={
-          <div style={{ width: '100%', maxWidth: 360 }}>
-            <input className="input" placeholder="Buscar pedidos, productos, clientes…" />
-          </div>
-        }
-        user={<Avatar name="Misael Ocas" size={32} />}
+        header={{
+          left: (
+            <button
+              type="button"
+              aria-label={collapsed ? 'Mostrar menú' : 'Ocultar menú'}
+              onClick={() => setCollapsed((c) => !c)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 36,
+                height: 36,
+                border: 0,
+                background: 'transparent',
+                color: 'inherit',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <MenuIcon size={20} />
+            </button>
+          ),
+          center: <Logo variant="horizontal" bg="light" height={28} />,
+          right: (
+            <>
+              <button
+                type="button"
+                aria-label="Notificaciones"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 36,
+                  height: 36,
+                  border: 0,
+                  background: 'transparent',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-md)',
+                }}
+              >
+                <Bell size={18} />
+              </button>
+              <Avatar name="Misael Ocas" size={32} />
+            </>
+          ),
+        }}
       >
         <PageHeader
           title="Resumen del día"

@@ -155,19 +155,27 @@ Recetas de página listas para copiar, **no se publican en el paquete**
 (viven en `src/blocks/`, fuera de `dist`). Componen los componentes del kit
 en secciones reales. Mirálas renderizadas en Storybook bajo **Blocks/**:
 
-| Block | Compone |
-|---|---|
-| Data table page | FilterPanel + DataTable (con `toolbar` slot) + BulkActionBar + TablePagination |
-| Admin dashboard | AppShell (sidebar) + PageHeader + Kpi + DataTable |
-| AppShell top | AppShell con `headerLayout="top"` (header full-width + sidebar collapsible) |
-| Auth screen | Card + FormField + Input + Logo (variante centered, simple) |
-| Auth split | Form a la izquierda + brand panel con watermark a la derecha (variante split-screen) |
-| Detail page | PageHeader + Tabs + sticky meta sidebar (vista de 1 entidad) |
-| Settings page | Sidebar de secciones + form area (Cuenta · Notificaciones · Seguridad · Facturación) |
-| Empty state page | EmptyState envuelto en page layout — "aún no hay datos" |
-| Error page | Página de error con retry CTA y contacto de soporte |
-| Not found | 404 con numeral brand-colored y dos acciones de recuperación |
-| Checkout | AddressForm + OrderSummary + PromoCodeInput + FreeShippingProgress |
+| Grupo | Block | Compone |
+|---|---|---|
+| Shell | Admin dashboard | AppShell `headerLayout="top"` + PageHeader + Kpi + DataTable |
+| Auth | Auth screen | Card + FormField + Input + Logo (centered, simple) |
+| Auth | Auth split | Form izquierda + brand panel con watermark derecha |
+| Listas | Data table page | FilterPanel + DataTable (con `toolbar` slot) + BulkActionBar + TablePagination |
+| Listas | Detail page | PageHeader + Tabs + sticky meta sidebar (vista de 1 entidad) |
+| Config | Settings page | Sidebar de secciones + form area (Cuenta · Notificaciones · Seguridad · Facturación) |
+| Estados | Empty state page | EmptyState envuelto en page layout |
+| Estados | Error page | Página de error con retry CTA y contacto de soporte |
+| Estados | Not found | 404 con numeral brand-colored y dos acciones de recuperación |
+| Utility | Onboarding checklist | Card + Progress + tareas chequeables con CTAs (activation pattern) |
+| Utility | Notifications page | Inbox con filtros por tono + mark-all-as-read |
+| Utility | Wizard page | Stepper + form por paso + back/next (multi-step) |
+| Utility | Audit log page | DataTable cronológico + DiffViewer en Modal (auditing) |
+| Commerce | Product catalog | FilterPanel + grid de ProductCards + toolbar |
+| Commerce | Cart drawer | Drawer + line items + qty + OrderSummary + Pagar |
+| Commerce | Invoice document | Factura print-friendly con header, items, totales/IVA |
+| Commerce | Checkout | AddressForm + OrderSummary + PromoCodeInput + FreeShippingProgress |
+| Domain | Kanban board | Columnas por estado, cards con priority/assignee/due |
+| Domain | Schedule week | Grid 7 días × N horas con event blocks |
 
 Índice detallado con código embebido: **[docs/BLOCKS.md](./docs/BLOCKS.md)**.
 
