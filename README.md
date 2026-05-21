@@ -157,10 +157,19 @@ en secciones reales. Mirálas renderizadas en Storybook bajo **Blocks/**:
 
 | Block | Compone |
 |---|---|
-| Data table page | FilterPanel + TableToolbar + DataTable + BulkActionBar + TablePagination |
-| Admin dashboard | AppShell + PageHeader + Kpi + DataTable |
-| Auth screen | Card + FormField + Input + Logo (se ve branded con el preset El Alba) |
+| Data table page | FilterPanel + DataTable (con `toolbar` slot) + BulkActionBar + TablePagination |
+| Admin dashboard | AppShell (sidebar) + PageHeader + Kpi + DataTable |
+| AppShell top | AppShell con `headerLayout="top"` (header full-width + sidebar collapsible) |
+| Auth screen | Card + FormField + Input + Logo (variante centered, simple) |
+| Auth split | Form a la izquierda + brand panel con watermark a la derecha (variante split-screen) |
+| Detail page | PageHeader + Tabs + sticky meta sidebar (vista de 1 entidad) |
+| Settings page | Sidebar de secciones + form area (Cuenta · Notificaciones · Seguridad · Facturación) |
+| Empty state page | EmptyState envuelto en page layout — "aún no hay datos" |
+| Error page | Página de error con retry CTA y contacto de soporte |
+| Not found | 404 con numeral brand-colored y dos acciones de recuperación |
 | Checkout | AddressForm + OrderSummary + PromoCodeInput + FreeShippingProgress |
+
+Índice detallado con código embebido: **[docs/BLOCKS.md](./docs/BLOCKS.md)**.
 
 Para usar uno: copia el `.tsx` desde `src/blocks/` a tu app y cambia el
 import `from '../index'` por `from '@misael703/ui'`. Son puntos de partida,
