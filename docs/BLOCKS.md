@@ -341,22 +341,25 @@ verdad en tu store alimenta ambos.
 
 ## Wizard page
 
-Multi-step form. `Stepper` a la izquierda + form area a la derecha + Back/
-Next/Finish footer. En tu app, persistí el draft entre pasos (Redux/Zustand/
-localStorage) y usá react-hook-form por paso.
+Multi-step form. **Horizontal Stepper arriba** (full width) + form area
+abajo (centered, max ~720px) + Back/Next/Finish footer. Layout estándar de
+wizards modernos (Shopify, Stripe Checkout). El `Stepper` del kit está
+diseñado horizontal — meterlo en sidebar vertical de 240px colapsa los
+labels.
+
+En tu app, persistí el draft entre pasos (Redux/Zustand/localStorage) y
+usá react-hook-form por paso.
 
 **Source:** [`src/blocks/WizardPage.tsx`](../src/blocks/WizardPage.tsx)
 **Story:** Storybook → Blocks → Wizard page
 
 ```tsx
 <PageHeader title="Nueva orden de despacho" description={`Paso ${step + 1} de ${STEPS.length}`} />
-<div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 32 }}>
-  <Stepper steps={STEPS} current={step} />
-  <div>
-    <Card><CardBody>{/* render del paso activo */}</CardBody></Card>
-    <Button variant="ghost" onClick={back} disabled={step === 0}>Atrás</Button>
-    {isLast ? <Button onClick={finish}>Crear</Button> : <Button onClick={next}>Siguiente</Button>}
-  </div>
+<Stepper steps={STEPS} current={step} />
+<div style={{ maxWidth: 720, margin: '0 auto' }}>
+  <Card><CardBody>{/* render del paso activo */}</CardBody></Card>
+  <Button variant="ghost" onClick={back} disabled={step === 0}>Atrás</Button>
+  {isLast ? <Button onClick={finish}>Crear</Button> : <Button onClick={next}>Siguiente</Button>}
 </div>
 ```
 
