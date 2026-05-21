@@ -8,7 +8,7 @@ import { NotificationsPage } from './NotificationsPage';
  * truth can feed both. Source: `src/blocks/NotificationsPage.tsx`.
  */
 export default {
-  title: 'Blocks/Notifications page',
+  title: 'Blocks/Genéricos/Utility/Notifications page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

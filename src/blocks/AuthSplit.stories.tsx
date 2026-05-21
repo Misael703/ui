@@ -8,7 +8,7 @@ import { AuthSplit } from './AuthSplit';
  * `src/blocks/AuthSplit.tsx`.
  */
 export default {
-  title: 'Blocks/Auth split',
+  title: 'Blocks/Genéricos/Auth/Auth split',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

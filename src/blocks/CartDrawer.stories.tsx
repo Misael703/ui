@@ -7,7 +7,7 @@ import { CartDrawer } from './CartDrawer';
  * `ProductCatalog`. Source: `src/blocks/CartDrawer.tsx`.
  */
 export default {
-  title: 'Blocks/Cart drawer',
+  title: 'Blocks/Commerce/Cart drawer',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

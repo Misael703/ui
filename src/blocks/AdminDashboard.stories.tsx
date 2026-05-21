@@ -9,7 +9,7 @@ import { AdminDashboard } from './AdminDashboard';
  * Source: `src/blocks/AdminDashboard.tsx`.
  */
 export default {
-  title: 'Blocks/Admin dashboard',
+  title: 'Blocks/Genéricos/Shell/Admin dashboard',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

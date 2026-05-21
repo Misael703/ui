@@ -7,7 +7,7 @@ import { EmptyStatePage } from './EmptyStatePage';
  * page card with a primary CTA. Source: `src/blocks/EmptyStatePage.tsx`.
  */
 export default {
-  title: 'Blocks/Empty state page',
+  title: 'Blocks/Genéricos/Estados/Empty state page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

@@ -8,7 +8,7 @@ import { SettingsPage } from './SettingsPage';
  * active section from the router. Source: `src/blocks/SettingsPage.tsx`.
  */
 export default {
-  title: 'Blocks/Settings page',
+  title: 'Blocks/Genéricos/Config/Settings page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

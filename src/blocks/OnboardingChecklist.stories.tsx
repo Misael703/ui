@@ -8,7 +8,7 @@ import { OnboardingChecklist } from './OnboardingChecklist';
  * `src/blocks/OnboardingChecklist.tsx`.
  */
 export default {
-  title: 'Blocks/Onboarding checklist',
+  title: 'Blocks/Genéricos/Utility/Onboarding checklist',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

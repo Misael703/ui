@@ -6,7 +6,7 @@ import { ErrorPage } from './ErrorPage';
  * and support contact. Source: `src/blocks/ErrorPage.tsx`.
  */
 export default {
-  title: 'Blocks/Error page',
+  title: 'Blocks/Genéricos/Estados/Error page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

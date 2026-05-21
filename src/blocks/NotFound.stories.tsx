@@ -7,7 +7,7 @@ import { NotFound } from './NotFound';
  * toolbar to see brand colors. Source: `src/blocks/NotFound.tsx`.
  */
 export default {
-  title: 'Blocks/Not found',
+  title: 'Blocks/Genéricos/Estados/Not found',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

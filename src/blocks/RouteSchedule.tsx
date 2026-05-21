@@ -1,8 +1,10 @@
 'use client';
 /**
- * Block: weekly schedule / calendar view. 7 days × N hours grid with event
- * blocks positioned by start/end time. Used for despachos routes,
- * appointments, deliveries.
+ * Block: weekly route schedule (Domain → Despachos). 7 days × N hours grid
+ * with route blocks positioned by start/end time. The shape fits delivery
+ * routes ("Ruta Las Condes — 6 paradas"), but the structure is general
+ * enough to repurpose for appointments, vehicle bookings, or any time-
+ * windowed event.
  *
  * Visual only — no drag-to-resize or DnD; click handlers are stubbed for
  * the consumer to wire up. The grid uses CSS Grid columns for days and
@@ -54,7 +56,7 @@ const EVENTS: CalendarEvent[] = [
 
 const HOUR_HEIGHT = 48; // px
 
-export function ScheduleWeek(): React.ReactElement {
+export function RouteSchedule(): React.ReactElement {
   return (
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: 24, height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PageHeader

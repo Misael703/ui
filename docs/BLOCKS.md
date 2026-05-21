@@ -22,32 +22,28 @@ Stories renderizadas: `npm run storybook` → carpeta **Blocks/** en el sidebar.
 
 ## Índice
 
-### Shell / layout
+### Genéricos (cross-app)
 
-- [Admin dashboard](#admin-dashboard) — AppShell `headerLayout="top"` + PageHeader + KPIs + tabla
+**Shell**
+- [Admin dashboard](#admin-dashboard) — AppShell `headerLayout="top"` + KPIs + tabla
 
-### Auth
-
+**Auth**
 - [Auth screen (centered)](#auth-screen) — card centered simple
 - [Auth split](#auth-split) — form izquierda + brand panel derecha
 
-### Listas y detalle
-
+**Data**
 - [Data table page](#data-table-page) — filtros + tabla con toolbar + bulk + paginación
 - [Detail page](#detail-page) — vista de 1 entidad con tabs + meta sidebar
 
-### Configuración
-
+**Config**
 - [Settings page](#settings-page) — sidebar de secciones + form area
 
-### Estados
-
+**Estados**
 - [Empty state page](#empty-state-page) — colección sin datos
 - [Error page](#error-page) — algo falló
 - [Not found](#not-found) — 404
 
-### Utility
-
+**Utility**
 - [Onboarding checklist](#onboarding-checklist) — activation pattern
 - [Notifications page](#notifications-page) — inbox con filtros
 - [Wizard page](#wizard-page) — multi-step form
@@ -60,10 +56,12 @@ Stories renderizadas: `npm run storybook` → carpeta **Blocks/** en el sidebar.
 - [Invoice document](#invoice-document) — factura print-friendly
 - [Checkout](#checkout) — address + order summary + promo + envío
 
-### Domain-specific
+### Dominio — Despachos
 
-- [Kanban board](#kanban-board) — columnas por estado (sin DnD)
-- [Schedule week](#schedule-week) — grid 7 días × N horas
+- [Dispatch board](#dispatch-board) — kanban operacional, columnas por etapa del pipeline
+- [Route map](#route-map) — sidebar de paradas + mapa mock SVG con polyline + vehículo
+- [Delivery timeline](#delivery-timeline) — timeline vertical del lifecycle de UNA entrega
+- [Route schedule](#route-schedule) — grid 7 días × N horas con bloques de ruta
 
 ---
 
@@ -500,27 +498,36 @@ trae data de país: definí el set de campos por mercado.
 
 ---
 
-## Kanban board
+## Dispatch board
 
-Columnas por estado, cards con priority/assignee/due. **Visual-only — sin
-drag-and-drop** (deliberado): elegí dnd-kit, react-beautiful-dnd, o HTML5
-nativo según tu app. Agregar DnD al recipe te acoplaría a una librería y
-forzaría un peer dep en cada consumer.
+**El centro de operación de cualquier app de logística.** Kanban con
+columnas que reflejan el pipeline real (Por confirmar → Preparando → Listo
+→ En ruta → Entregado), cards que muestran los 4 datos que el despachador
+necesita de un vistazo: **quién** (cliente), **dónde** (zona), **cuándo**
+(ETA), **carga** (paradas). Asignación de chofer ON the card — sin extra
+clicks.
 
-**Source:** [`src/blocks/KanbanBoard.tsx`](../src/blocks/KanbanBoard.tsx)
-**Story:** Storybook → Blocks → Kanban board
+UX rationale: las columnas mirror el pipeline físico (no buckets arbitrarios),
+así el movimiento entre etapas lee como movimiento real. Cada card surface
+los 4 atributos decisivos al frente.
+
+**Source:** [`src/blocks/DispatchBoard.tsx`](../src/blocks/DispatchBoard.tsx)
+**Story:** Storybook → Blocks → Dominio → Despachos → Dispatch board
 
 ```tsx
-<div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns.length}, minmax(260px, 1fr))`, gap: 16 }}>
+<div style={{ display: 'grid', gridTemplateColumns: `repeat(5, minmax(280px, 1fr))`, gap: 16 }}>
   {columns.map(col => (
     <div style={{ background: 'var(--bg-muted)', borderRadius: 'var(--radius-lg)', padding: 12 }}>
-      <strong>{col.label}</strong> <Badge variant="neutral">{col.cards.length}</Badge>
-      {col.cards.map(card => (
+      <strong>{col.label}</strong> <Badge variant="neutral">{col.orders.length}</Badge>
+      <div className="cell-meta">{col.hint}</div>
+      {col.orders.map(o => (
         <Card><CardBody>
-          <Badge variant={PRIORITY_BADGE[card.priority].variant}>{PRIORITY_BADGE[card.priority].label}</Badge>
-          <div>{card.title}</div>
-          <Avatar name={card.assignee} size={24} />
-          {card.due && <span className="cell-meta cell-mono">📅 {card.due}</span>}
+          <span className="cell-mono cell-meta">#{o.id}</span>
+          <span className="cell-meta"><Clock size={12} /> {o.eta}</span>
+          <div>{o.cliente}</div>
+          <span><MapPin size={12} /> {o.zona}</span>
+          <span><Package size={12} /> {o.paradas} paradas</span>
+          {o.driver ? <><Avatar name={o.driver} size={20} />{o.driver}</> : <button>+ Asignar chofer</button>}
         </CardBody></Card>
       ))}
     </div>
@@ -530,14 +537,100 @@ forzaría un peer dep en cada consumer.
 
 ---
 
-## Schedule week
+## Route map
 
-Grid 7 días × N horas con event blocks posicionados via CSS Grid
+**El visual flagship de despachos.** Dos paneles sincronizados: sidebar
+con paradas ordenadas + área de mapa con markers numerados + polyline +
+indicador de vehículo (pulse). El mapa es un **mock SVG** — en producción
+reemplazás `<MapMock>` con Mapbox/Leaflet/Google. El panel de lista queda
+igual y alimenta coordenadas al componente real.
+
+UX rationale: list + map son lecturas complementarias del mismo dato. La
+lista domina para scanning lineal ("¿cuántas faltan?"), el mapa para
+relaciones espaciales ("¿qué está más cerca?"). Renderizar SOLO uno penaliza
+una de esas formas de pensar.
+
+**Source:** [`src/blocks/RouteMap.tsx`](../src/blocks/RouteMap.tsx)
+**Story:** Storybook → Blocks → Dominio → Despachos → Route map
+
+```tsx
+<div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 16 }}>
+  {/* LIST */}
+  <Card>
+    <ol>{ROUTE.map(stop => (
+      <li>
+        <div /* sequence marker */>{stop.status === 'visited' ? <Check /> : stop.seq}</div>
+        <div>
+          <div>{stop.cliente}</div>
+          <div className="cell-meta">{stop.address}</div>
+        </div>
+        <span className="cell-mono">{stop.eta}</span>
+      </li>
+    ))}</ol>
+  </Card>
+
+  {/* MAP — mock SVG. En tu app: <Mapbox source={ROUTE} /> o <Leaflet ... /> */}
+  <Card>
+    <svg viewBox="0 0 100 100">
+      <path d={path} stroke="var(--color-primary)" />
+      {ROUTE.map(s => <circle cx={s.x} cy={s.y} ... />)}
+      {/* pulsing vehicle indicator at current stop */}
+    </svg>
+  </Card>
+</div>
+```
+
+---
+
+## Delivery timeline
+
+**Timeline vertical** del lifecycle de UNA entrega: creado → preparado →
+cargado → en ruta → entregado. Cada evento tiene timestamp, actor,
+descripción, y opcional foto inline (proof of delivery, paquete recibido).
+
+UX rationale: usar vertical (no Stepper horizontal). Los eventos son
+**temporales**, no pasos de configuración — el usuario escanea top-to-bottom
+buscando "¿qué pasó último?". El estado actual tiene affordance distinto
+(filled + brand color + ring). Pasados = success color filled. Futuros =
+outline.
+
+Pareja natural de `DetailPage`: dropeala como tab "Historial" en una vista
+de detalle de orden.
+
+**Source:** [`src/blocks/DeliveryTimeline.tsx`](../src/blocks/DeliveryTimeline.tsx)
+**Story:** Storybook → Blocks → Dominio → Despachos → Delivery timeline
+
+```tsx
+<ol>
+  {EVENTS.map((e, i) => (
+    <li style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 16 }}>
+      {/* dot + connector */}
+      <div>
+        {!isLast && <div className="connector" />}
+        <div className="dot" data-status={e.status}>{e.icon}</div>
+      </div>
+      {/* content */}
+      <div>
+        <div>{e.title} <span className="cell-mono cell-meta">{e.ts}</span></div>
+        <div className="cell-meta">{e.description}</div>
+        <Avatar name={e.actor} size={20} /> <span>{e.actor}</span>
+        {e.photo && <button className="photo-thumb"><Eye /></button>}
+      </div>
+    </li>
+  ))}
+</ol>
+```
+
+---
+
+## Route schedule
+
+Grid 7 días × N horas con bloques de ruta posicionados via CSS Grid
 `gridRow: start / end`. Visual-only — click handlers stubeados; agregar
 DnD/resize por app.
 
-**Source:** [`src/blocks/ScheduleWeek.tsx`](../src/blocks/ScheduleWeek.tsx)
-**Story:** Storybook → Blocks → Schedule week
+**Source:** [`src/blocks/RouteSchedule.tsx`](../src/blocks/RouteSchedule.tsx)
+**Story:** Storybook → Blocks → Dominio → Despachos → Route schedule
 
 ```tsx
 <div style={{ display: 'grid', gridTemplateColumns: `64px repeat(7, 1fr)`, gridTemplateRows: `repeat(${HOURS.length}, ${HOUR_HEIGHT}px)` }}>

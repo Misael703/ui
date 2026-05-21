@@ -7,7 +7,7 @@ import { ProductCatalog } from './ProductCatalog';
  * Source: `src/blocks/ProductCatalog.tsx`.
  */
 export default {
-  title: 'Blocks/Product catalog',
+  title: 'Blocks/Commerce/Product catalog',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

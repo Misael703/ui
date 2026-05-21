@@ -8,7 +8,7 @@ import { AuditLogPage } from './AuditLogPage';
  * `src/blocks/AuditLogPage.tsx`.
  */
 export default {
-  title: 'Blocks/Audit log page',
+  title: 'Blocks/Genéricos/Utility/Audit log page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

@@ -8,7 +8,7 @@ import { WizardPage } from './WizardPage';
  * and use react-hook-form per step. Source: `src/blocks/WizardPage.tsx`.
  */
 export default {
-  title: 'Blocks/Wizard page',
+  title: 'Blocks/Genéricos/Utility/Wizard page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

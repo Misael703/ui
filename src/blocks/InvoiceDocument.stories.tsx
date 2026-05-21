@@ -8,7 +8,7 @@ import { InvoiceDocument } from './InvoiceDocument';
  * PDF/paper output. Source: `src/blocks/InvoiceDocument.tsx`.
  */
 export default {
-  title: 'Blocks/Invoice document',
+  title: 'Blocks/Commerce/Invoice document',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

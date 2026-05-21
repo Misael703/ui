@@ -3,7 +3,7 @@ import { CheckoutSummary } from './CheckoutSummary';
 
 /** Copy-paste recipe (not shipped). Source: `src/blocks/CheckoutSummary.tsx`. */
 export default {
-  title: 'Blocks/Checkout',
+  title: 'Blocks/Commerce/Checkout',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

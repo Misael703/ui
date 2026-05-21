@@ -8,7 +8,7 @@ import { DetailPage } from './DetailPage';
  * `src/blocks/DetailPage.tsx`.
  */
 export default {
-  title: 'Blocks/Detail page',
+  title: 'Blocks/Genéricos/Data/Detail page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;
