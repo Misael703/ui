@@ -26,6 +26,17 @@ export interface NavSection {
 
 export type AppShellTheme = 'default' | 'brand';
 
+export type AppShellHeaderLayout = 'side' | 'top';
+
+export interface AppShellHeader {
+  /** Left slot — typically a menu/hamburger trigger or back action. */
+  left?: React.ReactNode;
+  /** Center slot — typically the brand (Logo). Lands at the true viewport centre. */
+  center?: React.ReactNode;
+  /** Right slot — notifications, user avatar, utilities. */
+  right?: React.ReactNode;
+}
+
 export interface AppShellProps {
   brand?: React.ReactNode;
   brandCollapsed?: React.ReactNode;
@@ -46,6 +57,20 @@ export interface AppShellProps {
   theme?: AppShellTheme;
   /** Render-prop for navigation links so the host app can use Next.js Link, etc. */
   linkAs?: (item: NavItem, content: React.ReactNode, className: string) => React.ReactNode;
+  /**
+   * Where the chrome lives. Default `'side'` is the legacy layout. `'top'`
+   * renders a full-width header above the body with three slots
+   * (`header.left/center/right`); the centre slot lands at the **true
+   * viewport centre** (1fr·auto·1fr column grid). The sidebar has no brand
+   * block (brand goes in `header.center`) and `collapsed` hides the
+   * sidebar entirely — no 72px rail. The topbar is **invariant** to the
+   * collapse (only the sidebar changes width). `theme="brand"` tints both
+   * header and sidebar with the same brand colour (single knob). `brand`,
+   * `brandCollapsed` and `topbar` are ignored when `'top'`.
+   */
+  headerLayout?: AppShellHeaderLayout;
+  /** Slots for the top-layout header (only used when `headerLayout="top"`). */
+  header?: AppShellHeader;
 }
 
 // Recursive nav item, memoized so a single item's parent re-render doesn't
@@ -106,6 +131,7 @@ export function AppShell({
   brand, brandCollapsed, sections, topbar, footer, user,
   defaultCollapsed = false, collapsed: ctrlCollapsed, onCollapsedChange,
   children, className, theme = 'default', linkAs,
+  headerLayout = 'side', header,
 }: AppShellProps) {
   const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -116,6 +142,39 @@ export function AppShell({
     onCollapsedChange?.(v);
   };
   const closeMobile = React.useCallback(() => setMobileOpen(false), []);
+
+  // Top-header variant: full-width header above the body. Topbar is
+  // invariant to `collapsed` (only the inner body's columns animate); brand
+  // lives in `header.center` at the true viewport centre. Default
+  // `headerLayout="side"` falls through to the legacy JSX below
+  // (byte-identical for existing consumers).
+  if (headerLayout === 'top') {
+    return (
+      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', collapsed && 'is-collapsed', className)}>
+        <header className="appshell__header" role="banner">
+          <div className="appshell__header-left">{header?.left}</div>
+          <div className="appshell__header-center">{header?.center}</div>
+          <div className="appshell__header-right">{header?.right}</div>
+        </header>
+        <div className="appshell__body">
+          <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
+            <nav className="appshell__nav">
+              {sections.map((s, i) => (
+                <div key={s.id ?? i} className="appshell__navsection">
+                  {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
+                  <ul>{s.items.map((it) => (
+                    <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
+                  ))}</ul>
+                </div>
+              ))}
+            </nav>
+            {footer != null && <div className="appshell__sidebar-foot">{footer}</div>}
+          </aside>
+          <main className="appshell__content" role="main">{children}</main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>

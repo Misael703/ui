@@ -1,9 +1,10 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppShell, PageHeader, type AppShellTheme } from './AppShell';
 import { Button } from './Button';
 import { Avatar } from './Display2';
 import { Logo } from './Logo';
-import { Home, Package, Truck, Users, Settings, ShoppingCart } from './Icons';
+import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell } from './Icons';
 
 export default {
   title: 'Layout/AppShell',
@@ -143,4 +144,75 @@ export const FooterTextColapsable: StoryObj = {
 
 export const FooterTextColapsadoInicial: StoryObj = {
   render: () => <FootWithText collapsed />,
+};
+
+/* =============================================================================
+ * `headerLayout="top"` — full-width header above the body (v1.15.0). Brand
+ * lives in `header.center` at the TRUE viewport centre (`1fr auto 1fr`
+ * column grid). Hamburger toggles `collapsed`: only the sidebar animates;
+ * the topbar is invariant. `theme="brand"` tints both header and sidebar.
+ * ===========================================================================*/
+
+function TopbarCenteredShell({ theme = 'default' }: { theme?: AppShellTheme }) {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const brand = theme === 'brand';
+  const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
+  return (
+    <div style={{ height: 'calc(100vh - 32px)' }}>
+      <AppShell
+        theme={theme}
+        headerLayout="top"
+        sections={sections}
+        collapsed={collapsed}
+        onCollapsedChange={setCollapsed}
+        header={{
+          left: (
+            <button
+              type="button"
+              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+              aria-expanded={!collapsed}
+              onClick={() => setCollapsed((c) => !c)}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: `1px solid ${sepColor}`,
+                background: 'transparent', color: 'inherit',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            ><MenuIcon size={18} /></button>
+          ),
+          center: <Logo variant="horizontal" bg={brand ? 'dark' : 'light'} height={28} />,
+          right: (
+            <>
+              <button type="button" aria-label="Notificaciones" style={{
+                width: 36, height: 36, borderRadius: 999, border: 0, background: 'transparent',
+                cursor: 'pointer', color: 'inherit',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}><Bell size={18} /></button>
+              <span aria-hidden="true" style={{ width: 1, height: 20, background: sepColor }} />
+              <Avatar name="Misael Ocas" size={32} />
+            </>
+          ),
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Dashboard" description="Overview of your account" actions={<Button>Acción</Button>} />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  );
+}
+
+/** **Topbar-centered, default light** (v1.15.0). Logo en el centro absoluto
+ *  del viewport (1fr·auto·1fr). Hamburger izq, bell+separador+avatar der.
+ *  Toggle: solo el sidebar se oculta; el topbar queda invariante. */
+export const TopbarCentered: StoryObj = {
+  render: () => <TopbarCenteredShell />,
+};
+
+/** **Topbar-centered, brand blue** — mismo shell, `theme="brand"` tematiza
+ *  topbar + sidebar juntos con `--color-primary` + texto blanco. */
+export const TopbarCenteredBrand: StoryObj = {
+  render: () => <TopbarCenteredShell theme="brand" />,
 };
