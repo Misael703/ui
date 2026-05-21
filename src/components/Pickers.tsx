@@ -27,6 +27,14 @@ export interface ComboboxProps<T = string> {
   invalid?: boolean;
   disabled?: boolean;
   id?: string;
+  /**
+   * Whether the trigger is a typeable text input that filters options.
+   * Default `true` (the searchable Combobox). Set `false` for a non-typing
+   * picker: button trigger + the same kit-styled listbox, no filter, full
+   * list always. Closes the gap between native `<Select>` (jarring native
+   * dropdown) and the searchable Combobox — same visual register, no input.
+   */
+  searchable?: boolean;
 }
 
 const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
@@ -36,6 +44,7 @@ export function Combobox<T = string>({
   value, onChange, options, placeholder,
   emptyMessage, filter = defaultFilter,
   className, invalid, disabled, id,
+  searchable = true,
 }: ComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -78,15 +87,21 @@ export function Combobox<T = string>({
 
   React.useEffect(() => { setActive(0); }, [query, open]);
 
-  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKey = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setOpen(true);
-      setActive((a) => Math.min(filtered.length - 1, a + 1));
+      if (!open) setOpen(true);
+      else setActive((a) => Math.min(filtered.length - 1, a + 1));
     } else if (e.key === 'ArrowUp') {
+      // Only navigate when the listbox is open (no-op otherwise).
+      if (!open) return;
       e.preventDefault();
       setActive((a) => Math.max(0, a - 1));
     } else if (e.key === 'Enter') {
+      // Only commit when the listbox is open — without this gate, Enter on
+      // a button trigger that just opened would race with the open and
+      // immediately select the first option.
+      if (!open) return;
       e.preventDefault();
       const opt = filtered[active];
       if (opt && !opt.disabled) {
@@ -101,22 +116,46 @@ export function Combobox<T = string>({
 
   return (
     <div ref={wrapRef} className={cx('combobox', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={listboxId}
-        className="combobox__input"
-        placeholder={ph}
-        disabled={disabled}
-        value={open ? query : selected?.label ?? ''}
-        onFocus={() => setOpen(true)}
-        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-        onKeyDown={onKey}
-      />
-      {selected && !open && (
+      {searchable ? (
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          className="combobox__input"
+          placeholder={ph}
+          disabled={disabled}
+          value={open ? query : selected?.label ?? ''}
+          onFocus={() => setOpen(true)}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onKeyDown={onKey}
+        />
+      ) : (
+        // Non-typing trigger: button shaped like `.combobox__input` (same
+        // border / radius / chevron) so the two variants line up visually.
+        // No clear button — the user re-picks from the listbox instead.
+        <button
+          id={id}
+          type="button"
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          className="combobox__trigger"
+          disabled={disabled}
+          onClick={() => setOpen((o) => !o)}
+          onKeyDown={onKey}
+        >
+          {selected ? (
+            <span className="combobox__trigger-label">{selected.label}</span>
+          ) : (
+            <span className="combobox__trigger-placeholder">{ph}</span>
+          )}
+        </button>
+      )}
+      {searchable && selected && !open && (
         <button
           type="button"
           className="combobox__clear"

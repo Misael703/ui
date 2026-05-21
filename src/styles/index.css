@@ -1697,12 +1697,15 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Combobox ---------- */
 .combobox { position: relative; display: inline-block; min-width: 220px; }
-.combobox__input {
+.combobox__input,
+.combobox__trigger {
   width: 100%;
   /* Reads as a real form field (v1.10.0), consistent with .input/.select:
      same border token, radius, height and a chevron affordance — was a
      borderline-plain text box (lighter border, sm radius, no chevron) that
-     looked like static text ("Todos") rather than a dropdown control. */
+     looked like static text ("Todos") rather than a dropdown control. The
+     same rule covers `.combobox__trigger` (the non-searchable button
+     variant, v1.15.0) so both line up at any density. */
   min-height: var(--field-min-h, 44px);
   /* Same tokenized metrics as .input/.select so the three line up at any
      density (`.fields--dense` compacts all of them together). Extra right
@@ -1718,8 +1721,19 @@ button, input, select, textarea { box-sizing: border-box; }
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
-.combobox__input:focus { outline: none; box-shadow: var(--focus-ring-accent); }
-.combobox.is-invalid .combobox__input { border-color: var(--color-danger); }
+.combobox__input:focus,
+.combobox__trigger:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+.combobox.is-invalid .combobox__input,
+.combobox.is-invalid .combobox__trigger { border-color: var(--color-danger); }
+/* Button-specific normalizations: align like a placeholder/value (left),
+   pointer cursor, drop default centered alignment of <button>. */
+.combobox__trigger {
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+.combobox__trigger[disabled] { opacity: 0.6; cursor: not-allowed; }
+.combobox__trigger-placeholder { color: var(--fg-subtle); }
 .combobox__clear {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   width: 22px; height: 22px; border-radius: var(--radius-pill);
@@ -2638,6 +2652,56 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--brand .appshell__collapse:hover {
   color: var(--color-white);
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* `headerLayout="top"` — full-width header above the body. Two correctness
+   constraints:
+   1. **Specificity:** the outer override must use `.appshell.appshell--header-top`
+      (≥2 classes) so it beats the legacy `.appshell.is-collapsed`
+      (`grid-template-columns: 72px 1fr`); else the legacy rule wins on
+      collapse and the layout breaks (header gets squeezed into a 72px col).
+   2. **True viewport-centre:** the header uses `grid-template-columns:
+      1fr auto 1fr` so the centre slot lands at the geometric middle of the
+      viewport regardless of how wide the left or right zones grow.
+   The topbar is invariant to `is-collapsed` — only `.appshell__body`
+   animates its columns. `theme="brand"` tints the header to match the
+   sidebar (existing `.appshell--brand .appshell__sidebar` already paints
+   the sidebar). */
+.appshell.appshell--header-top {
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+}
+.appshell--header-top .appshell__header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 56px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  color: var(--fg-default);
+}
+.appshell--header-top .appshell__header-left   { justify-self: start;  display: flex; align-items: center; }
+.appshell--header-top .appshell__header-center { justify-self: center; display: flex; align-items: center; }
+.appshell--header-top .appshell__header-right  { justify-self: end;    display: flex; align-items: center; gap: 10px; }
+.appshell--header-top .appshell__body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 0;
+  transition: grid-template-columns var(--duration-base) var(--ease-standard);
+}
+.appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
+.appshell--header-top .appshell__sidebar { overflow: hidden; }
+/* Brand top-header variant: same `--color-primary` as the legacy sidebar
+   (consistent shell-wide brand) + a soft white-α hairline so the topbar
+   reads as separate from the same-colour sidebar. The sidebar inherits
+   `.appshell--brand .appshell__sidebar` already, so no override needed
+   here. */
+.appshell--brand.appshell--header-top .appshell__header {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .appshell__sidebar-foot {

@@ -5,6 +5,51 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] — 2026-05-20
+
+**Minor.** Additive. AppShell gains a top-header layout variant. The
+default `headerLayout="side"` output is **byte-identical** for existing
+consumers — only opting into `headerLayout="top"` changes anything.
+
+### Added
+- **`AppShell` `headerLayout`** (`'side'` default · `'top'`).
+  - `'side'` (default): legacy shell — brand at top of sidebar, topbar
+    inside main. Unchanged.
+  - `'top'`: full-width header above the body with three slots
+    (`header.left`, `header.center`, `header.right`). Brand lives in
+    `header.center` at the **true viewport centre** (`1fr auto 1fr` column
+    grid — the centre slot is geometrically centred independent of how
+    wide the left/right zones grow). The sidebar has no brand block;
+    `collapsed` hides the sidebar entirely — no 72px rail. **The topbar is
+    invariant to `collapsed`** — only `.appshell__body` animates its
+    columns. `theme="brand"` tints both the header and the sidebar with
+    the existing brand tokens (single knob).
+- **`AppShellHeader`** type / `header` prop with `left`/`center`/`right`
+  React.ReactNode slots (only used when `headerLayout="top"`).
+- Storybook stories `TopbarCentered` (default light) and
+  `TopbarCenteredBrand` (brand blue).
+- **`Combobox` `searchable` prop** (`true` default · `false`). `false`
+  swaps the trigger from a typeable `<input>` to a `<button>` (same shell:
+  border / radius / chevron / focus ring) and shows the full options list
+  without filtering — closes the gap between `<Select>` (native dropdown,
+  jarring) and the searchable Combobox: same visual register, no input.
+  Existing usages unchanged. Also: Enter no longer commits when the
+  listbox is closed (previously could race with the open-on-click in the
+  new button-trigger path; latent for the input path too, now consistent).
+
+### Correctness (encoded by `tests/AppShellTop.test.tsx`)
+- `.appshell.appshell--header-top` (2 classes, `(0,2,0)`) is used for the
+  outer column override so it beats the legacy `.appshell.is-collapsed`
+  rule (which also has `(0,2,0)`); else collapse re-introduces the legacy
+  72px sidebar column and breaks the layout.
+- Header uses `grid-template-columns: 1fr auto 1fr` so the centre slot
+  lands at the absolute viewport centre.
+
+### Unchanged (verified, must remain)
+- The default `headerLayout="side"` shell is byte-identical to v1.14.x
+  (asserted by the guard: no `.appshell__header`, sidebar `.appshell__brand`
+  present, inline `.appshell__topbar` present).
+
 ## [1.14.0] — 2026-05-19
 
 **Minor.** "Gold standard" pass: the kit renders a dense DataTable + filter

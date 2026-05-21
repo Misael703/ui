@@ -19,6 +19,20 @@ export const ComboboxBasico: StoryObj = {
   },
 };
 
+/**
+ * **Combobox sin input** (v1.15.0): `searchable={false}` cambia el trigger
+ * a un botón que muestra el label del valor seleccionado (o el placeholder),
+ * sin filtrado — la lista siempre muestra todas las opciones. Mismo shell
+ * visual que el Combobox tipeable + misma listbox kit-styled. Cierra el gap
+ * con el `<Select>` nativo cuando querés un picker chico sin browser-dropdown.
+ */
+export const ComboboxSinInput: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<string | null>(null);
+    return <Combobox value={v} onChange={setV} options={opts} placeholder="Elegir producto…" searchable={false} />;
+  },
+};
+
 export const DatePickerBasico: StoryObj = {
   render: () => {
     const [d, setD] = React.useState<Date | null>(null);
