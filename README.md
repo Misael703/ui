@@ -188,6 +188,17 @@ en secciones reales. Mirálas renderizadas en Storybook bajo **Blocks/**:
 | Delivery timeline | Timeline vertical del lifecycle de UNA entrega con timestamps, fotos y actor |
 | Route schedule | Grid 7 días × N horas con bloques de ruta |
 
+### Dominio — Rentools (arriendo de herramientas)
+| Block | Compone |
+|---|---|
+| Tool catalog | Grid de herramientas con tarifa/día + disponibilidad + garantía + Reservar |
+| Rental booking | DateRangePicker + cálculo días×tarifa en vivo + depósito separado |
+| Availability calendar | Calendar con días reservado/mantención/libre + próximas reservas |
+| Rental board | Kanban por estado (Reservado→Entregado→En uso→Por devolver→Devuelto + Atrasado) |
+| Return inspection | Check-in con checklist de estado + daños + liquidación de garantía en vivo |
+| Rental agreement | Contrato de arriendo print-friendly con firma |
+| Rental detail | Vista de 1 arriendo: timeline de estado + meta (equipo/cliente/costos) |
+
 Índice detallado con código embebido: **[docs/BLOCKS.md](./docs/BLOCKS.md)**.
 
 Para usar uno: copia el `.tsx` desde `src/blocks/` a tu app y cambia el

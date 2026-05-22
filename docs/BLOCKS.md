@@ -63,6 +63,16 @@ Stories renderizadas: `npm run storybook` → carpeta **Blocks/** en el sidebar.
 - [Delivery timeline](#delivery-timeline) — timeline vertical del lifecycle de UNA entrega
 - [Route schedule](#route-schedule) — grid 7 días × N horas con bloques de ruta
 
+### Dominio — Rentools (arriendo de herramientas)
+
+- [Tool catalog](#tool-catalog) — grid con tarifa/día + disponibilidad + garantía
+- [Rental booking](#rental-booking) — DateRangePicker + cálculo en vivo + depósito
+- [Availability calendar](#availability-calendar) — días reservado/mantención/libre
+- [Rental board](#rental-board) — kanban por estado del arriendo (+ Atrasado)
+- [Return inspection](#return-inspection) — check-in + liquidación de garantía en vivo
+- [Rental agreement](#rental-agreement) — contrato print-friendly
+- [Rental detail](#rental-detail) — vista de 1 arriendo con timeline
+
 ---
 
 ## Admin dashboard
@@ -647,5 +657,169 @@ DnD/resize por app.
       <div>{e.subtitle}</div>
     </button>
   ))}
+</div>
+```
+
+---
+
+## Tool catalog
+
+Catálogo de arriendo. A diferencia de un catálogo de venta, las cards
+lideran con la **tarifa por periodo** ("$12.000/día"), no con un precio
+fijo; la disponibilidad es un badge de primera clase (Disponible / Libre
+DD-MM / En mantención) y el depósito (garantía) se muestra en la card.
+
+**Source:** [`src/blocks/ToolCatalog.tsx`](../src/blocks/ToolCatalog.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Tool catalog
+
+```tsx
+<ProductCard
+  sku={t.sku}
+  name={t.name}
+  price={<><span className="cell-mono">${t.ratePerDay}</span><span className="cell-meta">/día</span></>}
+  tag={availabilityBadge(t.availability, t.availableFrom)}
+  footer={
+    <>
+      <div className="cell-meta">Garantía: <span className="cell-mono">${t.deposit}</span></div>
+      <Button size="sm" fullWidth disabled={!rentable}>{rentable ? 'Reservar' : 'No disponible'}</Button>
+    </>
+  }
+/>
+```
+
+---
+
+## Rental booking
+
+El flujo central del negocio: elegir herramienta, elegir rango de fechas
+(`DateRangePicker`), ver el costo desglosarse en vivo (días × tarifa) y
+confirmar. El resumen de costo es **sticky y se recalcula** al cambiar las
+fechas; el depósito (garantía) va en **línea separada** del cargo — es
+reembolsable, mezclarlos erosiona la confianza.
+
+**Source:** [`src/blocks/RentalBooking.tsx`](../src/blocks/RentalBooking.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Rental booking
+
+```tsx
+const [range, setRange] = React.useState<DateRange>({ from: null, to: null });
+const days = dayCount(range);                    // inclusivo
+const rental = days * TOOL.ratePerDay;
+
+<DateRangePicker value={range} onChange={setRange} minDate={new Date()} />
+<OrderSummary rows={[
+  { label: `Tarifa (${days} × $${TOOL.ratePerDay})`, value: `$${rental}` },
+  { label: 'Total arriendo', value: `$${rental}`, emphasis: true },
+]} />
+{/* Garantía: línea separada, reembolsable */}
+<div>Garantía (reembolsable) <span className="cell-mono">${TOOL.deposit}</span></div>
+```
+
+---
+
+## Availability calendar
+
+Vista de mes de UN equipo: qué días está arrendado / en mantención /
+libre. Usa el `Calendar` del kit con events tone-coded (rented = danger,
+maintenance = warning); los días libres **no llevan event** — la ausencia
+lee como disponibilidad. Leyenda + lista de próximas reservas al lado.
+
+**Source:** [`src/blocks/AvailabilityCalendar.tsx`](../src/blocks/AvailabilityCalendar.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Availability calendar
+
+```tsx
+const events: CalendarEvent[] = [
+  ...reservations.flatMap(r => daysBetween(r).map(d => ({ date: d, label: 'Arrendado', tone: 'danger' }))),
+  ...maintenance.map(m => ({ date: m.date, label: 'Mantención', tone: 'warning' })),
+];
+<Calendar month={new Date(2026, 4, 1)} events={events} />
+```
+
+---
+
+## Rental board
+
+Kanban operacional del rental yard. Columnas = lifecycle (Reservado →
+Entregado → En uso → Por devolver → Devuelto) + una columna **Atrasado**
+que saca los arriendos vencidos del flujo (el único estado que cuesta
+plata vía multa). Cada card muestra **días restantes** (o días de atraso,
+en rojo).
+
+**Source:** [`src/blocks/RentalBoard.tsx`](../src/blocks/RentalBoard.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Rental board
+
+```tsx
+function daysChip(daysLeft: number) {
+  if (daysLeft < 0) return <Badge variant="danger">{Math.abs(daysLeft)} días de atraso</Badge>;
+  if (daysLeft === 0) return <Badge variant="warning">Vence hoy</Badge>;
+  return <span className="cell-meta"><Clock size={12} /> {daysLeft} días restantes</span>;
+}
+```
+
+---
+
+## Return inspection
+
+Check-in de devolución — el patrón **más único del rubro** (no existe en
+venta ni en despacho). Checklist pass/fail del estado (funciona/limpio/
+completo/sin daños) + notas + fotos, y la **liquidación de garantía en
+vivo**: cada retención (limpieza, daños, faltantes, multa) se resta del
+reembolso en tiempo real, con el cliente parado al frente.
+
+**Source:** [`src/blocks/ReturnInspection.tsx`](../src/blocks/ReturnInspection.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Return inspection
+
+```tsx
+const retained = RETENTIONS.filter(r => retentions.has(r.id)).reduce((s, r) => s + r.amount, 0);
+const refund = Math.max(0, deposit - retained);
+
+{CHECKS.map(c => <li>{c.label} <Switch checked={checks[c.id]} onChange={...} /></li>)}
+{RETENTIONS.map(r => <li><Checkbox checked={retentions.has(r.id)} onChange={...} /> {r.label} −${r.amount}</li>)}
+<div>A devolver <span className="cell-mono">${refund}</span></div>
+```
+
+---
+
+## Rental agreement
+
+Contrato de arriendo print-friendly. Hermano de [Invoice document](#invoice-document)
+adaptado a contrato: bloques arrendador/arrendatario, equipo + periodo +
+tarifa, garantía, términos, y área de firma. El `@media print` strippea el
+chrome del app.
+
+**Source:** [`src/blocks/RentalAgreement.tsx`](../src/blocks/RentalAgreement.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Rental agreement
+
+```tsx
+<article className="agreement-block">
+  <header>{/* Logo + arrendador + N° contrato */}</header>
+  <section>{/* Arrendatario */}</section>
+  <table>{/* Equipo · Periodo · Tarifa · Total · Garantía */}</table>
+  <ol>{/* Términos */}</ol>
+  <section>{/* Firmas: arrendador | arrendatario */}</section>
+</article>
+<style>{`@media print { .agreement-block__actions { display: none !important; } }`}</style>
+```
+
+---
+
+## Rental detail
+
+Vista de 1 arriendo. PageHeader + estado + timeline vertical del lifecycle
+(Reservado → Entregado → En uso → Devuelto) + meta sidebar sticky con
+equipo/cliente/periodo y desglose de costos/garantía. Combina el layout de
+[Detail page](#detail-page) con un track de estado tipo
+[Delivery timeline](#delivery-timeline), especializado para plata + fechas.
+
+**Source:** [`src/blocks/RentalDetail.tsx`](../src/blocks/RentalDetail.tsx)
+**Story:** Storybook → Blocks → Dominio → Rentools → Rental detail
+
+```tsx
+<PageHeader title={<>Arriendo <span className="cell-mono">{id}</span></>} meta={<Badge>En uso</Badge>} />
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
+  <Card>{/* timeline: Reservado → Entregado → En uso → Devuelto */}</Card>
+  <aside>
+    <Card><KeyValue>{/* equipo, SKU, cliente, periodo, días */}</KeyValue></Card>
+    <Card><KeyValue>{/* tarifa/día, total, garantía */}</KeyValue></Card>
+  </aside>
 </div>
 ```
