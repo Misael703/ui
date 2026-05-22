@@ -2516,7 +2516,12 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-display); font-weight: 700;
   text-transform: var(--tt-title); letter-spacing: var(--tracking-wide);
 }
-.appshell.is-collapsed .appshell__brand { padding: 16px 12px; overflow: hidden; }
+/* Keep the VERTICAL padding equal to the expanded state (12px) so the brand
+   header height matches the topbar in both states — collapsing only narrows
+   the horizontal padding for the rail. A 16px vertical here made the
+   collapsed brand 8px taller than the topbar, so the two header dividers
+   stopped aligning at the sidebar/main corner. */
+.appshell.is-collapsed .appshell__brand { padding: 12px 12px; overflow: hidden; }
 /* Brand text opt-out: wrap any textual part of `brand` in
    <span class="appshell__brand-text"> and it collapses away with the rail
    while the logo/mark stays. Mirrors the navlabel collapse below, so a
