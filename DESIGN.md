@@ -160,6 +160,11 @@ without wrappers, using the right pattern for each API shape:
   via `Slot`/`Slottable` (dependency-free). Default `false` (no change).
   Supported today: **`Button`**, **`Card`**. The single child must be a valid
   element; injected affordances (Button icons/spinner) are preserved.
+  - **Compact card-as-link / list-row.** There is no separate `ListRow`
+    component on purpose: `<Card interactive asChild>` over an `<a>`/`<Link>`
+    *is* the clickable row — accessible hover/focus, one interactive node
+    (no `<a>` inside `<div>`). Tighten `CardBody` padding for a dense row.
+    See the `CardComoLink` story.
 - **Render-prop (data/array-driven components).** When a component renders a
   generated list (nav, breadcrumbs, menus), `asChild` cannot express
   "render each of N items as a Link". The correct pattern is a render-prop:

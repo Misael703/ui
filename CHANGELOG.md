@@ -5,6 +5,41 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] — 2026-05-22
+
+**Minor. Additive — no breaking changes.** Consumer-driven: these gaps
+surfaced building a real data-dense screen (despachos) against the kit.
+
+### Added
+- **Layout: `Grid` responsive columns.** `columns` now accepts a
+  per-breakpoint object: `<Grid columns={{ base: 1, sm: 2, lg: 4 }}>`. Each
+  breakpoint inherits the previous when omitted; breakpoints match the kit
+  tokens (sm 480 · md 768 · lg 1024 · xl 1280). Number/string/`minColWidth`
+  forms unchanged.
+- **Layout: `Cluster`.** Horizontal group that wraps (tag lists, chip rows,
+  button bars) — sugar for `<Stack direction="row" wrap>`.
+- **Layout: `Spacer`.** Flexible spacer (`flex: 1`, pushes flex siblings
+  apart) or a fixed gap on the space scale with `size`.
+- **Categorical accents.** Six well-separated hues for CATEGORY (zones,
+  regions, teams), distinct from status colors. New tokens `--cat-1..6`
+  (+ `-bg` soft + `-fg` ink, all ≥ 4.5:1 AA, pinned in `Contrast.test`,
+  palette-neutral in the base). Exposed as `Card accent="cat-1..6"` and
+  `Badge variant="cat-1..6"`. Plus **`Card accent="neutral"`** (grey rail).
+- **`SegmentedControl`** (+ `SegmentedControlItem`). Single-select toggle
+  group with equal-width segments — the view-switcher case, with no `type`
+  discriminant to forget. Wraps `ToggleGroup type="single"`.
+- **Date helpers** (`src/utils/dateFormat`): `formatRelativeDay(iso, {locale,
+  now})` ("Hoy"/"Mañana"/"Ayer" then localized weekday), `isToday`,
+  `isTomorrow`, `isYesterday`. Timezone-deterministic — a date-only ISO maps
+  to the calendar day written, never UTC-shifted (SSR-safe). Pass `now` to
+  pin. Tested in `tests/RelativeDay.test.tsx`.
+
+### Docs
+- Storybook: `GridResponsive`, `ClusterDemo`, `SpacerDemo`,
+  `CategoricalAccents`, `SegmentedControlDemo`, `CardComoLink`.
+- DESIGN.md: documented compact card-as-link (`<Card interactive asChild>`
+  over a Link — no separate `ListRow` needed).
+
 ## [1.16.0] — 2026-05-22
 
 **Minor.** Visual change to the **El Alba preset only** (the generic base

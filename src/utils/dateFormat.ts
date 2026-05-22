@@ -160,3 +160,69 @@ export function buildMonthGrid(
   }
   return { month, cells };
 }
+
+// ---------- Relative day helpers ----------------------------------------
+
+/**
+ * Parse a date-only ISO (`YYYY-MM-DD`, optionally with a time suffix) to a
+ * Date at **local midnight**. `new Date('2026-05-22')` parses as UTC
+ * midnight, which lands on the 21st in negative-offset timezones — a classic
+ * off-by-one-day SSR bug. Reading the Y-M-D parts and constructing a local
+ * Date avoids it: the calendar day is always the one written in the string.
+ */
+function parseLocalDay(iso: string | Date): Date {
+  if (iso instanceof Date) return new Date(iso.getFullYear(), iso.getMonth(), iso.getDate());
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(iso);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+/** True if `iso` is the same calendar day as `now` (default today, local). */
+export function isToday(iso: string | Date, now: Date = new Date()): boolean {
+  return isSameDay(parseLocalDay(iso), now);
+}
+
+/** True if `iso` is the calendar day after `now` (default today, local). */
+export function isTomorrow(iso: string | Date, now: Date = new Date()): boolean {
+  const t = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return isSameDay(parseLocalDay(iso), t);
+}
+
+/** True if `iso` is the calendar day before `now` (default today, local). */
+export function isYesterday(iso: string | Date, now: Date = new Date()): boolean {
+  const y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  return isSameDay(parseLocalDay(iso), y);
+}
+
+export interface RelativeDayOptions {
+  /** BCP-47 locale. Defaults to the configured brand locale (es-CL). */
+  locale?: string;
+  /** Reference "today". Pass a fixed value for deterministic SSR / tests. */
+  now?: Date;
+}
+
+/**
+ * Human day label: "Hoy" / "Mañana" / "Ayer" for ±1 day, otherwise the
+ * localized weekday + day + month ("mar 26 may"). The ±1 words come from
+ * `Intl.RelativeTimeFormat(..., { numeric: 'auto' })` so they're correct in
+ * any locale; capitalized for use as a standalone label.
+ *
+ * Deterministic across timezones: the day delta is computed from local
+ * calendar parts (via `parseLocalDay`), never from UTC timestamps, so an
+ * ISO date never renders as the wrong day. Pass `now` to pin it for SSR.
+ */
+export function formatRelativeDay(iso: string | Date, opts: RelativeDayOptions = {}): string {
+  const locale = opts.locale ?? getBrand().locale ?? 'es-CL';
+  const now = opts.now ?? new Date();
+  const target = parseLocalDay(iso);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+
+  if (Math.abs(diffDays) <= 1) {
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    const s = rtf.format(diffDays, 'day');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  return new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short' }).format(target);
+}

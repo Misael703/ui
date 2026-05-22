@@ -110,6 +110,24 @@ export function ToggleGroup(props: ToggleGroupProps) {
   );
 }
 
+/**
+ * `SegmentedControl` — a single-select `ToggleGroup` with equal-width
+ * segments. The common case (view switcher, filter mode, on/off pair) is
+ * `type="single"`; this drops the discriminant so you can't trip the
+ * cryptic union error from forgetting `type`. Use `SegmentedControlItem`
+ * (alias of `ToggleGroupItem`) for the options.
+ *
+ *   <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
+ *     <SegmentedControlItem value="list">Lista</SegmentedControlItem>
+ *     <SegmentedControlItem value="grid">Tarjetas</SegmentedControlItem>
+ *   </SegmentedControl>
+ */
+export type SegmentedControlProps = Omit<ToggleGroupSingleProps, 'type'>;
+
+export function SegmentedControl({ className, ...rest }: SegmentedControlProps) {
+  return <ToggleGroup type="single" className={cx('toggle-group--segmented', className)} {...rest} />;
+}
+
 export interface ToggleGroupItemProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'value'> {
   value: string;
 }
@@ -149,3 +167,6 @@ export const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupIt
     </button>
   );
 });
+
+/** Alias of `ToggleGroupItem` for use inside `SegmentedControl`. */
+export const SegmentedControlItem = ToggleGroupItem;

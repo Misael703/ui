@@ -5,7 +5,10 @@ import { useLocale } from '../locale/LocaleProvider';
 import { Slot } from './Primitives';
 import type { Extensible } from '../utils/types';
 
-export type CardAccent = 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+export type CategoryAccent = 'cat-1' | 'cat-2' | 'cat-3' | 'cat-4' | 'cat-5' | 'cat-6';
+export type CardAccent =
+  | 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+  | CategoryAccent;
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
@@ -54,7 +57,8 @@ export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<
 
 // ---------- Badge --------------------------------------------------------
 export type BadgeVariant =
-  | 'primary' | 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  | 'primary' | 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+  | CategoryAccent;
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: Extensible<BadgeVariant>;

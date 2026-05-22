@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import {
   Tabs, TabList, Tab, TabPanel, Tooltip, Stepper,
-  Divider, Stack, HStack, VStack, Container, Grid,
+  Divider, Stack, HStack, VStack, Container, Grid, Cluster, Spacer,
   KeyValue, KeyValueRow, ListGroup, ListGroupItem,
 } from './Layout';
 import { Button } from './Button';
@@ -132,6 +132,46 @@ export const GridDemo: StoryObj = {
         </div>
       ))}
     </Grid>
+  ),
+};
+
+const Box = ({ children }: { children: React.ReactNode }) => (
+  <div style={{ padding: 16, background: 'var(--bg-subtle)', borderRadius: 8, textAlign: 'center' }}>{children}</div>
+);
+
+/** **Grid responsivo** — `columns={{ base:1, sm:2, lg:4 }}`. Achicá el viewport
+ *  (o el panel de Storybook) para ver el reflow: 1 col en móvil, 2 desde 480px,
+ *  4 desde 1024px. Cada breakpoint hereda del anterior si se omite. */
+export const GridResponsive: StoryObj = {
+  render: () => (
+    <Grid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <Box key={n}>Item {n}</Box>)}
+    </Grid>
+  ),
+};
+
+/** **Cluster** — fila que envuelve (tag lists, chips, botoneras). Sugar de
+ *  `Stack direction="row" wrap`. */
+export const ClusterDemo: StoryObj = {
+  render: () => (
+    <Cluster gap={2}>
+      {['Metropolitana', 'Valparaíso', 'Biobío', 'Maule', 'Araucanía', 'Los Lagos', 'Coquimbo', 'Antofagasta'].map((r) => (
+        <Badge key={r} variant="neutral">{r}</Badge>
+      ))}
+    </Cluster>
+  ),
+};
+
+/** **Spacer** flexible — empuja los grupos a los extremos de un flex (toolbar
+ *  pattern). Con `size` es un gap fijo sobre la escala de espacio. */
+export const SpacerDemo: StoryObj = {
+  render: () => (
+    <HStack style={{ border: '1px solid var(--border-default)', borderRadius: 8, padding: 12 }}>
+      <Button variant="outline">Atrás</Button>
+      <Spacer />
+      <Button variant="ghost">Cancelar</Button>
+      <Button>Guardar</Button>
+    </HStack>
   ),
 };
 
