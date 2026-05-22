@@ -6,7 +6,7 @@ import { DataTablePage } from './DataTablePage';
  * table + bulk actions + pagination. Source: `src/blocks/DataTablePage.tsx`.
  */
 export default {
-  title: 'Blocks/Data table page',
+  title: 'Blocks/Genéricos/Data/Data table page',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;

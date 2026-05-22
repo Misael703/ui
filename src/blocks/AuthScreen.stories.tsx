@@ -6,7 +6,7 @@ import { AuthScreen } from './AuthScreen';
  * to see it branded. Source: `src/blocks/AuthScreen.tsx`.
  */
 export default {
-  title: 'Blocks/Auth screen',
+  title: 'Blocks/Genéricos/Auth/Auth screen',
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
 } as Meta;
