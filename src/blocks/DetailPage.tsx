@@ -5,7 +5,7 @@
  *
  * - `PageHeader` with title, status `Badge`, breadcrumb back-link, actions
  * - `Tabs` to slice the entity (Información · Historial · Relacionados)
- * - Two-column layout: main content + sticky meta sidebar (`KeyValue`)
+ * - Two-column layout: main content + sticky meta sidebar (stacked fields)
  *
  * Example: a Pedido. Swap the data shape and tabs to fit your domain.
  *
@@ -23,8 +23,6 @@ import {
   TabPanel,
   Badge,
   Button,
-  KeyValue,
-  KeyValueRow,
   DataTable,
 } from '../index';
 
@@ -159,18 +157,36 @@ export function DetailPage(): React.ReactElement {
               <h3 className="h4" style={{ margin: 0 }}>Detalles</h3>
             </CardHeader>
             <CardBody>
-              <KeyValue keyWidth={120}>
-                <KeyValueRow label="Cliente">{order.cliente}</KeyValueRow>
-                <KeyValueRow label="RUT"><span className="cell-mono">{order.rut}</span></KeyValueRow>
-                <KeyValueRow label="Vendedor">{order.vendedor}</KeyValueRow>
-                <KeyValueRow label="Método pago">{order.metodoPago}</KeyValueRow>
-                <KeyValueRow label="Despacho">{order.fechaDespacho}</KeyValueRow>
-                <KeyValueRow label="Total"><span className="cell-mono"><strong>${order.total.toLocaleString('es-CL')}</strong></span></KeyValueRow>
-              </KeyValue>
+              <FieldList>
+                <Field label="Cliente">{order.cliente}</Field>
+                <Field label="RUT" mono>{order.rut}</Field>
+                <Field label="Vendedor">{order.vendedor}</Field>
+                <Field label="Método pago">{order.metodoPago}</Field>
+                <Field label="Despacho">{order.fechaDespacho}</Field>
+                <Field label="Total" mono><strong>${order.total.toLocaleString('es-CL')}</strong></Field>
+              </FieldList>
             </CardBody>
           </Card>
         </aside>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Stacked field: label above, value below at full width. In a narrow meta
+ * sidebar this beats a 2-column KeyValue — the value gets the full card
+ * width so mono values (RUT, dates) don't wrap mid-token.
+ */
+function FieldList({ children }: { children: React.ReactNode }) {
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>;
+}
+
+function Field({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
+  return (
+    <div>
+      <div className="cell-meta" style={{ marginBottom: 2 }}>{label}</div>
+      <div className={mono ? 'cell-mono' : undefined}>{children}</div>
     </div>
   );
 }

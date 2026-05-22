@@ -18,8 +18,6 @@ import {
   CardBody,
   Badge,
   Button,
-  KeyValue,
-  KeyValueRow,
 } from '../index';
 import { Check, Package, Truck, MapPin, CheckCircle } from '../components/Icons';
 
@@ -139,29 +137,47 @@ export function RentalDetail(): React.ReactElement {
           <Card>
             <CardHeader><h3 className="h4" style={{ margin: 0 }}>Detalles</h3></CardHeader>
             <CardBody>
-              <KeyValue keyWidth={110}>
-                <KeyValueRow label="Equipo">{RENTAL.tool}</KeyValueRow>
-                <KeyValueRow label="SKU"><span className="cell-mono">{RENTAL.sku}</span></KeyValueRow>
-                <KeyValueRow label="Cliente">{RENTAL.cliente}</KeyValueRow>
-                <KeyValueRow label="RUT"><span className="cell-mono">{RENTAL.rut}</span></KeyValueRow>
-                <KeyValueRow label="Periodo"><span className="cell-mono">{RENTAL.from} → {RENTAL.to}</span></KeyValueRow>
-                <KeyValueRow label="Días"><span className="cell-mono">{RENTAL.days}</span></KeyValueRow>
-              </KeyValue>
+              <FieldList>
+                <Field label="Equipo">{RENTAL.tool}</Field>
+                <Field label="SKU" mono>{RENTAL.sku}</Field>
+                <Field label="Cliente">{RENTAL.cliente}</Field>
+                <Field label="RUT" mono>{RENTAL.rut}</Field>
+                <Field label="Periodo" mono>{RENTAL.from} → {RENTAL.to}</Field>
+                <Field label="Días" mono>{RENTAL.days}</Field>
+              </FieldList>
             </CardBody>
           </Card>
 
           <Card>
             <CardHeader><h3 className="h4" style={{ margin: 0 }}>Costos</h3></CardHeader>
             <CardBody>
-              <KeyValue keyWidth={110}>
-                <KeyValueRow label="Tarifa/día"><span className="cell-mono">${RENTAL.ratePerDay.toLocaleString('es-CL')}</span></KeyValueRow>
-                <KeyValueRow label="Total"><span className="cell-mono"><strong>${rentalTotal.toLocaleString('es-CL')}</strong></span></KeyValueRow>
-                <KeyValueRow label="Garantía"><span className="cell-mono">${RENTAL.deposit.toLocaleString('es-CL')}</span></KeyValueRow>
-              </KeyValue>
+              <FieldList>
+                <Field label="Tarifa/día" mono>${RENTAL.ratePerDay.toLocaleString('es-CL')}</Field>
+                <Field label="Total" mono><strong>${rentalTotal.toLocaleString('es-CL')}</strong></Field>
+                <Field label="Garantía" mono>${RENTAL.deposit.toLocaleString('es-CL')}</Field>
+              </FieldList>
             </CardBody>
           </Card>
         </aside>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Stacked field: label above, value below at full width. Better than a
+ * 2-column KeyValue inside a narrow sidebar — the value gets the full card
+ * width so mono values (RUT, dates) don't wrap mid-token.
+ */
+function FieldList({ children }: { children: React.ReactNode }) {
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>;
+}
+
+function Field({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
+  return (
+    <div>
+      <div className="cell-meta" style={{ marginBottom: 2 }}>{label}</div>
+      <div className={mono ? 'cell-mono' : undefined}>{children}</div>
     </div>
   );
 }

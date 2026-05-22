@@ -209,7 +209,13 @@ sidebar sticky.
     <TabPanel value="info">{/* items */}</TabPanel>
   </Tabs>
   <aside style={{ position: 'sticky', top: 24 }}>
-    <Card><KeyValue><KeyValueRow label="Cliente">{cliente}</KeyValueRow></KeyValue></Card>
+    {/* Sidebar angosto → campos APILADOS (label arriba, valor abajo), no
+        KeyValue 2-col: el valor toma el ancho completo y los datos mono
+        (RUT, fechas) no parten a media palabra. */}
+    <Card><CardBody>
+      <Field label="Cliente">{cliente}</Field>
+      <Field label="RUT" mono>{rut}</Field>
+    </CardBody></Card>
   </aside>
 </div>
 ```
@@ -818,8 +824,11 @@ equipo/cliente/periodo y desglose de costos/garantía. Combina el layout de
 <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
   <Card>{/* timeline: Reservado → Entregado → En uso → Devuelto */}</Card>
   <aside>
-    <Card><KeyValue>{/* equipo, SKU, cliente, periodo, días */}</KeyValue></Card>
-    <Card><KeyValue>{/* tarifa/día, total, garantía */}</KeyValue></Card>
+    {/* Campos apilados (label arriba, valor abajo) — sidebar angosto: el
+        valor mono (RUT, periodo) no parte a media palabra como haría en
+        un KeyValue 2-col. */}
+    <Card><CardBody><FieldList>{/* equipo, SKU, cliente, periodo, días */}</FieldList></CardBody></Card>
+    <Card><CardBody><FieldList>{/* tarifa/día, total, garantía */}</FieldList></CardBody></Card>
   </aside>
 </div>
 ```
