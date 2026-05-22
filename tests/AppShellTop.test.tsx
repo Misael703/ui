@@ -50,12 +50,32 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(container.querySelector('.appshell__topbar')).toBeNull();
   });
 
-  it('theme="brand" applies to BOTH header and sidebar (single knob)', () => {
+  it('theme="brand" applies to BOTH header and sidebar (headerTheme inherits theme)', () => {
     const { container } = render(
       <AppShell headerLayout="top" theme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     const root = container.querySelector('.appshell');
-    expect(root).toHaveClass('appshell--brand', 'appshell--header-top');
+    // sidebar brand (appshell--brand) + header brand (appshell--header-brand)
+    expect(root).toHaveClass('appshell--brand', 'appshell--header-top', 'appshell--header-brand');
+  });
+
+  it('headerTheme="brand" with theme="default" brands ONLY the header, not the sidebar', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" theme="default" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    const root = container.querySelector('.appshell');
+    expect(root).toHaveClass('appshell--default', 'appshell--header-brand');
+    // sidebar stays neutral — no brand class on the root
+    expect(root).not.toHaveClass('appshell--brand');
+  });
+
+  it('default top layout (no headerTheme) does not brand the header', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    const root = container.querySelector('.appshell');
+    expect(root).toHaveClass('appshell--header-default');
+    expect(root).not.toHaveClass('appshell--header-brand');
   });
 
   it('default (no headerLayout) is byte-identical to the legacy shell', () => {
@@ -87,18 +107,18 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*0\s+1fr/);
   });
 
-  it('CSS: brand+top reuses --color-primary (same shade as the legacy sidebar)', () => {
-    // The top-header brand chrome shares `--color-primary` with the legacy
-    // `.appshell--brand .appshell__sidebar` so both surfaces match. The
-    // sidebar override is intentionally NOT redefined here (the legacy
-    // rule already paints it).
-    expect(css).toMatch(/\.appshell--brand\.appshell--header-top\s+\.appshell__header\s*\{[^}]*background:\s*var\(--color-primary\)(?!-)/);
+  it('CSS: header-brand band reuses --color-primary (driven by headerTheme, not theme)', () => {
+    // The brand top-header is keyed on `.appshell--header-brand` (from the
+    // `headerTheme` prop) — NOT `.appshell--brand` — so it can fire over a
+    // neutral sidebar. It shares `--color-primary` with the legacy
+    // `.appshell--brand .appshell__sidebar` so the shades match when both
+    // are branded.
+    expect(css).toMatch(/\.appshell--header-top\.appshell--header-brand\s+\.appshell__header\s*\{[^}]*background:\s*var\(--color-primary\)(?!-)/);
   });
 
-  it('CSS: brand+top header keeps a visible separator from the sidebar', () => {
-    // Same colour on both surfaces would erase the seam; a soft white-α
-    // hairline (the kit's idiom for borders on brand surfaces) keeps the
-    // topbar legible from the sidebar.
-    expect(css).toMatch(/\.appshell--brand\.appshell--header-top\s+\.appshell__header\s*\{[^}]*border-bottom:\s*1px solid rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*0\.12\s*\)/);
+  it('CSS: header-brand band keeps a visible separator from the body', () => {
+    // A soft white-α hairline (the kit's idiom for borders on brand
+    // surfaces) keeps the topbar legible from whatever sits below it.
+    expect(css).toMatch(/\.appshell--header-top\.appshell--header-brand\s+\.appshell__header\s*\{[^}]*border-bottom:\s*1px solid rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*0\.12\s*\)/);
   });
 });

@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.0] — 2026-05-22
+
+**Minor. Additive at runtime; tightens types.** Two AppShell improvements.
+
+### Added
+- **`AppShell` `headerTheme`** (`headerLayout="top"` only). Themes the
+  header band independently of the sidebar; defaults to `theme`, so
+  `theme="brand"` still tints both (back-compat). `theme="default"
+  headerTheme="brand"` = a brand top bar over a neutral sidebar (common
+  data-heavy admin pattern). New `.appshell--header-brand` class drives the
+  brand header (decoupled from `.appshell--brand`).
+
+### Changed
+- **`AppShellProps` is now a discriminated union** keyed on `headerLayout`
+  (`AppShellBaseProps` + `AppShellSideProps` + `AppShellTopProps`).
+  TypeScript now rejects layout-mismatched props at compile time
+  (`brand`/`topbar`/`user` only with `side`; `header` only with `top`) —
+  previously they were silently ignored at runtime. **Runtime output is
+  byte-identical.** Types-only tightening: the only code that breaks is code
+  that was already passing no-op props for its layout. Kept as **minor**
+  (owner call): functionally additive, no runtime change.
+
+Pinned by `tests/AppShellProps.test.tsx` (type contract) and
+`tests/AppShellTop.test.tsx` (3 theming guards).
+
 ## [1.17.0] — 2026-05-22
 
 **Minor. Additive — no breaking changes.** Consumer-driven: these gaps

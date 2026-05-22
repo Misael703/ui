@@ -153,14 +153,17 @@ export const FooterTextColapsadoInicial: StoryObj = {
  * the topbar is invariant. `theme="brand"` tints both header and sidebar.
  * ===========================================================================*/
 
-function TopbarCenteredShell({ theme = 'default' }: { theme?: AppShellTheme }) {
+function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppShellTheme; headerTheme?: AppShellTheme }) {
   const [collapsed, setCollapsed] = React.useState(false);
-  const brand = theme === 'brand';
+  // The header content (separators, icon buttons) follows the HEADER band's
+  // theme, which defaults to `theme`.
+  const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
   return (
     <div style={{ height: 'calc(100vh - 32px)' }}>
       <AppShell
         theme={theme}
+        headerTheme={headerTheme}
         headerLayout="top"
         sections={sections}
         collapsed={collapsed}
@@ -215,4 +218,13 @@ export const TopbarCentered: StoryObj = {
  *  topbar + sidebar juntos con `--color-primary` + texto blanco. */
 export const TopbarCenteredBrand: StoryObj = {
   render: () => <TopbarCenteredShell theme="brand" />,
+};
+
+/** **Topbar brand, sidebar neutro** — `theme="default" headerTheme="brand"`.
+ *  Solo el topbar va azul de marca; el sidebar queda claro (mejor legibilidad
+ *  en apps data-heavy de uso prolongado). El collapsible funciona normal.
+ *  `headerTheme` es independiente de `theme`; por defecto hereda `theme`,
+ *  así que `theme="brand"` sin `headerTheme` sigue tiñendo ambas bandas. */
+export const TopbarBrandHeaderOnly: StoryObj = {
+  render: () => <TopbarCenteredShell theme="default" headerTheme="brand" />,
 };
