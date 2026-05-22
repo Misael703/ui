@@ -50,6 +50,90 @@ export const CardConAccent: StoryObj = {
   ),
 };
 
+const ZONES = [
+  { cat: 'cat-1', label: 'Metropolitana' },
+  { cat: 'cat-2', label: 'Valparaíso' },
+  { cat: 'cat-3', label: 'Biobío' },
+  { cat: 'cat-4', label: 'Maule' },
+  { cat: 'cat-5', label: 'Araucanía' },
+  { cat: 'cat-6', label: 'Los Lagos' },
+] as const;
+
+/**
+ * **Categorical accents** (v1.16+). For CATEGORY, not status: six
+ * well-separated hues so operational zones / regions / teams read as
+ * distinct (unlike `info` vs `primary`, both blue). `accent="cat-N"` on
+ * Card draws the rail; `variant="cat-N"` on Badge is the soft chip. All
+ * `--cat-N-fg` on `--cat-N-bg` are AA (pinned in Contrast.test). Plus the
+ * new `accent="neutral"` (grey rail).
+ */
+export const CategoricalAccents: StoryObj = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {ZONES.map((z) => <Badge key={z.cat} variant={z.cat}>{z.label}</Badge>)}
+        <Badge variant="neutral">Sin zona</Badge>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+        {ZONES.map((z) => (
+          <Card key={z.cat} accent={z.cat}>
+            <CardBody>
+              <strong>{z.label}</strong>
+              <div style={{ color: 'var(--fg-muted)', fontSize: 13, marginTop: 4 }}>Zona operativa</div>
+            </CardBody>
+          </Card>
+        ))}
+        <Card accent="neutral">
+          <CardBody><strong>Sin asignar</strong><div style={{ color: 'var(--fg-muted)', fontSize: 13, marginTop: 4 }}>accent="neutral"</div></CardBody>
+        </Card>
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * **Card clickeable compacta = link/row.** No hace falta un componente
+ * `ListRow` aparte: `Card interactive asChild` deja que la Card *sea* el
+ * `<a>` (o el `<Link>` de Next), heredando hover/focus accesibles. Para
+ * una fila densa (lista de pedidos, resultados), bajá el padding del
+ * `CardBody` con `style`/className. El `asChild` evita el `<a>`-dentro-de-
+ * `<div>` (un solo nodo interactivo, foco correcto).
+ *
+ * En tu app, Next.js:
+ * ```tsx
+ * <Card interactive asChild>
+ *   <Link href={`/pedidos/${id}`}> … </Link>
+ * </Card>
+ * ```
+ */
+export const CardComoLink: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 460 }}>
+      {[
+        { id: '1042', cliente: 'Northwind Builders', total: '$1.245.000', estado: 'Despachado' },
+        { id: '1041', cliente: 'Constructora Norte', total: '$842.300', estado: 'En ruta' },
+        { id: '1040', cliente: 'Ferretería Centro', total: '$318.900', estado: 'Pendiente' },
+      ].map((o) => (
+        <Card key={o.id} interactive asChild>
+          {/* In your app this is a Next <Link href=…>. Plain <a> here. */}
+          <a href="#" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+            <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 16px' }}>
+              <div>
+                <div style={{ fontWeight: 600 }}>{o.cliente}</div>
+                <div className="cell-meta cell-mono">#{o.id}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div className="cell-mono">{o.total}</div>
+                <Badge variant="neutral">{o.estado}</Badge>
+              </div>
+            </CardBody>
+          </a>
+        </Card>
+      ))}
+    </div>
+  ),
+};
+
 export const Badges: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

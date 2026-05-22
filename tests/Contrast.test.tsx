@@ -77,6 +77,14 @@ function pairs(map: Record<string, string>): Pair[] {
     { label: 'fg-meta on bg-subtle (eco line on hovered row)', fg: T('--fg-meta'), bg: T('--bg-subtle'), min: 4.5 },
     { label: 'fg-default on bg-surface', fg: T('--fg-default'), bg: T('--bg-surface'), min: 4.5 },
     { label: 'fg-link on bg-surface', fg: T('--fg-link'), bg: T('--bg-surface'), min: 4.5 },
+
+    // --- categorical palette: each --cat-N-fg must be AA on its soft --cat-N-bg ---
+    { label: 'cat-1 fg on cat-1 bg', fg: T('--cat-1-fg'), bg: T('--cat-1-bg'), min: 4.5 },
+    { label: 'cat-2 fg on cat-2 bg', fg: T('--cat-2-fg'), bg: T('--cat-2-bg'), min: 4.5 },
+    { label: 'cat-3 fg on cat-3 bg', fg: T('--cat-3-fg'), bg: T('--cat-3-bg'), min: 4.5 },
+    { label: 'cat-4 fg on cat-4 bg', fg: T('--cat-4-fg'), bg: T('--cat-4-bg'), min: 4.5 },
+    { label: 'cat-5 fg on cat-5 bg', fg: T('--cat-5-fg'), bg: T('--cat-5-bg'), min: 4.5 },
+    { label: 'cat-6 fg on cat-6 bg', fg: T('--cat-6-fg'), bg: T('--cat-6-bg'), min: 4.5 },
   ];
 }
 

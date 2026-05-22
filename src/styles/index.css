@@ -457,6 +457,15 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Was missing in 1.10.0 (variant existed in the union, no CSS → fell back to
    neutral). Soft register, same shape as the others. */
 .badge--info { background: var(--color-info-50); color: var(--color-info-800); border-color: var(--color-info-200); --badge-ink: var(--color-info-800); }
+/* Categorical badges (v1.16+): soft-bg + AA ink from the --cat-* triple.
+   For category, not status (see _root.css). --badge-ink feeds the solid
+   appearance; the soft fg is AA on the soft bg (pinned in Contrast.test). */
+.badge--cat-1 { background: var(--cat-1-bg); color: var(--cat-1-fg); border-color: transparent; --badge-ink: var(--cat-1-fg); }
+.badge--cat-2 { background: var(--cat-2-bg); color: var(--cat-2-fg); border-color: transparent; --badge-ink: var(--cat-2-fg); }
+.badge--cat-3 { background: var(--cat-3-bg); color: var(--cat-3-fg); border-color: transparent; --badge-ink: var(--cat-3-fg); }
+.badge--cat-4 { background: var(--cat-4-bg); color: var(--cat-4-fg); border-color: transparent; --badge-ink: var(--cat-4-fg); }
+.badge--cat-5 { background: var(--cat-5-bg); color: var(--cat-5-fg); border-color: transparent; --badge-ink: var(--cat-5-fg); }
+.badge--cat-6 { background: var(--cat-6-bg); color: var(--cat-6-fg); border-color: transparent; --badge-ink: var(--cat-6-fg); }
 /* Appearance axis, orthogonal to variant. Both reuse the per-variant
    --badge-ink, which is the variant's already-shipped AA text token
    (--color-*-800): solid = white on that token (AA by symmetry — it's
@@ -580,7 +589,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--accent-success,
 .card--accent-warning,
 .card--accent-danger,
-.card--accent-info {
+.card--accent-info,
+.card--accent-neutral,
+.card--accent-cat-1,
+.card--accent-cat-2,
+.card--accent-cat-3,
+.card--accent-cat-4,
+.card--accent-cat-5,
+.card--accent-cat-6 {
   box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-sm);
 }
 .card--accent-brand     { --card-accent-color: var(--color-primary); }
@@ -589,6 +605,13 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--accent-warning   { --card-accent-color: var(--color-warning); }
 .card--accent-danger    { --card-accent-color: var(--color-danger); }
 .card--accent-info      { --card-accent-color: var(--color-info); }
+.card--accent-neutral   { --card-accent-color: var(--border-strong); }
+.card--accent-cat-1     { --card-accent-color: var(--cat-1); }
+.card--accent-cat-2     { --card-accent-color: var(--cat-2); }
+.card--accent-cat-3     { --card-accent-color: var(--cat-3); }
+.card--accent-cat-4     { --card-accent-color: var(--cat-4); }
+.card--accent-cat-5     { --card-accent-color: var(--cat-5); }
+.card--accent-cat-6     { --card-accent-color: var(--cat-6); }
 
 /* Preserve the accent rail when an interactive card is hovered —
    the base `.card--interactive:hover` swaps box-shadow, which would
@@ -598,7 +621,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--interactive.card--accent-success:hover,
 .card--interactive.card--accent-warning:hover,
 .card--interactive.card--accent-danger:hover,
-.card--interactive.card--accent-info:hover {
+.card--interactive.card--accent-info:hover,
+.card--interactive.card--accent-neutral:hover,
+.card--interactive.card--accent-cat-1:hover,
+.card--interactive.card--accent-cat-2:hover,
+.card--interactive.card--accent-cat-3:hover,
+.card--interactive.card--accent-cat-4:hover,
+.card--interactive.card--accent-cat-5:hover,
+.card--interactive.card--accent-cat-6:hover {
   box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-md);
 }
 
@@ -3829,6 +3859,11 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default);
   box-shadow: var(--shadow-sm);
 }
+/* SegmentedControl: same track look as .toggle-group, but the segments
+   share width (view switchers read better with equal segments). Stretch
+   the group to its container so `flex: 1` segments have room to divide. */
+.toggle-group--segmented { display: flex; }
+.toggle-group--segmented .toggle-group__item { flex: 1 1 0; }
 
 /* ---------- InputOTP -------------------------------------------------- */
 .input-otp { display: inline-flex; gap: var(--space-2); }
@@ -3984,6 +4019,28 @@ button, input, select, textarea { box-sizing: border-box; }
 .nav-menu__link-body { display: flex; flex-direction: column; gap: 2px; }
 .nav-menu__link-label { font-weight: 500; font-size: var(--text-sm); }
 .nav-menu__link-desc { font-size: var(--text-xs); color: var(--fg-muted); }
+
+/* ---------- Grid (responsive columns) --------------------------------- */
+/* `<Grid columns={{ base, sm, md, lg, xl }}>` sets --grid-cols* custom
+   props; these media queries read them with an inherit chain so each
+   breakpoint falls back to the previous one when omitted. Breakpoints
+   match the kit tokens (--bp-sm 480 … --bp-xl 1280). */
+.grid--responsive {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 1), minmax(0, 1fr));
+}
+@media (min-width: 480px) {
+  .grid--responsive { grid-template-columns: repeat(var(--grid-cols-sm, var(--grid-cols, 1)), minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .grid--responsive { grid-template-columns: repeat(var(--grid-cols-md, var(--grid-cols-sm, var(--grid-cols, 1))), minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .grid--responsive { grid-template-columns: repeat(var(--grid-cols-lg, var(--grid-cols-md, var(--grid-cols-sm, var(--grid-cols, 1)))), minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+  .grid--responsive { grid-template-columns: repeat(var(--grid-cols-xl, var(--grid-cols-lg, var(--grid-cols-md, var(--grid-cols-sm, var(--grid-cols, 1))))), minmax(0, 1fr)); }
+}
 
 } /* end @layer elalba */
 

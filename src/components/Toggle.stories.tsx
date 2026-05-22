@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Toggle, ToggleGroup, ToggleGroupItem } from './Toggle';
+import { Toggle, ToggleGroup, ToggleGroupItem, SegmentedControl, SegmentedControlItem } from './Toggle';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from './Icons';
 
 export default { title: 'Actions/Toggle', tags: ['autodocs'] } as Meta;
@@ -43,6 +43,27 @@ export const ToggleGroupSingle: StoryObj = {
           <AlignRight size={16} />
         </ToggleGroupItem>
       </ToggleGroup>
+    );
+  },
+};
+
+/**
+ * **SegmentedControl** — single-select with equal-width segments, the
+ * view-switcher case. No `type` to forget (it's always single), so no
+ * cryptic union error. `SegmentedControlItem` aliases `ToggleGroupItem`.
+ */
+export const SegmentedControlDemo: StoryObj = {
+  render: () => {
+    const [view, setView] = React.useState<string | null>('list');
+    return (
+      <div style={{ maxWidth: 320 }}>
+        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
+          <SegmentedControlItem value="list">Lista</SegmentedControlItem>
+          <SegmentedControlItem value="grid">Tarjetas</SegmentedControlItem>
+          <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
+        </SegmentedControl>
+        <p style={{ marginTop: 12, fontSize: 13, color: 'var(--fg-muted)' }}>Vista actual: {view}</p>
+      </div>
     );
   },
 };

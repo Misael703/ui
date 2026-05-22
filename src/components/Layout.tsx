@@ -260,27 +260,100 @@ export function Container({ size = 'lg', className, style, ...rest }: ContainerP
 }
 
 // ---------- Grid ---------------------------------------------------------
+/**
+ * Column count. A number/string is fixed; an object is responsive per
+ * breakpoint (each breakpoint inherits the previous one if omitted).
+ * Breakpoints match the kit tokens: sm 480 · md 768 · lg 1024 · xl 1280.
+ */
+export type ResponsiveColumns =
+  | number
+  | string
+  | { base?: number; sm?: number; md?: number; lg?: number; xl?: number };
+
 export interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
-  columns?: number | string;
+  columns?: ResponsiveColumns;
   gap?: SpaceToken;
+  /** Intrinsically responsive auto-fit columns; takes precedence over `columns`. */
   minColWidth?: number | string;
 }
 
 export function Grid({ columns, gap = 4, minColWidth, className, style, ...rest }: GridProps) {
-  const tpl = minColWidth
-    ? `repeat(auto-fit, minmax(${typeof minColWidth === 'number' ? `${minColWidth}px` : minColWidth}, 1fr))`
-    : typeof columns === 'number'
-      ? `repeat(${columns}, minmax(0, 1fr))`
-      : columns ?? 'repeat(12, minmax(0, 1fr))';
+  const gapVar = `var(--space-${gap})`;
+
+  // auto-fit: intrinsic responsiveness, no breakpoints needed.
+  if (minColWidth) {
+    const w = typeof minColWidth === 'number' ? `${minColWidth}px` : minColWidth;
+    return (
+      <div
+        className={cx('grid', className)}
+        style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${w}, 1fr))`, gap: gapVar, ...style }}
+        {...rest}
+      />
+    );
+  }
+
+  // Responsive object: emit per-breakpoint custom props; `.grid--responsive`
+  // (in index.css) reads them through media queries with an inherit chain.
+  if (columns && typeof columns === 'object') {
+    const vars: Record<string, string> = {};
+    if (columns.base != null) vars['--grid-cols'] = String(columns.base);
+    if (columns.sm != null) vars['--grid-cols-sm'] = String(columns.sm);
+    if (columns.md != null) vars['--grid-cols-md'] = String(columns.md);
+    if (columns.lg != null) vars['--grid-cols-lg'] = String(columns.lg);
+    if (columns.xl != null) vars['--grid-cols-xl'] = String(columns.xl);
+    return (
+      <div
+        className={cx('grid', 'grid--responsive', className)}
+        style={{ gap: gapVar, ...vars, ...style } as React.CSSProperties}
+        {...rest}
+      />
+    );
+  }
+
+  const tpl = typeof columns === 'number'
+    ? `repeat(${columns}, minmax(0, 1fr))`
+    : columns ?? 'repeat(12, minmax(0, 1fr))';
   return (
     <div
       className={cx('grid', className)}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: tpl,
-        gap: `var(--space-${gap})`,
-        ...style,
-      }}
+      style={{ display: 'grid', gridTemplateColumns: tpl, gap: gapVar, ...style }}
+      {...rest}
+    />
+  );
+}
+
+// ---------- Cluster / Spacer --------------------------------------------
+/**
+ * Horizontal group that wraps — the "cluster" layout primitive (Braid /
+ * Every Layout). Sugar for `<Stack direction="row" wrap>`. Use for tag
+ * lists, button rows, filter chips: items flow and wrap, gap stays even.
+ */
+export const Cluster = React.forwardRef<HTMLDivElement, Omit<StackProps, 'direction' | 'wrap'>>(
+  function Cluster(props, ref) {
+    return <Stack ref={ref} direction="row" wrap align={props.align ?? 'center'} {...props} />;
+  }
+);
+
+export interface SpacerProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Fixed size on a space token. Omit for a flexible spacer (`flex: 1`). */
+  size?: SpaceToken;
+}
+
+/**
+ * Spacing element. With `size`, a fixed gap on the space scale. Without it,
+ * a flexible spacer that eats remaining space in a flex container (pushes
+ * siblings apart) — e.g. a toolbar with left items + `<Spacer />` + right
+ * items.
+ */
+export function Spacer({ size, style, ...rest }: SpacerProps) {
+  return (
+    <div
+      aria-hidden="true"
+      style={
+        size != null
+          ? { flex: '0 0 auto', width: `var(--space-${size})`, height: `var(--space-${size})`, ...style }
+          : { flex: '1 1 auto', ...style }
+      }
       {...rest}
     />
   );
