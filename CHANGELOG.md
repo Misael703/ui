@@ -5,6 +5,15 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.1] — 2026-05-22
+
+**Patch.** `AppShell` sidebar layout: fix the collapsed brand header being
+8px taller than the topbar, which broke the alignment of the two header
+dividers at the sidebar/main corner. Collapsing changed the brand's
+vertical padding (12px → 16px); now it stays 12px (only the horizontal
+padding narrows for the rail), so both headers are the same height in both
+states. Guarded in `tests/AppShell.test.tsx`.
+
 ## [1.18.0] — 2026-05-22
 
 **Minor. Additive at runtime; tightens types.** Two AppShell improvements.
