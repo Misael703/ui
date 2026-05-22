@@ -94,6 +94,14 @@ export interface AppShellTopProps extends AppShellBaseProps {
   headerLayout: 'top';
   /** Slots for the full-width header. Brand usually goes in `center`. */
   header?: AppShellHeader;
+  /**
+   * Theme of the **header band only**, independent of the sidebar (`theme`).
+   * Defaults to `theme`, so `theme="brand"` still tints both bands (no
+   * change for existing consumers). Set `theme="default" headerTheme="brand"`
+   * for a branded top bar over a neutral, legible sidebar — common in
+   * data-heavy admin apps.
+   */
+  headerTheme?: AppShellTheme;
   /** Not valid in `top` — use `header.center` for the brand. */
   brand?: never;
   /** Not valid in `top` — the sidebar collapses entirely. */
@@ -192,8 +200,11 @@ export function AppShell(props: AppShellProps) {
   // `brand`/`topbar`/`user` (side) are each only in scope in their branch.
   if (props.headerLayout === 'top') {
     const { header } = props;
+    // Header band themes independently of the sidebar; defaults to `theme`
+    // so `theme="brand"` keeps tinting both bands (back-compat).
+    const headerTheme = props.headerTheme ?? theme;
     return (
-      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', collapsed && 'is-collapsed', className)}>
+      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsed && 'is-collapsed', className)}>
         <header className="appshell__header" role="banner">
           <div className="appshell__header-left">{header?.left}</div>
           <div className="appshell__header-center">{header?.center}</div>

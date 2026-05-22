@@ -2723,12 +2723,14 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
 .appshell--header-top .appshell__sidebar { overflow: hidden; }
-/* Brand top-header variant: same `--color-primary` as the legacy sidebar
-   (consistent shell-wide brand) + a soft white-α hairline so the topbar
-   reads as separate from the same-colour sidebar. The sidebar inherits
-   `.appshell--brand .appshell__sidebar` already, so no override needed
-   here. */
-.appshell--brand.appshell--header-top .appshell__header {
+/* Brand top-header band. Driven by `.appshell--header-brand` (from the
+   `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
+   That decoupling is what lets a branded top bar sit over a neutral sidebar
+   (`theme="default" headerTheme="brand"`). When `theme="brand"` and no
+   `headerTheme` is set, `headerTheme` resolves to `brand` too, so this still
+   fires and both bands stay branded (back-compat). The sidebar tint is a
+   separate concern handled by `.appshell--brand .appshell__sidebar`. */
+.appshell--header-top.appshell--header-brand .appshell__header {
   background: var(--color-primary);
   color: var(--color-white);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
