@@ -33,8 +33,13 @@ Two palettes ship. The generic default and the El Alba preset
   The canvas/surface contrast is the signature of the default look.
 
 **El Alba preset:** Pantone 287 C blue (`--color-primary-700` `#002f87`) +
-Pantone 165 C orange (`--color-secondary-600` `#ff671d`), white canvas, cool
-slate-tinted neutrals.
+Pantone 165 C orange (`--color-secondary-600` `#ff671d`), subtle cool-slate
+canvas (`--bg-canvas` `#eaeef5`) on white surfaces, cool slate-tinted
+neutrals. Tier scale (semantics preserved, `subtle`→`muted` stays the hover
+progression): canvas `#eaeef5` < subtle `#f1f4f9` < muted `#e7ebf2` <
+surface `#fff`. The cool canvas gives white Cards/DataTables figure/ground
+without the consumer touching CSS (pre-1.16 the El Alba canvas was pure
+white = no contrast).
 
 **Status:** full green / yellow / red / info scales; semantics alias the
 600 step (`--color-success` = green-600, `--color-warning` = yellow-500,

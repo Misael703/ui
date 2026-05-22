@@ -5,6 +5,33 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] — 2026-05-22
+
+**Minor.** Visual change to the **El Alba preset only** (the generic base
+is unchanged). No API changes. Affects every El Alba consumer (barritas,
+marginapp, etc.) — review once after bumping; it's a strict figure/ground
+improvement.
+
+### Changed (El Alba preset)
+- **Tinted canvas.** `--bg-canvas` `#fff` → **`#eaeef5`** (subtle cool-slate).
+  A white canvas equalled a white surface, so Cards, DataTable and filters
+  dissolved into the page (zero figure/ground). White surfaces now read as
+  elevated against a cool-slate page background **without the consumer
+  touching CSS**.
+- **Re-scaled background tiers** (semantics preserved — `subtle`→`muted`
+  stays the hover progression, so ghost-button / footer hovers don't
+  invert):
+  - `--bg-subtle` → `#f1f4f9` (inset on a surface: table header, card footer)
+  - `--bg-muted`  → `#e7ebf2` (stronger inset / hover, still "below" subtle
+    in luminance = more prominent)
+  - `--bg-surface` stays `#fff`; order: canvas < subtle < muted < surface.
+- **`--fg-subtle`** `#686d7c` → **`#666b78`** (one slate step darker). The
+  darker canvas dropped `fg-subtle`/`fg-meta` on canvas to 4.44:1 (just
+  under AA); this clears it (~4.58 canvas / ~5.33 surface / ~4.77 subtle).
+  Captions/meta read a hair stronger everywhere.
+
+Pinned by `tests/Contrast.test.tsx` (27 pairs, all AA). DESIGN.md updated.
+
 ## [1.15.0] — 2026-05-20
 
 **Minor.** Additive. AppShell gains a top-header layout variant. The

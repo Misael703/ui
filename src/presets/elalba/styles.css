@@ -64,8 +64,23 @@
   --color-gray-100:  #f4f5f8;
   --color-gray-50:   #fafbfc;
 
-  /* Original white canvas (v1.0.0 default is warm cream paper). */
-  --bg-canvas: var(--color-white);
+  /* Cool-slate canvas on white surfaces (was pure white pre-1.16). A white
+     canvas == white surface gave zero figure/ground: Cards, DataTable and
+     filters dissolved into the page. A subtle cool-slate canvas makes the
+     white surfaces read as elevated without the consumer touching CSS.
+
+     Tier scale (luminance, darkest → lightest), semantics PRESERVED so the
+     `subtle → muted` hover progression doesn't invert:
+       --bg-canvas  #eaeef5  page background (the only non-white tier here)
+       --bg-subtle  #f1f4f9  inset on a surface (table header, card footer)
+       --bg-muted   #e7ebf2  stronger inset / hover/pressed (kept "below"
+                             subtle in luminance = more prominent, as before)
+       --bg-surface #ffffff  cards, tables, the content that should pop
+     `--bg-subtle`/`--bg-muted` sit ON surfaces, not on the canvas, so their
+     relation to the canvas value doesn't matter for normal kit usage. */
+  --bg-canvas:  #eaeef5;
+  --bg-subtle:  #f1f4f9;
+  --bg-muted:   #e7ebf2;
 
   /* Base aliases — El Alba anchors primary at the 700 stop and secondary
      at the 600 stop (matches the original @misael703/elalba-ui). */
@@ -87,9 +102,13 @@
                      3.43 subtle). Minimal cool-slate darkening to clear
                      4.5:1 (5.16 surface / 4.74 subtle). This is the only
                      El Alba visual delta in v1.10.0 (breaks v0.7.1
-                     pixel-identity by design — v0.7.1 was sub-AA). */
+                     pixel-identity by design — v0.7.1 was sub-AA).
+     v1.16.0: nudged #686d7c → #666b78 (one slate step darker). The tinted
+     canvas (#eaeef5) dropped `fg-subtle`/`fg-meta` on canvas to 4.44:1
+     (just under AA); this clears it (~4.58 canvas / ~5.33 surface / ~4.77
+     subtle). Net: captions/meta read a hair stronger everywhere. */
   --fg-muted:  var(--color-gray-600);
-  --fg-subtle: #686d7c;
+  --fg-subtle: #666b78;
 
   /* Button primary↔secondary swap (El Alba only, buttons only — these
      tokens are read solely by .btn--primary/.btn--secondary; links, focus
