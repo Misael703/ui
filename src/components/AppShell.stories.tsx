@@ -62,6 +62,7 @@ const Shell = ({ theme }: { theme?: AppShellTheme }) => (
  * Recomendado para apps data-heavy de uso prolongado (ERP, admin, dashboards).
  */
 export const ConSidebar: StoryObj = {
+  name: 'Sidebar · Claro (default)',
   render: () => <Shell />,
 };
 
@@ -71,6 +72,7 @@ export const ConSidebar: StoryObj = {
  * fatiga visual en apps de uso prolongado.
  */
 export const SidebarBrand: StoryObj = {
+  name: 'Sidebar · Brand (azul)',
   render: () => <Shell theme="brand" />,
 };
 
@@ -104,10 +106,12 @@ const BrandWithText = ({ collapsed }: { collapsed?: boolean }) => (
 );
 
 export const BrandTextColapsable: StoryObj = {
+  name: 'Sidebar · Brand, texto colapsable',
   render: () => <BrandWithText />,
 };
 
 export const BrandTextColapsadoInicial: StoryObj = {
+  name: 'Sidebar · Brand, texto colapsado',
   render: () => <BrandWithText collapsed />,
 };
 
@@ -139,10 +143,12 @@ const FootWithText = ({ collapsed }: { collapsed?: boolean }) => (
 );
 
 export const FooterTextColapsable: StoryObj = {
+  name: 'Sidebar · Footer colapsable',
   render: () => <FootWithText />,
 };
 
 export const FooterTextColapsadoInicial: StoryObj = {
+  name: 'Sidebar · Footer colapsado',
   render: () => <FootWithText collapsed />,
 };
 
@@ -212,12 +218,14 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
  *  del viewport (1fr·auto·1fr). Hamburger izq, bell+separador+avatar der.
  *  Toggle: solo el sidebar se oculta; el topbar queda invariante. */
 export const TopbarCentered: StoryObj = {
+  name: 'Topbar · Claro (default)',
   render: () => <TopbarCenteredShell />,
 };
 
 /** **Topbar-centered, brand blue** — mismo shell, `theme="brand"` tematiza
  *  topbar + sidebar juntos con `--color-primary` + texto blanco. */
 export const TopbarCenteredBrand: StoryObj = {
+  name: 'Topbar · Brand (ambas bandas)',
   render: () => <TopbarCenteredShell theme="brand" />,
 };
 
@@ -227,7 +235,16 @@ export const TopbarCenteredBrand: StoryObj = {
  *  `headerTheme` es independiente de `theme`; por defecto hereda `theme`,
  *  así que `theme="brand"` sin `headerTheme` sigue tiñendo ambas bandas. */
 export const TopbarBrandHeaderOnly: StoryObj = {
+  name: 'Topbar · Header brand + sidebar claro',
   render: () => <TopbarCenteredShell theme="default" headerTheme="brand" />,
+};
+
+/** **Topbar claro + icon rail** — `collapsedRail` con `theme="default"`. Mismo
+ *  rail de 72px (iconos, item activo, toggle abajo) pero sobre el shell claro:
+ *  el par white del `Topbar · Brand + rail`. */
+export const TopbarDefaultRail: StoryObj = {
+  name: 'Topbar · Claro + rail',
+  render: () => <TopbarCenteredShell rail startCollapsed />,
 };
 
 /** **Topbar brand + icon rail** — `collapsedRail`. Collapsing keeps a 72px
@@ -236,5 +253,6 @@ export const TopbarBrandHeaderOnly: StoryObj = {
  *  rail. Use the hamburger (header.left) or the rail toggle to expand.
  *  Shown starting collapsed so the rail is visible. */
 export const TopbarBrandRail: StoryObj = {
+  name: 'Topbar · Brand + rail',
   render: () => <TopbarCenteredShell theme="brand" rail startCollapsed />,
 };
