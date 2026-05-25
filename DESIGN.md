@@ -96,6 +96,12 @@ alternatives).
 - Spacing: 4pt grid, `--space-0` 0 → `--space-24` 96px.
 - Radii: `--radius-xs` 2px → `--radius-xl` 18px, `--radius-pill` 999px.
 - Shadows: soft, neutral — `--shadow-xs` → `--shadow-lg`, plus `--shadow-brand`.
+  `--shadow-card` / `--shadow-card-hover` (v1.20.0) are two-layer (fine
+  contact + diffuse lift) for `Card`'s default float — needed since the
+  tinted canvas (v1.16) leaves a 1px border alone too weak to separate a
+  card from the page. A card nested in a card drops its lift (no double
+  elevation). Tint is the blue-ish ink, not pure black, so it sits on both
+  palettes.
 - Breakpoints (documentation + JS use, not usable in `@media` conditions):
   `--bp-sm` 480 / `--bp-md` 768 / `--bp-lg` 1024 / `--bp-xl` 1280.
 

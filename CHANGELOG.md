@@ -5,6 +5,38 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.0] — 2026-05-25
+
+**Minor. Visual default change to `Card`** (both palettes). Follow-up to the
+v1.16 tinted El Alba canvas: a card needed a real elevation to read as
+floating, which the tinted canvas exposed.
+
+### Added / Changed
+- **`Card` elevation.** New `--shadow-card` / `--shadow-card-hover` tokens —
+  two layers (fine contact shadow + diffuse lift), tinted with the blue-ish
+  ink (not pure black) so they sit on both palettes. `Card` now floats on
+  `--shadow-card` by default (was the single-layer `--shadow-sm`);
+  `Card interactive` lifts to `--shadow-card-hover` on hover. Accent cards
+  keep their rail and pick up the same elevation.
+- **No double elevation.** A `.card` nested inside another `.card` drops its
+  shadow (it's a sub-panel, not a second floating surface) — keeps border +
+  radius. Verified in Storybook (nested card → `box-shadow: none`).
+
+### Canvas-tint regression audit (v1.16 follow-up — no fixes needed)
+Audited every component/token that assumed a white canvas after v1.16
+turned the El Alba canvas cool-slate. **No regressions found:** all
+backgrounds already use tokens (no hardcoded `#fff`/`white` that would seam
+against the canvas; the `rgba(255,255,255,x)` values are overlays on
+brand/dark surfaces). Tier order holds (canvas < subtle < muted < surface);
+AppShell already uses `--bg-canvas` for the shell and `--bg-surface` for the
+sidebar; WCAG of `--fg-*` on `--bg-canvas` is pinned AA by `Contrast.test`.
+The one real consequence — `--border-default` (#e3e6ec) barely separating a
+card from the #eaeef5 canvas — is exactly what the `Card` elevation above
+resolves. No visual-snapshot baseline exists in the repo, so nothing to
+regenerate.
+
+Pinned by `tests/CardElevation.test.tsx`. DESIGN.md updated.
+
 ## [1.19.0] — 2026-05-25
 
 **Minor. Additive — no breaking changes.** Two form-ergonomics gaps that
