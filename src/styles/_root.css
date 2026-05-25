@@ -277,6 +277,14 @@
   --shadow-md: 0 8px 20px rgba(12, 18, 32, 0.10);
   --shadow-lg: 0 18px 40px rgba(12, 18, 32, 0.14);
   --shadow-brand: 0 10px 30px rgba(0, 47, 135, 0.25);
+  /* Card elevation: two layers — a fine contact shadow + a diffuse lift —
+     so surfaces read as floating over the tinted canvas (v1.16 made the
+     El Alba canvas cool-slate, where a 1px border alone barely separates
+     a card from the page). Tint is the blue-ish ink (rgba 12,18,32), not
+     pure black, so it sits right on both palettes. `-card-hover` is one
+     step higher for interactive cards. */
+  --shadow-card:       0 1px 2px rgba(12, 18, 32, 0.05), 0 8px 24px -16px rgba(12, 18, 32, 0.20);
+  --shadow-card-hover: 0 2px 4px rgba(12, 18, 32, 0.06), 0 16px 32px -14px rgba(12, 18, 32, 0.26);
 
   /* -------- Motion --------------------------------------------------- */
   /* Exponential ease-out family: confident deceleration, no bounce. UI
