@@ -2748,16 +2748,14 @@ button, input, select, textarea { box-sizing: border-box; }
    kept). */
 .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
 .appshell--header-top .appshell__sidebar { overflow: hidden; }
-/* Hide mode (no rail): the body animates 240px → 0, passing through ~72px
-   where the still-visible nav icons read as a momentary rail before the
-   sidebar disappears. Fade the sidebar out faster than the width so its
-   content is gone before the rail width — clean hide, no flash. The rail
-   mode keeps it visible (opacity 1) since 72px IS the destination. */
-.appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-  transition: opacity var(--duration-fast) var(--ease-standard);
-}
-.appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
-  opacity: 0;
+/* Hide mode (no rail): collapse the sidebar INSTANTLY, not animated. A
+   width transition (240px → 0) sweeps through ~72px, where the still-visible
+   nav icons read as a momentary rail on the way out. Hide has no meaningful
+   intermediate state (unlike rail, whose destination IS 72px), so snapping
+   the column avoids the flash entirely — the content just reclaims the
+   width. Rail mode keeps the smooth transition. */
+.appshell--header-top:not(.appshell--rail) .appshell__body {
+  transition: none;
 }
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
