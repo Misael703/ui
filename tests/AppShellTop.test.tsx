@@ -102,6 +102,12 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
 
+  it('CSS: hide mode (no rail) fades the sidebar out so it never flashes the rail', () => {
+    // width animates 240→0 and passes through ~72px; fading the sidebar
+    // (faster) hides the nav icons before that, so no momentary rail.
+    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*opacity:\s*0/);
+  });
+
   it('default top layout (no headerTheme) does not brand the header', () => {
     const { container } = render(
       <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
