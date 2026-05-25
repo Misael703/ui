@@ -69,6 +69,20 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(root).not.toHaveClass('appshell--brand');
   });
 
+  it('brand header carries data-tone="inverse" so its content is band-aware', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell__header')).toHaveAttribute('data-tone', 'inverse');
+  });
+
+  it('default (non-brand) header has no data-tone', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell__header')).not.toHaveAttribute('data-tone');
+  });
+
   it('default top layout (no headerTheme) does not brand the header', () => {
     const { container } = render(
       <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>

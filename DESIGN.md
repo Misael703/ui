@@ -155,6 +155,28 @@ alternatives).
   never a role hack on `<tr>` or an onClick-only div). `renderRow` is the
   data-driven render-prop escape hatch (same family as `AppShell.linkAs`;
   not `asChild`, which would emit invalid markup on `<tr>`).
+- **Band-aware Avatar (v1.21.0).** `Avatar` re-colors itself on an
+  inverse/brand surface (translucent-white chip + on-brand text) instead of
+  its default light-blue chip — driven by `data-tone="inverse"` on an
+  ancestor, the same re-scope mechanism that tints the sidebar/header. The
+  `AppShell` brand header (`headerTheme="brand"`) sets `data-tone="inverse"`
+  on its `<header>`, so an avatar in `header.right` is band-aware with **no
+  per-call-site colors**. Outside the AppShell, wrap your branded surface in
+  `data-tone="inverse"` (or `.surface-inverse`) to get the same. AA pinned
+  in `Contrast.test`.
+- **AppShell `headerLayout="top"` collapse (v1.15.0+).** The collapse toggle
+  is the consumer's to wire (no built-in affordance in `top`, unlike `side`):
+  put a hamburger in `header.left` and drive `collapsed`/`onCollapsedChange`.
+  **Behavior (by design):** in `top`, `collapsed` hides the sidebar
+  **entirely** (no 72px rail like `side`) so the content reclaims the full
+  width; the header stays full-width and invariant. Canonical snippet:
+  ```tsx
+  const [collapsed, setCollapsed] = useState(false);
+  <AppShell headerLayout="top" collapsed={collapsed} onCollapsedChange={setCollapsed}
+    header={{ left: <button aria-label="Menú" aria-expanded={!collapsed}
+      onClick={() => setCollapsed(c => !c)}><MenuIcon /></button>, center: <Logo/> }} />
+  ```
+  (See the `AppShellTop` block and the `TopbarCentered` story.)
 
 ## Polymorphism (two patterns, on purpose)
 

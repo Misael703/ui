@@ -205,7 +205,10 @@ export function AppShell(props: AppShellProps) {
     const headerTheme = props.headerTheme ?? theme;
     return (
       <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsed && 'is-collapsed', className)}>
-        <header className="appshell__header" role="banner">
+        {/* On a brand header the band is dark, so re-scope foreground tokens
+            via data-tone="inverse" — anything inside (Avatar, badges, links)
+            becomes band-aware automatically without per-call-site colors. */}
+        <header className="appshell__header" role="banner" data-tone={headerTheme === 'brand' ? 'inverse' : undefined}>
           <div className="appshell__header-left">{header?.left}</div>
           <div className="appshell__header-center">{header?.center}</div>
           <div className="appshell__header-right">{header?.right}</div>

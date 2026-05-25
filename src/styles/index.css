@@ -2156,6 +2156,15 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Avatar (extends components.css) ---------- */
 .avatar { background: var(--color-primary-100); color: var(--color-primary); }
+/* Band-aware: on an inverse/brand surface (e.g. AppShell brand header, which
+   sets data-tone="inverse"), the default light-blue chip would clash. Use a
+   translucent white chip + on-brand text so it reads correctly without the
+   consumer passing any colors. White text on (brand + 16% white) stays AA. */
+[data-tone="inverse"] .avatar,
+.surface-inverse .avatar {
+  background: color-mix(in srgb, var(--fg-on-brand) 16%, transparent);
+  color: var(--fg-on-brand);
+}
 .avatar--circle { border-radius: var(--radius-pill); }
 .avatar--square { border-radius: var(--radius-md); }
 .avatar__initials {
