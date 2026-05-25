@@ -2741,6 +2741,12 @@ button, input, select, textarea { box-sizing: border-box; }
   transition: grid-template-columns var(--duration-base) var(--ease-standard);
 }
 .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
+/* `collapsedRail`: collapse to a 72px icon rail instead of hiding the
+   sidebar (4 classes > the 3-class hide rule above, so this wins). The
+   nav-icon/label-hide/active-bar mechanics are shared with the `side`
+   layout via the root `.is-collapsed` (labels hidden, icons + active bar
+   kept). */
+.appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
 .appshell--header-top .appshell__sidebar { overflow: hidden; }
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.

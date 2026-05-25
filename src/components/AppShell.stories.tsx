@@ -153,8 +153,8 @@ export const FooterTextColapsadoInicial: StoryObj = {
  * the topbar is invariant. `theme="brand"` tints both header and sidebar.
  * ===========================================================================*/
 
-function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppShellTheme; headerTheme?: AppShellTheme }) {
-  const [collapsed, setCollapsed] = React.useState(false);
+function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, startCollapsed = false }: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean }) {
+  const [collapsed, setCollapsed] = React.useState(startCollapsed);
   // The header content (separators, icon buttons) follows the HEADER band's
   // theme, which defaults to `theme`.
   const brand = (headerTheme ?? theme) === 'brand';
@@ -165,6 +165,7 @@ function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppSh
         theme={theme}
         headerTheme={headerTheme}
         headerLayout="top"
+        collapsedRail={rail}
         sections={sections}
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -227,4 +228,13 @@ export const TopbarCenteredBrand: StoryObj = {
  *  así que `theme="brand"` sin `headerTheme` sigue tiñendo ambas bandas. */
 export const TopbarBrandHeaderOnly: StoryObj = {
   render: () => <TopbarCenteredShell theme="default" headerTheme="brand" />,
+};
+
+/** **Topbar brand + icon rail** — `collapsedRail`. Collapsing keeps a 72px
+ *  rail with the nav icons (labels hidden, active-item bar) instead of
+ *  hiding the sidebar, with a built-in expand toggle at the bottom of the
+ *  rail. Use the hamburger (header.left) or the rail toggle to expand.
+ *  Shown starting collapsed so the rail is visible. */
+export const TopbarBrandRail: StoryObj = {
+  render: () => <TopbarCenteredShell theme="brand" rail startCollapsed />,
 };

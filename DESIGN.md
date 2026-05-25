@@ -167,9 +167,12 @@ alternatives).
 - **AppShell `headerLayout="top"` collapse (v1.15.0+).** The collapse toggle
   is the consumer's to wire (no built-in affordance in `top`, unlike `side`):
   put a hamburger in `header.left` and drive `collapsed`/`onCollapsedChange`.
-  **Behavior (by design):** in `top`, `collapsed` hides the sidebar
-  **entirely** (no 72px rail like `side`) so the content reclaims the full
-  width; the header stays full-width and invariant. Canonical snippet:
+  **Default behavior:** in `top`, `collapsed` hides the sidebar **entirely**
+  (no 72px rail) so the content reclaims the full width; the header stays
+  full-width and invariant. **Opt into a rail with `collapsedRail`
+  (v1.21.0):** collapse to a 72px icon rail (icons + active bar, labels
+  hidden — same mechanics as `side`) with a built-in expand toggle at the
+  bottom of the rail. Canonical snippet (default hide):
   ```tsx
   const [collapsed, setCollapsed] = useState(false);
   <AppShell headerLayout="top" collapsed={collapsed} onCollapsedChange={setCollapsed}

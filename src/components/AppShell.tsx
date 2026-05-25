@@ -102,6 +102,14 @@ export interface AppShellTopProps extends AppShellBaseProps {
    * data-heavy admin apps.
    */
   headerTheme?: AppShellTheme;
+  /**
+   * Collapse to an icon rail (72px) instead of hiding the sidebar entirely.
+   * Default `false` → `collapsed` hides the sidebar (the original `top`
+   * behavior). `true` → `collapsed` keeps a 72px rail showing the nav icons
+   * (labels hidden, active-item bar kept) — like the `side` layout — and
+   * renders a built-in expand/collapse toggle at the bottom of the rail.
+   */
+  collapsedRail?: boolean;
   /** Not valid in `top` — use `header.center` for the brand. */
   brand?: never;
   /** Not valid in `top` — the sidebar collapses entirely. */
@@ -203,8 +211,9 @@ export function AppShell(props: AppShellProps) {
     // Header band themes independently of the sidebar; defaults to `theme`
     // so `theme="brand"` keeps tinting both bands (back-compat).
     const headerTheme = props.headerTheme ?? theme;
+    const collapsedRail = props.collapsedRail ?? false;
     return (
-      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsed && 'is-collapsed', className)}>
+      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsedRail && 'appshell--rail', collapsed && 'is-collapsed', className)}>
         {/* On a brand header the band is dark, so re-scope foreground tokens
             via data-tone="inverse" — anything inside (Avatar, badges, links)
             becomes band-aware automatically without per-call-site colors. */}
@@ -225,7 +234,23 @@ export function AppShell(props: AppShellProps) {
                 </div>
               ))}
             </nav>
-            {footer != null && <div className="appshell__sidebar-foot">{footer}</div>}
+            {(footer != null || collapsedRail) && (
+              <div className="appshell__sidebar-foot">
+                {footer}
+                {collapsedRail && (
+                  <button
+                    type="button"
+                    className="appshell__collapse"
+                    onClick={() => setCollapsed(!collapsed)}
+                    aria-expanded={!collapsed}
+                    aria-label={collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu']}
+                    title={collapsed ? t['appshell.expand'] : t['appshell.collapse']}
+                  >
+                    {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                  </button>
+                )}
+              </div>
+            )}
           </aside>
           <main className="appshell__content" role="main">{children}</main>
         </div>

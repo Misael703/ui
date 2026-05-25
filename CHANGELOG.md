@@ -26,12 +26,17 @@ band-aware Avatar + documented collapse pattern. From using
     on the brand band): it now shows the correct translucent chip with no
     hand-set colors.
 
+- **`AppShell` `collapsedRail`** (`headerLayout="top"` only). Opt-in: collapse
+  to a 72px **icon rail** (nav icons, labels hidden, active-item bar kept)
+  instead of hiding the sidebar entirely, plus a built-in expand/collapse
+  toggle at the bottom of the rail. Reuses the `side` layout's rail
+  mechanics. Default `false` = the original hide behavior (back-compat).
+
 ### Docs
 - DESIGN.md: band-aware Avatar; and the `headerLayout="top"` collapse
-  pattern (consumer wires a hamburger in `header.left` → `onCollapsedChange`;
-  `collapsed` hides the sidebar **entirely** in `top`, by design — no 72px
-  rail) with a canonical snippet. No new API — a built-in `collapseToggle`
-  would be over-engineering for a 3-line call site.
+  pattern — by default `collapsed` hides the sidebar entirely (consumer
+  wires a hamburger in `header.left`); `collapsedRail` opts into a 72px
+  icon rail with a built-in toggle. Canonical snippet included.
 
 Guards: `tests/AppShellTop.test.tsx` (brand header carries
 `data-tone="inverse"`), `tests/Contrast.test.tsx` (translucent chip AA).
