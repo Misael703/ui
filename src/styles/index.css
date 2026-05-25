@@ -1651,6 +1651,8 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .number-input.is-invalid { border-color: var(--color-danger); }
 .number-input.is-disabled { opacity: 0.55; pointer-events: none; }
+.number-input--block { display: flex; width: 100%; }
+.number-input--block .number-input__field { flex: 1 1 auto; min-width: 0; text-align: left; }
 .number-input__btn {
   width: 36px; border: none; background: var(--bg-subtle);
   color: var(--fg-default); font-size: var(--text-lg); font-weight: 500;

@@ -33,6 +33,33 @@ export const ComboboxSinInput: StoryObj = {
   },
 };
 
+/**
+ * **renderOption** (v1.19.0): customiza el contenido de cada fila del listbox
+ * (p. ej. un código/id mono junto al nombre). El input tipeable sigue
+ * mostrando `label` como texto — solo cambian las filas de la lista.
+ */
+export const ComboboxRenderOption: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<string | null>(null);
+    return (
+      <Combobox
+        value={v}
+        onChange={setV}
+        options={opts}
+        placeholder="Buscar producto…"
+        renderOption={(o) => (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'monospace', fontSize: 'var(--text-xs)', color: 'var(--fg-meta)' }}>
+              {String(o.value)}
+            </span>
+            {o.label}
+          </span>
+        )}
+      />
+    );
+  },
+};
+
 export const DatePickerBasico: StoryObj = {
   render: () => {
     const [d, setD] = React.useState<Date | null>(null);

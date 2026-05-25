@@ -11,6 +11,17 @@ export const NumberInputBasico: StoryObj = {
   },
 };
 
+export const NumberInputFullWidth: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<number | null>(1200);
+    return (
+      <div style={{ width: 320 }}>
+        <NumberInput value={v} onChange={setV} min={0} fullWidth suffix="kg" />
+      </div>
+    );
+  },
+};
+
 export const PaginationBasico: StoryObj = {
   render: () => {
     const [p, setP] = React.useState(3);

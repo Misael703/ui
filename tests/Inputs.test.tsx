@@ -61,6 +61,16 @@ describe('NumberInput', () => {
     fireEvent.click(screen.getByLabelText('Aumentar'));
     expect(onChange).toHaveBeenCalledWith(5);
   });
+
+  it('adds the block modifier when fullWidth', () => {
+    const { container } = render(<NumberInput value={1} onChange={() => {}} fullWidth />);
+    expect(container.querySelector('.number-input--block')).toBeInTheDocument();
+  });
+
+  it('omits the block modifier by default', () => {
+    const { container } = render(<NumberInput value={1} onChange={() => {}} />);
+    expect(container.querySelector('.number-input--block')).toBeNull();
+  });
 });
 
 describe('EmptyState', () => {

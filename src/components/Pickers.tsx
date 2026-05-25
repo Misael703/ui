@@ -35,6 +35,13 @@ export interface ComboboxProps<T = string> {
    * dropdown) and the searchable Combobox — same visual register, no input.
    */
   searchable?: boolean;
+  /**
+   * Custom renderer for each option's content in the listbox. Receives the
+   * option; return any node (e.g. an id `Badge` + the name). Falls back to
+   * `label` (+ `description`) when omitted. The searchable input still shows
+   * `label` as text — only the listbox rows are customized.
+   */
+  renderOption?: (option: ComboboxOption<T>) => React.ReactNode;
 }
 
 const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
@@ -44,7 +51,7 @@ export function Combobox<T = string>({
   value, onChange, options, placeholder,
   emptyMessage, filter = defaultFilter,
   className, invalid, disabled, id,
-  searchable = true,
+  searchable = true, renderOption,
 }: ComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -197,8 +204,14 @@ export function Combobox<T = string>({
                   setOpen(false);
                 }}
               >
-                <span className="combobox__option-label">{o.label}</span>
-                {o.description && <span className="combobox__option-desc">{o.description}</span>}
+                {renderOption ? (
+                  renderOption(o)
+                ) : (
+                  <>
+                    <span className="combobox__option-label">{o.label}</span>
+                    {o.description && <span className="combobox__option-desc">{o.description}</span>}
+                  </>
+                )}
               </li>
             ))
           )}

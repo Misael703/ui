@@ -5,6 +5,26 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] — 2026-05-25
+
+**Minor. Additive — no breaking changes.** Two form-ergonomics gaps that
+surfaced building a real data-dense screen (despachos) against the kit.
+
+### Added
+- **`NumberInput` `fullWidth`.** Fills the container width — the field grows
+  and left-aligns — instead of the default intrinsic inline width. Mirrors
+  `Button`'s `fullWidth` (→ `.btn--block`); new `.number-input--block` class.
+  Removes the need for consumers to hand-override `.number-input` width inside
+  a full-width `FormField`.
+- **`Combobox` `renderOption`.** Custom renderer for each listbox row
+  (`(option) => ReactNode`) — e.g. an id `Badge`/mono code next to the name.
+  Falls back to `label` (+ `description`) when omitted; the searchable input
+  still shows `label` as text (only the rows are customized).
+
+Pinned by `tests/Inputs.test.tsx` (block modifier) and
+`tests/ComboboxRenderOption.test.tsx`. Stories: `NumberInputFullWidth`,
+`ComboboxRenderOption`.
+
 ## [1.18.1] — 2026-05-22
 
 **Patch.** `AppShell` sidebar layout: fix the collapsed brand header being
