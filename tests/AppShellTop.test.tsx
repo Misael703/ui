@@ -69,6 +69,47 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(root).not.toHaveClass('appshell--brand');
   });
 
+  it('brand header carries data-tone="inverse" so its content is band-aware', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell__header')).toHaveAttribute('data-tone', 'inverse');
+  });
+
+  it('default (non-brand) header has no data-tone', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell__header')).not.toHaveAttribute('data-tone');
+  });
+
+  it('collapsedRail adds the rail modifier + a built-in collapse toggle', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell')).toHaveClass('appshell--rail');
+    expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeInTheDocument();
+  });
+
+  it('without collapsedRail there is no rail modifier (default = hide)', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'b' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell')).not.toHaveClass('appshell--rail');
+  });
+
+  it('CSS: collapsedRail keeps a 72px rail (not 0) when collapsed', () => {
+    expect(css).toMatch(/\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+  });
+
+  it('CSS: hide mode (no rail) slides the sidebar out (full width, no rail narrowing)', () => {
+    // The 240→0 width transition would flash the ~72px rail; instead the
+    // sidebar keeps its width and translates off-screen (overlaying), so it
+    // never narrows into a rail. Rail mode keeps the width transition.
+    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
+    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\s+\.appshell__sidebar\s*\{[^}]*transition:\s*transform/);
+  });
+
   it('default top layout (no headerTheme) does not brand the header', () => {
     const { container } = render(
       <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>

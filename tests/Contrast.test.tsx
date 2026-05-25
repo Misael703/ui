@@ -107,6 +107,30 @@ run('default palette', baseMap);
 run('El Alba preset', elalbaMap);
 
 /**
+ * Band-aware Avatar (v1.21.0). On an inverse/brand surface the avatar chip
+ * is `color-mix(--fg-on-brand 16%, transparent)` over the brand color, with
+ * `--fg-on-brand` text. Compose the translucent chip over the brand surface
+ * and assert the white text clears AA — in El Alba (the brand band consumers
+ * actually use), where the band is `--color-primary` blue.
+ */
+describe('band-aware Avatar chip on brand surface', () => {
+  // alpha-composite `fg` at `a` over opaque `bg`
+  function over(fg: string, bg: string, a: number): string {
+    const [fr, fgc, fb] = rgb(fg), [br, bgc, bb] = rgb(bg);
+    const ch = (f: number, b: number) => Math.round(f * a + b * (1 - a));
+    const hex = (n: number) => n.toString(16).padStart(2, '0');
+    return `#${hex(ch(fr, br))}${hex(ch(fgc, bgc))}${hex(ch(fb, bb))}`;
+  }
+  it('white text on the translucent chip over El Alba brand is AA', () => {
+    const brand = tok(elalbaMap, '--color-primary');      // #002f87
+    const onBrand = tok(elalbaMap, '--fg-on-brand');       // white
+    const chip = over(onBrand, brand, 0.16);               // 16% white over blue
+    const r = contrast(onBrand, chip);
+    expect(r, `avatar text on chip: ${onBrand} on ${chip} = ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+/**
  * El Alba primary↔secondary button swap (preset-only).
  *
  * The owner accepted, eyes open (2026-05-18), a DELIBERATE brand exception:

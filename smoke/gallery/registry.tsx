@@ -153,6 +153,9 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'CommandPalette', node: <K.CommandPalette open={false} onClose={() => {}} items={[{ id: 'a', label: 'A', onRun: () => {} }]} /> },
   { name: 'Portal', node: <ClientOnly><K.Portal><span>portal</span></K.Portal></ClientOnly> },
   { name: 'Slot', node: <K.Slot><span>slot</span></K.Slot> },
+  { name: 'Cluster', node: <K.Cluster gap={2}><K.Badge>a</K.Badge><K.Badge>b</K.Badge></K.Cluster> },
+  { name: 'Spacer', node: <div style={{ display: 'flex', width: 120 }}><span>a</span><K.Spacer /><span>b</span></div> },
+  { name: 'SegmentedControl', node: <Ctrl<string | null> init="a" render={(v, s) => <K.SegmentedControl value={v} onChange={s} ariaLabel="seg"><K.SegmentedControlItem value="a">A</K.SegmentedControlItem><K.SegmentedControlItem value="b">B</K.SegmentedControlItem></K.SegmentedControl>} /> },
 ];
 
 export function IconGrid() {

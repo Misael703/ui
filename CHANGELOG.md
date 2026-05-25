@@ -5,6 +5,42 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] — 2026-05-25
+
+**Minor. Additive — no breaking changes.** AppShell `top`-brand polish:
+band-aware Avatar + documented collapse pattern. From using
+`headerLayout="top" theme="brand"` in a real consumer.
+
+### Added / Changed
+- **Band-aware `Avatar`.** On an inverse/brand surface the avatar becomes a
+  translucent-white chip with on-brand text (instead of the default
+  light-blue chip), so it reads correctly on a brand header **without the
+  consumer passing colors**. Driven by `data-tone="inverse"` — the same
+  re-scope that tints the sidebar/header. The **`AppShell` brand header
+  now sets `data-tone="inverse"`** on its `<header>` (when
+  `headerTheme="brand"`), so an avatar in `header.right` is band-aware
+  automatically. Outside the AppShell, wrap the branded surface in
+  `data-tone="inverse"`/`.surface-inverse`. Default avatar (non-inverse
+  surfaces) is unchanged. AA pinned in `Contrast.test`.
+  - Fixes the story modeling a weak pattern (white avatar + dark-blue text
+    on the brand band): it now shows the correct translucent chip with no
+    hand-set colors.
+
+- **`AppShell` `collapsedRail`** (`headerLayout="top"` only). Opt-in: collapse
+  to a 72px **icon rail** (nav icons, labels hidden, active-item bar kept)
+  instead of hiding the sidebar entirely, plus a built-in expand/collapse
+  toggle at the bottom of the rail. Reuses the `side` layout's rail
+  mechanics. Default `false` = the original hide behavior (back-compat).
+
+### Docs
+- DESIGN.md: band-aware Avatar; and the `headerLayout="top"` collapse
+  pattern — by default `collapsed` hides the sidebar entirely (consumer
+  wires a hamburger in `header.left`); `collapsedRail` opts into a 72px
+  icon rail with a built-in toggle. Canonical snippet included.
+
+Guards: `tests/AppShellTop.test.tsx` (brand header carries
+`data-tone="inverse"`), `tests/Contrast.test.tsx` (translucent chip AA).
+
 ## [1.20.0] — 2026-05-25
 
 **Minor. Visual default change to `Card`** (both palettes). Follow-up to the

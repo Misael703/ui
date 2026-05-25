@@ -2156,6 +2156,15 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Avatar (extends components.css) ---------- */
 .avatar { background: var(--color-primary-100); color: var(--color-primary); }
+/* Band-aware: on an inverse/brand surface (e.g. AppShell brand header, which
+   sets data-tone="inverse"), the default light-blue chip would clash. Use a
+   translucent white chip + on-brand text so it reads correctly without the
+   consumer passing any colors. White text on (brand + 16% white) stays AA. */
+[data-tone="inverse"] .avatar,
+.surface-inverse .avatar {
+  background: color-mix(in srgb, var(--fg-on-brand) 16%, transparent);
+  color: var(--fg-on-brand);
+}
 .avatar--circle { border-radius: var(--radius-pill); }
 .avatar--square { border-radius: var(--radius-md); }
 .avatar__initials {
@@ -2732,7 +2741,32 @@ button, input, select, textarea { box-sizing: border-box; }
   transition: grid-template-columns var(--duration-base) var(--ease-standard);
 }
 .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
+/* `collapsedRail`: collapse to a 72px icon rail instead of hiding the
+   sidebar (4 classes > the 3-class hide rule above, so this wins). The
+   nav-icon/label-hide/active-bar mechanics are shared with the `side`
+   layout via the root `.is-collapsed` (labels hidden, icons + active bar
+   kept). */
+.appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
 .appshell--header-top .appshell__sidebar { overflow: hidden; }
+/* Hide mode (no rail): SLIDE the sidebar out instead of narrowing it. A
+   width transition (240px → 0) sweeps through ~72px and reads as a momentary
+   rail; instead the sidebar keeps its full width and translates off-screen
+   to the left (overlaying, so it can slide past the edge) while the content
+   reclaims the width immediately. Animated, and never narrows into a rail.
+   Rail mode keeps the smooth 240→72 width transition. */
+.appshell--header-top:not(.appshell--rail) .appshell__body {
+  transition: none;
+  position: relative;
+}
+.appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 240px;
+  transform: translateX(-100%);
+}
+.appshell--header-top:not(.appshell--rail) .appshell__sidebar {
+  transition: transform var(--duration-base) var(--ease-standard);
+}
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
    That decoupling is what lets a branded top bar sit over a neutral sidebar

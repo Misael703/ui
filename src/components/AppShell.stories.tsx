@@ -31,10 +31,11 @@ const sections = [
   },
 ];
 
-const Shell = ({ theme }: { theme?: AppShellTheme }) => (
+const Shell = ({ theme, defaultCollapsed }: { theme?: AppShellTheme; defaultCollapsed?: boolean }) => (
   <div style={{ height: 'calc(100vh - 32px)' }}>
     <AppShell
       theme={theme}
+      defaultCollapsed={defaultCollapsed}
       brand={<Logo variant="horizontal" bg={theme === 'brand' ? 'dark' : 'light'} height={34} />}
       brandCollapsed={<Logo variant="mark" bg={theme === 'brand' ? 'dark' : 'light'} height={34} />}
       sections={sections}
@@ -57,21 +58,39 @@ const Shell = ({ theme }: { theme?: AppShellTheme }) => (
   </div>
 );
 
-/**
- * Sidebar claro con acento azul de marca en el item activo + barra naranja.
- * Recomendado para apps data-heavy de uso prolongado (ERP, admin, dashboards).
- */
-export const ConSidebar: StoryObj = {
-  render: () => <Shell />,
-};
+interface PlaygroundArgs {
+  headerLayout: 'side' | 'top';
+  theme: AppShellTheme;
+  headerTheme: AppShellTheme;
+  collapsedRail: boolean;
+  defaultCollapsed: boolean;
+}
 
 /**
- * Sidebar azul de marca con texto blanco. Mayor brand recall, recomendado para
- * apps con identidad visual fuerte (consumer, marketing-driven). Cuidado con la
- * fatiga visual en apps de uso prolongado.
+ * **Playground** — configurable AppShell. Flip the controls to explore the
+ * whole matrix; each control maps to a real prop:
+ * `headerLayout` (side/top) × `theme` × `headerTheme` (top only) ×
+ * `collapsedRail` (top only) × initial collapse. The named stories below
+ * are kept as fixed references: the brand-text / footer collapse mechanism
+ * (a usage pattern, not a single prop) and the collapsed rail look.
  */
-export const SidebarBrand: StoryObj = {
-  render: () => <Shell theme="brand" />,
+export const Playground: StoryObj<PlaygroundArgs> = {
+  argTypes: {
+    headerLayout: { control: 'inline-radio', options: ['side', 'top'] },
+    theme: { control: 'inline-radio', options: ['default', 'brand'] },
+    headerTheme: { control: 'inline-radio', options: ['default', 'brand'], if: { arg: 'headerLayout', eq: 'top' } },
+    collapsedRail: { control: 'boolean', if: { arg: 'headerLayout', eq: 'top' } },
+    defaultCollapsed: { control: 'boolean' },
+  },
+  args: { headerLayout: 'top', theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false },
+  render: (a) => {
+    // Remount the stateful shell when collapse-affecting args change, so the
+    // initial-collapse / rail controls take effect (useState init is read once).
+    const k = `${a.headerLayout}-${a.defaultCollapsed}-${a.collapsedRail}`;
+    return a.headerLayout === 'top'
+      ? <TopbarCenteredShell key={k} theme={a.theme} headerTheme={a.headerTheme} rail={a.collapsedRail} startCollapsed={a.defaultCollapsed} />
+      : <Shell key={k} theme={a.theme} defaultCollapsed={a.defaultCollapsed} />;
+  },
 };
 
 /**
@@ -104,10 +123,12 @@ const BrandWithText = ({ collapsed }: { collapsed?: boolean }) => (
 );
 
 export const BrandTextColapsable: StoryObj = {
+  name: 'Sidebar · Brand, texto colapsable',
   render: () => <BrandWithText />,
 };
 
 export const BrandTextColapsadoInicial: StoryObj = {
+  name: 'Sidebar · Brand, texto colapsado',
   render: () => <BrandWithText collapsed />,
 };
 
@@ -139,10 +160,12 @@ const FootWithText = ({ collapsed }: { collapsed?: boolean }) => (
 );
 
 export const FooterTextColapsable: StoryObj = {
+  name: 'Sidebar · Footer colapsable',
   render: () => <FootWithText />,
 };
 
 export const FooterTextColapsadoInicial: StoryObj = {
+  name: 'Sidebar · Footer colapsado',
   render: () => <FootWithText collapsed />,
 };
 
@@ -153,8 +176,8 @@ export const FooterTextColapsadoInicial: StoryObj = {
  * the topbar is invariant. `theme="brand"` tints both header and sidebar.
  * ===========================================================================*/
 
-function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppShellTheme; headerTheme?: AppShellTheme }) {
-  const [collapsed, setCollapsed] = React.useState(false);
+function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, startCollapsed = false }: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean }) {
+  const [collapsed, setCollapsed] = React.useState(startCollapsed);
   // The header content (separators, icon buttons) follows the HEADER band's
   // theme, which defaults to `theme`.
   const brand = (headerTheme ?? theme) === 'brand';
@@ -165,6 +188,7 @@ function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppSh
         theme={theme}
         headerTheme={headerTheme}
         headerLayout="top"
+        collapsedRail={rail}
         sections={sections}
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -207,24 +231,11 @@ function TopbarCenteredShell({ theme = 'default', headerTheme }: { theme?: AppSh
   );
 }
 
-/** **Topbar-centered, default light** (v1.15.0). Logo en el centro absoluto
- *  del viewport (1fr·auto·1fr). Hamburger izq, bell+separador+avatar der.
- *  Toggle: solo el sidebar se oculta; el topbar queda invariante. */
-export const TopbarCentered: StoryObj = {
-  render: () => <TopbarCenteredShell />,
-};
-
-/** **Topbar-centered, brand blue** — mismo shell, `theme="brand"` tematiza
- *  topbar + sidebar juntos con `--color-primary` + texto blanco. */
-export const TopbarCenteredBrand: StoryObj = {
-  render: () => <TopbarCenteredShell theme="brand" />,
-};
-
-/** **Topbar brand, sidebar neutro** — `theme="default" headerTheme="brand"`.
- *  Solo el topbar va azul de marca; el sidebar queda claro (mejor legibilidad
- *  en apps data-heavy de uso prolongado). El collapsible funciona normal.
- *  `headerTheme` es independiente de `theme`; por defecto hereda `theme`,
- *  así que `theme="brand"` sin `headerTheme` sigue tiñendo ambas bandas. */
-export const TopbarBrandHeaderOnly: StoryObj = {
-  render: () => <TopbarCenteredShell theme="default" headerTheme="brand" />,
+/** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
+ *  (icons, active-item bar) with a built-in toggle at the bottom, instead of
+ *  hiding the sidebar. Shown starting collapsed so the rail is visible.
+ *  (Toggle `theme`/`collapsedRail` live in the Playground for the rest.) */
+export const TopbarRail: StoryObj = {
+  name: 'Topbar · Rail (collapsedRail)',
+  render: () => <TopbarCenteredShell theme="brand" rail startCollapsed />,
 };
