@@ -102,10 +102,12 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
 
-  it('CSS: hide mode (no rail) collapses instantly (no width sweep through the rail)', () => {
-    // The 240→0 width transition would flash the ~72px rail on the way out;
-    // hide mode snaps the column instead. Rail mode keeps the transition.
-    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\s+\.appshell__body\s*\{[^}]*transition:\s*none/);
+  it('CSS: hide mode (no rail) slides the sidebar out (full width, no rail narrowing)', () => {
+    // The 240→0 width transition would flash the ~72px rail; instead the
+    // sidebar keeps its width and translates off-screen (overlaying), so it
+    // never narrows into a rail. Rail mode keeps the width transition.
+    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
+    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\s+\.appshell__sidebar\s*\{[^}]*transition:\s*transform/);
   });
 
   it('default top layout (no headerTheme) does not brand the header', () => {
