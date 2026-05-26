@@ -112,6 +112,19 @@ saltado): modelo app-shell de scroll interno en `top`. Header (fila 1) + sidebar
 - [ ] Check visual Playwright: browser MCP con lock de sesión previa (no liberable por MCP). Cubierto por 4 guards de CSS + smoke (Next app real buildea/renderiza). Validar en despachos al bump.
 - [ ] Pendiente: confirmación explícita para release 1.24.0.
 
+## Adenda 4 — iconos de view switcher + icon prop (1.25.0)
+
+Pedido despachos: switcher de 5 layouts con iconos; el kit no los tenía.
+
+- [x] Icons.tsx: 5 iconos. `Rows3` (NO `Table` — colisiona con el wrapper `<table>` de Layout.tsx; `Rows3` es el nombre lucide estándar), `CalendarDays`, `Map`, `LayoutGrid`, `Columns3`. `MapPin` ya existía.
+- [x] Toggle.tsx: `icon?` prop en `ToggleGroupItem`/`SegmentedControlItem` (renderiza antes de children; layout vía flex gap ya existente). Children sigue funcionando (back-compat). Hallazgo: los iconos YA funcionaban vía children; el prop es la API explícita.
+- [x] smoke `ICON_NAMES`: +5 (el gate exige cubrir cada export Capitalizado).
+- [x] Tests: Toggle (icon+label, icon-only via aria-label, children-only back-compat).
+- [x] Story `SegmentedControl · view switcher (iconos)` (icon+label y icon-only).
+- [x] CHANGELOG 1.25.0 + package.json.
+- [x] Gate: tsc 0 · eslint 0 · vitest 497/497 · build 0 · smoke OK.
+- [ ] Pendiente: confirmación explícita para release 1.25.0 (parado antes de publicar por protocolo).
+
 ## Verificación
 
 - Test de read-path: pre-seed `localStorage`, render con `persistKey`, assert

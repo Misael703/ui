@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.0] — 2026-05-26
+
+**Minor. Additive — no breaking changes.** Icons + a first-class icon slot for
+segmented controls, for an icon-based view switcher (despachos: Tabla / Agenda
+/ Zona / Tarjetas / Tablero).
+
+### Added
+- **5 icons** (Feather/lucide style, `currentColor`, stroke-based — same `make()`
+  factory as the rest): `Rows3` (Tabla), `CalendarDays` (Agenda), `Map` (Zona),
+  `LayoutGrid` (Tarjetas), `Columns3` (Tablero). Named `Rows3` rather than
+  `Table` because the kit already exports `Table` (the `<table>` element wrapper
+  in Layout); `Rows3` is the standard lucide name. `MapPin` already existed
+  (reuse it for a pin instead of a folded map). All added to the smoke icon grid
+  + reviewed `ICON_NAMES`.
+- **`ToggleGroupItem` / `SegmentedControlItem` `icon` prop.** Optional leading
+  icon, aligned via the toggle's built-in flex gap. Children still work as
+  before (the prop is opt-in). For an **icon-only** segment, pass `icon` with
+  no children and an `aria-label` (icons render decorative/`aria-hidden`):
+  ```tsx
+  <SegmentedControlItem value="table" icon={<Table size={16} />}>Tabla</SegmentedControlItem>
+  <SegmentedControlItem value="table" icon={<Table size={16} />} aria-label="Tabla" /> {/* icon-only */}
+  ```
+
 ## [1.24.0] — 2026-05-26
 
 **Minor. Layout behavior change in `headerLayout="top"` — no API change, not
