@@ -2719,6 +2719,13 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell.appshell--header-top {
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
+  /* Standard app-shell scroll model: cap the shell at the viewport (NOT
+     min-height) so header (row 1) and sidebar (row 2) stay static and only
+     the content scrolls. Without this the whole .appshell grows past 100vh
+     and the PAGE scrolls, carrying the header away and desyncing the sidebar.
+     The shell now owns the viewport height → render it at the root or inside a
+     100vh container. `side` is untouched (it uses the sticky model). */
+  height: 100vh;
 }
 .appshell--header-top .appshell__header {
   display: grid;
@@ -2747,7 +2754,17 @@ button, input, select, textarea { box-sizing: border-box; }
    layout via the root `.is-collapsed` (labels hidden, icons + active bar
    kept). */
 .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
-.appshell--header-top .appshell__sidebar { overflow: hidden; }
+/* The base sidebar is `height: 100vh` (sticky model for `side`). In `top` the
+   body row is already bounded to `100vh − header`, so a 100vh sidebar would
+   overflow its row and introduce a SECOND scrollbar. `height: auto` lets the
+   grid item stretch to exactly the row height instead. */
+.appshell--header-top .appshell__sidebar { overflow: hidden; height: auto; }
+/* The single scroll container. `min-height: 0` lets this grid cell shrink
+   below its content so `overflow-y` can engage; padding is inherited from the
+   base `.appshell__content` and must stay (do not restate it here). A
+   consumer's in-page sticky sub-header (`position: sticky; top: 0`) then
+   anchors to the top of THIS scroll viewport. */
+.appshell--header-top .appshell__content { min-height: 0; overflow-y: auto; }
 /* Hide mode (no rail): SLIDE the sidebar out instead of narrowing it. A
    width transition (240px → 0) sweeps through ~72px and reads as a momentary
    rail; instead the sidebar keeps its full width and translates off-screen

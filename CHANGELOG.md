@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.0] — 2026-05-26
+
+**Minor. Layout behavior change in `headerLayout="top"` — no API change, not
+breaking.** From a real consumer: scrolling long content in `top` scrolled the
+whole page, carrying the header (logo + collapse hamburger) away and desyncing
+the sidebar/rail.
+
+### Fixed
+- **`top` now uses the standard app-shell internal-scroll model.** The shell is
+  capped at the viewport (`height: 100vh`, replacing the inherited
+  `min-height`); the header (row 1) and sidebar (row 2) stay static and **only
+  the content scrolls**. A consumer's in-page sticky sub-header
+  (`position: sticky; top: 0`) now anchors cleanly to the top of the content
+  viewport.
+  - The `top` sidebar is reset to `height: auto` (the base is `height: 100vh`
+    for the `side` sticky model) so it fills its grid row instead of
+    overflowing it and adding a second scrollbar.
+  - `overflow-y: auto` is scoped to `.appshell--header-top .appshell__content`
+    only — the `side` layout's page-scroll model is untouched. Content padding
+    is unchanged.
+  - **Consequence:** the `top` shell now owns the viewport height. Render it at
+    the root or inside a `100vh` container (a `min-height` wrapper no longer
+    bounds it). `side` consumers are unaffected.
+
 ## [1.23.0] — 2026-05-26
 
 **Minor. Additive — no breaking changes.** Closes a gap a consumer measured in

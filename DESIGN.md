@@ -205,6 +205,16 @@ alternatives).
   from a header-slot render-prop (v1.23.0) — without one, an uncontrolled `top`
   shell has no toggle and `persistKey` cannot be exercised.
   `<AppShell persistKey="despachos.sidebar" sections={…} />`.
+- **Two scroll models, one per layout (v1.24.0).** `side` uses the **sticky**
+  model: the page scrolls, the sidebar (`height: 100vh; position: sticky`) and
+  topbar (`position: sticky`) stay pinned. `top` uses the **internal-scroll**
+  model: the shell is capped at the viewport (`height: 100vh`), header (row 1)
+  and sidebar (row 2) are static, and only `.appshell__content` scrolls
+  (`overflow-y: auto`, scoped to `--header-top`). Two consequences for `top`:
+  the sidebar is `height: auto` (fills its row, not `100vh`, to avoid a second
+  scrollbar), and the shell **owns the viewport height** — render it at the
+  root or in a `100vh` container. A consumer's in-page sticky sub-header anchors
+  to the top of the content viewport, not the page.
 
 ## Polymorphism (two patterns, on purpose)
 
