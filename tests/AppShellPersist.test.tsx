@@ -50,6 +50,32 @@ describe('AppShell persistKey', () => {
     expect(window.localStorage.getItem('test.shell')).toBe('0');
   });
 
+  it('TOP uncontrolled + persistKey + header render-prop toggle persists (the literal pattern)', () => {
+    // Regression for the gap a consumer measured: `persistKey` is
+    // uncontrolled-only, and `top` has no built-in toggle, so before the
+    // header render-prop the hamburger could not drive an uncontrolled shell
+    // and `persistKey` was a no-op in `top`. Now the render-prop API toggles
+    // the uncontrolled state AND the change is persisted.
+    const { container } = render(
+      <AppShell headerLayout="top" persistKey="test.shell" header={{
+        left: ({ toggle }) => <button data-testid="burger" onClick={toggle}>m</button>,
+        center: 'brand',
+      }} sections={sections}>x</AppShell>,
+    );
+    expect(container.querySelector('.appshell')).not.toHaveClass('is-collapsed');
+    fireEvent.click(container.querySelector('[data-testid="burger"]')!);
+    expect(container.querySelector('.appshell')).toHaveClass('is-collapsed');
+    expect(window.localStorage.getItem('test.shell')).toBe('1');
+  });
+
+  it('TOP reads the stored value after mount (uncontrolled, via persistKey)', () => {
+    window.localStorage.setItem('test.shell', '1');
+    const { container } = render(
+      <AppShell headerLayout="top" persistKey="test.shell" header={{ center: 'b' }} sections={sections}>x</AppShell>,
+    );
+    expect(container.querySelector('.appshell')).toHaveClass('is-collapsed');
+  });
+
   it('controlled mode ignores persistKey (host owns state)', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
     window.localStorage.setItem('test.shell', '1');

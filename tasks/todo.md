@@ -73,6 +73,26 @@ uniforme en hide y rail. `collapsedRail` queda puramente visual. `side` intacto.
 - [x] Gate: tsc 0 · eslint 0 · vitest 486/486 · build exit 0.
 - [ ] Check visual en Storybook: browser MCP bloqueado por sesión previa; cubierto por la aserción de DOM del test (toggle null). Validar en despachos al consumir 1.22.0.
 
+## Adenda 2 — header render-prop (1.23.0)
+
+Gap medido por el consumer en 1.22.0: en `top`, `persistKey` (uncontrolled) no
+podía convivir con un trigger en el header. El kit renderizaba `header.{left,
+center,right}` como nodos estáticos sin handle al estado, y `top` no tiene
+toggle built-in → un shell uncontrolled no tenía cómo colapsar desde el header
+y `persistKey` era no-op ahí. (Mi propio test de persistencia usaba `side`, lo
+que escondió la inconsistencia.)
+
+Fix: los slots del header aceptan render-prop `(api) => ReactNode` con
+`{ collapsed, toggle, setCollapsed }`. Tipos nuevos exportados:
+`AppShellHeaderApi`, `AppShellHeaderSlot`. Nodos estáticos sin cambio.
+
+- [x] `AppShell.tsx`: tipos `AppShellHeaderApi`/`AppShellHeaderSlot`; slots con render-prop; `slot()` resolver + `headerApi` en el render `top`.
+- [x] Tests: `AppShellTop` (render-prop togglea uncontrolled + nodo estático intacto); `AppShellPersist` (TOP uncontrolled + persistKey + render-prop persiste; TOP lee stored).
+- [x] Story `Topbar · Uncontrolled (header render-prop)`.
+- [x] DESIGN.md (snippet canónico → render-prop) + CHANGELOG 1.23.0 + package.json.
+- [x] Gate: tsc 0 · eslint 0 · vitest 490/490 · build 0 · smoke OK.
+- [ ] Pendiente: confirmación explícita para push/PR/release 1.23.0.
+
 ## Verificación
 
 - Test de read-path: pre-seed `localStorage`, render con `persistKey`, assert

@@ -177,22 +177,34 @@ alternatives).
   built-in toggle (the bottom chevron is a `side`-only idiom; `side` has no
   header to host a hamburger). Single control, no redundancy. *(v1.22.0
   removed the built-in rail toggle added in 1.21.0 for exactly this reason.)*
-  Canonical snippet (default hide):
+  Wire the hamburger via a **header-slot render-prop** (v1.23.0), which hands
+  it the collapse API (`{ collapsed, toggle, setCollapsed }`) — this is the
+  only way to drive an **uncontrolled** shell from the header (and what lets
+  `persistKey` work in `top`; see below). Static nodes still work for slots
+  that don't toggle. Canonical snippet (uncontrolled + persisted, default hide):
   ```tsx
-  const [collapsed, setCollapsed] = useState(false);
-  <AppShell headerLayout="top" collapsed={collapsed} onCollapsedChange={setCollapsed}
-    header={{ left: <button aria-label="Menú" aria-expanded={!collapsed}
-      onClick={() => setCollapsed(c => !c)}><MenuIcon /></button>, center: <Logo/> }} />
+  <AppShell headerLayout="top" persistKey="despachos.sidebar"
+    header={{
+      left: ({ collapsed, toggle }) => (
+        <button aria-label="Menú" aria-expanded={!collapsed} onClick={toggle}><MenuIcon /></button>
+      ),
+      center: <Logo/>,
+    }} sections={…} />
   ```
-  (See the `AppShellTop` block and the `TopbarCentered` story.)
-- **AppShell collapse persistence (`persistKey`, v1.22.0).** Opt-in. Pass a
+  Controlled is still supported (`collapsed`/`onCollapsedChange`) when the host
+  needs to own the state — but then `persistKey` is ignored (the host owns
+  persistence too). (See the `AppShellTop` block and the `TopbarCentered` story.)
+- **AppShell collapse persistence (`persistKey`, v1.22.0+).** Opt-in. Pass a
   key and the collapsed state survives reloads via `localStorage[persistKey]`;
   omit it and the shell resets to `defaultCollapsed` per mount (unchanged
   default — chosen so the kit never writes storage or risks an SSR hydration
   mismatch behind the consumer's back). SSR-safe: the initial render uses
-  `defaultCollapsed`, the stored value is applied after mount. Uncontrolled
-  only — ignored when `collapsed` is provided (controlled mode owns its own
-  persistence). `<AppShell persistKey="despachos.sidebar" sections={…} />`.
+  `defaultCollapsed`, the stored value is applied after mount. **Uncontrolled
+  only** — ignored when `collapsed` is provided (controlled mode owns its own
+  persistence). In `side` the built-in chevron drives it; in `top` drive it
+  from a header-slot render-prop (v1.23.0) — without one, an uncontrolled `top`
+  shell has no toggle and `persistKey` cannot be exercised.
+  `<AppShell persistKey="despachos.sidebar" sections={…} />`.
 
 ## Polymorphism (two patterns, on purpose)
 
