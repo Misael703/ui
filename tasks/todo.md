@@ -93,6 +93,25 @@ Fix: los slots del header aceptan render-prop `(api) => ReactNode` con
 - [x] Gate: tsc 0 · eslint 0 · vitest 490/490 · build 0 · smoke OK.
 - [ ] Pendiente: confirmación explícita para push/PR/release 1.23.0.
 
+## Adenda 3 — scroll interno en top (1.24.0)
+
+Bug del consumidor: en `top`, contenido largo scrollea la página entera y se
+lleva el header + desincroniza el sidebar. Causa: `.appshell { min-height:100vh }`
+sin scroll container interno. El `side` no sufre (modelo sticky).
+
+Fix (spec del consumidor, corregida con el override del sidebar que me había
+saltado): modelo app-shell de scroll interno en `top`. Header (fila 1) + sidebar
+(fila 2) estáticos; scrollea solo `.appshell__content`. Default, scopeado a
+`--header-top` (no toca `side`), sin tocar el padding del content.
+
+- [x] `index.css`: `.appshell.appshell--header-top { height: 100vh }`; `.appshell--header-top .appshell__sidebar { height: auto }` (evita 2º scrollbar vs base `height:100vh`); `.appshell--header-top .appshell__content { min-height:0; overflow-y:auto }`. (`body { min-height:0 }` ya estaba.)
+- [x] Stories: wrappers `top` → `100vh`; contenido alto (8×200) + sub-header sticky para demostrar scroll y anclaje.
+- [x] Tests: 4 guards de CSS en `AppShellTop` (height 100vh, sidebar auto, content overflow-y+min-height, global padding intacto).
+- [x] DESIGN.md (sección "two scroll models") + CHANGELOG 1.24.0 + package.json.
+- [x] Gate: tsc 0 · eslint 0 · vitest 494/494 · build 0 · smoke OK.
+- [ ] Check visual Playwright: browser MCP con lock de sesión previa (no liberable por MCP). Cubierto por 4 guards de CSS + smoke (Next app real buildea/renderiza). Validar en despachos al bump.
+- [ ] Pendiente: confirmación explícita para release 1.24.0.
+
 ## Verificación
 
 - Test de read-path: pre-seed `localStorage`, render con `persistKey`, assert

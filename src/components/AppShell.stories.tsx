@@ -183,7 +183,7 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
   const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
   return (
-    <div style={{ height: 'calc(100vh - 32px)' }}>
+    <div style={{ height: '100vh' }}>
       <AppShell
         theme={theme}
         headerTheme={headerTheme}
@@ -222,9 +222,17 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
           ),
         }}
       >
-        <div style={{ padding: 24 }}>
-          <PageHeader title="Dashboard" description="Overview of your account" actions={<Button>Acción</Button>} />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        {/* Sticky page sub-header: a direct child of the scroll container
+            (.appshell__content), so `top: 0` anchors to the top of the content
+            viewport while the header + sidebar stay put. */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-canvas)', padding: '12px 24px', borderBottom: '1px solid var(--border-default)', fontWeight: 600 }}>
+          Sub-header sticky · ancla al tope del contenido al scrollear
+        </div>
+        <div style={{ padding: 24, display: 'grid', gap: 16 }}>
+          <PageHeader title="Dashboard" description="Contenido largo para demostrar el scroll interno: el header y el sidebar quedan fijos" actions={<Button>Acción</Button>} />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{ border: '1px dashed var(--border-default)', borderRadius: 12, height: 200 }} />
+          ))}
         </div>
       </AppShell>
     </div>
@@ -251,7 +259,7 @@ export const TopbarRail: StoryObj = {
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: () => (
-    <div style={{ height: 'calc(100vh - 32px)' }}>
+    <div style={{ height: '100vh' }}>
       <AppShell
         headerLayout="top"
         collapsedRail

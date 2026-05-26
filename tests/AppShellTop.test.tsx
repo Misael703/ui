@@ -193,4 +193,33 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     // surfaces) keeps the topbar legible from whatever sits below it.
     expect(css).toMatch(/\.appshell--header-top\.appshell--header-brand\s+\.appshell__header\s*\{[^}]*border-bottom:\s*1px solid rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*0\.12\s*\)/);
   });
+
+  /* Internal-scroll model (v1.24.0). In `top` the shell is capped at the
+     viewport and only the content scrolls — header (row 1) and sidebar (row 2)
+     stay static. These guards pin the three rules that make that work and that
+     a naive refactor would silently drop. */
+  it('CSS: top shell is capped at the viewport (height: 100vh, not min-height)', () => {
+    // `height: 100vh` (not just the base `min-height`) is what bounds the grid
+    // so the body row can be `1fr` of a fixed height and host an inner scroll.
+    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*height:\s*100vh/);
+  });
+
+  it('CSS: top sidebar is height:auto (fills its row, no second scrollbar)', () => {
+    // The base sidebar is `height: 100vh`; left as-is in `top` it would overflow
+    // the bounded body row and add a second scrollbar. Must be reset to auto.
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*height:\s*auto/);
+  });
+
+  it('CSS: only the top content scrolls (overflow-y:auto + min-height:0, scoped)', () => {
+    // The single scroll container. Scoped to `--header-top` so the `side`
+    // layout's page-scroll model is untouched.
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__content\s*\{[^}]*overflow-y:\s*auto/);
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__content\s*\{[^}]*min-height:\s*0/);
+  });
+
+  it('CSS: the GLOBAL .appshell__content keeps its padding (top scoping must not strip it)', () => {
+    // Guard the "do not touch the padding" constraint: the base rule still
+    // carries `padding: 24px`, and the scoped top rule only adds scroll.
+    expect(css).toMatch(/\.appshell__content\s*\{[^}]*padding:\s*24px/);
+  });
 });
