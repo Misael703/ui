@@ -171,8 +171,13 @@ alternatives).
   (no 72px rail) so the content reclaims the full width; the header stays
   full-width and invariant. **Opt into a rail with `collapsedRail`
   (v1.21.0):** collapse to a 72px icon rail (icons + active bar, labels
-  hidden — same mechanics as `side`) with a built-in expand toggle at the
-  bottom of the rail. Canonical snippet (default hide):
+  hidden — same mechanics as `side`) instead of hiding the sidebar.
+  `collapsedRail` is **purely visual** (rail vs hide); collapse is *always*
+  driven by the consumer's `header.left` control in `top`, in both modes — no
+  built-in toggle (the bottom chevron is a `side`-only idiom; `side` has no
+  header to host a hamburger). Single control, no redundancy. *(v1.22.0
+  removed the built-in rail toggle added in 1.21.0 for exactly this reason.)*
+  Canonical snippet (default hide):
   ```tsx
   const [collapsed, setCollapsed] = useState(false);
   <AppShell headerLayout="top" collapsed={collapsed} onCollapsedChange={setCollapsed}
@@ -180,6 +185,14 @@ alternatives).
       onClick={() => setCollapsed(c => !c)}><MenuIcon /></button>, center: <Logo/> }} />
   ```
   (See the `AppShellTop` block and the `TopbarCentered` story.)
+- **AppShell collapse persistence (`persistKey`, v1.22.0).** Opt-in. Pass a
+  key and the collapsed state survives reloads via `localStorage[persistKey]`;
+  omit it and the shell resets to `defaultCollapsed` per mount (unchanged
+  default — chosen so the kit never writes storage or risks an SSR hydration
+  mismatch behind the consumer's back). SSR-safe: the initial render uses
+  `defaultCollapsed`, the stored value is applied after mount. Uncontrolled
+  only — ignored when `collapsed` is provided (controlled mode owns its own
+  persistence). `<AppShell persistKey="despachos.sidebar" sections={…} />`.
 
 ## Polymorphism (two patterns, on purpose)
 

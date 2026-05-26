@@ -5,6 +5,36 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0] — 2026-05-26
+
+**Minor. Additive — no breaking changes.** AppShell remembers its collapsed
+state across reloads, opt-in. From a real consumer: the sidebar reset to
+expanded on every page reload.
+
+### Added
+- **`AppShell` `persistKey?: string`.** Opt-in: pass a key and the collapsed
+  state is persisted in `localStorage[persistKey]`, surviving reloads. Omit it
+  and behaviour is unchanged (resets to `defaultCollapsed` per mount).
+  - **SSR-safe.** The initial render still uses `defaultCollapsed` (server and
+    first client render agree → no hydration mismatch); the stored value is
+    read after mount. A differing stored value may flash for one frame.
+  - **Uncontrolled only.** Ignored when `collapsed` is provided — controlled
+    mode owns its own persistence.
+  - **Resilient.** `localStorage` access is guarded (try/catch); a throwing or
+    unavailable store (Safari private mode) falls back to `defaultCollapsed`
+    and never crashes the shell.
+
+### Changed
+- **`AppShell` `headerLayout="top"` + `collapsedRail` no longer renders its own
+  bottom collapse toggle.** In `top`, collapse is driven *only* by the
+  consumer's `header.left` control, uniformly across hide and rail modes —
+  removing the two-control redundancy (header hamburger **and** rail chevron)
+  that `collapsedRail` introduced in 1.21.0. The bottom chevron stays a
+  `side`-only idiom (its sidebar has no header to host a hamburger). Affects
+  only `top`+`collapsedRail` consumers that relied on the built-in toggle; wire
+  the collapse to your existing `header.left` hamburger instead. `side` layout
+  is unchanged.
+
 ## [1.21.0] — 2026-05-25
 
 **Minor. Additive — no breaking changes.** AppShell `top`-brand polish:

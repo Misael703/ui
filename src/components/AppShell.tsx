@@ -48,6 +48,15 @@ export interface AppShellBaseProps {
   defaultCollapsed?: boolean;
   collapsed?: boolean;
   onCollapsedChange?: (c: boolean) => void;
+  /**
+   * Persist the collapsed state in `localStorage[persistKey]` so it survives
+   * reloads. Opt-in: omit it and the shell keeps the default behaviour (resets
+   * to `defaultCollapsed` on each mount). SSR-safe — the initial render still
+   * uses `defaultCollapsed` (no hydration mismatch); the stored value is read
+   * after mount, so a differing value may flash for one frame. Ignored in
+   * controlled mode (when `collapsed` is provided): the host owns persistence.
+   */
+  persistKey?: string;
   children: React.ReactNode;
   className?: string;
   /**
@@ -186,15 +195,38 @@ const NavItemNode = React.memo(function NavItemNode({
 export function AppShell(props: AppShellProps) {
   const {
     sections, footer, defaultCollapsed = false,
-    collapsed: ctrlCollapsed, onCollapsedChange,
+    collapsed: ctrlCollapsed, onCollapsedChange, persistKey,
     children, className, theme = 'default', linkAs,
   } = props;
   const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const t = useLocale();
   const collapsed = ctrlCollapsed ?? internalCollapsed;
+
+  // SSR-safe persistence: the initial render uses `defaultCollapsed` (server
+  // and first client render agree → no hydration mismatch), then we sync from
+  // localStorage after mount. Only in uncontrolled mode; reads can throw
+  // (Safari private mode), so they're guarded. Runs once per persistKey.
+  React.useEffect(() => {
+    if (persistKey == null || ctrlCollapsed !== undefined) return;
+    try {
+      const stored = window.localStorage.getItem(persistKey);
+      if (stored === '0' || stored === '1') setInternalCollapsed(stored === '1');
+    } catch {
+      /* localStorage unavailable — keep defaultCollapsed */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once at mount; ctrlCollapsed read intentionally not tracked
+  }, [persistKey]);
+
   const setCollapsed = (v: boolean) => {
     if (ctrlCollapsed === undefined) setInternalCollapsed(v);
+    if (persistKey != null && ctrlCollapsed === undefined) {
+      try {
+        window.localStorage.setItem(persistKey, v ? '1' : '0');
+      } catch {
+        /* localStorage unavailable — persistence is best-effort */
+      }
+    }
     onCollapsedChange?.(v);
   };
   const closeMobile = React.useCallback(() => setMobileOpen(false), []);
@@ -234,22 +266,8 @@ export function AppShell(props: AppShellProps) {
                 </div>
               ))}
             </nav>
-            {(footer != null || collapsedRail) && (
-              <div className="appshell__sidebar-foot">
-                {footer}
-                {collapsedRail && (
-                  <button
-                    type="button"
-                    className="appshell__collapse"
-                    onClick={() => setCollapsed(!collapsed)}
-                    aria-expanded={!collapsed}
-                    aria-label={collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu']}
-                    title={collapsed ? t['appshell.expand'] : t['appshell.collapse']}
-                  >
-                    {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-                  </button>
-                )}
-              </div>
+            {footer != null && (
+              <div className="appshell__sidebar-foot">{footer}</div>
             )}
           </aside>
           <main className="appshell__content" role="main">{children}</main>
