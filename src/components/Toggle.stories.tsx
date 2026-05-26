@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { Toggle, ToggleGroup, ToggleGroupItem, SegmentedControl, SegmentedControlItem } from './Toggle';
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from './Icons';
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Rows3, CalendarDays, Map, LayoutGrid, Columns3 } from './Icons';
 
 export default { title: 'Actions/Toggle', tags: ['autodocs'] } as Meta;
 
@@ -63,6 +63,41 @@ export const SegmentedControlDemo: StoryObj = {
           <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
         </SegmentedControl>
         <p style={{ marginTop: 12, fontSize: 13, color: 'var(--fg-muted)' }}>Vista actual: {view}</p>
+      </div>
+    );
+  },
+};
+
+/**
+ * **View switcher con iconos** — `SegmentedControlItem` acepta `icon`. Caso de
+ * despachos: 5 layouts (Tabla / Agenda / Zona / Tarjetas / Tablero). Arriba con
+ * icono + label; abajo icon-only (cada segmento con `aria-label` para el nombre
+ * accesible, ya que el icono es decorativo).
+ */
+export const ViewSwitcherIcons: StoryObj = {
+  name: 'SegmentedControl · view switcher (iconos)',
+  render: () => {
+    const [view, setView] = React.useState<string | null>('table');
+    const views = [
+      { value: 'table', label: 'Tabla', icon: <Rows3 size={16} /> },
+      { value: 'agenda', label: 'Agenda', icon: <CalendarDays size={16} /> },
+      { value: 'zone', label: 'Zona', icon: <Map size={16} /> },
+      { value: 'cards', label: 'Tarjetas', icon: <LayoutGrid size={16} /> },
+      { value: 'board', label: 'Tablero', icon: <Columns3 size={16} /> },
+    ];
+    return (
+      <div style={{ display: 'grid', gap: 20, maxWidth: 560 }}>
+        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
+          {views.map((v) => (
+            <SegmentedControlItem key={v.value} value={v.value} icon={v.icon}>{v.label}</SegmentedControlItem>
+          ))}
+        </SegmentedControl>
+        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista (compacta)">
+          {views.map((v) => (
+            <SegmentedControlItem key={v.value} value={v.value} icon={v.icon} aria-label={v.label} />
+          ))}
+        </SegmentedControl>
+        <p style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Vista actual: {view}</p>
       </div>
     );
   },

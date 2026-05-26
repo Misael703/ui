@@ -130,10 +130,18 @@ export function SegmentedControl({ className, ...rest }: SegmentedControlProps) 
 
 export interface ToggleGroupItemProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'value'> {
   value: string;
+  /**
+   * Optional leading icon, rendered before `children` and aligned via the
+   * toggle's built-in flex gap. Convenience for view switchers / segmented
+   * controls: `<SegmentedControlItem value="table" icon={<Table />}>Tabla</…>`.
+   * For an **icon-only** segment, pass `icon` with no children and give the
+   * button an accessible name via `aria-label` (icons are decorative).
+   */
+  icon?: React.ReactNode;
 }
 
 export const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupItemProps>(function ToggleGroupItem(
-  { value, className, children, disabled: itemDisabled, ...rest },
+  { value, className, children, icon, disabled: itemDisabled, ...rest },
   ref
 ) {
   const ctx = React.useContext(ToggleGroupContext);
@@ -163,6 +171,7 @@ export const ToggleGroupItem = React.forwardRef<HTMLButtonElement, ToggleGroupIt
       onClick={onClick}
       {...rest}
     >
+      {icon}
       {children}
     </button>
   );

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Toggle, ToggleGroup, ToggleGroupItem } from '../src/components/Toggle';
+import { Toggle, ToggleGroup, ToggleGroupItem, SegmentedControl, SegmentedControlItem } from '../src/components/Toggle';
+import { Rows3 } from '../src/components/Icons';
 
 describe('Toggle', () => {
   it('toggles pressed state', () => {
@@ -39,6 +40,43 @@ describe('ToggleGroup single', () => {
     expect(onChange).toHaveBeenCalledWith('b');
     expect(b).toHaveAttribute('aria-pressed', 'true');
     expect(a).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+describe('ToggleGroupItem icon prop', () => {
+  it('renders the icon before the label (icon + text segment)', () => {
+    render(
+      <SegmentedControl ariaLabel="Vista" defaultValue="table">
+        <SegmentedControlItem value="table" icon={<Rows3 />}>Tabla</SegmentedControlItem>
+      </SegmentedControl>
+    );
+    const btn = screen.getByRole('button', { name: 'Tabla' });
+    const svg = btn.querySelector('svg');
+    expect(svg).toBeTruthy();
+    // icon precedes the text node
+    expect(btn.firstElementChild?.tagName.toLowerCase()).toBe('svg');
+    expect(btn).toHaveTextContent('Tabla');
+  });
+
+  it('supports an icon-only segment named via aria-label (no children)', () => {
+    render(
+      <SegmentedControl ariaLabel="Vista" defaultValue="table">
+        <SegmentedControlItem value="table" icon={<Rows3 />} aria-label="Tabla" />
+      </SegmentedControl>
+    );
+    // Accessible name comes from aria-label, not text.
+    const btn = screen.getByRole('button', { name: 'Tabla' });
+    expect(btn).toHaveTextContent('');
+    expect(btn.querySelector('svg')).toBeTruthy();
+  });
+
+  it('children-only still works (icon prop is optional, back-compat)', () => {
+    render(
+      <ToggleGroup type="single" defaultValue="a">
+        <ToggleGroupItem value="a">A</ToggleGroupItem>
+      </ToggleGroup>
+    );
+    expect(screen.getByRole('button', { name: 'A' })).toBeInTheDocument();
   });
 });
 
