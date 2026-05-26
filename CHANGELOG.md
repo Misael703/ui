@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.0] — 2026-05-26
+
+**Minor. Additive — no breaking changes.** Closes a gap a consumer measured in
+1.22.0: in `headerLayout="top"`, `persistKey` (uncontrolled) could not coexist
+with a header trigger — the shell rendered `header.{left,center,right}` as
+static nodes with no handle to the collapse state, and `top` has no built-in
+toggle, so an uncontrolled shell had no way to collapse from the header and
+`persistKey` was effectively a no-op there.
+
+### Added
+- **Header-slot render-props.** `AppShellHeader` slots
+  (`left`/`center`/`right`) now accept a function `(api: AppShellHeaderApi) =>
+  ReactNode` in addition to a static `ReactNode`. The API is
+  `{ collapsed, toggle, setCollapsed }`, letting a consumer-placed control
+  (hamburger) drive the sidebar — the only path in **uncontrolled** `top`.
+  New exported types: `AppShellHeaderApi`, `AppShellHeaderSlot`. Static-node
+  slots are unchanged (render-prop is opt-in). This makes the documented
+  `persistKey` + header-hamburger pattern actually wire up in `top`:
+  ```tsx
+  <AppShell headerLayout="top" persistKey="despachos.sidebar"
+    header={{ left: ({ collapsed, toggle }) =>
+      <button aria-expanded={!collapsed} onClick={toggle}><MenuIcon/></button>,
+      center: <Logo/> }} />
+  ```
+
 ## [1.22.0] — 2026-05-26
 
 **Minor. Additive — no breaking changes.** AppShell remembers its collapsed

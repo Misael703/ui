@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { AppShell } from '../src/components/AppShell';
@@ -93,6 +93,33 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     );
     expect(container.querySelector('.appshell')).toHaveClass('appshell--rail');
     expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeNull();
+  });
+
+  it('header slot render-prop receives the collapse API and toggles an UNCONTROLLED shell', () => {
+    // The whole point: in `top` uncontrolled mode there is no built-in toggle,
+    // so a header hamburger needs the API to flip the state. A static node
+    // could never do this — only the render-prop form reaches setCollapsed.
+    const { container } = render(
+      <AppShell headerLayout="top" header={{
+        left: ({ collapsed, toggle }) => (
+          <button data-testid="burger" aria-expanded={!collapsed} onClick={toggle}>menu</button>
+        ),
+        center: 'brand',
+      }} sections={sections}>x</AppShell>
+    );
+    const burger = container.querySelector('[data-testid="burger"]')!;
+    expect(container.querySelector('.appshell')).not.toHaveClass('is-collapsed');
+    expect(burger).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(burger);
+    expect(container.querySelector('.appshell')).toHaveClass('is-collapsed');
+    expect(burger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('static-node header slots still render unchanged (render-prop is opt-in)', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ left: <span data-testid="static">x</span>, center: 'b' }} sections={sections}>y</AppShell>
+    );
+    expect(container.querySelector('.appshell__header-left [data-testid="static"]')).toBeTruthy();
   });
 
   it('without collapsedRail there is no rail modifier (default = hide)', () => {

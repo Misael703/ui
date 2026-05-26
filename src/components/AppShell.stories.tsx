@@ -240,3 +240,46 @@ export const TopbarRail: StoryObj = {
   name: 'Topbar · Rail (collapsedRail)',
   render: () => <TopbarCenteredShell theme="brand" rail startCollapsed />,
 };
+
+/**
+ * **Topbar · uncontrolled, header render-prop** (v1.23.0). The shell owns the
+ * collapse state; the hamburger is a `header.left` **render-prop** that gets
+ * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled `top`
+ * shell from the header — and what lets `persistKey` (uncontrolled) coexist
+ * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
+ */
+export const TopbarUncontrolledRenderProp: StoryObj = {
+  name: 'Topbar · Uncontrolled (header render-prop)',
+  render: () => (
+    <div style={{ height: 'calc(100vh - 32px)' }}>
+      <AppShell
+        headerLayout="top"
+        collapsedRail
+        sections={sections}
+        header={{
+          left: ({ collapsed, toggle }) => (
+            <button
+              type="button"
+              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+              aria-expanded={!collapsed}
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            ><MenuIcon size={18} /></button>
+          ),
+          center: <Logo variant="horizontal" bg="light" height={28} />,
+          right: <Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Dashboard" description="El estado lo administra el AppShell; el hamburger lo togglea vía render-prop" />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};

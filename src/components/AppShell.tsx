@@ -28,13 +28,39 @@ export type AppShellTheme = 'default' | 'brand';
 
 export type AppShellHeaderLayout = 'side' | 'top';
 
+/**
+ * Collapse API handed to header-slot render-props so a consumer-placed control
+ * (e.g. a hamburger in `left`) can drive the sidebar — crucially in
+ * **uncontrolled** mode, where the `top` layout otherwise has no toggle
+ * affordance. This is what lets `persistKey` (uncontrolled) coexist with a
+ * custom header trigger: the kit owns the state + persistence, the consumer
+ * owns the trigger's look and placement.
+ */
+export interface AppShellHeaderApi {
+  /** Current collapsed state. */
+  collapsed: boolean;
+  /** Flip the collapsed state (persisted if `persistKey` is set). */
+  toggle: () => void;
+  /** Set the collapsed state explicitly. */
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+/**
+ * A header slot: a static node, or a render-prop receiving {@link AppShellHeaderApi}.
+ * The function form is the only way to toggle an uncontrolled shell from the
+ * header (no built-in toggle exists in `top`).
+ */
+export type AppShellHeaderSlot =
+  | React.ReactNode
+  | ((api: AppShellHeaderApi) => React.ReactNode);
+
 export interface AppShellHeader {
   /** Left slot — typically a menu/hamburger trigger or back action. */
-  left?: React.ReactNode;
+  left?: AppShellHeaderSlot;
   /** Center slot — typically the brand (Logo). Lands at the true viewport centre. */
-  center?: React.ReactNode;
+  center?: AppShellHeaderSlot;
   /** Right slot — notifications, user avatar, utilities. */
-  right?: React.ReactNode;
+  right?: AppShellHeaderSlot;
 }
 
 /**
@@ -244,15 +270,21 @@ export function AppShell(props: AppShellProps) {
     // so `theme="brand"` keeps tinting both bands (back-compat).
     const headerTheme = props.headerTheme ?? theme;
     const collapsedRail = props.collapsedRail ?? false;
+    // Hand the collapse API to header slots so a consumer trigger (hamburger)
+    // can toggle the shell — the only path in uncontrolled `top` (no built-in
+    // toggle here). A function slot is called with the API; a node renders as-is.
+    const headerApi: AppShellHeaderApi = { collapsed, toggle: () => setCollapsed(!collapsed), setCollapsed };
+    const slot = (s: AppShellHeaderSlot): React.ReactNode =>
+      typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
     return (
       <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsedRail && 'appshell--rail', collapsed && 'is-collapsed', className)}>
         {/* On a brand header the band is dark, so re-scope foreground tokens
             via data-tone="inverse" — anything inside (Avatar, badges, links)
             becomes band-aware automatically without per-call-site colors. */}
         <header className="appshell__header" role="banner" data-tone={headerTheme === 'brand' ? 'inverse' : undefined}>
-          <div className="appshell__header-left">{header?.left}</div>
-          <div className="appshell__header-center">{header?.center}</div>
-          <div className="appshell__header-right">{header?.right}</div>
+          <div className="appshell__header-left">{slot(header?.left)}</div>
+          <div className="appshell__header-center">{slot(header?.center)}</div>
+          <div className="appshell__header-right">{slot(header?.right)}</div>
         </header>
         <div className="appshell__body">
           <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
