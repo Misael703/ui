@@ -232,8 +232,9 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
 }
 
 /** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
- *  (icons, active-item bar) with a built-in toggle at the bottom, instead of
- *  hiding the sidebar. Shown starting collapsed so the rail is visible.
+ *  (icons, active-item bar) instead of hiding the sidebar. Collapse is driven
+ *  by the header hamburger (`header.left`) — no built-in rail toggle, so there
+ *  is a single control. Shown starting collapsed so the rail is visible.
  *  (Toggle `theme`/`collapsedRail` live in the Playground for the rest.) */
 export const TopbarRail: StoryObj = {
   name: 'Topbar · Rail (collapsedRail)',

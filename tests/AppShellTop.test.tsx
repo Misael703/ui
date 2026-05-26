@@ -83,12 +83,16 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(container.querySelector('.appshell__header')).not.toHaveAttribute('data-tone');
   });
 
-  it('collapsedRail adds the rail modifier + a built-in collapse toggle', () => {
+  it('collapsedRail adds the rail modifier but NO built-in toggle (top is driven by the header hamburger)', () => {
+    // The bottom chevron is a `side`-only idiom (its sidebar has no header to
+    // host a hamburger). In `top`, collapse is ALWAYS driven by the consumer's
+    // `header.left` control — in both hide and rail modes — so the shell never
+    // renders its own toggle here. Avoids the two-control redundancy.
     const { container } = render(
       <AppShell headerLayout="top" collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell')).toHaveClass('appshell--rail');
-    expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeInTheDocument();
+    expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeNull();
   });
 
   it('without collapsedRail there is no rail modifier (default = hide)', () => {
