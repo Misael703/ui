@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const ROUTES = ['/', '/client', '/gallery'];
+const ROUTES = ['/', '/client', '/gallery', '/scenarios', '/scenarios/modal', '/scenarios/brand', '/scenarios/table'];
 
 // React hydration tells: explicit messages + minified codes (418 text/markup
 // mismatch, 421 suspense, 423 recoverable, 425 text content).
