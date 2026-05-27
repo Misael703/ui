@@ -5,6 +5,19 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.1] — 2026-05-27
+
+**Patch. Bugfix.** Popover/combobox panels could drift off their anchor when
+their own content resized.
+
+### Fixed
+- **`usePopoverPosition` recomputes on content resize.** A `ResizeObserver` on
+  the panel re-runs the (rAF-coalesced) position pass when the content's size
+  changes — e.g. a Combobox list shrinking as the query filters options. Before
+  this, coords computed for the initial (tall) size went stale: a `top`-flipped
+  panel that then shrank kept its high `top` and drifted up off the anchor.
+  Guarded for SSR/old runtimes (`typeof ResizeObserver !== 'undefined'`).
+
 ## [1.25.0] — 2026-05-26
 
 **Minor. Additive — no breaking changes.** Icons + a first-class icon slot for

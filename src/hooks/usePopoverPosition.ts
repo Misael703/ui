@@ -141,12 +141,23 @@ export function usePopoverPosition(
     // from *any* ancestor (the table/card wrapper, not just window).
     window.addEventListener('scroll', schedule, { capture: true, passive: true });
     window.addEventListener('resize', schedule, { passive: true });
+    // Recompute when the panel itself resizes — e.g. a combobox list shrinking
+    // as the query filters options. Without this the coords computed for the
+    // initial (tall) size go stale; a 'top'-flipped panel that shrinks keeps
+    // its high `top` and drifts up off the anchor.
+    const contentEl = contentRef.current;
+    let ro: ResizeObserver | undefined;
+    if (contentEl && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(schedule);
+      ro.observe(contentEl);
+    }
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', schedule, { capture: true });
       window.removeEventListener('resize', schedule);
+      ro?.disconnect();
     };
-  }, [open, compute]);
+  }, [open, compute, contentRef]);
 
   return pos;
 }
