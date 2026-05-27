@@ -12,10 +12,12 @@ import { Badge } from '../src/components/Display';
  * Storybook; this locks the token-level decisions.
  *
  * Defects (must FAIL before the fix):
- *  - P1 Badge: neutral default carries `--fg-default` ink + a hard
- *    `--border-default` ring + `--tt-label` uppercase → shouts as a data
- *    chip in a dense table. Default register must be the quiet data-chip
- *    (no caps, tinted text, no hard border); brand caps move to opt-in.
+ *  - P1 Badge: neutral default carried `--fg-default` ink + a hard ink ring
+ *    + `--tt-label` uppercase → shouted as a data chip in a dense table.
+ *    Default register must be the quiet data-chip (no caps, tinted text).
+ *    NOTE (1.26.0): the soft `--border-default` hairline was re-added — it is
+ *    the kit's standard delineator (Card/Chip), needed so the chip survives a
+ *    tinted canvas; not the loud ink ring. See the border test below.
  *  - P2 Label: `.label` is weight 700 + `--fg-default` ink → the scaffold
  *    weighs as much as the value. It must recede (muted + lighter weight)
  *    without dropping below AA (covered by Contrast.test).
@@ -57,9 +59,18 @@ describe('P1 — Badge default is the quiet data-chip register', () => {
     expect(decl(badge, 'color')).toBe('var(--fg-muted)');
   });
 
-  it('has no hard 1px --border-default ring on the neutral default', () => {
+  it('carries the soft --border-default hairline so it stays legible on any surface tier (1.26.0 re-decision)', () => {
+    // Conscious reversal of the 1.10.0 "no border" sub-decision. 1.10.0 removed
+    // the border to quiet the badge in dense WHITE tables, where its --bg-subtle
+    // fill already delineates it. But --bg-subtle is designed to sit ON white
+    // surfaces; on a tinted canvas (El Alba --bg-canvas) subtle ≈ canvas, so a
+    // transparent border made the neutral chip VANISH (reported from despachos).
+    // The hairline is the kit's standard soft delineator — the SAME token as
+    // Card and Chip — NOT the loud --fg-default ink ring 1.10.0 removed. The
+    // other quiet wins (no caps, tinted text) below still hold, and colored/
+    // solid variants keep overriding border-color with their own.
     const border = decl(badge, 'border') ?? '';
-    expect(border).not.toContain('var(--border-default)');
+    expect(border).toContain('var(--border-default)');
   });
 
   it('ships the opt-in brand micro-label register (.badge--label = caps)', () => {
