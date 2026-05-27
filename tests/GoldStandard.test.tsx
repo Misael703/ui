@@ -89,10 +89,15 @@ describe('P4 — header recedes to the gold register', () => {
 
 describe('P5 — quiet data-chip badge default MUST remain (shipped v1.11)', () => {
   const b = ruleBody(index, '.badge');
-  it('sentence case, tinted (not ink), no hard border', () => {
+  it('sentence case + tinted (not ink); soft hairline so it survives non-white surfaces (1.26.0)', () => {
     expect(decl(b, 'text-transform')).toBe('none');
     expect(decl(b, 'color')).toBe('var(--fg-muted)');
-    expect(decl(b, 'border')).toBe('1px solid transparent');
+    // 1.26.0 re-decision: the transparent border made the neutral chip vanish
+    // on a tinted canvas (--bg-subtle ≈ --bg-canvas in El Alba) — same class of
+    // bug as the disappear-on-hover one pinned just below. The soft
+    // --border-default hairline (Card/Chip's token) delineates it on any
+    // surface tier; it is NOT the loud ink ring the quiet-default pass removed.
+    expect(decl(b, 'border')).toBe('1px solid var(--border-default)');
   });
 
   it('row hover must not collide with the neutral chip background', () => {

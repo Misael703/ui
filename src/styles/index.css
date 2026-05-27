@@ -427,10 +427,10 @@ button, input, select, textarea { box-sizing: border-box; }
   /* Default register is the quiet DATA-CHIP (post-1.10.0). The P4 decision
      ("badges are micro-labels, keep caps") only held for eyebrow/tag
      badges; in a dense table the overwhelming real use is a data value
-     (status, type, "Clase A4", a price) where caps + ink + a hard ring
+     (status, type, "Clase A4", a price) where caps + ink + a hard ink ring
      shout and break the scan. So the default now reads as metadata:
-     sentence case, tinted text, no hard border. The brand caps texture is
-     not lost — it moves to the opt-in `.badge--label` register below. */
+     sentence case, tinted text. The brand caps texture is not lost — it
+     moves to the opt-in `.badge--label` register below. */
   font-weight: 600;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
@@ -438,7 +438,13 @@ button, input, select, textarea { box-sizing: border-box; }
   text-transform: none;
   background: var(--bg-subtle);
   color: var(--fg-muted);
-  border: 1px solid transparent;
+  /* Soft hairline (same token as Card/Chip), NOT a hard ink ring. The neutral
+     badge's bg is `--bg-subtle`, which is designed to sit ON white surfaces;
+     on a tinted canvas (e.g. El Alba `--bg-canvas`) subtle ≈ canvas, so a
+     transparent border made the chip vanish. The hairline delineates it on
+     ANY surface tier — matching `.chip`, which already carries it — while the
+     colored/solid variants keep overriding `border-color` with their own. */
+  border: 1px solid var(--border-default);
   white-space: nowrap;
   /* Per-variant deep tone, consumed by the solid/outline appearances.
      Neutral (no variant rule) → ink: `variant="neutral" appearance="solid"`

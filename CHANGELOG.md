@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.0] — 2026-05-27
+
+**Minor. Visible default change (no API change).** A consumer (despachos)
+reported neutral Badges vanishing on the tinted page canvas — they blended
+into `--bg-canvas` and didn't stand out.
+
+### Fixed
+- **Neutral `Badge` now carries the soft `--border-default` hairline** (was a
+  transparent border). Root cause: the neutral badge's fill is `--bg-subtle`,
+  which is designed to sit ON white surfaces; on a tinted canvas (e.g. El Alba
+  `--bg-canvas`) `--bg-subtle` ≈ `--bg-canvas`, so with no border the chip had
+  no visible boundary. The hairline is the kit's standard soft delineator — the
+  **same token `Card` and `Chip` already use** — so the neutral badge now reads
+  on **any** surface tier (white card, table, or tinted canvas) instead of only
+  on white. **Pit of success: consumers no longer need to wrap status chips in
+  a white surface to keep them legible.**
+  - This is a deliberate reversal of the 1.10.0 "no border" sub-decision (which
+    targeted dense white tables). The other 1.10.0 quiet-default wins stay: no
+    caps, tinted text. It is a **hairline**, not the loud `--fg-default` ink
+    ring 1.10.0 removed.
+  - **Visible delta for all consumers:** every neutral `<Badge>` gains a 1px
+    `--border-default` outline. Colored/solid variants are unchanged (they
+    already override `border-color`).
+
 ## [1.25.1] — 2026-05-27
 
 **Patch. Bugfix.** Popover/combobox panels could drift off their anchor when
