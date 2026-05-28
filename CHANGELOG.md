@@ -5,6 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.0] — 2026-05-30
+
+**Minor. Additive — no breaking changes.** From a real consumer (despachos): an
+order-detail timeline with an "Orden creada" anchor at the top, accumulating
+operational dispatch events below it. The anchor needs more visual weight than
+the events that hang from it; pre-1.30.0 the default hollow marker was
+*lighter* than the colored operational markers, **inverting the hierarchy**.
+
+### Added
+- **`TimelineItem` `variant?: 'default' | 'milestone'`** (orthogonal to `tone`
+  and `state`). Milestone upgrades the marker to **32×32 filled in the tone
+  color with a soft halo**, so anchor events out-rank the operational events
+  visually. Combinable with all 5 tones; combinable with `state` (a pending
+  milestone stays hollow muted, preserving "not yet" while keeping the larger
+  anchor slot; a current milestone gets the existing pulse halo). The
+  connector top is re-anchored so the line clears the taller marker.
+  ```tsx
+  <Timeline>
+    <TimelineItem variant="milestone" state="done" tone="success" title="Orden creada" />
+    <TimelineItem state="done" tone="success" title="Despacho 1/3" />
+    {/* … events hanging from the anchor … */}
+  </Timeline>
+  ```
+
+### Internal
+- New tests in `Display3.test.tsx` — variant class applied + composes with each
+  of the 5 tones; back-compat (no variant) renders byte-equivalent to 1.29.x.
+- New smoke scenario `/scenarios/timeline-milestone` + spec — renders all 5
+  tones and asserts each milestone marker computes to 32×32 with a visible
+  tone-tinted halo and non-transparent fill.
+- Two new Storybook stories: `#7 Milestone · 5 tonos lado a lado` and
+  `#8 Milestone · despachos anchor + eventos`.
+
 ## [1.29.0] — 2026-05-29
 
 **Minor. Color-system tidy-up — no API change.** Eight coherence fixes to the

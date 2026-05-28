@@ -3041,6 +3041,32 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-muted);
 }
 
+/* Milestone variant (v1.30.0) — for "anchor" events that should out-rank the
+   operational events below them visually (e.g. "Orden creada" at the top of a
+   detail timeline). 32×32 (vs 24×24), filled with the tone color, contrasting
+   icon, soft halo. The per-item `--timeline-tone` set by the existing tone
+   `:has()` rules drives both the fill and the halo, so adding the variant
+   alongside a tone class is all the consumer does. Connector top is
+   re-anchored to clear the taller marker. */
+.timeline__marker--milestone {
+  width: 32px; height: 32px;
+  background: var(--timeline-tone);
+  border-color: var(--timeline-tone);
+  color: var(--color-white);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--timeline-tone) 14%, transparent);
+}
+.timeline__item:has(> .timeline__marker--milestone):not(:last-child)::before {
+  top: 36px; /* 32px marker + 2px margin-top + 2px clearance (was 28px for 24px) */
+}
+/* Pending milestone: preserve the "not yet" semantics — bigger anchor slot
+   but still hollow muted, no halo. */
+.timeline__item--pending .timeline__marker--milestone {
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+  color: var(--fg-muted);
+  box-shadow: none;
+}
+
 /* Compact density — for cards, list summaries, dense panels. */
 .timeline--compact { gap: var(--space-3); }
 .timeline--compact .timeline__item { gap: var(--space-2); }

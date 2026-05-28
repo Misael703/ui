@@ -217,3 +217,22 @@ export function ScenarioSemanticBadgeRow() {
     </div>
   );
 }
+
+/**
+ * Scenario 6 — **Timeline milestone variant** (v1.30.0). Seam: the 5 tones of
+ * the milestone variant must each render at 32×32 with a visible halo and the
+ * fill color reading from the per-item `--timeline-tone`. Catches a future
+ * drift in the milestone CSS (e.g. someone reverting size or losing the halo).
+ */
+export function ScenarioTimelineMilestone() {
+  const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
+  return (
+    <div style={{ padding: 24, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'start' }} data-scenario="timeline-milestone">
+      {tones.map((t) => (
+        <K.Timeline key={t} data-testid={`tl-${t}`}>
+          <K.TimelineItem variant="milestone" tone={t} title={`anchor ${t}`} />
+        </K.Timeline>
+      ))}
+    </div>
+  );
+}

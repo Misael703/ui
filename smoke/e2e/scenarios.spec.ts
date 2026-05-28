@@ -167,6 +167,35 @@ test.describe('Scenario · responsive DataTable', () => {
 });
 
 /**
+ * Timeline milestone variant (v1.30.0). Each of the 5 tones must render the
+ * milestone marker at 32×32 with a visible halo (box-shadow), and the fill
+ * must read from the tone (i.e. not be the bg-surface / hollow look). Catches
+ * a future drift where someone reverts the size or loses the halo.
+ */
+test.describe('Scenario · Timeline milestone variant', () => {
+  test('all 5 tones render the milestone marker at 32×32 with a tone-tinted halo', async ({ page }) => {
+    await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
+
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const marker = page.locator(`[data-testid="tl-${t}"] .timeline__marker--milestone`);
+      await expect(marker, `tone ${t} marker present`).toHaveCount(1);
+      const measured = await marker.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { width: cs.width, height: cs.height, boxShadow: cs.boxShadow, background: cs.backgroundColor };
+      });
+      expect(measured.width,  `tone ${t} width`).toBe('32px');
+      expect(measured.height, `tone ${t} height`).toBe('32px');
+      // Halo present (not the default "none" string from no box-shadow).
+      expect(measured.boxShadow, `tone ${t} halo missing — got "${measured.boxShadow}"`).not.toBe('none');
+      // Filled (some non-transparent background — neutral uses --border-default
+      // via --timeline-tone; the tone variants use their semantic color).
+      expect(measured.background, `tone ${t} fill missing — got "${measured.background}"`).not.toMatch(/rgba?\(0,\s*0,\s*0,\s*0\)/);
+    }
+  });
+});
+
+/**
  * Semantic Badge row coherence (v1.29.0). After tidying yellow → gold and
  * info → cyan-sky and aliasing warning to -600, a row of soft-register Badges
  * {success / warning / danger / info} must read with even weight: all four

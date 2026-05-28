@@ -207,3 +207,44 @@ export const CalendarDemo: StoryObj = {
     );
   },
 };
+
+/**
+ * **Milestone variant** (v1.30.0) — anchor events get visual weight that the
+ * operational events below them don't. 32×32 filled in the tone color + soft
+ * halo. Combinable with each of the 5 tones; combinable with `state` (a
+ * pending milestone stays hollow muted, preserving "not yet" while keeping
+ * the anchor slot).
+ */
+export const TimelineMilestoneTones: StoryObj = {
+  name: '#7 Milestone · 5 tonos lado a lado',
+  render: () => (
+    <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+      {(['neutral', 'success', 'info', 'warning', 'danger'] as const).map((t) => (
+        <Timeline key={t}>
+          <TimelineItem variant="milestone" tone={t} icon={<CheckCircle size={18} />} title={`Anchor · ${t}`} meta="2026-05-25 09:14" />
+          <TimelineItem tone={t === 'neutral' ? 'success' : t} icon={<CheckCircle size={14} />} title="Evento operativo" meta="14:30" />
+        </Timeline>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * **Despachos canonical** — la orden 1415231 ahora con el "Orden creada" como
+ * anchor milestone arriba del resto de despachos operativos. La inversión de
+ * jerarquía pre-1.30.0 desaparece: el anchor pesa más que los eventos que
+ * cuelgan de él, no menos.
+ */
+export const TimelineMilestoneDespachos: StoryObj = {
+  name: '#8 Milestone · despachos anchor + eventos',
+  render: () => (
+    <Timeline style={{ maxWidth: 480 }}>
+      <TimelineItem variant="milestone" state="done" tone="success" icon={<CheckCircle size={18} />} title="Orden 1415231 creada" meta="2026-05-25 09:14 · Misael Ocas" />
+      <TimelineItem state="done"    tone="success" icon={<Truck size={14} />}   title="Despacho 1/3 enviado"       meta="2026-05-25 14:30" />
+      <TimelineItem state="done"    tone="success" icon={<Package size={14} />} title="Retiro parcial — mesón"     meta="2026-05-26 10:12" />
+      <TimelineItem state="current" tone="info"    icon={<Truck size={14} />}   title="Preparando despacho 2/3"    meta="En curso" />
+      <TimelineItem state="pending"                icon={<Truck size={14} />}   title="Despacho 3/3"               meta="Pendiente" />
+      <TimelineItem variant="milestone" state="pending" tone="success" icon={<CheckCircle size={18} />} title="Orden completada" meta="Pendiente" />
+    </Timeline>
+  ),
+};
