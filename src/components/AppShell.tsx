@@ -69,7 +69,15 @@ export interface AppShellHeader {
  * discriminated union of the two, keyed on `headerLayout`.
  */
 export interface AppShellBaseProps {
-  sections: NavSection[];
+  /**
+   * Navigation sections that populate the sidebar. Omit (or pass an empty
+   * array) in `headerLayout="top"` to render a **top-bar-only** shell — no
+   * sidebar at all, body collapses to a single column. Use when the app is
+   * flat-route (no panel nav), e.g. a kiosk/cobros-mesón style layout.
+   * Required (effectively) in `headerLayout="side"`: that layout is the
+   * sidebar; omitting sections renders an empty rail.
+   */
+  sections?: NavSection[];
   footer?: React.ReactNode;
   defaultCollapsed?: boolean;
   collapsed?: boolean;
@@ -220,7 +228,7 @@ const NavItemNode = React.memo(function NavItemNode({
 
 export function AppShell(props: AppShellProps) {
   const {
-    sections, footer, defaultCollapsed = false,
+    sections = [], footer, defaultCollapsed = false,
     collapsed: ctrlCollapsed, onCollapsedChange, persistKey,
     children, className, theme = 'default', linkAs,
   } = props;
@@ -276,8 +284,14 @@ export function AppShell(props: AppShellProps) {
     const headerApi: AppShellHeaderApi = { collapsed, toggle: () => setCollapsed(!collapsed), setCollapsed };
     const slot = (s: AppShellHeaderSlot): React.ReactNode =>
       typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
+    // Top-bar-only mode (v1.27.0): with no `sections` the shell is just a
+    // header band over a single-column content area — no sidebar. For
+    // flat-route apps (kiosk, checkout, single-flow tools) that don't need
+    // panel navigation. Stays inside `AppShell` (no new component) so the
+    // already-shipped `top` header band is reused as-is.
+    const hasSidebar = sections.length > 0;
     return (
-      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsedRail && 'appshell--rail', collapsed && 'is-collapsed', className)}>
+      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsedRail && 'appshell--rail', !hasSidebar && 'appshell--no-nav', collapsed && 'is-collapsed', className)}>
         {/* On a brand header the band is dark, so re-scope foreground tokens
             via data-tone="inverse" — anything inside (Avatar, badges, links)
             becomes band-aware automatically without per-call-site colors. */}
@@ -287,21 +301,23 @@ export function AppShell(props: AppShellProps) {
           <div className="appshell__header-right">{slot(header?.right)}</div>
         </header>
         <div className="appshell__body">
-          <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
-            <nav className="appshell__nav">
-              {sections.map((s, i) => (
-                <div key={s.id ?? i} className="appshell__navsection">
-                  {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
-                  <ul>{s.items.map((it) => (
-                    <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
-                  ))}</ul>
-                </div>
-              ))}
-            </nav>
-            {footer != null && (
-              <div className="appshell__sidebar-foot">{footer}</div>
-            )}
-          </aside>
+          {hasSidebar && (
+            <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
+              <nav className="appshell__nav">
+                {sections.map((s, i) => (
+                  <div key={s.id ?? i} className="appshell__navsection">
+                    {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
+                    <ul>{s.items.map((it) => (
+                      <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
+                    ))}</ul>
+                  </div>
+                ))}
+              </nav>
+              {footer != null && (
+                <div className="appshell__sidebar-foot">{footer}</div>
+              )}
+            </aside>
+          )}
           <main className="appshell__content" role="main">{children}</main>
         </div>
       </div>

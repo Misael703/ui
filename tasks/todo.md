@@ -133,3 +133,13 @@ Pedido despachos: switcher de 5 layouts con iconos; el kit no los tenía.
   assert `localStorage[key] === '1'`.
 - Manual en Storybook: togglear, recargar (F5), confirmar que recuerda — solo
   si agrego el control; si no, lo valido en despachos al consumir 1.22.0.
+
+## /frontend-qa — auditoría kit-wide (2026-05-27)
+
+Scope: kit completo (no una ruta). Adaptado a librería. Stack React (no Angular).
+
+- [ ] Gate A — review estático: web-design-guidelines + design-taste-frontend + convenciones (sin browser)
+- [ ] Gate B — runtime Playwright en Storybook (superficies representativas) — NECESITA `npm run storybook` levantado
+- [ ] Gate C — polish (impeccable) + i18n/locale (español neutro, tú, sin tildes en imperativos)
+- [ ] Gate D — visual regression (baselines) — N/A primer run
+- [ ] Sign-off + informe de gaps/mejoras
