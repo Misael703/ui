@@ -64,21 +64,23 @@
   --color-gray-100:  #f4f5f8;
   --color-gray-50:   #fafbfc;
 
-  /* Cool-slate canvas on white surfaces (was pure white pre-1.16). A white
-     canvas == white surface gave zero figure/ground: Cards, DataTable and
-     filters dissolved into the page. A subtle cool-slate canvas makes the
-     white surfaces read as elevated without the consumer touching CSS.
+  /* Cool-slate surface tier system (v1.29.0 tidy-up).
 
-     Tier scale (luminance, darkest → lightest), semantics PRESERVED so the
-     `subtle → muted` hover progression doesn't invert:
-       --bg-canvas  #eaeef5  page background (the only non-white tier here)
+     Pre-1.29.0 `--bg-canvas` (#eaeef5) sat BETWEEN `--bg-subtle` and
+     `--bg-muted` in luminance — semantically wrong (canvas is the deepest
+     page tier, subtle/muted are insets on a surface), and the source of the
+     "neutral Badge vanishes on canvas" bug parched with the hairline in
+     1.26.0 (subtle ≈ canvas → no figure/ground).
+
+     v1.29.0 re-orders by luminance, lightest → darkest:
+       --bg-surface #ffffff  cards, tables (CONTENT — must pop)
        --bg-subtle  #f1f4f9  inset on a surface (table header, card footer)
-       --bg-muted   #e7ebf2  stronger inset / hover/pressed (kept "below"
-                             subtle in luminance = more prominent, as before)
-       --bg-surface #ffffff  cards, tables, the content that should pop
-     `--bg-subtle`/`--bg-muted` sit ON surfaces, not on the canvas, so their
-     relation to the canvas value doesn't matter for normal kit usage. */
-  --bg-canvas:  #eaeef5;
+       --bg-muted   #e7ebf2  stronger inset / hover/pressed
+       --bg-canvas  #dde3ed  page background (DEEPEST tier, supports the
+                             card lift on its own without the consumer
+                             touching CSS or borders).
+     Pinned by tests/SurfaceTiers.test.tsx. */
+  --bg-canvas:  #dde3ed;
   --bg-subtle:  #f1f4f9;
   --bg-muted:   #e7ebf2;
 
@@ -108,7 +110,12 @@
      (just under AA); this clears it (~4.58 canvas / ~5.33 surface / ~4.77
      subtle). Net: captions/meta read a hair stronger everywhere. */
   --fg-muted:  var(--color-gray-600);
-  --fg-subtle: #666b78;
+  /* v1.29.0: with the new darker canvas (#dde3ed, see surface tier block above)
+     the pre-1.29.0 `#666b78` dropped to 4.13:1 on canvas (just under AA). One
+     slate step darker clears it everywhere — pinned in Contrast.test.
+     (~4.61 canvas / ~5.39 subtle / ~5.83 surface.) Still a hair lighter than
+     `--fg-muted` (gray-600 #5b6173), preserving the muted/subtle relationship. */
+  --fg-subtle: #5e6373;
 
   /* Button primary↔secondary swap (El Alba only, buttons only — these
      tokens are read solely by .btn--primary/.btn--secondary; links, focus
@@ -128,4 +135,16 @@
   --btn-secondary-bg:        var(--color-primary);
   --btn-secondary-fg:        var(--color-white);
   --btn-secondary-bg-hover:  var(--color-primary-900);
+
+  /* Categorical re-mapping (v1.29.0). The base palette's `--cat-1` (blue) and
+     `--cat-4` (amber) sit in the SAME hue families as El Alba's brand primary
+     (Pantone 287 C navy) and secondary (Pantone 165 C orange), so a "zona 1"
+     chip next to a primary CTA reads as "two primaries". We shift these two
+     into hue families brand doesn't occupy:
+       cat-1 blue   → cyan/teal (cool, separates cleanly from brand navy)
+       cat-4 amber  → chartreuse-lime (well away from brand orange)
+     AA on each soft-bg pair pinned in Contrast.test. The other 4 cats (teal,
+     violet, rose, slate) keep their base values — they don't collide. */
+  --cat-1:    #0891b2;  --cat-1-bg: #e0f7fa;  --cat-1-fg: #155e75;  /* cyan       */
+  --cat-4:    #65a30d;  --cat-4-bg: #ecfccb;  --cat-4-fg: #3f6212;  /* chartreuse */
 }

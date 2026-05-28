@@ -73,16 +73,25 @@
   --color-green-100: #e0f1e3;
   --color-green-50:  #f0f8f2;
 
-  --color-yellow-900: #6b4400;
-  --color-yellow-800: #8c5800;
-  --color-yellow-700: #b67200;
-  --color-yellow-600: #d68b00;
-  --color-yellow-500: #f59f00;   /* base */
-  --color-yellow-400: #f7b633;
-  --color-yellow-300: #f9cc66;
-  --color-yellow-200: #fbe199;
-  --color-yellow-100: #fdedc4;
-  --color-yellow-50:  #fef7e3;
+  /* Yellow / gold (v1.29.0). Pre-1.29.0 the scale was amber-orange (#f59f00
+     at -500), which sat in the SAME hue family as the El Alba brand orange
+     (Pantone 165 C #ff671d) → a warning Badge next to a primary CTA read as
+     "two warnings". Re-anchored to a true gold yellow (Tailwind `yellow`) so
+     warning separates cleanly from any brand-orange palette. The alias for
+     `--color-warning` moved from -500 to -600 (see semantic block below) so
+     the 600 stop sits at the same luminance neighbourhood as green/red/info
+     -600 — a row of {success warning danger info} Badges reads with even
+     weight instead of warning being the lightest one. */
+  --color-yellow-900: #713f12;
+  --color-yellow-800: #854d0e;
+  --color-yellow-700: #a16207;
+  --color-yellow-600: #ca8a04;   /* base for `--color-warning` (v1.29.0) */
+  --color-yellow-500: #eab308;
+  --color-yellow-400: #facc15;
+  --color-yellow-300: #fde047;
+  --color-yellow-200: #fef08a;
+  --color-yellow-100: #fef9c3;
+  --color-yellow-50:  #fefce8;
 
   --color-red-900: #5b0e0e;
   --color-red-800: #7e1818;
@@ -95,28 +104,45 @@
   --color-red-100: #fee2e2;
   --color-red-50:  #fef2f2;
 
-  --color-info-900: #0a3a66;
-  --color-info-800: #0f4d85;
-  --color-info-700: #1660a5;
-  --color-info-600: #1a73c2;    /* base */
-  --color-info-500: #408fd0;
-  --color-info-400: #6ba9da;
-  --color-info-300: #95c2e4;
-  --color-info-200: #c0d8ee;
-  --color-info-100: #dee9f5;
-  --color-info-50:  #eef4fa;
+  /* Info / cyan-blue (v1.29.0). Pre-1.29.0 the scale was a pure medium blue
+     (#1a73c2 at -600), which in El Alba sits in the SAME hue family as the
+     brand primary navy (Pantone 287 C #002f87) → info Badges and primary
+     CTAs fought for the eye. Re-anchored to a cyan-leaning blue (Tailwind
+     `sky`) so info reads as distinctly cooler/cyan than any brand navy,
+     while still reading as "blue" (info icons + alerts). Also rebalances
+     the -600 luminance closer to red-600 (was ~L46, now ~L52 — even with
+     red/yellow-600/green-600 for a balanced semantic row). */
+  --color-info-900: #0c4a6e;
+  --color-info-800: #075985;
+  --color-info-700: #0369a1;
+  --color-info-600: #0284c7;    /* base */
+  --color-info-500: #0ea5e9;
+  --color-info-400: #38bdf8;
+  --color-info-300: #7dd3fc;
+  --color-info-200: #bae6fd;
+  --color-info-100: #e0f2fe;
+  --color-info-50:  #f0f9ff;
 
-  /* Semantic status (alias del 600 de cada escala) */
+  /* Semantic status — all aliased to the -600 stop of their scale so the four
+     semantics sit at the same luminance neighbourhood (v1.29.0 D). Pre-1.29.0
+     `warning` aliased to -500 because the old amber-orange scale was too dark
+     at -600; with the new gold-yellow scale (Tailwind yellow) -600 is the
+     right balance (~L58, matching green-600 / red-600 / info-600). */
   --color-success:   var(--color-green-600);
-  --color-warning:   var(--color-yellow-500);
+  --color-warning:   var(--color-yellow-600);
   --color-danger:    var(--color-red-600);
   --color-info:      var(--color-info-600);
 
   /* -------- Semantic color tokens ------------------------------------ */
-  /* Canvas is warm cream paper; surface stays pure white so Cards,
-     Modals, etc. visually float above the page. The contrast between
-     the two is the signature of the default look. */
-  --bg-canvas:       #fef5ef;
+  /* Surface tier system (v1.29.0). Pre-1.29.0 `--bg-canvas` (#fef5ef) sat
+     BETWEEN `--bg-subtle` and `--bg-muted` in luminance — same inversion the
+     El Alba preset just fixed. Canvas is the page (deepest tier); subtle and
+     muted are insets on a surface (lighter than canvas). Re-anchored to a
+     warm-earth taupe canvas that's distinctly the page tier, pinned by
+     tests/SurfaceTiers.test.tsx in both presets. Surface stays pure white so
+     Cards, Modals etc. visually float above the page (the figure/ground that
+     is the default look's signature). */
+  --bg-canvas:       #ede1cc;
   --bg-surface:      var(--color-white);
   --bg-subtle:       var(--color-gray-100);
   --bg-muted:        var(--color-gray-150);
@@ -124,15 +150,16 @@
   --bg-inverse-strong: var(--color-primary-900);
 
   --fg-default:      var(--color-ink);
-  /* WCAG AA debt fix (v1.10.0). The gray-600/500 stops shipped BELOW 4.5:1
-     as body text on the kit's own surfaces (table headers on --bg-subtle,
-     captions/placeholders on --bg-canvas): measured 4.40 / 2.31–2.52. These
-     are now explicit, minimal-delta values that clear 4.5:1 on the worst
-     surface while keeping the warm undertone and a perceptible muted↔subtle
-     step. The gray scale stays the decorative ramp (borders, fills). The El
-     Alba preset re-points these to its cool slate (see presets/elalba). */
-  --fg-muted:        #6b6560;   /* on surface 5.74 · canvas 5.34 · subtle 5.27 */
-  --fg-subtle:       #726c66;   /* on surface 5.18 · canvas 4.82 · subtle 4.75 */
+  /* WCAG AA debt fix (v1.10.0 + v1.29.0 retune). The gray-600/500 stops once
+     shipped BELOW 4.5:1 as body text; explicit warm-earth values were pinned
+     in v1.10.0. v1.29.0 darkens the default canvas to fix the surface-tier
+     inversion (canvas was lighter than muted), so both fg-muted and fg-subtle
+     are re-anchored a step darker to clear 4.5:1 on the new canvas while
+     keeping the warm undertone and a perceptible muted↔subtle step.
+     fg-muted #605a54 → ~6.5 surface · ~5.2 canvas · ~6.0 subtle.
+     fg-subtle #655e57 → ~6.0 surface · ~4.7 canvas · ~5.5 subtle. */
+  --fg-muted:        #605a54;
+  --fg-subtle:       #655e57;
   /* Decorative meta/eco role (secondary cell line, "RUT under name", doc
      echo). Separated from the ESSENTIAL --fg-muted so marking text as
      secondary recedes on its own without consumers hand-tuning a colour.
@@ -146,7 +173,15 @@
      The El Alba preset (dark orange secondary) flips this back to white. */
   --fg-on-secondary: var(--color-primary);
   --fg-link:         var(--color-primary);
-  --fg-link-hover:   var(--color-secondary-600);
+  /* Hover stays in the link's own brand family — one shade darker than
+     `--fg-link` — instead of jumping to the complementary brand colour
+     (v1.29.0 audit #8). Pre-1.29.0 the hover crossed from primary to
+     secondary (blue→orange in El Alba): brand-bold but visually agitated in
+     dense product UI (DataTable rows of links). Convention: hover = darker
+     same-hue is the standard pattern (Apple, GitHub, Linear). The accent
+     identity stays available via the .link--accent escape hatch where
+     consumers genuinely want the cross-brand emphasis. */
+  --fg-link-hover:   var(--color-primary-900);
 
   --accent-primary:    var(--color-primary);
   --accent-secondary:  var(--color-secondary);
@@ -154,7 +189,13 @@
   --border-default:  var(--color-gray-200);
   --border-strong:   var(--color-gray-300);
   --border-brand:    var(--color-primary);
-  --border-focus:    var(--color-secondary);
+  /* Focus border identity (v1.29.0 G). Pre-1.29.0 this was `--color-secondary`,
+     which produced a focused-element look with an ORANGE border + a BLUE halo
+     from `--focus-ring-brand`: two brand colours fighting on a single focus
+     signal. Unified on `--color-primary` so border + halo are the same brand
+     identity (orange focus rings still available via `--focus-ring-accent`
+     for the rare accent-specific contexts). */
+  --border-focus:    var(--color-primary);
 
   /* -------- Categorical palette (v1.16+) ----------------------------- */
   /* For CATEGORY, not status. Status colors (success/warning/danger/info)
@@ -314,9 +355,14 @@
   --z-floating:  1300;   /* shared Portal/usePopoverPosition panels; above --z-overlay (Modal/Drawer) */
 
   /* -------- Focus rings (3px halo around focused element) ------------ */
-  --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
-  --focus-ring-accent:  0 0 0 3px color-mix(in srgb, var(--color-secondary) 35%, transparent);
-  --focus-ring-danger:  0 0 0 3px color-mix(in srgb, var(--color-red-600) 18%, transparent);
+  /* Alphas aligned at 16% (v1.29.0 H). Pre-1.29.0 they were 15 / 35 / 18 —
+     the accent at 35% was an outlier with no documented rationale, breaking
+     the "one focus halo intensity" coherence. The accent stays available for
+     special accent contexts; brand + danger are the kit's default focus
+     signals and now read at identical halo weight. */
+  --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-primary)   16%, transparent);
+  --focus-ring-accent:  0 0 0 3px color-mix(in srgb, var(--color-secondary) 16%, transparent);
+  --focus-ring-danger:  0 0 0 3px color-mix(in srgb, var(--color-red-600)   16%, transparent);
 
   /* -------- Overlays --------------------------------------------------*/
   --backdrop: color-mix(in srgb, var(--color-ink) 55%, transparent);
