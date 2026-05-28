@@ -165,3 +165,46 @@ test.describe('Scenario · responsive DataTable', () => {
     expect(await theadDisplay(), 'header collapses to cards under 600px').toBe('none');
   });
 });
+
+/**
+ * Semantic Badge row coherence (v1.29.0). After tidying yellow → gold and
+ * info → cyan-sky and aliasing warning to -600, a row of soft-register Badges
+ * {success / warning / danger / info} must read with even weight: all four
+ * backgrounds soft (high luminance), and the spread between them small enough
+ * that no one chip jumps out. Catches a future drift in any semantic 50 stop.
+ */
+test.describe('Scenario · semantic Badge row coherence', () => {
+  test('soft Badge backgrounds are uniformly light and within a tight luminance spread', async ({ page }) => {
+    await page.goto('/scenarios/badges', { waitUntil: 'networkidle' });
+
+    const luminanceOf = (testid: string) =>
+      page.evaluate((id) => {
+        const el = document.querySelector(`[data-testid="${id}"]`) as HTMLElement;
+        const cs = getComputedStyle(el);
+        const m = cs.backgroundColor.match(/\d+(\.\d+)?/g)!.map(Number);
+        const [r, g, b] = m;
+        const lin = (c: number) => {
+          const s = c / 255;
+          return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        };
+        return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+      }, testid);
+
+    const success = await luminanceOf('badge-success');
+    const warning = await luminanceOf('badge-warning');
+    const danger  = await luminanceOf('badge-danger');
+    const info    = await luminanceOf('badge-info');
+    const all = { success, warning, danger, info };
+
+    // (1) Soft register: every bg must read as "very light" (>0.85).
+    for (const [name, L] of Object.entries(all)) {
+      expect(L, `Badge ${name} bg should be soft (L>0.85), got ${L.toFixed(3)} (${JSON.stringify(all)})`).toBeGreaterThan(0.85);
+    }
+    // (2) Coherence: spread between brightest and darkest is small enough that
+    // no one chip jumps in a row. 0.06 catches drift (e.g. yellow-50 leaning
+    // amber-saturated again) without being so tight it triggers on rounding.
+    const max = Math.max(success, warning, danger, info);
+    const min = Math.min(success, warning, danger, info);
+    expect(max - min, `semantic Badge bg spread too wide: ${(max - min).toFixed(3)} (${JSON.stringify(all)})`).toBeLessThan(0.06);
+  });
+});

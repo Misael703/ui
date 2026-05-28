@@ -173,7 +173,15 @@
      The El Alba preset (dark orange secondary) flips this back to white. */
   --fg-on-secondary: var(--color-primary);
   --fg-link:         var(--color-primary);
-  --fg-link-hover:   var(--color-secondary-600);
+  /* Hover stays in the link's own brand family — one shade darker than
+     `--fg-link` — instead of jumping to the complementary brand colour
+     (v1.29.0 audit #8). Pre-1.29.0 the hover crossed from primary to
+     secondary (blue→orange in El Alba): brand-bold but visually agitated in
+     dense product UI (DataTable rows of links). Convention: hover = darker
+     same-hue is the standard pattern (Apple, GitHub, Linear). The accent
+     identity stays available via the .link--accent escape hatch where
+     consumers genuinely want the cross-brand emphasis. */
+  --fg-link-hover:   var(--color-primary-900);
 
   --accent-primary:    var(--color-primary);
   --accent-secondary:  var(--color-secondary);

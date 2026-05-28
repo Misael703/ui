@@ -50,11 +50,23 @@ Pantone 287 C blue / 165 C orange) are untouched.
 - **Focus ring alphas aligned at 16%** (H). Pre-1.29.0 they were 15 / 35 / 18
   with no documented rationale (`accent` at 2.3× the other two). Now uniform.
 
+### Changed
+- **`--fg-link-hover` stays in the link's own brand family** (audit #8). Was
+  `var(--color-secondary-600)` — the COMPLEMENTARY brand colour (blue link →
+  orange hover in El Alba), brand-bold but visually agitated in dense product
+  UI (DataTable rows of links). Now `var(--color-primary-900)` — one shade
+  darker than `--fg-link` itself, the standard pattern (Apple, GitHub, Linear).
+  The cross-brand accent is still available where consumers genuinely want it.
+
 ### Internal
 - New guard `tests/SurfaceTiers.test.tsx` — asserts strict luminance ordering
   of `surface > subtle > muted > canvas` in every preset.
 - Existing `Contrast.test` re-validates every fg/bg pair under the new values
   (44/44 pass).
+- New smoke scenario `/scenarios/badges` + spec — renders the four semantic
+  soft Badges in a row and asserts (1) every bg is in the soft register
+  (L > 0.85) and (2) the spread between brightest and darkest is < 0.06 →
+  catches a future drift in any semantic -50 stop.
 
 ## [1.28.0] — 2026-05-28
 

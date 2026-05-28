@@ -197,3 +197,23 @@ export function ScenarioResponsiveTable() {
     </div>
   );
 }
+
+/**
+ * Scenario 5 — **semantic Badge row coherence** (v1.29.0). Seam: the four
+ * semantic soft Badges (success / warning / danger / info) must read with even
+ * weight in a row — same luminance neighbourhood for the bg, same depth for
+ * the fg. Catches a future drift where one semantic scale (e.g. yellow) gets
+ * tuned out of step with the others.
+ */
+export function ScenarioSemanticBadgeRow() {
+  return (
+    <div style={{ padding: 24 }} data-scenario="semantic-badge-row">
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <K.Badge variant="success" data-testid="badge-success">success</K.Badge>
+        <K.Badge variant="warning" data-testid="badge-warning">warning</K.Badge>
+        <K.Badge variant="danger"  data-testid="badge-danger" >danger</K.Badge>
+        <K.Badge variant="info"    data-testid="badge-info"   >info</K.Badge>
+      </div>
+    </div>
+  );
+}
