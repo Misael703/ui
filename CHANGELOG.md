@@ -5,6 +5,57 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.0] — 2026-05-29
+
+**Minor. Color-system tidy-up — no API change.** Eight coherence fixes to the
+kit's color tokens, audit-driven. Brand palettes (default warm-earth + El Alba
+Pantone 287 C blue / 165 C orange) are untouched.
+
+### Fixed
+- **Surface tier ordering** (A). Both presets had `--bg-canvas` sitting BETWEEN
+  `--bg-subtle` and `--bg-muted` in luminance — the source of the "neutral
+  Badge vanishes on canvas" bug parched with the hairline in 1.26.0. Re-anchored
+  so canvas is the deepest tier in both presets (surface > subtle > muted >
+  canvas, strictly). Default canvas `#fef5ef → #ede1cc` (warm taupe). El Alba
+  canvas `#eaeef5 → #dde3ed` (a step deeper cool slate). Default
+  `--fg-muted`/`--fg-subtle` re-tuned to clear AA on the new (deeper) canvas
+  while preserving the warm-earth undertone. El Alba `--fg-subtle` re-tuned
+  (`#666b78 → #5e6373`). **Pinned by the new `tests/SurfaceTiers.test.tsx`**
+  so the inversion cannot return.
+- **`--color-info` scale → cyan-leaning blue** (B). Pre-1.29.0 the scale
+  (`#1a73c2` at -600) sat in the same hue family as El Alba's brand navy
+  (`#002f87`), so info Badges and primary CTAs fought for the eye. Re-anchored
+  to Tailwind's `sky` scale (`#0284c7` at -600), distinctly cyan from any brand
+  navy while still reading as "blue" (info icons + alerts). Improves the
+  default palette too (slightly more cyan info, harmonises with warm-earth).
+- **`--color-yellow` scale → true gold** (C + D + E). Pre-1.29.0 the scale was
+  amber-orange (`#f59f00` at -500), sitting in the same hue family as El Alba's
+  brand orange (`#ff671d`) → a warning Badge next to a primary CTA read as
+  "two warnings". Re-anchored to Tailwind's `yellow` scale (true gold) and
+  moved the `--color-warning` alias from -500 to -600 so all four semantics
+  sit at the same luminance neighbourhood (~L52–58): a row of {success,
+  warning, danger, info} Badges now reads with **even weight** instead of
+  warning being noticeably lighter. The harmonised 50 stops also normalise
+  the soft-Badge register.
+- **`--cat-1` (blue) and `--cat-4` (amber) re-mapped in El Alba** (F). They
+  clashed with brand primary (navy) and secondary (orange). Overridden in the
+  preset only: `cat-1` → cyan/teal `#0891b2`, `cat-4` → chartreuse-lime
+  `#65a30d`. The other 4 cats keep their base values (no collision). The
+  default preset cats are untouched (no brand collision there).
+- **Single focus identity** (G). `--border-focus` moved from `--color-secondary`
+  to `--color-primary`, so a focused element shows a primary border + a primary
+  halo (instead of an orange border + a blue halo — two brand colours fighting
+  on a single signal). Accent focus is still available via `--focus-ring-accent`
+  for the rare accent-specific contexts.
+- **Focus ring alphas aligned at 16%** (H). Pre-1.29.0 they were 15 / 35 / 18
+  with no documented rationale (`accent` at 2.3× the other two). Now uniform.
+
+### Internal
+- New guard `tests/SurfaceTiers.test.tsx` — asserts strict luminance ordering
+  of `surface > subtle > muted > canvas` in every preset.
+- Existing `Contrast.test` re-validates every fg/bg pair under the new values
+  (44/44 pass).
+
 ## [1.28.0] — 2026-05-28
 
 **Minor. Additive — no breaking changes.** From a real consumer (despachos):
