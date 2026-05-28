@@ -75,6 +75,22 @@ export const Timeline = React.forwardRef<HTMLOListElement, TimelineProps>(
  */
 export type TimelineState = 'done' | 'current' | 'pending';
 
+/**
+ * Visual emphasis for the entry's marker (v1.30.0), orthogonal to `state` and
+ * `tone`. Default markers are 24×24 hollow with a tone-colored border, ideal
+ * for the operational events that fill a timeline. `milestone` upgrades the
+ * marker to 32×32 filled in the `tone` color with a subtle halo — for the
+ * "anchor" events that the rest of the timeline hangs from (e.g. "Orden
+ * creada" at the top of an order detail). Without this the hollow markers of
+ * the operational events out-shout the anchor, inverting the hierarchy.
+ *
+ * `milestone` keeps the `state` semantics: a `pending` milestone stays hollow
+ * (muted, no halo), preserving "not yet" while still occupying the larger
+ * anchor slot. A `current` milestone gets the pulse halo (overrides the
+ * static one).
+ */
+export type TimelineVariant = 'default' | 'milestone';
+
 export interface TimelineItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement>, 'title'> {
   icon?: React.ReactNode;
   tone?: StatusTone;
@@ -88,20 +104,30 @@ export interface TimelineItemProps extends Omit<React.LiHTMLAttributes<HTMLLIEle
    * right edge, or a small action chip.
    */
   right?: React.ReactNode;
+  /** Visual emphasis (see {@link TimelineVariant}). Optional, default unchanged. */
+  variant?: TimelineVariant;
 }
 
-export function TimelineItem({ icon, tone = 'neutral', title, meta, children, state, right, className, ...rest }: TimelineItemProps) {
+export function TimelineItem({ icon, tone = 'neutral', title, meta, children, state, right, variant, className, ...rest }: TimelineItemProps) {
   return (
     <li
       className={cx(
         'timeline__item',
         state && `timeline__item--${state}`,
+        variant === 'milestone' && 'timeline__item--milestone',
         className,
       )}
       data-state={state}
       {...rest}
     >
-      <span className={cx('timeline__marker', `timeline__marker--${tone}`)} aria-hidden="true">
+      <span
+        className={cx(
+          'timeline__marker',
+          `timeline__marker--${tone}`,
+          variant === 'milestone' && 'timeline__marker--milestone',
+        )}
+        aria-hidden="true"
+      >
         {icon}
       </span>
       <div className="timeline__body">

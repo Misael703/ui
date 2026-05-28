@@ -62,6 +62,34 @@ describe('Timeline', () => {
     expect(container.querySelector('.timeline')).toHaveClass('timeline--compact');
   });
 
+  // v1.30.0: milestone variant — bigger, filled, with halo. Orthogonal to
+  // state + tone. Default (variant omitted) renders byte-equivalent to 1.29.x.
+  it('variant="milestone" applies the modifier on item + marker, composing with each of the 5 tones', () => {
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
+    for (const t of tones) {
+      const { container } = render(
+        <Timeline>
+          <TimelineItem variant="milestone" tone={t} title={`anchor ${t}`} />
+        </Timeline>
+      );
+      const li = container.querySelector('.timeline__item')!;
+      const marker = container.querySelector('.timeline__marker')!;
+      expect(li, `tone=${t}`).toHaveClass('timeline__item--milestone');
+      expect(marker, `tone=${t}`).toHaveClass('timeline__marker--milestone');
+      expect(marker, `tone=${t}`).toHaveClass(`timeline__marker--${t}`);
+    }
+  });
+
+  it('no variant prop → no milestone modifier (back-compat byte-identical)', () => {
+    const { container } = render(
+      <Timeline>
+        <TimelineItem tone="success" title="default" />
+      </Timeline>
+    );
+    expect(container.querySelector('.timeline__item--milestone')).toBeNull();
+    expect(container.querySelector('.timeline__marker--milestone')).toBeNull();
+  });
+
   it('`right` renders the trailing slot only when provided; DOM is unchanged otherwise', () => {
     const { container, rerender } = render(
       <Timeline>
