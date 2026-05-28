@@ -1,7 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { UserCell, StatusIndicator, Timeline, TimelineItem, Tree, Calendar } from './Display3';
-import { CheckCircle, Edit, Bell, Folder, Package } from './Icons';
+import { Badge } from './Display';
+import { CheckCircle, Edit, Bell, Folder, Package, Truck, Clock } from './Icons';
 import { action } from '@storybook/addon-actions';
 
 export default { title: 'Data Display/People, Timeline, Tree & Calendar', tags: ['autodocs'] } as Meta;
@@ -29,6 +30,7 @@ export const StatusIndicators: StoryObj = {
 };
 
 export const TimelineDemo: StoryObj = {
+  name: 'Timeline · default (1.x register)',
   render: () => (
     <Timeline style={{ maxWidth: 480 }}>
       <TimelineItem tone="success" icon={<CheckCircle size={14} />} title="Pedido creado" meta="2026-04-29 09:14 · Misael Ocas">
@@ -37,6 +39,112 @@ export const TimelineDemo: StoryObj = {
       <TimelineItem tone="info" icon={<Edit size={14} />} title="Cliente confirmó por WhatsApp" meta="2026-04-29 10:32" />
       <TimelineItem tone="warning" icon={<Bell size={14} />} title="Stock bajo en SKU ELT-12-AC" meta="2026-04-29 11:01" />
       <TimelineItem tone="success" icon={<CheckCircle size={14} />} title="Despachado" meta="2026-04-29 14:32 · Bodega norte" />
+    </Timeline>
+  ),
+};
+
+/**
+ * **#1 — Progress states** (v1.28.0). Estados `done | current | pending` por
+ * item, orthogonales al `tone`. El connector arriba de cada item se re-pinta
+ * según el estado, así que mirando la columna izquierda escaneás avance:
+ * sólido coloreado en lo hecho, halo pulsante en lo actual, dasheado muted
+ * en lo pendiente. Caso despachos: una orden acumulando envíos/retiros hasta
+ * marcar "completada".
+ */
+export const TimelineProgress: StoryObj = {
+  name: '#1 Progress (despachos canonical)',
+  render: () => (
+    <Timeline style={{ maxWidth: 480 }}>
+      <TimelineItem state="done"    tone="success" icon={<CheckCircle size={14} />} title="Orden 1415231 creada" meta="2026-05-25 09:14 · Misael Ocas" />
+      <TimelineItem state="done"    tone="success" icon={<Truck size={14} />}        title="Despacho 1/3 enviado" meta="2026-05-25 14:30 · Bodega norte" />
+      <TimelineItem state="done"    tone="success" icon={<Package size={14} />}      title="Retiro parcial — cliente en mesón" meta="2026-05-26 10:12" />
+      <TimelineItem state="current" tone="info"    icon={<Truck size={14} />}        title="Preparando despacho 2/3" meta="En curso · Bodega norte" />
+      <TimelineItem state="pending"                icon={<Truck size={14} />}        title="Despacho 3/3" meta="Pendiente" />
+      <TimelineItem state="pending"                icon={<CheckCircle size={14} />}  title="Orden completada" meta="Pendiente" />
+    </Timeline>
+  ),
+};
+
+/**
+ * **#2 — Numeric stepper.** Pura composición: el `icon` slot toma un número
+ * en vez de un SVG, y los estados de progreso hacen el resto. Útil cuando el
+ * orden importa más que el evento.
+ */
+export const TimelineNumeric: StoryObj = {
+  name: '#2 Numeric (icon = número)',
+  render: () => {
+    const Num = ({ n }: { n: number }) => <span style={{ fontWeight: 700, fontSize: 11 }}>{n}</span>;
+    return (
+      <Timeline style={{ maxWidth: 480 }}>
+        <TimelineItem state="done"    tone="success" icon={<Num n={1} />} title="Crear orden" />
+        <TimelineItem state="done"    tone="success" icon={<Num n={2} />} title="Confirmar cliente" />
+        <TimelineItem state="current" tone="info"    icon={<Num n={3} />} title="Despachar" meta="En curso" />
+        <TimelineItem state="pending"                icon={<Num n={4} />} title="Completar" />
+      </Timeline>
+    );
+  },
+};
+
+/**
+ * **#3 — Compact density** (v1.28.0). `density="compact"` reduce marker, gap y
+ * font sizes manteniendo la semántica. Para resúmenes en sidebar / cards de
+ * lista de órdenes.
+ */
+export const TimelineCompact: StoryObj = {
+  name: '#3 Compact (cards / sidebars)',
+  render: () => (
+    <div style={{ maxWidth: 280, padding: 16, border: '1px solid var(--border-default)', borderRadius: 12 }}>
+      <h4 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 700 }}>Orden 1415231</h4>
+      <Timeline density="compact">
+        <TimelineItem state="done"    tone="success" icon={<CheckCircle size={10} />} title="Creada"           meta="09:14" />
+        <TimelineItem state="done"    tone="success" icon={<Truck size={10} />}       title="Despacho 1/3"     meta="14:30" />
+        <TimelineItem state="current" tone="info"    icon={<Truck size={10} />}       title="Despacho 2/3"     meta="ahora" />
+        <TimelineItem state="pending"                icon={<Truck size={10} />}       title="Despacho 3/3"     meta="pend." />
+      </Timeline>
+    </div>
+  ),
+};
+
+/**
+ * **#5 — Event-typed** (v1.28.0). El prop `right` agrega un slot al final del
+ * title row — encaja perfecto una `Badge` que clasifique el tipo de evento
+ * (envío / retiro / nota), así escaneás el "qué" sin leer el "qué pasó".
+ */
+export const TimelineEventTyped: StoryObj = {
+  name: '#5 Event-typed (Badge en `right`)',
+  render: () => (
+    <Timeline style={{ maxWidth: 560 }}>
+      <TimelineItem state="done"    tone="success" icon={<CheckCircle size={14} />} title="Orden 1415231 creada"        meta="09:14"   right={<Badge variant="info">orden</Badge>} />
+      <TimelineItem state="done"    tone="success" icon={<Truck size={14} />}       title="Despacho 1/3 enviado"        meta="14:30"   right={<Badge variant="primary">envío</Badge>} />
+      <TimelineItem state="done"    tone="success" icon={<Package size={14} />}     title="Retiro parcial — mesón"      meta="10:12"   right={<Badge variant="accent">retiro</Badge>} />
+      <TimelineItem state="current" tone="info"    icon={<Truck size={14} />}       title="Preparando despacho 2/3"     meta="ahora"   right={<Badge variant="primary">envío</Badge>} />
+      <TimelineItem state="pending"                icon={<Bell size={14} />}        title="Nota: cliente cambió dirección" meta="pend." right={<Badge>nota</Badge>} />
+    </Timeline>
+  ),
+};
+
+/**
+ * **#6 — Inline payload.** El slot `children` ya existía — esta story
+ * demuestra el patrón: un mini-card debajo del evento con el detalle (guía,
+ * tracking, factura), solo para los items que tengan payload.
+ */
+export const TimelinePayload: StoryObj = {
+  name: '#6 Inline payload (slot children)',
+  render: () => (
+    <Timeline style={{ maxWidth: 540 }}>
+      <TimelineItem state="done" tone="success" icon={<CheckCircle size={14} />} title="Orden creada" meta="09:14" />
+      <TimelineItem state="done" tone="success" icon={<Truck size={14} />} title="Despacho 1/3 enviado" meta="14:30">
+        <div style={{ border: '1px solid var(--border-default)', borderRadius: 8, padding: 10, fontSize: 12 }}>
+          <div><strong>Guía:</strong> #DG-78422 · Starken</div>
+          <div style={{ color: 'var(--fg-muted)' }}>4 bultos · 38,2 kg</div>
+        </div>
+      </TimelineItem>
+      <TimelineItem state="current" tone="info" icon={<Truck size={14} />} title="Despacho 2/3 en preparación" meta="ahora">
+        <div style={{ border: '1px dashed var(--border-default)', borderRadius: 8, padding: 10, fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Clock size={14} /> Guía aún sin emitir
+        </div>
+      </TimelineItem>
+      <TimelineItem state="pending" icon={<Truck size={14} />} title="Despacho 3/3" meta="Pendiente" />
     </Timeline>
   ),
 };

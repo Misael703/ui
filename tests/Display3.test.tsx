@@ -33,6 +33,54 @@ describe('Timeline', () => {
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent('Paso 1');
   });
+
+  // v1.28.0: progress states + density + right slot. All orthogonal and opt-in;
+  // existing usage (no state / no density / no right) must render byte-equivalent.
+  it('state="done|current|pending" emits the matching modifier class', () => {
+    const { container } = render(
+      <Timeline>
+        <TimelineItem state="done"    title="A" />
+        <TimelineItem state="current" title="B" />
+        <TimelineItem state="pending" title="C" />
+        <TimelineItem title="D" />
+      </Timeline>
+    );
+    const lis = container.querySelectorAll('.timeline__item');
+    expect(lis[0]).toHaveClass('timeline__item--done');
+    expect(lis[1]).toHaveClass('timeline__item--current');
+    expect(lis[2]).toHaveClass('timeline__item--pending');
+    // No state → no progress modifier (back-compat).
+    expect(lis[3].className).not.toMatch(/timeline__item--(done|current|pending)/);
+  });
+
+  it('density="compact" adds the modifier to the list (semantically identical)', () => {
+    const { container } = render(
+      <Timeline density="compact">
+        <TimelineItem title="A" />
+      </Timeline>
+    );
+    expect(container.querySelector('.timeline')).toHaveClass('timeline--compact');
+  });
+
+  it('`right` renders the trailing slot only when provided; DOM is unchanged otherwise', () => {
+    const { container, rerender } = render(
+      <Timeline>
+        <TimelineItem title="A" />
+      </Timeline>
+    );
+    // Without `right`: no title-row wrapper (DOM is byte-identical with 1.x).
+    expect(container.querySelector('.timeline__title-row')).toBeNull();
+    expect(container.querySelector('.timeline__right')).toBeNull();
+
+    rerender(
+      <Timeline>
+        <TimelineItem title="A" right={<span data-testid="chip">envío</span>} />
+      </Timeline>
+    );
+    // With `right`: wrapper appears and the trailing node renders inside it.
+    expect(container.querySelector('.timeline__title-row')).toBeInTheDocument();
+    expect(container.querySelector('.timeline__right [data-testid="chip"]')).toBeInTheDocument();
+  });
 });
 
 describe('Tree', () => {

@@ -5,6 +5,37 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0] — 2026-05-28
+
+**Minor. Additive — no breaking changes.** From a real consumer (despachos):
+a Timeline showing an order accumulating envíos/retiros until completed had no
+way to express progress — only event tone. Three orthogonal additions cover the
+scan-the-progress pattern without touching the 1.x look.
+
+### Added
+- **`TimelineItem` `state?: 'done' | 'current' | 'pending'`** (orthogonal to
+  `tone`). The connector above each item re-paints with the state, so a single
+  glance reads the progress: solid coloured for `done`, pulsing ring around the
+  marker for `current` (gated by `prefers-reduced-motion`), dashed muted for
+  `pending`. Default (no `state`) renders the 1.x look exactly.
+- **`Timeline` `density?: 'default' | 'compact'`** — shrinks marker, gap and
+  font sizes for sidebars / list summaries. Semantically identical.
+- **`TimelineItem` `right?: React.ReactNode`** — trailing slot on the title
+  row, aligned right. Useful for a `Badge` marking event type (envío / retiro /
+  nota) without bloating the title. Title-row wrapper only renders when `right`
+  is provided → DOM is byte-identical for existing consumers.
+
+### Internal
+- New CSS modifiers (`.timeline__item--done|--current|--pending`,
+  `.timeline--compact`, `.timeline__title-row`, `.timeline__right`) and a
+  per-item `--timeline-tone` token (read by marker + connector + pulse) so
+  one tone decision drives every progress-state visual.
+
+### Stories
+Six Timeline stories in Storybook on the same despachos dataset for comparison:
+default, Progress, Numeric (composition), Compact, Event-typed, Inline payload
+(composition).
+
 ## [1.27.0] — 2026-05-28
 
 **Minor. Additive — no breaking changes.** From a real consumer (cobros-meson,

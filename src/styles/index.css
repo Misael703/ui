@@ -2977,6 +2977,80 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__meta { font-size: var(--text-xs); color: var(--fg-muted); margin-top: 2px; }
 .timeline__content { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--fg-default); }
 
+/* ---------- Timeline · v1.28.0 progress + density + right slot --------- */
+/* Title row appears ONLY when the item has a `right` trailing slot (DOM is
+   byte-identical for existing consumers when `right` is absent). */
+.timeline__title-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3);
+}
+.timeline__right { flex: none; display: inline-flex; align-items: center; gap: 6px; }
+
+/* Per-item tone token: marker + connector + pulse all read from it, so a single
+   `tone` decision drives every progress-state visual. `:has()` is broadly
+   supported (Chrome 105+, Safari 15.4+, Firefox 121+) — same baseline the kit
+   already assumes for color-mix and `inset`. */
+.timeline__item { --timeline-tone: var(--border-default); }
+.timeline__item:has(> .timeline__marker--success) { --timeline-tone: var(--color-success); }
+.timeline__item:has(> .timeline__marker--info)    { --timeline-tone: var(--color-info); }
+.timeline__item:has(> .timeline__marker--warning) { --timeline-tone: var(--color-warning); }
+.timeline__item:has(> .timeline__marker--danger)  { --timeline-tone: var(--color-danger); }
+
+/* Progress state, orthogonal to tone. Default look (no state) is unchanged.
+   `done`    → filled marker (tone), solid colored connector below.
+   `current` → tone-tinted marker with a pulsing halo; solid colored connector.
+   `pending` → hollow muted marker; **dashed** connector below; text fades. */
+.timeline__item--done .timeline__marker {
+  background: var(--timeline-tone);
+  border-color: var(--timeline-tone);
+  color: var(--color-white);
+}
+.timeline__item--done.timeline__item:not(:last-child)::before { background: var(--timeline-tone); }
+
+.timeline__item--current .timeline__marker {
+  background: var(--bg-surface);
+  border-color: var(--timeline-tone);
+  color: var(--timeline-tone);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--timeline-tone) 24%, transparent);
+  animation: timeline-pulse 1800ms ease-in-out infinite;
+}
+.timeline__item--current.timeline__item:not(:last-child)::before { background: var(--timeline-tone); }
+@keyframes timeline-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--timeline-tone) 24%, transparent); }
+  50%      { box-shadow: 0 0 0 8px color-mix(in srgb, var(--timeline-tone) 12%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .timeline__item--current .timeline__marker { animation: none; }
+}
+
+.timeline__item--pending .timeline__marker {
+  color: var(--fg-muted);
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+}
+.timeline__item--pending.timeline__item:not(:last-child)::before {
+  /* Dashed connector via repeating-gradient — no extra DOM, no animation cost. */
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border-default) 0 4px,
+    transparent 4px 8px
+  );
+}
+.timeline__item--pending .timeline__title,
+.timeline__item--pending .timeline__meta {
+  color: var(--fg-muted);
+}
+
+/* Compact density — for cards, list summaries, dense panels. */
+.timeline--compact { gap: var(--space-3); }
+.timeline--compact .timeline__item { gap: var(--space-2); }
+.timeline--compact .timeline__marker { width: 16px; height: 16px; border-width: 2px; margin-top: 3px; }
+.timeline--compact .timeline__marker > svg { width: 10px; height: 10px; }
+.timeline--compact .timeline__item:not(:last-child)::before { left: 7px; top: 20px; }
+.timeline--compact .timeline__title { font-size: var(--text-xs); font-weight: 600; }
+.timeline--compact .timeline__meta { font-size: 11px; }
+.timeline--compact .timeline__content { font-size: var(--text-xs); margin-top: 4px; }
+
 /* ---------- Tree ------------------------------------------------------- */
 .tree { list-style: none; margin: 0; padding: 0; font-family: var(--font-body); font-size: var(--text-sm); }
 .tree__node { list-style: none; }
