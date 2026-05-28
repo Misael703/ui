@@ -291,3 +291,31 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
     </div>
   ),
 };
+
+/**
+ * **Top-bar only** (v1.27.0) — for flat-route apps (kiosk, single-flow tools)
+ * that don't need panel navigation. Omit `sections` and the shell renders just
+ * the header band over a single-column content area (no sidebar at all). The
+ * already-shipped `top` header slots (`left`/`center`/`right`) carry the brand
+ * + chrome; no new component, no new variant. Empirical case: a checkout/cobros
+ * mesón flow with a logo (linked home) + a context tag, nothing else.
+ */
+export const TopbarOnlyNoNav: StoryObj = {
+  name: 'Topbar · Top-bar only (no sidebar)',
+  render: () => (
+    <div style={{ height: '100vh' }}>
+      <AppShell
+        headerLayout="top"
+        header={{
+          left: <Logo variant="horizontal" bg="light" height={26} />,
+          right: <span style={{ color: 'var(--fg-muted)', fontSize: 13 }}>Cobros Khipu · Mesón</span>,
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Nuevo cobro" description="Flujo plano — el shell es solo el header sobre el contenido (sin sidebar)" />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 360 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};

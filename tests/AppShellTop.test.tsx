@@ -222,4 +222,42 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     // carries `padding: 24px`, and the scoped top rule only adds scroll.
     expect(css).toMatch(/\.appshell__content\s*\{[^}]*padding:\s*24px/);
   });
+
+  /* Top-bar-only mode (v1.27.0). `sections` is optional in `top`; omitting it
+     (or passing []) renders just the header band over a single-column content
+     area — no sidebar at all. For flat-route apps without panel nav. */
+  it('without sections renders no sidebar, marks the shell `appshell--no-nav`', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'brand' }}>x</AppShell>
+    );
+    const root = container.querySelector('.appshell')!;
+    expect(root).toHaveClass('appshell--no-nav');
+    expect(container.querySelector('.appshell__sidebar')).toBeNull();
+    // The header band is still there — that's the whole point of this mode.
+    expect(container.querySelector('.appshell__header')).toBeInTheDocument();
+    // And the content still renders.
+    expect(container.querySelector('.appshell__content')).toBeInTheDocument();
+  });
+
+  it('explicit sections={[]} behaves the same as omitting it (top-bar-only)', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'b' }} sections={[]}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell')).toHaveClass('appshell--no-nav');
+    expect(container.querySelector('.appshell__sidebar')).toBeNull();
+  });
+
+  it('with sections, no `appshell--no-nav` and the sidebar renders (back-compat)', () => {
+    const { container } = render(
+      <AppShell headerLayout="top" header={{ center: 'b' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell')).not.toHaveClass('appshell--no-nav');
+    expect(container.querySelector('.appshell__sidebar')).toBeInTheDocument();
+  });
+
+  it('CSS: top-bar-only collapses the body grid to a single column', () => {
+    // Placed AFTER the rail rule so it wins by source order on the rare
+    // no-nav+rail combo. Pin the rule so a refactor cannot silently drop it.
+    expect(css).toMatch(/\.appshell--header-top\.appshell--no-nav\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*1fr/);
+  });
 });

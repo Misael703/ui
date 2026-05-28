@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0] — 2026-05-28
+
+**Minor. Additive — no breaking changes.** From a real consumer (cobros-meson,
+a flat-route checkout flow): the kit had no top-bar-only mode, so the consumer
+hand-rolled a custom header instead of using `AppShell` because `AppShell`
+required `sections` and always rendered a sidebar.
+
+### Added
+- **`AppShell` top-bar-only mode.** `sections` is now optional. In
+  `headerLayout="top"`, omitting it (or passing `[]`) renders just the header
+  band over a single-column content area — **no sidebar at all**. For flat-route
+  apps (kiosk, single-flow tools, checkout) that don't need panel navigation.
+  Same `header.{left,center,right}` slots; no new component, no new variant.
+  ```tsx
+  <AppShell headerLayout="top" header={{
+    left:  <Link href="/"><Logo … /></Link>,
+    right: <span>Cobros Khipu · Mesón</span>,
+  }}>{children}</AppShell>
+  ```
+  Internally the shell gets an `appshell--no-nav` modifier that collapses the
+  body grid to a single column; the `<aside>` is not rendered. `side` layout
+  is unchanged (an empty `sections` array there still renders the rail, as
+  before). Required-in-`side` is enforced by docs/JSDoc, not by the type
+  (kept as a simple optional to avoid bloating the discriminated union).
+
 ## [1.26.0] — 2026-05-27
 
 **Minor. Visible default change (no API change).** A consumer (despachos)

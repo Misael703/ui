@@ -2760,6 +2760,11 @@ button, input, select, textarea { box-sizing: border-box; }
    layout via the root `.is-collapsed` (labels hidden, icons + active bar
    kept). */
 .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+/* Top-bar-only (`sections` omitted, v1.27.0): no sidebar at all → body is a
+   single column. The `<aside>` itself is not rendered (in the JSX), this just
+   collapses the grid track. Placed after the rail rule so it wins on the (rare)
+   `appshell--no-nav.appshell--rail` combo by source order. */
+.appshell--header-top.appshell--no-nav .appshell__body { grid-template-columns: 1fr; }
 /* The base sidebar is `height: 100vh` (sticky model for `side`). In `top` the
    body row is already bounded to `100vh − header`, so a 100vh sidebar would
    overflow its row and introduce a SECOND scrollbar. `height: auto` lets the
