@@ -47,29 +47,74 @@ export function StatusIndicator({ tone = 'success', pulse, label, className, ...
 }
 
 // ---------- Timeline ----------------------------------------------------
-export interface TimelineProps extends React.HTMLAttributes<HTMLOListElement> {}
+export type TimelineDensity = 'default' | 'compact';
+
+export interface TimelineProps extends React.HTMLAttributes<HTMLOListElement> {
+  /**
+   * Visual density (v1.28.0). `compact` shrinks the marker, gap and font
+   * sizes for use in cards / list summaries; semantically identical.
+   */
+  density?: TimelineDensity;
+}
 
 export const Timeline = React.forwardRef<HTMLOListElement, TimelineProps>(
-  function Timeline({ className, ...rest }, ref) {
-    return <ol ref={ref} className={cx('timeline', className)} {...rest} />;
+  function Timeline({ className, density = 'default', ...rest }, ref) {
+    return <ol ref={ref} className={cx('timeline', density === 'compact' && 'timeline--compact', className)} {...rest} />;
   }
 );
+
+/**
+ * Progress state of a Timeline entry (v1.28.0), orthogonal to `tone`.
+ * - `done` — completed: filled marker (in `tone` color), solid connector above.
+ * - `current` — happening now: ringed/pulsing marker, solid connector above.
+ * - `pending` — not started: hollow muted marker, **dashed** connector above.
+ *
+ * Use it to scan progress on a list of events that grow over time (a despachos
+ * order accumulating envíos/retiros until the last marks it complete). Default
+ * (state omitted) keeps the 1.x look exactly.
+ */
+export type TimelineState = 'done' | 'current' | 'pending';
 
 export interface TimelineItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement>, 'title'> {
   icon?: React.ReactNode;
   tone?: StatusTone;
   title: React.ReactNode;
   meta?: React.ReactNode;
+  /** Progress state (see {@link TimelineState}). Optional. */
+  state?: TimelineState;
+  /**
+   * Trailing slot on the title row, aligned to the right (v1.28.0). Useful for
+   * a Badge marking event type (envío / retiro / nota), a timestamp on the
+   * right edge, or a small action chip.
+   */
+  right?: React.ReactNode;
 }
 
-export function TimelineItem({ icon, tone = 'neutral', title, meta, children, className, ...rest }: TimelineItemProps) {
+export function TimelineItem({ icon, tone = 'neutral', title, meta, children, state, right, className, ...rest }: TimelineItemProps) {
   return (
-    <li className={cx('timeline__item', className)} {...rest}>
+    <li
+      className={cx(
+        'timeline__item',
+        state && `timeline__item--${state}`,
+        className,
+      )}
+      data-state={state}
+      {...rest}
+    >
       <span className={cx('timeline__marker', `timeline__marker--${tone}`)} aria-hidden="true">
         {icon}
       </span>
       <div className="timeline__body">
-        <div className="timeline__title">{title}</div>
+        {right != null ? (
+          // Title row wrapper only renders when there's a trailing slot, so
+          // the DOM stays byte-identical for existing consumers (back-compat).
+          <div className="timeline__title-row">
+            <div className="timeline__title">{title}</div>
+            <div className="timeline__right">{right}</div>
+          </div>
+        ) : (
+          <div className="timeline__title">{title}</div>
+        )}
         {meta && <div className="timeline__meta">{meta}</div>}
         {children && <div className="timeline__content">{children}</div>}
       </div>
