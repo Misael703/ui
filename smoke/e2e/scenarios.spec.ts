@@ -193,6 +193,33 @@ test.describe('Scenario · Timeline milestone variant', () => {
       expect(measured.background, `tone ${t} fill missing — got "${measured.background}"`).not.toMatch(/rgba?\(0,\s*0,\s*0,\s*0\)/);
     }
   });
+
+  test('milestone marker is center-aligned with the default marker below it (v1.30.1 regression)', async ({ page }) => {
+    await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
+    // The 1.30.0 milestone shifted the centre 4px right of the 24px default
+    // markers' centre because the flex parent aligns by left edge — and the
+    // connector ran through the left side of the milestone, not its centre.
+    // 1.30.1 pulls the milestone -4px so both centres land on the same axis.
+    // Asserts CENTRE.X equality (within 1px tolerance for sub-pixel rounding)
+    // for each of the 5 tones.
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const centres = await page.evaluate((tone) => {
+        const root = document.querySelector(`[data-testid="tl-${tone}"]`)!;
+        const m = (root.querySelector('.timeline__marker--milestone') as HTMLElement).getBoundingClientRect();
+        // The default item's marker is the only `.timeline__marker` NOT also
+        // carrying the milestone class — pick the second item's marker.
+        const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
+        const defaultMarker = items[1].querySelector('.timeline__marker') as HTMLElement;
+        const d = defaultMarker.getBoundingClientRect();
+        return { milestoneCx: m.left + m.width / 2, defaultCx: d.left + d.width / 2 };
+      }, t);
+      expect(
+        Math.abs(centres.milestoneCx - centres.defaultCx),
+        `tone ${t}: milestone centre (${centres.milestoneCx.toFixed(2)}) ≠ default centre (${centres.defaultCx.toFixed(2)})`,
+      ).toBeLessThanOrEqual(1);
+    }
+  });
 });
 
 /**

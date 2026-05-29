@@ -3054,6 +3054,15 @@ button, input, select, textarea { box-sizing: border-box; }
   border-color: var(--timeline-tone);
   color: var(--color-white);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--timeline-tone) 14%, transparent);
+  /* Center-align the 32px milestone with the 24px default markers in the same
+     timeline (v1.30.1 visual regression fix). The flex parent aligns by
+     flex-start (left edge), so without this the milestone's centre sat 4px to
+     the right of the default markers' centre and the connector line —
+     positioned at `left: 11px`, centred on the default 24px marker — ran
+     through the LEFT side of the milestone instead of through its centre.
+     The −4px pull shifts the milestone start to x=−4 → centre at x=12 →
+     aligned with default marker centres and with the connector. */
+  margin-left: -4px;
 }
 .timeline__item:has(> .timeline__marker--milestone):not(:last-child)::before {
   top: 36px; /* 32px marker + 2px margin-top + 2px clearance (was 28px for 24px) */

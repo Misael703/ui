@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.1] — 2026-05-30
+
+**Patch. Visual regression fix.** v1.30.0 added the `milestone` variant
+(32×32 marker) without realigning the centre axis. When a Timeline mixed a
+milestone with default items (24×24), the centres landed on different vertical
+axes (4px offset) and the connector line ran through the LEFT side of the
+milestone instead of through its centre — the line looked visibly crooked.
+
+### Fixed
+- **`.timeline__marker--milestone` centred with default markers.** A
+  `margin-left: -4px` shifts the 32px milestone's centre from x=16 to x=12,
+  matching the 24px default marker centre at x=12 (and the connector at
+  `left: 11px`). The fix is scoped to the milestone marker; nothing else
+  moves. Pinned by an extended spec on `/scenarios/timeline-milestone` that
+  asserts CENTRE.X equality (within 1px) between the milestone marker and the
+  default marker below it, for each of the 5 tones.
+
 ## [1.30.0] — 2026-05-30
 
 **Minor. Additive — no breaking changes.** From a real consumer (despachos): an
