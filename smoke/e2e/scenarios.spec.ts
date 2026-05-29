@@ -284,25 +284,37 @@ test.describe('Scenario · Timeline milestone variant', () => {
         const nextMarker =
           (items[nextIdx].querySelector('.timeline__marker--milestone') as HTMLElement | null) ??
           (items[nextIdx].querySelector('.timeline__marker') as HTMLElement);
+        // The previous item's OWN marker (the marker the connector emerges
+        // FROM). v1.30.5 also asserts the connector start covers this marker's
+        // bottom (no top gap), symmetric to the bottom-side reach.
+        const prevMarker =
+          (prev.querySelector('.timeline__marker--milestone') as HTMLElement | null) ??
+          (prev.querySelector('.timeline__marker') as HTMLElement);
         const prevRect = prev.getBoundingClientRect();
+        const prevMarkerRect = prevMarker.getBoundingClientRect();
         const markerRect = nextMarker.getBoundingClientRect();
-        const beforeBottom = parseFloat(getComputedStyle(prev, '::before').bottom);
+        const beforeCS = getComputedStyle(prev, '::before');
+        const beforeTop = parseFloat(beforeCS.top);
+        const beforeBottom = parseFloat(beforeCS.bottom);
+        const connectorStartY = prevRect.top + beforeTop;
         const connectorEndY = prevRect.bottom - beforeBottom;
-        return { reach: connectorEndY - markerRect.top, connectorEndY, markerTopY: markerRect.top };
+        return {
+          reach:    connectorEndY - markerRect.top,             // ≥0 → enters next marker
+          attach:   prevMarkerRect.bottom - connectorStartY,    // ≥0 → emerges from source marker
+        };
       }, { tone, prevIdx, nextIdx });
 
     const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
     for (const t of tones) {
       const dToM = await reachOf(t, 0, 1); // default → milestone
       const mToD = await reachOf(t, 1, 2); // milestone → default
-      expect(
-        dToM.reach,
-        `tone ${t} · default→milestone: connector hangs ${(-dToM.reach).toFixed(1)}px above the next marker`,
-      ).toBeGreaterThanOrEqual(0);
-      expect(
-        mToD.reach,
-        `tone ${t} · milestone→default: connector hangs ${(-mToD.reach).toFixed(1)}px above the next marker`,
-      ).toBeGreaterThanOrEqual(0);
+      // BOTTOM side: connector enters the next marker top.
+      expect(dToM.reach, `tone ${t} · default→milestone: end hangs ${(-dToM.reach).toFixed(1)}px above next marker`).toBeGreaterThanOrEqual(0);
+      expect(mToD.reach, `tone ${t} · milestone→default: end hangs ${(-mToD.reach).toFixed(1)}px above next marker`).toBeGreaterThanOrEqual(0);
+      // TOP side (v1.30.5): connector starts inside the source marker, so it
+      // emerges flush from the marker's bottom — no top gap.
+      expect(dToM.attach, `tone ${t} · default→milestone: start is ${(-dToM.attach).toFixed(1)}px below source marker bottom (gap)`).toBeGreaterThanOrEqual(0);
+      expect(mToD.attach, `tone ${t} · milestone→default: start is ${(-mToD.attach).toFixed(1)}px below source marker bottom (gap)`).toBeGreaterThanOrEqual(0);
     }
   });
 });

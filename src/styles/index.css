@@ -2953,19 +2953,20 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__item:not(:last-child)::before {
   content: '';
   position: absolute;
-  /* Connector geometry (v1.30.3 universal connector-reach fix):
-       top:    28 = 24px marker + 2px margin-top + 2px clearance below it.
-       bottom: -20 = 12px past item bottom + 4px gap remainder + 2px overlap
-                    into the next marker top (= 16-2-(-2)... see below).
-     The next item's marker border top sits at `H + 16 (gap) + 2 (margin-top)
-     = H + 18`. Pre-1.30.3 `bottom: -12` ended the line at H+12 — 6px of
-     visible air to the next marker. The bigger-marker variants (32px
-     milestone with halo) made the gap impossible to ignore; the default 24px
-     variants masked it but still had it. `bottom: -20` lands the line 2px
-     INTO the next marker top → the marker (z-index:1, opaque fill) occludes
-     the overlap → solid line into solid marker, every direction (default↔
-     default, default↔milestone, milestone↔default, milestone↔milestone). */
-  left: 11px; top: 28px; bottom: calc(var(--space-4) * -1 - 4px);
+  /* Connector geometry (v1.30.5 — symmetric overlap on BOTH ends).
+       top:    24 = marker_bottom (margin-top 2 + height 24 = 26) − 2px overlap.
+       bottom: -20 = the line lands 2px PAST the next marker top (which sits
+                    at H+18 from the previous item top: 16 gap + 2 margin-top).
+     The line OVERLAPS each marker by 2px on the side it touches; the marker
+     (z-index:1, opaque fill) occludes the overlap, so the visible line
+     emerges flush from the marker's edge on both sides — no gap on top, no
+     gap on bottom, in any size combination.
+     Pre-1.30.3: `bottom: -12` left a 6px gap to every next marker.
+     Pre-1.30.5: `top: 28` (= marker_bottom + 2 clearance) left a 2px gap
+                 between the source marker bottom and the line start. Visible
+                 on the milestone story where the user reported the line
+                 "salía un pelín separada" del marker. */
+  left: 11px; top: 24px; bottom: calc(var(--space-4) * -1 - 4px);
   width: 2px;
   background: var(--border-default);
 }
@@ -3085,7 +3086,7 @@ button, input, select, textarea { box-sizing: border-box; }
   margin-left: -4px;
 }
 .timeline__item:has(> .timeline__marker--milestone):not(:last-child)::before {
-  top: 36px; /* 32px marker + 2px margin-top + 2px clearance (was 28px for 24px) */
+  top: 32px; /* milestone_bottom (margin-top:2 + 32 height = 34) − 2px overlap (v1.30.5). Same pattern as the base rule's `top: 24` for the 24px default. */
 }
 /* (v1.30.2's `:has(+ .timeline__item--milestone)` override removed in 1.30.3:
    the base rule above now extends far enough universally — the special-case
@@ -3104,7 +3105,8 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline--compact .timeline__item { gap: var(--space-2); }
 .timeline--compact .timeline__marker { width: 16px; height: 16px; border-width: 2px; margin-top: 3px; }
 .timeline--compact .timeline__marker > svg { width: 10px; height: 10px; }
-.timeline--compact .timeline__item:not(:last-child)::before { left: 7px; top: 20px; }
+/* Compact marker: margin-top:3 + height:16 = bottom 19; top:17 = −2px overlap (v1.30.5). */
+.timeline--compact .timeline__item:not(:last-child)::before { left: 7px; top: 17px; }
 .timeline--compact .timeline__title { font-size: var(--text-xs); font-weight: 600; }
 .timeline--compact .timeline__meta { font-size: 11px; }
 .timeline--compact .timeline__content { font-size: var(--text-xs); margin-top: 4px; }
