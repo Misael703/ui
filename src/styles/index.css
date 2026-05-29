@@ -2951,14 +2951,73 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 900px) {
   .appshell { grid-template-columns: 1fr; }
   .appshell__sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 280px; transform: translateX(-100%);
+    position: fixed; top: 0; left: 0;
+    width: 280px;
+    /* iOS Safari URL-bar safety: `top: 0; bottom: 0` clips the bottom of
+       a fixed element by the URL bar. Use height with `100dvh` override
+       on supporting browsers; older browsers keep the `100vh` value. */
+    height: 100vh;
+    height: 100dvh;
+    transform: translateX(-100%);
     transition: transform var(--duration-base) var(--ease-standard);
     z-index: 40;
   }
   .appshell.is-mobile-open .appshell__sidebar { transform: translateX(0); }
   .appshell.is-mobile-open .appshell__scrim { display: block; }
   .appshell__hamburger { display: inline-flex; align-items: center; justify-content: center; }
+
+  /* Drawer-is-binary in mobile (v1.31.0): a portal-overlay drawer doesn't
+     have a meaningful rail state — the previous "open + collapse-to-rail"
+     left the drawer at 280px width but with labels stripped (a UX dead-end).
+     Neutralize every `.is-collapsed` visibility effect WHEN the drawer is
+     open in mobile so the drawer is binary open/closed regardless of the
+     `collapsed` boolean (which may persist across resizes via persistKey or
+     controlled mode). The chevron's onClick is also pivoted in React to
+     close the drawer instead of toggling rail. */
+  .appshell.is-collapsed.is-mobile-open .appshell__navlabel,
+  .appshell.is-collapsed.is-mobile-open .appshell__navbadge {
+    opacity: 1;
+    max-width: none;
+    margin: revert;
+    padding: revert;
+    pointer-events: auto;
+    overflow: visible;
+  }
+  .appshell.is-collapsed.is-mobile-open .appshell__navchildren { display: block; }
+  .appshell.is-collapsed.is-mobile-open .appshell__navlabel-section {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+    padding: 10px 12px 4px;
+    overflow: visible;
+  }
+  .appshell.is-collapsed.is-mobile-open .appshell__brand {
+    padding: 12px 20px;
+    overflow: visible;
+  }
+  .appshell.is-collapsed.is-mobile-open .appshell__brand-text,
+  .appshell.is-collapsed.is-mobile-open .appshell__foot-text {
+    opacity: 1;
+    max-width: none;
+    margin: revert;
+    padding: revert;
+    pointer-events: auto;
+  }
+  /* Footer slot in mobile-open returns to its default row layout (base rule
+     sets `space-between`); the rail-only override above this would force
+     a centered column. */
+  .appshell.is-collapsed.is-mobile-open .appshell__sidebar-foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px;
+    overflow: visible;
+  }
+  .appshell.is-collapsed.is-mobile-open .appshell__collapse {
+    margin-left: auto;
+  }
 }
 
 /* ---------- Mobile responsive overrides --------------------------------- */

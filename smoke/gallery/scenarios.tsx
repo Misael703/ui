@@ -430,6 +430,35 @@ export function ScenarioAppShellTopMobileNoNav() {
   );
 }
 
+/* 7f — `side` layout in mobile: legacy drawer (slides from left, fixed
+   width 280px, scrim covers content). v1.31 closed three gaps: (1) the
+   chevron at the drawer foot used to toggle `collapsed` → drawer stayed
+   open at 280px but labels stripped (a UX dead-end). Now in mobile-open
+   the chevron closes the drawer. (2) No ESC / focus trap / body scroll
+   lock. Now via shared hooks. (3) iOS Safari clipped `bottom: 0`. Now
+   `100vh` + `100dvh` height. */
+export function ScenarioAppShellSideMobile() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-side-mobile">
+      <K.AppShell
+        theme="brand"
+        brand={<strong>El Alba</strong>}
+        sections={[
+          { label: 'Operación', items: [
+            { id: 'home', label: 'Inicio', href: '#', active: true },
+            { id: 'orders', label: 'Pedidos', href: '#' },
+          ] },
+        ]}
+        topbar={<span>Despacho</span>}
+      >
+        <div style={{ padding: 16 }} data-testid="content">
+          contenido del side mobile
+        </div>
+      </K.AppShell>
+    </div>
+  );
+}
+
 export function ScenarioTimelineMilestone() {
   const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
   return (

@@ -108,6 +108,33 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   rule paint as designed. Comment in the CSS documents the trap so a
   future contributor doesn't reintroduce it.
 
+### Side mobile drawer UX + a11y (audit P1 #6 fully closed)
+- **Chevron in the drawer foot is context-aware in mobile.** Pre-fix, tapping
+  the chevron while the drawer was open in mobile toggled `collapsed` — the
+  drawer stayed at 280px width but lost all labels (a UX dead-end: the user
+  wanted to close, but got an icon-only zombie drawer). Now, when
+  `isMobile && mobileOpen`, the chevron closes the drawer instead. Icon
+  stays `<` (chevron-left) as a "close back to the left" affordance.
+  `aria-label` switches to "Cerrar menú" (new i18n key
+  `appshell.closeMenu`).
+- **CSS neutralizes `.is-collapsed` visibility effects while
+  `.is-mobile-open`** (labels, badges, section labels, brand padding,
+  brand-text, foot-text, navchildren, sidebar-foot layout). A persisted
+  `collapsed=true` (from desktop via `persistKey` or controlled mode) no
+  longer strips the drawer's content when the user reaches it on a phone.
+- **ESC closes the drawer; focus traps inside the open drawer; body
+  scroll locks while open.** Reuses the shared `useFocusTrap` /
+  `useEscape` / `useScrollLock` hooks (the same Modal/Drawer and the top
+  mobile drawer use).
+- **`aria-hidden`** on the closed mobile side drawer (`isMobile` is state,
+  not ref, so the attribute actually lands).
+- **iOS Safari URL-bar safety** on the side aside: `top: 0; bottom: 0`
+  used to clip behind the URL bar. Now sized by `height: 100vh; height:
+  100dvh` (same pattern as the top mobile drawer).
+- New smoke scenario `/scenarios/appshell-side-mobile` + 2 e2e
+  assertions covering the chevron-closes + ESC-closes-with-scroll-lock
+  paths.
+
 ### Bug caught by user (hide-mode collapse)
 - In `headerLayout="top"` without `collapsedRail`, when the user collapsed
   the sidebar the aside went `position: absolute` and slid off-screen

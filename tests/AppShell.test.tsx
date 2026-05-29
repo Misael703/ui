@@ -23,6 +23,18 @@ describe('AppShell sidebar header alignment (CSS)', () => {
     // vertical token is the first value; must be 12px, never 16px.
     expect(padding?.startsWith('12px'), `collapsed brand padding = "${padding}", expected vertical 12px`).toBe(true);
   });
+
+  /* Side mobile drawer (v1.31.0) — iOS Safari URL-bar safety + binary
+     drawer (no collapsed-rail intermediate state in mobile). */
+  it('CSS: side mobile aside uses 100vh + 100dvh fallback (no `bottom: 0`)', () => {
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell__sidebar\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
+  });
+
+  it('CSS: side mobile-open neutralizes is-collapsed label hide effects', () => {
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell\.is-collapsed\.is-mobile-open\s+\.appshell__navlabel[^{]*\{[^}]*opacity:\s*1/);
+    expect(css).toMatch(/\.appshell\.is-collapsed\.is-mobile-open\s+\.appshell__navlabel-section\s*\{[^}]*visibility:\s*visible/);
+    expect(css).toMatch(/\.appshell\.is-collapsed\.is-mobile-open\s+\.appshell__brand\s*\{[^}]*padding:\s*12px\s+20px/);
+  });
 });
 
 describe('AppShell', () => {
@@ -86,6 +98,114 @@ describe('AppShell', () => {
     );
     const aside = container.querySelector('aside.appshell__sidebar');
     expect(aside?.hasAttribute('data-tone')).toBe(false);
+  });
+
+  /* Side mobile drawer UX (v1.31.0): pre-fix the chevron button inside the
+     drawer kept toggling `collapsed` even when the drawer was open in mobile
+     — a UX dead-end where the drawer stayed 280px wide but lost all labels
+     (CSS hid them via `.is-collapsed`). Plus: no ESC, no focus trap, no
+     scroll lock. These tests pin the fix. */
+  function withMatchMedia(matches: boolean, fn: () => void) {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    })) as typeof window.matchMedia;
+    try { fn(); } finally { window.matchMedia = original; }
+  }
+
+  it('side mobile open: chevron click closes the drawer (not toggles collapse)', () => {
+    withMatchMedia(true, () => {
+      const sidebarSections = [
+        { label: 'Op', items: [
+          { id: 'a', label: 'Inicio', href: '/a' },
+          { id: 'b', label: 'Pedidos', href: '/b' },
+        ] },
+      ];
+      const { container, getByLabelText } = render(
+        <AppShell brand="A" sections={sidebarSections}>
+          <div />
+        </AppShell>
+      );
+      // Open the drawer via the hamburger.
+      fireEvent.click(getByLabelText(/Abrir menú/i));
+      expect(container.querySelector('.appshell')).toHaveClass('is-mobile-open');
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-collapsed');
+      // The chevron now reads "Cerrar menú", not "Colapsar menú".
+      const chevron = container.querySelector('.appshell__collapse') as HTMLButtonElement;
+      expect(chevron?.getAttribute('aria-label')).toBe('Cerrar menú');
+      fireEvent.click(chevron);
+      // Drawer closes; `collapsed` left untouched.
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-collapsed');
+    });
+  });
+
+  it('side desktop: chevron click still toggles collapsed (original behaviour)', () => {
+    withMatchMedia(false, () => {
+      const { container, getByLabelText } = render(
+        <AppShell brand="A" sections={[]}>
+          <div />
+        </AppShell>
+      );
+      const chevron = getByLabelText(/Colapsar menú/i);
+      fireEvent.click(chevron);
+      expect(container.querySelector('.appshell')).toHaveClass('is-collapsed');
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('side mobile open: ESC closes the drawer', () => {
+    withMatchMedia(true, () => {
+      const { container, getByLabelText } = render(
+        <AppShell brand="A" sections={[]}>
+          <div />
+        </AppShell>
+      );
+      fireEvent.click(getByLabelText(/Abrir menú/i));
+      expect(container.querySelector('.appshell')).toHaveClass('is-mobile-open');
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('side mobile open: body scroll is locked while open, released on close', () => {
+    withMatchMedia(true, () => {
+      document.body.style.overflow = '';
+      const { getByLabelText } = render(
+        <AppShell brand="A" sections={[]}>
+          <div />
+        </AppShell>
+      );
+      const hamburger = getByLabelText(/Abrir menú/i);
+      fireEvent.click(hamburger);
+      expect(document.body.style.overflow).toBe('hidden');
+      fireEvent.click(hamburger);
+      expect(document.body.style.overflow).not.toBe('hidden');
+    });
+  });
+
+  it('side mobile closed: aria-hidden lands on the aside (state, not ref)', async () => {
+    await new Promise<void>((resolve) => {
+      withMatchMedia(true, () => {
+        const { container } = render(
+          <AppShell brand="A" sections={[]}>
+            <div />
+          </AppShell>
+        );
+        setTimeout(() => {
+          const aside = container.querySelector('aside.appshell__sidebar');
+          expect(aside?.getAttribute('aria-hidden')).toBe('true');
+          resolve();
+        }, 0);
+      });
+    });
   });
 });
 

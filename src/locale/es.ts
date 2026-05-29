@@ -31,6 +31,7 @@ export const esMessages: UiKitMessages = {
   'appshell.expand': 'Expandir',
   'appshell.collapse': 'Colapsar',
   'appshell.openMenu': 'Abrir menú',
+  'appshell.closeMenu': 'Cerrar menú',
   'appshell.breadcrumb': 'Breadcrumb',
 
   // Notifications

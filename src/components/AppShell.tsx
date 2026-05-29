@@ -443,6 +443,35 @@ export function AppShell(props: AppShellProps) {
   }
 
   const { brand, brandCollapsed, topbar, user } = props;
+  // Mobile drawer hardening (v1.31.0) — same playbook as the top branch:
+  // - `isMobile` is state (not ref) so `aria-hidden` actually lands on the
+  //   aside when the drawer is closed in mobile.
+  // - The collapse chevron in the drawer footer pivots semantics when the
+  //   drawer is open in mobile: it closes the drawer instead of toggling
+  //   the rail (rail is meaningless on a portal-overlay drawer — the
+  //   previous "open + collapse-to-rail" state was a UX dead-end where the
+  //   drawer kept its 280px width but lost all labels). Icon stays
+  //   chevron-left as a "close to the left" affordance.
+  // - useFocusTrap + useEscape + useScrollLock from the shared hooks set
+  //   the same Modal/Drawer + top mobile drawer use.
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(max-width: 900px)');
+    setIsMobile(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setMobileOpen(false);
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
+  useEscape(mobileOpen, closeMobileDrawer);
+  const asideRef = React.useRef<HTMLElement>(null);
+  useFocusTrap(asideRef, mobileOpen);
+  useScrollLock(mobileOpen);
+  const collapseButtonInMobileDrawer = isMobile && mobileOpen;
   return (
     <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
       {/* On a brand sidebar the surface is dark, so re-scope foreground
@@ -452,9 +481,11 @@ export function AppShell(props: AppShellProps) {
           fixes audit P1 #4 where the side brand sidebar was the only
           band where descendants kept their default foreground colors. */}
       <aside
+        ref={asideRef}
         className="appshell__sidebar"
         aria-label={t['appshell.mainNav']}
         data-tone={theme === 'brand' ? 'inverse' : undefined}
+        aria-hidden={isMobile && !mobileOpen ? true : undefined}
       >
         <div className="appshell__brand">
           {collapsed ? (brandCollapsed ?? brand) : brand}
@@ -474,12 +505,25 @@ export function AppShell(props: AppShellProps) {
           <button
             type="button"
             className="appshell__collapse"
-            onClick={() => setCollapsed(!collapsed)}
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu']}
-            title={collapsed ? t['appshell.expand'] : t['appshell.collapse']}
+            onClick={() => {
+              if (collapseButtonInMobileDrawer) closeMobileDrawer();
+              else setCollapsed(!collapsed);
+            }}
+            aria-expanded={collapseButtonInMobileDrawer ? mobileOpen : !collapsed}
+            aria-label={
+              collapseButtonInMobileDrawer
+                ? t['appshell.closeMenu']
+                : (collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu'])
+            }
+            title={
+              collapseButtonInMobileDrawer
+                ? undefined
+                : (collapsed ? t['appshell.expand'] : t['appshell.collapse'])
+            }
           >
-            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            {collapseButtonInMobileDrawer
+              ? <ChevronLeft size={14} />
+              : (collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />)}
           </button>
         </div>
       </aside>
@@ -500,7 +544,7 @@ export function AppShell(props: AppShellProps) {
       </div>
 
       {mobileOpen && (
-        <div className="appshell__scrim" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+        <div className="appshell__scrim" onClick={closeMobileDrawer} aria-hidden="true" />
       )}
     </div>
   );

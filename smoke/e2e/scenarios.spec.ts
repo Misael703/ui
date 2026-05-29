@@ -537,6 +537,57 @@ test.describe('Scenario · AppShell top mobile drawer — brand variant', () => 
 });
 
 /**
+ * Scenario 7f — `side` layout in mobile (1.31.0 UX hardening). The legacy
+ * mobile drawer (slides from left) was missing ESC / focus trap / scroll
+ * lock, and the chevron at the drawer foot kept toggling `collapsed`
+ * instead of closing — a UX dead-end where the drawer stayed at 280px
+ * width but lost all labels. Tests pin: chevron now closes, no `is-
+ * collapsed` class lingers, scroll lock engages.
+ */
+test.describe('Scenario · AppShell side mobile drawer', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-side-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+  });
+
+  test('hamburger opens; chevron closes (does NOT toggle collapsed)', async ({ page }) => {
+    const root = page.locator('.appshell');
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+
+    // Open via the hamburger button (aria-label varies by locale).
+    await page.locator('.appshell__hamburger').click();
+    await page.waitForTimeout(150);
+    await expect(root).toHaveClass(/is-mobile-open/);
+
+    // The chevron inside the drawer foot now reads "Cerrar menú".
+    const chevron = page.locator('.appshell__collapse');
+    await expect(chevron).toHaveAttribute('aria-label', 'Cerrar menú');
+    await chevron.click();
+    await page.waitForTimeout(150);
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+    // And `collapsed` is left untouched.
+    await expect(root).not.toHaveClass(/is-collapsed/);
+  });
+
+  test('ESC closes the drawer + body scroll lock engages', async ({ page }) => {
+    const root = page.locator('.appshell');
+    await page.locator('.appshell__hamburger').click();
+    await page.waitForTimeout(150);
+
+    const overflowOpen = await page.evaluate(() => document.body.style.overflow);
+    expect(overflowOpen, 'body scroll should be locked while drawer open').toBe('hidden');
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+
+    const overflowClosed = await page.evaluate(() => document.body.style.overflow);
+    expect(overflowClosed, 'body scroll should be released on close').not.toBe('hidden');
+  });
+});
+
+/**
  * Scenario 7e — Desktop hide-mode collapsed without rail (1.31.0 bug guard).
  * Pre-fix, the absolute aside vacated grid col 1 and auto-placement put the
  * <main> into col 1 (0 width) instead of col 2 (1fr). Visible artifact:
