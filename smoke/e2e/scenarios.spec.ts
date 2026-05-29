@@ -221,6 +221,48 @@ test.describe('Scenario · Timeline milestone variant', () => {
     }
   });
 
+  test('the connector vertical line is centered on the marker x-axis (v1.30.4)', async ({ page }) => {
+    // Pre-1.30.4 the marker box-sizing was content-box (the kit ships no global
+    // reset), so `width: 24px + border: 2px` rendered at 28px → centre x=14,
+    // but the connector at `left: 11px, width: 2px` is centred at x=12. 2px
+    // visible offset. v1.30.4 sets `box-sizing: border-box` on the marker so
+    // its visual width matches its declared width. Asserts centre.x of the
+    // marker and the connector are within 1px for default and milestone.
+    await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const measured = await page.evaluate((tone) => {
+        const root = document.querySelector(`[data-testid="tl-${tone}"]`)!;
+        const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
+        const defaultMarker = items[0].querySelector('.timeline__marker') as HTMLElement; // default 24×24
+        const milestone   = items[1].querySelector('.timeline__marker--milestone') as HTMLElement; // 32×32
+        // The connector ::before lives on items[0] and items[1] (both have a
+        // sibling below them). Read its computed `left` + `width` to compute
+        // its centre.x relative to its container's left edge.
+        const beforeCS = getComputedStyle(items[0], '::before');
+        const beforeLeft  = parseFloat(beforeCS.left);
+        const beforeWidth = parseFloat(beforeCS.width);
+        const prevRect = items[0].getBoundingClientRect();
+        const connectorCx = prevRect.left + beforeLeft + beforeWidth / 2;
+        const d = defaultMarker.getBoundingClientRect();
+        const m = milestone.getBoundingClientRect();
+        return {
+          connectorCx,
+          defaultCx:   d.left + d.width / 2,
+          milestoneCx: m.left + m.width / 2,
+        };
+      }, t);
+      expect(
+        Math.abs(measured.connectorCx - measured.defaultCx),
+        `tone ${t}: default marker centre (${measured.defaultCx.toFixed(2)}) ≠ connector centre (${measured.connectorCx.toFixed(2)})`,
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(measured.connectorCx - measured.milestoneCx),
+        `tone ${t}: milestone marker centre (${measured.milestoneCx.toFixed(2)}) ≠ connector centre (${measured.connectorCx.toFixed(2)})`,
+      ).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('every connector REACHES the next marker top in both directions (v1.30.3 universal)', async ({ page }) => {
     await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
     // The base connector rule's `bottom: -12px` left a 6px gap to every next

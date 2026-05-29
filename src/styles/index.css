@@ -2971,6 +2971,14 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .timeline__marker {
   flex: none;
+  /* `box-sizing: border-box` so `width: 24px` includes the 2px border on each
+     side (total visual width = 24px). The kit doesn't ship a global
+     `* { box-sizing }` reset (only on form controls), so the marker would
+     otherwise compute to 28px wide (24 content + 4 border) → centre at x=14,
+     2px off from the connector at x=12. v1.30.4 visual fix. Same applies to
+     the milestone (32px), compact (16px) and any future size variant — they
+     all stay centred on the connector with this single line. */
+  box-sizing: border-box;
   width: 24px; height: 24px;
   border-radius: var(--radius-pill);
   display: inline-flex; align-items: center; justify-content: center;
