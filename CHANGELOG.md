@@ -5,6 +5,25 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.4] — 2026-05-29
+
+**Patch. Connector x-axis alignment.** The connector vertical line ran 2px to
+the LEFT of the marker centres because the marker's box-sizing was the CSS
+default (`content-box`), so `width: 24px + border: 2px` rendered at 28px wide
+→ marker centre at x=14, but the connector at `left: 11px; width: 2px` is
+centred at x=12. Visible as an off-center connector line in every Timeline.
+
+### Fixed
+- **`.timeline__marker { box-sizing: border-box }`.** Declared width now
+  matches the visual width (24px / 16px compact / 32px milestone), so the
+  marker centre sits at x=12 (24/2) for default and x=12 for milestone
+  (32/2 + margin-left:-4), aligned with the connector. The kit doesn't ship a
+  global `* { box-sizing }` reset (only form controls have it), so the
+  property must be set on the marker explicitly.
+- Smoke spec extended with a new test that asserts `connector centre.x ≡
+  marker centre.x` (within 1px) for both default and milestone, per tone.
+  Catches any future visual offset before it ships.
+
 ## [1.30.3] — 2026-05-29
 
 **Patch. Universal connector-reach fix.** v1.30.2 only patched the default→
