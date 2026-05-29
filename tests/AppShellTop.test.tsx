@@ -260,4 +260,143 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     // no-nav+rail combo. Pin the rule so a refactor cannot silently drop it.
     expect(css).toMatch(/\.appshell--header-top\.appshell--no-nav\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*1fr/);
   });
+
+  /* Mobile drawer (v1.31.0). The aside becomes a fixed overlay anchored
+     beneath the header; the consumer toggles via `headerApi.toggle()`, which
+     is DWIM by viewport (desktop ⇒ collapse, mobile ⇒ open/close drawer).
+     These CSS guards pin the rules a refactor would silently drop. */
+  it('CSS: --appshell-header-height is exposed as a public var (so sticky sub-headers can anchor)', () => {
+    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*--appshell-header-height:\s*56px/);
+  });
+
+  it('CSS: header min-height reads from the same var (single source of truth)', () => {
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*min-height:\s*var\(--appshell-header-height\)/);
+  });
+
+  it('CSS: desktop hide/rail overlay rules are scoped to min-width:901px (so they cannot leak into mobile)', () => {
+    // The pre-1.31 rules `position: absolute; translateX(-100%); width: 240px`
+    // used to fire on ALL viewports and outranked the mobile overlay by
+    // specificity. Scoping them to desktop avoids the fight.
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
+  });
+
+  it('CSS: mobile (≤900px) makes the top sidebar a fixed overlay anchored under the header', () => {
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*position:\s*fixed/);
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*top:\s*var\(--appshell-header-height\)/);
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
+  });
+
+  it('CSS: mobile header compacts to `auto 1fr auto` (center stretches, ends stay compact)', () => {
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__header\s*\{[^}]*grid-template-columns:\s*auto\s+1fr\s+auto/);
+  });
+
+  it('CSS: is-mobile-open slides the sidebar in (translateX(0))', () => {
+    expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(0\)/);
+  });
+
+  it('CSS: mobile scrim covers below the header (not over it) so the trigger remains interactive', () => {
+    expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__scrim\s*\{[^}]*top:\s*var\(--appshell-header-height\)/);
+  });
+
+  /* React side of the drawer — jsdom + a matchMedia mock so the consumer
+     trigger's `toggle()` flips the drawer instead of `collapsed`. */
+  function withMatchMedia(matches: boolean, fn: () => void) {
+    const original = window.matchMedia;
+    const listeners = new Set<(e: MediaQueryListEvent) => void>();
+    window.matchMedia = ((query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: (_: string, cb: (e: MediaQueryListEvent) => void) => listeners.add(cb),
+      removeEventListener: (_: string, cb: (e: MediaQueryListEvent) => void) => listeners.delete(cb),
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    })) as typeof window.matchMedia;
+    try { fn(); } finally { window.matchMedia = original; }
+  }
+
+  it('mobile: render-prop toggle() opens the drawer (is-mobile-open) and does NOT touch is-collapsed', () => {
+    withMatchMedia(true, () => {
+      const { container, getByTestId } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'brand',
+          }}
+        >x</AppShell>
+      );
+      const root = container.querySelector('.appshell')!;
+      expect(root).not.toHaveClass('is-mobile-open');
+      expect(root).not.toHaveClass('is-collapsed');
+      fireEvent.click(getByTestId('trigger'));
+      expect(root).toHaveClass('is-mobile-open');
+      expect(root).not.toHaveClass('is-collapsed');
+      // Click again closes it; `collapsed` remains untouched.
+      fireEvent.click(getByTestId('trigger'));
+      expect(root).not.toHaveClass('is-mobile-open');
+      expect(root).not.toHaveClass('is-collapsed');
+    });
+  });
+
+  it('desktop: render-prop toggle() flips is-collapsed as before (no drawer)', () => {
+    withMatchMedia(false, () => {
+      const { container, getByTestId } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'brand',
+          }}
+        >x</AppShell>
+      );
+      const root = container.querySelector('.appshell')!;
+      fireEvent.click(getByTestId('trigger'));
+      expect(root).toHaveClass('is-collapsed');
+      expect(root).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('mobile: ESC closes the open drawer', () => {
+    withMatchMedia(true, () => {
+      const { container, getByTestId } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'brand',
+          }}
+        >x</AppShell>
+      );
+      fireEvent.click(getByTestId('trigger'));
+      expect(container.querySelector('.appshell')).toHaveClass('is-mobile-open');
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('mobile: scrim renders only while the drawer is open (click closes it)', () => {
+    withMatchMedia(true, () => {
+      const { container, getByTestId } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'brand',
+          }}
+        >x</AppShell>
+      );
+      expect(container.querySelector('.appshell__scrim')).toBeNull();
+      fireEvent.click(getByTestId('trigger'));
+      const scrim = container.querySelector('.appshell__scrim') as HTMLElement;
+      expect(scrim).toBeTruthy();
+      fireEvent.click(scrim);
+      expect(container.querySelector('.appshell__scrim')).toBeNull();
+    });
+  });
 });

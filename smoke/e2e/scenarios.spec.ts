@@ -394,3 +394,84 @@ test.describe('Scenario · semantic Badge row coherence', () => {
     expect(max - min, `semantic Badge bg spread too wide: ${(max - min).toFixed(3)} (${JSON.stringify(all)})`).toBeLessThan(0.06);
   });
 });
+
+/**
+ * Scenario 7 — AppShell `top` mobile drawer (v1.31.0). Until 1.31, under
+ * 900px the `top` shell rendered the header + content but had NO way to
+ * reach the nav (the legacy `@media (max-width: 900px)` block was written
+ * for `side` and was a no-op on `top` because it recolumned `.appshell`
+ * via grid-template-columns while `top` uses grid-template-rows).
+ *
+ * Geometry assertions: at 1024×768 the aside is in-flow (NOT fixed) and
+ * visible; at 375×667 it is fixed-overlay translated off-screen; tapping
+ * the consumer trigger slides it in; ESC closes it.
+ */
+test.describe('Scenario · AppShell top — mobile drawer', () => {
+  test('desktop (≥901px): sidebar is in-flow and visible', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 720 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const aside = page.locator('.appshell__sidebar');
+    await expect(aside).toBeVisible();
+    const pos = await aside.evaluate((el) => getComputedStyle(el).position);
+    // Desktop: the aside is a grid item (default static / relative), NOT fixed.
+    expect(pos, `desktop aside should not be fixed (was ${pos})`).not.toBe('fixed');
+  });
+
+  test('mobile (≤900px): sidebar starts as a translated-off fixed overlay', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const m = await page.locator('.appshell__sidebar').evaluate((el) => {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return { position: s.position, transform: s.transform, right: Math.round(r.right) };
+    });
+    expect(m.position, `mobile aside must be position:fixed (was ${m.position})`).toBe('fixed');
+    // translateX(-100%) → transform matrix shows the X translation. Cheap
+    // proof: the right edge of the (translated) aside is at ≤0 (offscreen).
+    expect(m.right, `mobile aside must be offscreen when closed (right=${m.right}px)`).toBeLessThanOrEqual(0);
+
+    // No scrim while closed.
+    expect(await page.locator('.appshell__scrim').count()).toBe(0);
+  });
+
+  test('mobile: tapping the trigger opens the drawer; ESC closes it', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300); // wait for the slide transition
+
+    const openX = await page.locator('.appshell__sidebar').evaluate((el) => Math.round(el.getBoundingClientRect().left));
+    expect(openX, `open aside should sit at left:0 (was ${openX}px)`).toBe(0);
+
+    // Scrim is rendered + the root carries the state class.
+    await expect(page.locator('.appshell__scrim')).toBeVisible();
+    await expect(page.locator('.appshell')).toHaveClass(/is-mobile-open/);
+
+    // ESC closes.
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell')).not.toHaveClass(/is-mobile-open/);
+    expect(await page.locator('.appshell__scrim').count()).toBe(0);
+  });
+
+  test('mobile: tapping the scrim also closes the drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell__scrim')).toBeVisible();
+
+    // Click the scrim where the aside is NOT (right side of the viewport).
+    await page.locator('.appshell__scrim').click({ position: { x: 350, y: 400 } });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell')).not.toHaveClass(/is-mobile-open/);
+  });
+});

@@ -5,6 +5,51 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] — 2026-05-29
+
+**Minor. `headerLayout="top"` mobile drawer.** Pre-1.31, under 900px the `top`
+shell rendered the header + content but had no way to reach the nav: the legacy
+`@media (max-width: 900px)` block was written for `side` (recolumns `.appshell`
+via `grid-template-columns`, no-op on `top` which uses `grid-template-rows`),
+and there was no built-in hamburger in the `top` header. Reported by despachos
++ cobros-mesón on their phones — the sidebar was simply unreachable.
+
+### Added
+- **Mobile drawer in `headerLayout="top"`.** Below 900px the sidebar becomes a
+  `position: fixed` overlay anchored beneath the header (`top:
+  var(--appshell-header-height)`), slides in from the left to `min(280px,
+  85vw)`, and dims the rest of the viewport with a scrim. ESC closes; tap on
+  scrim closes; tap on the consumer trigger toggles. No built-in hamburger —
+  the existing `header.left` render-prop drives it (consumer keeps the
+  trigger's look).
+- **`headerApi.toggle()` is now DWIM by viewport.** On desktop it flips
+  `collapsed` as before; on mobile (≤900px) it flips an overlay drawer
+  (`is-mobile-open`) and leaves `collapsed` untouched. Same single click
+  handler regardless of breakpoint — the pattern Linear / Vercel use. Listener
+  cleans up `mobileOpen` when the user resizes back into desktop so a stale
+  drawer cannot ghost.
+- **`--appshell-header-height: 56px`** exposed as a public CSS var on
+  `.appshell.appshell--header-top`. Consumer sticky sub-headers/drawers can
+  anchor to the header's bottom edge without hardcoding the 56. The header's
+  `min-height` now reads from the same var (single source of truth).
+- **`aria-hidden`** on the closed mobile drawer so screen readers don't tab
+  through 30 offscreen nav links.
+- Story `Topbar · Mobile drawer (≤900px)` + smoke scenario
+  `/scenarios/appshell-top-mobile` with Playwright assertions for the
+  open/close + scrim + ESC paths.
+
+### Changed
+- The desktop "hide / rail" overlay rules
+  (`.appshell--header-top:not(.appshell--rail).is-collapsed ...`) are now
+  scoped to `@media (min-width: 901px)` so they don't compete with the mobile
+  rules below the breakpoint. Pure refactor — desktop behaviour byte-identical
+  at ≥901px.
+
+### Smoke harness
+- New scenario `appshell-top-mobile` covers: desktop in-flow aside (≥1024px),
+  mobile fixed-overlay offscreen aside (375px), trigger-tap opens to `left:0`,
+  ESC closes, scrim-tap closes.
+
 ## [1.30.6] — 2026-05-29
 
 **Patch. Compact + milestone alignment.** In `density="compact"` the milestone

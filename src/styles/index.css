@@ -2732,6 +2732,10 @@ button, input, select, textarea { box-sizing: border-box; }
      The shell now owns the viewport height → render it at the root or inside a
      100vh container. `side` is untouched (it uses the sticky model). */
   height: 100vh;
+  /* Public var so consumers can anchor sticky sub-headers/drawers to the
+     header's bottom edge without hardcoding the 56. Kept in sync with the
+     header `min-height` rule below; if you bump one, bump both. */
+  --appshell-header-height: 56px;
 }
 .appshell--header-top .appshell__header {
   display: grid;
@@ -2739,7 +2743,7 @@ button, input, select, textarea { box-sizing: border-box; }
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  min-height: 56px;
+  min-height: var(--appshell-header-height);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   color: var(--fg-default);
@@ -2781,19 +2785,27 @@ button, input, select, textarea { box-sizing: border-box; }
    rail; instead the sidebar keeps its full width and translates off-screen
    to the left (overlaying, so it can slide past the edge) while the content
    reclaims the width immediately. Animated, and never narrows into a rail.
-   Rail mode keeps the smooth 240→72 width transition. */
-.appshell--header-top:not(.appshell--rail) .appshell__body {
-  transition: none;
-  position: relative;
-}
-.appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 240px;
-  transform: translateX(-100%);
-}
-.appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-  transition: transform var(--duration-base) var(--ease-standard);
+   Rail mode keeps the smooth 240→72 width transition.
+   Scoped to `min-width: 901px` so it does NOT compete with the mobile
+   drawer rules below the breakpoint — at mobile the overlay frame is
+   different (fixed, anchored under the header) and pre-1.31.0 letting this
+   desktop rule leak into mobile created a 4-class specificity floor that
+   the mobile rules had to fight to override. Keeping it desktop-scoped
+   keeps the mobile block simple. */
+@media (min-width: 901px) {
+  .appshell--header-top:not(.appshell--rail) .appshell__body {
+    transition: none;
+    position: relative;
+  }
+  .appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 240px;
+    transform: translateX(-100%);
+  }
+  .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
 }
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
@@ -2806,6 +2818,67 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--color-primary);
   color: var(--color-white);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Mobile drawer for `top` (v1.31.0). The legacy mobile block (search for
+   `@media (max-width: 900px)` below) was written for `side` and is a no-op
+   here: it recolumns `.appshell` via `grid-template-columns` but `top` uses
+   `grid-template-rows`, so the override slides right off. Result before this
+   block: under 900px the `top` shell rendered the header + content with NO
+   way to reach the nav. This block makes the aside an overlay anchored
+   beneath the header, driven by `is-mobile-open` (set by the React side via
+   the render-prop `toggle()` API — there is no built-in hamburger in `top`).
+   Header columns compact to `auto 1fr auto` so the center has room to stretch
+   over a narrow viewport instead of choking against fixed-end zones.
+
+   The desktop "hide / rail" overlay rules above are scoped to
+   `min-width: 901px`, so this block does not need to fight specificity to
+   reposition the aside. */
+@media (max-width: 900px) {
+  .appshell--header-top .appshell__header {
+    grid-template-columns: auto 1fr auto;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  /* Body becomes a single column; the sidebar is taken out of flow. */
+  .appshell--header-top .appshell__body { grid-template-columns: 1fr; }
+  /* Overlay frame. The aside leaves flow and anchors BELOW the header
+     (`top: var(--appshell-header-height)`) so the consumer-placed trigger in
+     `header.left` stays visible — the user can close from the same control
+     they used to open. Width caps at 85vw on narrow phones so a slice of
+     content stays visible as a depth cue. */
+  .appshell--header-top .appshell__sidebar {
+    position: fixed;
+    top: var(--appshell-header-height);
+    bottom: 0; left: 0;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+    z-index: 40;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-default);
+    overflow: auto;
+    height: auto;
+  }
+  /* Brand surfaces lose the dark hairline against the primary blue;
+     swap for the white-α idiom used on brand bands. */
+  .appshell--brand.appshell--header-top .appshell__sidebar {
+    border-right-color: rgba(255, 255, 255, 0.12);
+  }
+  .appshell--header-top.is-mobile-open .appshell__sidebar {
+    transform: translateX(0);
+  }
+  /* Scrim covers content area below the header so the trigger remains
+     interactive for close. Higher z than the desktop scrim (30) because
+     the mobile aside is bumped to 40. */
+  .appshell--header-top.is-mobile-open .appshell__scrim {
+    display: block;
+    position: fixed;
+    top: var(--appshell-header-height);
+    left: 0; right: 0; bottom: 0;
+    background: var(--backdrop);
+    z-index: 35;
+  }
 }
 
 .appshell__sidebar-foot {

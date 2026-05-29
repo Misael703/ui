@@ -319,3 +319,48 @@ export const TopbarOnlyNoNav: StoryObj = {
     </div>
   ),
 };
+
+/**
+ * **Topbar · Mobile drawer** (v1.31.0). Under 900px the sidebar becomes an
+ * overlay anchored beneath the header. The same `header.left` render-prop
+ * trigger that toggles `collapsed` on desktop now opens/closes the drawer
+ * on mobile — one control, DWIM by viewport. ESC and a tap on the scrim
+ * also close it. Resize the Storybook canvas (or open in your phone) to
+ * see the breakpoint switch live; in a desktop frame this story looks
+ * identical to `TopbarUncontrolledRenderProp`.
+ */
+export const TopbarMobileDrawer: StoryObj = {
+  name: 'Topbar · Mobile drawer (≤900px)',
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  render: () => (
+    <div style={{ height: '100vh' }}>
+      <AppShell
+        headerLayout="top"
+        sections={sections}
+        header={{
+          left: ({ collapsed, toggle }) => (
+            <button
+              type="button"
+              aria-label={collapsed ? 'Abrir menú' : 'Cerrar menú'}
+              aria-expanded={!collapsed}
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            ><MenuIcon size={18} /></button>
+          ),
+          center: <Logo variant="horizontal" bg="light" height={26} />,
+          right: <Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 16 }}>
+          <PageHeader title="Pedidos" description="Toca el menú para abrir el drawer; ESC o tap fuera lo cierran." />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};

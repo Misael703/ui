@@ -247,6 +247,51 @@ export function ScenarioTimelineMilestoneCompact() {
   );
 }
 
+/**
+ * Scenario 7 — **AppShell `top` mobile drawer** (v1.31.0). Seam: under 900px
+ * the sidebar must become a fixed overlay anchored under the header; the
+ * same `header.left` render-prop trigger that toggles `collapsed` on desktop
+ * must DWIM into open/close drawer on mobile. ESC + scrim-tap also close.
+ * Asserted via Playwright resize across the breakpoint.
+ */
+export function ScenarioAppShellTopMobile() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile">
+      <K.AppShell
+        headerLayout="top"
+        sections={sections}
+        header={{
+          left: ({ collapsed, toggle }) => (
+            <button
+              type="button"
+              data-testid="trigger"
+              aria-label={collapsed ? 'Abrir menú' : 'Cerrar menú'}
+              aria-expanded={!collapsed}
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <K.MenuIcon size={18} />
+            </button>
+          ),
+          center: <strong>Despachos</strong>,
+          right: <K.Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 16 }} data-testid="content">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} style={{ height: 200, marginBottom: 12, border: '1px dashed var(--border-default)', borderRadius: 12 }} />
+          ))}
+        </div>
+      </K.AppShell>
+    </div>
+  );
+}
+
 export function ScenarioTimelineMilestone() {
   const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
   return (

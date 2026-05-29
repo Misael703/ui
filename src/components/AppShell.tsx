@@ -226,6 +226,153 @@ const NavItemNode = React.memo(function NavItemNode({
   );
 });
 
+/**
+ * Mobile drawer breakpoint for `headerLayout="top"`. Below this, `toggle()`
+ * flips an overlay drawer (`is-mobile-open`) instead of the desktop
+ * collapse — see CSS `@media (max-width: 900px)` for the visual shape.
+ * Kept in sync with that media query; if you change one, change both.
+ */
+const TOP_MOBILE_BREAKPOINT = '(max-width: 900px)';
+
+/**
+ * `headerLayout="top"` branch (v1.31.0 extracted from `AppShell` so the
+ * mobile-drawer hooks — matchMedia listener + ESC handler + state — only
+ * run when this layout is rendered, not for every `side` shell).
+ *
+ * The drawer is consumer-driven: there is no built-in hamburger in `top`.
+ * In mobile (≤900px) `headerApi.toggle()` flips an overlay drawer instead
+ * of toggling `collapsed`; in desktop it behaves as before. One control,
+ * two behaviours by viewport — what Linear/Vercel do. `collapsed` is left
+ * untouched in mobile so a user returning to desktop finds the rail/hide
+ * state they configured.
+ */
+interface AppShellTopBranchProps {
+  topProps: AppShellTopProps;
+  theme: AppShellTheme;
+  sections: NavSection[];
+  footer: React.ReactNode;
+  linkAs?: AppShellBaseProps['linkAs'];
+  className?: string;
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  children: React.ReactNode;
+}
+function AppShellTopBranch({
+  topProps, theme, sections, footer, linkAs, className,
+  collapsed, setCollapsed, children,
+}: AppShellTopBranchProps) {
+  const t = useLocale();
+  const { header } = topProps;
+  // Header band themes independently of the sidebar; defaults to `theme`
+  // so `theme="brand"` keeps tinting both bands (back-compat).
+  const headerTheme = topProps.headerTheme ?? theme;
+  const collapsedRail = topProps.collapsedRail ?? false;
+  const hasSidebar = sections.length > 0;
+
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  // Track whether matchMedia says we are below the mobile breakpoint. A ref
+  // so the toggle() closure handed to header slots always reads the latest
+  // value without forcing a re-render of every consumer trigger; a state
+  // would be needed only if rendering depended on it (it doesn't — the CSS
+  // does the work). The listener also cleans up `mobileOpen` when the user
+  // resizes back into desktop, so a stale-open drawer doesn't ghost.
+  const isMobileRef = React.useRef(false);
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia(TOP_MOBILE_BREAKPOINT);
+    isMobileRef.current = mql.matches;
+    const onChange = (e: MediaQueryListEvent) => {
+      isMobileRef.current = e.matches;
+      if (!e.matches) setMobileOpen(false);
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  // ESC closes the drawer. Only active while open to avoid leaking the
+  // global listener; tracks `mobileOpen` directly (no ref) since the
+  // effect re-runs cheaply on the rare open/close.
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileOpen]);
+
+  // The DWIM toggle: mobile flips the drawer, desktop flips `collapsed`.
+  // Same API surface (`headerApi.toggle`) — the consumer's hamburger keeps
+  // its single click handler regardless of viewport.
+  const headerApi: AppShellHeaderApi = {
+    collapsed,
+    toggle: () => {
+      if (isMobileRef.current) setMobileOpen((o) => !o);
+      else setCollapsed(!collapsed);
+    },
+    setCollapsed,
+  };
+  const slot = (s: AppShellHeaderSlot): React.ReactNode =>
+    typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
+  const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
+
+  return (
+    <div className={cx(
+      'appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`,
+      collapsedRail && 'appshell--rail',
+      !hasSidebar && 'appshell--no-nav',
+      collapsed && 'is-collapsed',
+      mobileOpen && 'is-mobile-open',
+      className,
+    )}>
+      {/* On a brand header the band is dark, so re-scope foreground tokens
+          via data-tone="inverse" — anything inside (Avatar, badges, links)
+          becomes band-aware automatically without per-call-site colors. */}
+      <header className="appshell__header" role="banner" data-tone={headerTheme === 'brand' ? 'inverse' : undefined}>
+        <div className="appshell__header-left">{slot(header?.left)}</div>
+        <div className="appshell__header-center">{slot(header?.center)}</div>
+        <div className="appshell__header-right">{slot(header?.right)}</div>
+      </header>
+      <div className="appshell__body">
+        {hasSidebar && (
+          <aside
+            className="appshell__sidebar"
+            aria-label={t['appshell.mainNav']}
+            /* When the drawer is closed in mobile, hide the nav from
+               assistive tech so a screen reader doesn't tab through 30
+               offscreen links. The check is best-effort (initial render is
+               desktop-shaped → not hidden); the listener flips it on resize. */
+            aria-hidden={isMobileRef.current && !mobileOpen ? true : undefined}
+          >
+            <nav className="appshell__nav">
+              {sections.map((s, i) => (
+                <div key={s.id ?? i} className="appshell__navsection">
+                  {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
+                  <ul>{s.items.map((it) => (
+                    <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobileDrawer} />
+                  ))}</ul>
+                </div>
+              ))}
+            </nav>
+            {footer != null && (
+              <div className="appshell__sidebar-foot">{footer}</div>
+            )}
+          </aside>
+        )}
+        <main className="appshell__content" role="main">{children}</main>
+      </div>
+      {/* Scrim is only present (and only visible) while the drawer is open
+          in mobile. Click-anywhere-out closes; CSS keeps it under the
+          header so the trigger stays interactive. */}
+      {mobileOpen && (
+        <div
+          className="appshell__scrim"
+          onClick={closeMobileDrawer}
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+}
+
 export function AppShell(props: AppShellProps) {
   const {
     sections = [], footer, defaultCollapsed = false,
@@ -273,54 +420,19 @@ export function AppShell(props: AppShellProps) {
   // check narrows the discriminated union, so `header` (top) and
   // `brand`/`topbar`/`user` (side) are each only in scope in their branch.
   if (props.headerLayout === 'top') {
-    const { header } = props;
-    // Header band themes independently of the sidebar; defaults to `theme`
-    // so `theme="brand"` keeps tinting both bands (back-compat).
-    const headerTheme = props.headerTheme ?? theme;
-    const collapsedRail = props.collapsedRail ?? false;
-    // Hand the collapse API to header slots so a consumer trigger (hamburger)
-    // can toggle the shell — the only path in uncontrolled `top` (no built-in
-    // toggle here). A function slot is called with the API; a node renders as-is.
-    const headerApi: AppShellHeaderApi = { collapsed, toggle: () => setCollapsed(!collapsed), setCollapsed };
-    const slot = (s: AppShellHeaderSlot): React.ReactNode =>
-      typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
-    // Top-bar-only mode (v1.27.0): with no `sections` the shell is just a
-    // header band over a single-column content area — no sidebar. For
-    // flat-route apps (kiosk, checkout, single-flow tools) that don't need
-    // panel navigation. Stays inside `AppShell` (no new component) so the
-    // already-shipped `top` header band is reused as-is.
-    const hasSidebar = sections.length > 0;
     return (
-      <div className={cx('appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`, collapsedRail && 'appshell--rail', !hasSidebar && 'appshell--no-nav', collapsed && 'is-collapsed', className)}>
-        {/* On a brand header the band is dark, so re-scope foreground tokens
-            via data-tone="inverse" — anything inside (Avatar, badges, links)
-            becomes band-aware automatically without per-call-site colors. */}
-        <header className="appshell__header" role="banner" data-tone={headerTheme === 'brand' ? 'inverse' : undefined}>
-          <div className="appshell__header-left">{slot(header?.left)}</div>
-          <div className="appshell__header-center">{slot(header?.center)}</div>
-          <div className="appshell__header-right">{slot(header?.right)}</div>
-        </header>
-        <div className="appshell__body">
-          {hasSidebar && (
-            <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
-              <nav className="appshell__nav">
-                {sections.map((s, i) => (
-                  <div key={s.id ?? i} className="appshell__navsection">
-                    {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
-                    <ul>{s.items.map((it) => (
-                      <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
-                    ))}</ul>
-                  </div>
-                ))}
-              </nav>
-              {footer != null && (
-                <div className="appshell__sidebar-foot">{footer}</div>
-              )}
-            </aside>
-          )}
-          <main className="appshell__content" role="main">{children}</main>
-        </div>
-      </div>
+      <AppShellTopBranch
+        topProps={props}
+        theme={theme}
+        sections={sections}
+        footer={footer}
+        linkAs={linkAs}
+        className={className}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      >
+        {children}
+      </AppShellTopBranch>
     );
   }
 
