@@ -265,6 +265,81 @@ top-mobile` (commit 2 pushed).
 - Smoke scenarios para brand/rail/no-nav en mobile (matriz de variantes)
 - Validación visual humana (mock1 viewport, Storybook abierto)
 
+---
+
+## Commit 4 (mismo PR) — Cerrado el "siguen pendientes"
+
+Usuario pidió hacer **todo en el mismo PR**. Ejecutado:
+
+### iOS Safari URL-bar safety
+- `.appshell.appshell--header-top { height: 100vh; height: 100dvh }`.
+  Los browsers viejos ignoran la segunda; los nuevos (Chrome 108+, Safari
+  16.4+) usan el viewport dinámico.
+- Mobile aside + scrim pasaron de `bottom: 0` a `calc(100vh - header)`
+  con el mismo dvh override. iOS antes clipa `bottom: 0` por la barra de
+  URL.
+
+### Side brand band-aware (audit P1 #4)
+- `<aside class="appshell__sidebar" data-tone={theme==='brand' ? 'inverse'
+  : undefined}>` en el `side`. Antes, Avatar/Badge/iconos en sidebar brand
+  no se re-tokenizaban. Espejo del header brand del `top`.
+
+### 3 smoke variants (brand / rail / no-nav)
+- Nuevos scenarios + páginas + 4 e2e asserts. La brand cazó un BUG REAL
+  que tenía oculto: mi regla mobile original restateaba `background:
+  var(--bg-surface)`, empataba en specificity con
+  `.appshell--brand .appshell__sidebar` y ganaba por source order →
+  brand sidebar quedaba **blanca** en mobile. Fix: saqué las propiedades
+  redundantes (`background` y `border-right` ya viven en la base).
+  Comentario en el CSS para que un futuro contributor no lo reintroduzca.
+
+### Visual pass (Playwright MCP)
+- Levanté el smoke server local (port 3100, `next start`), navegué con
+  el MCP a las 4 rutas mobile a 375×667 + desktop 1280×800. Screenshots
+  visuales confirmaron:
+  - **Default mobile cerrado**: header compacto, sin aside, sin scrim
+  - **Default mobile abierto**: aside 280px, scrim debajo del header,
+    Inicio activo con bar oro
+  - **Brand mobile abierto**: aside dark con texto white, hairline
+    white-α en el right border, active item con bg white-α 0.16
+  - **Rail mobile abierto**: el `collapsedRail` NO interfiere
+    (verifica que mis reglas mobile dominan sobre el rail desktop)
+  - **No-nav mobile**: sin aside, header con auto/1fr/auto, center
+    stretch
+  - **Desktop 1280**: sidebar 240px en grid, header centered, sin
+    overlay, byte-identical al pre-1.31
+
+### Tests resultantes
+
+| | Before commit 4 | After commit 4 |
+|---|---|---|
+| Unit | 526 | **530** (+4: 2 side brand data-tone + 2 CSS dvh) |
+| Smoke | 25 | **29** (+4: brand surface, rail overlay, no-nav header, aside dvh) |
+
+Visual pass humano (vía MCP) no cuenta como test automatizado pero
+confirma que las geometrías matemáticas se traducen a píxeles correctos.
+
+### Bug encontrado por mí ANTES de pedir merge
+
+Aplicando la regla nueva ("self-review antes de merge"):
+- ✅ ¿Qué bugs introduje en este PR? → El `background: var(--bg-surface)`
+  redundante. Cazado por el smoke brand, fixed antes de push.
+- ✅ ¿Qué cases de la auditoría perpetuaba? → P1 #4 cerrado.
+- ✅ ¿Qué combinaciones no estaban cubiertas? → brand/rail/no-nav,
+  ahora con smoke.
+- ✅ ¿Visual humano? → 4 mobile scenarios + 1 desktop con MCP.
+
+### Lo que sigue pendiente (próximos PRs, no este)
+
+- P1 #5 audit: contraste de `.appshell--brand .appshell__collapse`
+  (rgba(255,255,255,0.7) — verificar AA en preset)
+- P1 #6 audit (cerrado en commit 2 para `top`): focus trap en sidebar
+  mobile del `side` también — separate PR
+- P1 #7 audit: NavItem `<a href="#">` → `<button>` cuando no hay href
+- P2 #8-13: modernización del `side` layout (render-prop, BrandText
+  componente tipado, slot breadcrumbs, header-height var en `side`)
+- P3 + P4: roving tabindex, Cmd+\\ shortcut, CommandPalette integration
+
 ### Lección que se va a `tasks/lessons.md`
 
 Patrón a fijar: **siempre auditar mi propio output ANTES de pedir
