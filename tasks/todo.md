@@ -209,3 +209,69 @@ En el branch `top` de `AppShell()`:
 
 Branch `feat/appshell-top-mobile` con todo commiteado local. No pusheo ni
 abro PR sin tu OK explícito (memory: feedback-no-push-without-approval).
+
+---
+
+## Post-review hardening (commit 2)
+
+Tras el primer push + PR #47, hice self-review honesto y encontré 3 gaps
+que YO había introducido en este mismo PR:
+
+### A) `aria-hidden` era código muerto
+Mi primer commit usó `useRef` para `isMobile`. El listener actualizaba el
+ref pero **no disparaba re-render** — el atributo nunca llegaba al DOM.
+El comentario que escribí en este mismo archivo decía "el listener lo
+corrige en cuanto hidrata", falso. **Fix:** `useRef` → `useState`. Paga
+1 re-render post-mount, normal. Ahora el screen reader sí ve el drawer
+cerrado como hidden.
+
+### B) Sin focus trap en el drawer
+Tab se salía al header. Incoherencia total: el primer mensaje de la
+auditoría listó "P1 #6 Focus trap mobile no existe" como bug del `side`,
+y yo estaba a punto de shipear un nuevo case del mismo bug en `top`.
+**Fix:** extraje `useFocusTrap` de Overlay.tsx (Modal/Drawer lo usan
+hace tiempo) a `src/hooks/useFocusTrap.ts`. AppShell lo consume. Open
+foca primer link, Tab cycla, close vuelve foco al trigger.
+
+### C) Sin body scroll lock
+Content scrolleaba bajo el scrim al swipe. **Fix:** extraje
+`useScrollLock` también, mismo contador global que Modal/Drawer (nesting-
+safe). Lo mismo con `useEscape` para no dejar un patrón duplicado.
+
+### Refactor colateral
+
+- 3 hooks (`useFocusTrap`, `useEscape`, `useScrollLock`) movidos de
+  `Overlay.tsx` a `src/hooks/`. Re-exportados desde `hooks/index.ts`
+  (interno). **NO** agregados al barrel público `src/index.ts` — son
+  internos hasta que tengan docs + nombres estables.
+- Overlay.tsx ahora importa de ahí. Modal/Drawer behaviour byte-idéntico
+  (9/9 tests verdes confirma).
+
+### Tests adicionales (+5)
+
+- `aria-hidden` lands cuando mobile + cerrado
+- `aria-hidden` ausente cuando mobile + abierto
+- `aria-hidden` ausente cuando desktop
+- `body.style.overflow=hidden` cuando drawer abierto
+- Focus va al primer link al abrir, vuelve al trigger al cerrar (ESC)
+
+Final: **526 unit + 25 smoke verdes**. CI corriendo sobre `feat/appshell-
+top-mobile` (commit 2 pushed).
+
+### Lo que sigue pendiente (próximos PRs, no este)
+
+- iOS Safari `100dvh` con fallback `100vh` (P1 #3 audit)
+- `data-tone="inverse"` en sidebar brand del `side` mobile (P1 #4 audit)
+- Smoke scenarios para brand/rail/no-nav en mobile (matriz de variantes)
+- Validación visual humana (mock1 viewport, Storybook abierto)
+
+### Lección que se va a `tasks/lessons.md`
+
+Patrón a fijar: **siempre auditar mi propio output ANTES de pedir
+aprobación de merge**. La pregunta "qué hiciste para revisarlo" debería
+ser implícita, no que tenga que preguntármela el usuario. Tres tipos de
+gaps a buscar siempre:
+- Bugs introducidos por mí en este mismo PR (refs vs state, listeners
+  sin re-render, etc.)
+- Casos en la auditoría reciente que el PR perpetúa
+- Combinaciones de props no testeadas (matriz)
