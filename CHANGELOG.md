@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.3] — 2026-05-29
+
+**Patch. Universal connector-reach fix.** v1.30.2 only patched the default→
+milestone direction, but the underlying bug was global: the base connector
+rule's `bottom: -12px` left a 6px gap to EVERY next marker (not just
+milestones). The 24px default markers masked the gap visually because the
+tone-colored border drew the eye across it; the 32px milestone markers (and
+the milestone → default direction) made it impossible to ignore.
+
+### Fixed
+- **Base connector rule extended `-12 → -20`.** The line now lands 2px INTO
+  the next marker top in every direction: default↔default, default↔milestone,
+  milestone↔default, milestone↔milestone. The marker (z-index: 1, opaque
+  fill) occludes the 2px overlap → solid line into solid marker, no visible
+  gap. The 1.30.2 `:has(+ .timeline__item--milestone)` special-case became
+  redundant and was removed.
+- **Smoke spec extended** to assert the reach in BOTH directions per tone
+  (default→milestone AND milestone→default), so a future regression in either
+  direction fails immediately.
+
+### Visible delta
+Every Timeline in every consumer sees its connector lines extend ~8px more.
+This is the bug — they should have reached the marker all along. The fix is
+the line you'd draw in design, not the one the math left short.
+
 ## [1.30.2] — 2026-05-29
 
 **Patch. Visual regression fix.** The connector line between a default item

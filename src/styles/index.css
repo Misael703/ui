@@ -2953,7 +2953,19 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__item:not(:last-child)::before {
   content: '';
   position: absolute;
-  left: 11px; top: 28px; bottom: calc(var(--space-4) * -1 + 4px);
+  /* Connector geometry (v1.30.3 universal connector-reach fix):
+       top:    28 = 24px marker + 2px margin-top + 2px clearance below it.
+       bottom: -20 = 12px past item bottom + 4px gap remainder + 2px overlap
+                    into the next marker top (= 16-2-(-2)... see below).
+     The next item's marker border top sits at `H + 16 (gap) + 2 (margin-top)
+     = H + 18`. Pre-1.30.3 `bottom: -12` ended the line at H+12 — 6px of
+     visible air to the next marker. The bigger-marker variants (32px
+     milestone with halo) made the gap impossible to ignore; the default 24px
+     variants masked it but still had it. `bottom: -20` lands the line 2px
+     INTO the next marker top → the marker (z-index:1, opaque fill) occludes
+     the overlap → solid line into solid marker, every direction (default↔
+     default, default↔milestone, milestone↔default, milestone↔milestone). */
+  left: 11px; top: 28px; bottom: calc(var(--space-4) * -1 - 4px);
   width: 2px;
   background: var(--border-default);
 }
@@ -3067,18 +3079,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__item:has(> .timeline__marker--milestone):not(:last-child)::before {
   top: 36px; /* 32px marker + 2px margin-top + 2px clearance (was 28px for 24px) */
 }
-/* When a milestone FOLLOWS a default item, extend the previous item's
-   connector down so it reaches into the milestone marker's top edge instead
-   of hanging in the air ~6px above it. The default rule's `bottom: -12px`
-   was sized for the 24px marker (margin-top: 2px → border top at y=2);
-   the milestone marker is at the same margin-top but its border top sits
-   6px lower (because the line also has to clear the translucent halo
-   between the line end and the border to read continuous). The new
-   `bottom: -20px` lands the line 2px past the milestone border top — solid
-   line → solid border, no visible gap. v1.30.2 visual regression fix. */
-.timeline__item:has(+ .timeline__item--milestone):not(:last-child)::before {
-  bottom: calc(var(--space-4) * -1 - 4px);
-}
+/* (v1.30.2's `:has(+ .timeline__item--milestone)` override removed in 1.30.3:
+   the base rule above now extends far enough universally — the special-case
+   selector became redundant.) */
 /* Pending milestone: preserve the "not yet" semantics — bigger anchor slot
    but still hollow muted, no halo. */
 .timeline__item--pending .timeline__marker--milestone {

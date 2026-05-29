@@ -221,39 +221,45 @@ test.describe('Scenario · Timeline milestone variant', () => {
     }
   });
 
-  test('the connector from a default item REACHES the milestone marker top (v1.30.2 regression)', async ({ page }) => {
+  test('every connector REACHES the next marker top in both directions (v1.30.3 universal)', async ({ page }) => {
     await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
-    // The default item's connector ends at `bottom: -12px` relative to its
-    // box — calibrated for the 24px marker that follows. When a 32px milestone
-    // follows, that ending sits ~6px ABOVE the milestone marker border top
-    // (the larger marker's border lands lower; the halo above it is
-    // translucent so it doesn't bridge the gap visually). v1.30.2 extends the
-    // connector to `bottom: -20px` ONLY when followed by a milestone, so the
-    // line reaches into the milestone marker top. Asserted by computing the
-    // pseudo's visual bottom Y vs the milestone marker top Y for each tone.
-    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
-    for (const t of tones) {
-      const reach = await page.evaluate((tone) => {
+    // The base connector rule's `bottom: -12px` left a 6px gap to every next
+    // marker (the marker border top sits at H+18 from the previous item top,
+    // but the line ended at H+12). v1.30.2 patched it for default → milestone
+    // only via `:has(+ milestone)`; v1.30.3 fixes the BASE rule to `bottom:
+    // -20px` so EVERY connector reaches the next marker — in all four
+    // directions (default ↔ default, default ↔ milestone, milestone ↔ default,
+    // milestone ↔ milestone). Asserted per tone for both default → milestone
+    // (items[0] → items[1]) AND milestone → default (items[1] → items[2]).
+    const reachOf = async (tone: string, prevIdx: 0 | 1, nextIdx: 1 | 2) =>
+      page.evaluate(({ tone, prevIdx, nextIdx }) => {
         const root = document.querySelector(`[data-testid="tl-${tone}"]`)!;
         const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
-        // items[0] = default ABOVE, items[1] = milestone.
-        const prev = items[0];
-        const milestone = items[1].querySelector('.timeline__marker--milestone') as HTMLElement;
+        const prev = items[prevIdx];
+        // Pick whichever marker the next item has — `.timeline__marker--milestone`
+        // (preferred) or the plain default marker. Both have the same border
+        // top inside their item, but the milestone is larger.
+        const nextMarker =
+          (items[nextIdx].querySelector('.timeline__marker--milestone') as HTMLElement | null) ??
+          (items[nextIdx].querySelector('.timeline__marker') as HTMLElement);
         const prevRect = prev.getBoundingClientRect();
-        const markerRect = milestone.getBoundingClientRect();
-        // `getComputedStyle(el, '::before').bottom` returns the resolved
-        // numeric value (e.g. "-20px"). A negative bottom means the pseudo's
-        // bottom edge sits OUTSIDE its container — `|value|` pixels below the
-        // container's bottom edge.
+        const markerRect = nextMarker.getBoundingClientRect();
         const beforeBottom = parseFloat(getComputedStyle(prev, '::before').bottom);
-        const connectorEndY = prevRect.bottom - beforeBottom; // since beforeBottom is negative
-        // `reach` ≥ 0 means the connector reaches at least the marker top
-        // (the line continues into the marker, no air gap).
+        const connectorEndY = prevRect.bottom - beforeBottom;
         return { reach: connectorEndY - markerRect.top, connectorEndY, markerTopY: markerRect.top };
-      }, t);
+      }, { tone, prevIdx, nextIdx });
+
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const dToM = await reachOf(t, 0, 1); // default → milestone
+      const mToD = await reachOf(t, 1, 2); // milestone → default
       expect(
-        reach.reach,
-        `tone ${t}: connector hangs ${(-reach.reach).toFixed(1)}px above the milestone marker (ended at y=${reach.connectorEndY.toFixed(1)}, marker top y=${reach.markerTopY.toFixed(1)})`,
+        dToM.reach,
+        `tone ${t} · default→milestone: connector hangs ${(-dToM.reach).toFixed(1)}px above the next marker`,
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        mToD.reach,
+        `tone ${t} · milestone→default: connector hangs ${(-mToD.reach).toFixed(1)}px above the next marker`,
       ).toBeGreaterThanOrEqual(0);
     }
   });
