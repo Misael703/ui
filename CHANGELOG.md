@@ -5,6 +5,26 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.5] — 2026-05-29
+
+**Patch. Connector top symmetry.** 1.30.3 closed the gap on the BOTTOM side of
+the connector (where it enters the next marker), but the TOP side (where it
+emerges from the current marker) still had a 2px gap: `top: 28` lived 2px
+below the default marker's bottom (margin-top:2 + height:24 = 26). The line
+started "slightly detached" from the marker it came out of — visible as a thin
+air gap.
+
+### Fixed
+- **`top` overlaps the source marker by 2px on all three sizes.** Now the line
+  emerges flush from the marker's bottom edge — the marker (z-index:1, opaque
+  fill) occludes the 2px overlap, same trick as the bottom-side `−20px` fix.
+  - Default: `top: 28 → 24` (marker bottom 26 − 2).
+  - Milestone: `top: 36 → 32` (marker bottom 34 − 2).
+  - Compact: `top: 20 → 17` (marker bottom 19 − 2).
+- Smoke spec now asserts BOTH the bottom-side reach AND the top-side attach
+  for each tone — symmetric guard, so a future top-side regression fails here
+  not in a consumer's review.
+
 ## [1.30.4] — 2026-05-29
 
 **Patch. Connector x-axis alignment.** The connector vertical line ran 2px to
