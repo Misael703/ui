@@ -29,16 +29,133 @@ export const StatusIndicators: StoryObj = {
   ),
 };
 
+/**
+ * **Timeline · default (1.x register)** — the original look from v1.x, before
+ * `state` (1.28.0), `density` (1.28.0), `right` (1.28.0) and `variant`
+ * (1.30.0) arrived. Hollow markers tinted by `tone` over `--bg-surface`, a
+ * single vertical gray connector, refined typography (title weight 600
+ * post-1.31.0, tabular-nums on `meta` so timestamps align in a column).
+ *
+ * Use it as a chronological event log when you don't need progress states or
+ * anchor emphasis — a customer order's history, a dispatcher's activity feed,
+ * an audit trail. Items that just record what happened, not what comes next.
+ *
+ * The patterns this story canonises:
+ *  - `<time dateTime="…">` inside `meta` — semantic + a11y + SEO.
+ *  - **Author rendered as an inline `<span>`** in `--fg-subtle`, visually
+ *    separate from the timestamp.
+ *  - **Detail card in `children`** for events that carry a structured payload
+ *    (totals, tracking, etc.), with a left rail in `--border-default` so the
+ *    body reads as "belongs to its event".
+ *  - 16px icons inside the 24px markers — better optical balance than 14.
+ *
+ * The 1.28.0+ additions stay opt-in: an item that doesn't pass `state`,
+ * `density`, `variant`, or `right` renders byte-identical to v1.x.
+ */
+type EventTone = 'success' | 'info' | 'warning' | 'danger' | 'neutral';
+interface OrderEvent {
+  id: string;
+  tone: EventTone;
+  icon: React.ReactNode;
+  title: string;
+  /** ISO timestamp for `<time dateTime>` + locale-formatted label. */
+  time: { iso: string; label: string };
+  author?: string;
+  detail?: Array<[label: string, value: string]>;
+}
+
+const ORDER_HISTORY: OrderEvent[] = [
+  {
+    id: 'created',
+    tone: 'success',
+    icon: <CheckCircle size={16} />,
+    title: 'Pedido creado',
+    time: { iso: '2026-05-29T09:14', label: '09:14' },
+    author: 'Misael Ocas',
+    detail: [['Items', '14'], ['Total', '$1.245.000']],
+  },
+  {
+    id: 'confirmed',
+    tone: 'info',
+    icon: <Edit size={16} />,
+    title: 'Cliente confirmó por WhatsApp',
+    time: { iso: '2026-05-29T10:32', label: '10:32' },
+  },
+  {
+    id: 'stock',
+    tone: 'warning',
+    icon: <Bell size={16} />,
+    title: 'Stock bajo en SKU ELT-12-AC',
+    time: { iso: '2026-05-29T11:01', label: '11:01' },
+  },
+  {
+    id: 'dispatched',
+    tone: 'success',
+    icon: <Truck size={16} />,
+    title: 'Despachado',
+    time: { iso: '2026-05-29T14:32', label: '14:32' },
+    author: 'Bodega norte',
+    detail: [['Guía', 'DG-78422 · Starken'], ['Bultos', '4 · 38,2 kg']],
+  },
+];
+
+/** Inline meta render — semantic `<time>` for the stamp + a distinct `<span>`
+ *  for the author. Reusable pattern (the kit doesn't ship it as a component
+ *  so the consumer keeps full control over the meta layout). */
+function EventMeta({ time, author }: { time: OrderEvent['time']; author?: string }) {
+  return (
+    <>
+      <time dateTime={time.iso}>{time.label}</time>
+      {author && (
+        <>
+          <span aria-hidden="true" style={{ margin: '0 6px', color: 'var(--fg-subtle)' }}>·</span>
+          <span style={{ color: 'var(--fg-subtle)' }}>{author}</span>
+        </>
+      )}
+    </>
+  );
+}
+
+/** Inline detail card — left rail + key/value rows. The pattern for events
+ *  that carry a structured payload; events without `detail` skip it entirely. */
+function EventDetail({ rows }: { rows: Array<[string, string]> }) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: 4,
+        marginTop: 6,
+        padding: '8px 12px',
+        borderLeft: '2px solid var(--border-default)',
+        fontSize: 'var(--text-xs)',
+        fontVariantNumeric: 'tabular-nums',
+      }}
+    >
+      {rows.map(([k, v]) => (
+        <div key={k} style={{ display: 'flex', gap: 10 }}>
+          <span style={{ color: 'var(--fg-subtle)', minWidth: 56 }}>{k}</span>
+          <span style={{ color: 'var(--fg-default)' }}>{v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export const TimelineDemo: StoryObj = {
   name: 'Timeline · default (1.x register)',
   render: () => (
-    <Timeline style={{ maxWidth: 480 }}>
-      <TimelineItem tone="success" icon={<CheckCircle size={14} />} title="Pedido creado" meta="2026-04-29 09:14 · Misael Ocas">
-        14 ítems · Total $1.245.000
-      </TimelineItem>
-      <TimelineItem tone="info" icon={<Edit size={14} />} title="Cliente confirmó por WhatsApp" meta="2026-04-29 10:32" />
-      <TimelineItem tone="warning" icon={<Bell size={14} />} title="Stock bajo en SKU ELT-12-AC" meta="2026-04-29 11:01" />
-      <TimelineItem tone="success" icon={<CheckCircle size={14} />} title="Despachado" meta="2026-04-29 14:32 · Bodega norte" />
+    <Timeline style={{ maxWidth: 540 }}>
+      {ORDER_HISTORY.map((e) => (
+        <TimelineItem
+          key={e.id}
+          tone={e.tone}
+          icon={e.icon}
+          title={e.title}
+          meta={<EventMeta time={e.time} author={e.author} />}
+        >
+          {e.detail && <EventDetail rows={e.detail} />}
+        </TimelineItem>
+      ))}
     </Timeline>
   ),
 };

@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   UserCell, StatusIndicator, Timeline, TimelineItem,
   Tree, Calendar,
@@ -88,6 +90,24 @@ describe('Timeline', () => {
     );
     expect(container.querySelector('.timeline__item--milestone')).toBeNull();
     expect(container.querySelector('.timeline__marker--milestone')).toBeNull();
+  });
+
+  // v1.31.0 — 1.x register polish. The default Timeline title moved from
+  // weight 700 (bold) to 600 (semibold) to align with the kit's post-1.10.0
+  // quiet-data hierarchy (.label/.th/.btn already moved). Pin so a future
+  // revert to 700 fails here, not in a consumer's review.
+  it('CSS: .timeline__title is semibold (600), not bold (700)', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    const m = css.match(/^\.timeline__title\s*\{[^}]*font-weight\s*:\s*(\d+)/m);
+    expect(m, 'could not find .timeline__title block').not.toBeNull();
+    expect(Number(m![1]), '.timeline__title weight').toBe(600);
+  });
+
+  it('CSS: .timeline__meta uses tabular-nums so timestamps align across items', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    const m = css.match(/^\.timeline__meta\s*\{([^}]*)\}/m);
+    expect(m, 'could not find .timeline__meta block').not.toBeNull();
+    expect(m![1], '.timeline__meta declarations').toMatch(/font-variant-numeric\s*:\s*tabular-nums/);
   });
 
   it('`right` renders the trailing slot only when provided; DOM is unchanged otherwise', () => {

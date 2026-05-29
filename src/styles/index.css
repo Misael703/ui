@@ -2973,8 +2973,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__marker--danger  { border-color: var(--color-danger);  color: var(--color-danger); }
 .timeline__marker--info    { border-color: var(--color-info);    color: var(--color-info); }
 .timeline__body { flex: 1; min-width: 0; }
-.timeline__title { font-weight: 700; color: var(--fg-default); font-size: var(--text-sm); }
-.timeline__meta { font-size: var(--text-xs); color: var(--fg-muted); margin-top: 2px; }
+/* Title weight 700→600 (v1.31.0). Bold + sentence case over 14px in a short
+   event log shouted; semibold reads as confident without breaking the kit's
+   post-1.10.0 quiet-data hierarchy (where `.label`, `.th`, `.btn` were already
+   moved off 700). Pinned by tests/QuietDefaults.test.tsx. */
+.timeline__title { font-weight: 600; color: var(--fg-default); font-size: var(--text-sm); }
+/* Tabular numerics on `meta` (v1.31.0) so timestamps across items align in a
+   column instead of jittering by digit width. Invisible unless numeric. */
+.timeline__meta { font-size: var(--text-xs); color: var(--fg-muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .timeline__content { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--fg-default); }
 
 /* ---------- Timeline · v1.28.0 progress + density + right slot --------- */

@@ -5,6 +5,41 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] — 2026-05-29
+
+**Minor. Typography polish — no API change.** Audit-driven cleanup of the
+`Timeline · default (1.x register)` story and the underlying styles, so the
+1.x register reads as the polished event-log it was always meant to be.
+
+### Fixed
+- **`.timeline__title` weight 700 → 600.** Bold + sentence case over 14px in a
+  short event log shouted; semibold reads as confident without breaking the
+  kit's post-1.10.0 quiet-data hierarchy (`.label`, `.th`, `.btn` already
+  moved off 700 in that pass — Timeline was the last holdout). Pinned by
+  `Display3.test.tsx`.
+- **`.timeline__meta` gets `font-variant-numeric: tabular-nums`.** Timestamps
+  across items now align in a column instead of jittering by digit width.
+  Invisible unless numeric — back-compat byte-identical to plain text meta.
+
+### Changed (story-only, no API)
+- **`Timeline · default (1.x register)`** rewritten as the canonical
+  copy-paste reference:
+  - JSDoc that says what the 1.x register is, what tones exist, and when to
+    use it vs the 1.28.0+ additions (`state` / `density` / `right` / `variant`).
+  - **Semantic `<time dateTime="…">`** inside `meta`, so screen readers and
+    SEO can parse the stamp.
+  - **Author as a distinct inline `<span>`** in `--fg-subtle`, visually
+    separate from the timestamp (not concatenated into the meta string).
+  - **Detail card pattern in `children`** with a `--border-default` left rail
+    and key/value rows — the pattern for events that carry a structured
+    payload (totals, tracking) without bloating the title.
+  - 16px icons inside the 24px markers (better optical balance than 14).
+
+### Internal
+- No component API change. Existing consumers render byte-identical for items
+  that don't use the new `meta`/`children` patterns. The title-weight delta is
+  the only visible kit-wide change (semibold instead of bold on the title).
+
 ## [1.30.1] — 2026-05-30
 
 **Patch. Visual regression fix.** v1.30.0 added the `milestone` variant
