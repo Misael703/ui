@@ -2813,6 +2813,19 @@ button, input, select, textarea { box-sizing: border-box; }
   .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
     transition: transform var(--duration-base) var(--ease-standard);
   }
+  /* Hide-mode collapse bug (v1.31.0): when the aside goes `position: absolute`
+     it leaves the grid flow → grid auto-placement gives the next in-flow item
+     (the <main>) the FIRST column instead of the second. With body grid
+     `0 1fr` that drops the content into a 0-width column; the visible 48px
+     it kept was only its own padding, and content overflowed to a phantom
+     scrollbar at the body's right edge.
+     Fix: explicitly pin the content to column 2 whenever there IS a 2-column
+     body grid (every top layout EXCEPT `no-nav`, which is single-column).
+     `no-nav` is excluded so a `grid-column: 2` doesn't create an implicit
+     second track in its single-column grid. */
+  .appshell--header-top:not(.appshell--no-nav) .appshell__content {
+    grid-column: 2;
+  }
 }
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.

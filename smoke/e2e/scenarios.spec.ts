@@ -537,6 +537,35 @@ test.describe('Scenario · AppShell top mobile drawer — brand variant', () => 
 });
 
 /**
+ * Scenario 7e — Desktop hide-mode collapsed without rail (1.31.0 bug guard).
+ * Pre-fix, the absolute aside vacated grid col 1 and auto-placement put the
+ * <main> into col 1 (0 width) instead of col 2 (1fr). Visible artifact:
+ * a 48px main strip + a phantom scrollbar at the viewport's right edge.
+ * Fix: explicit `grid-column: 2` on `.appshell__content` in the desktop
+ * media. This test pins the geometry: at 1440px viewport, main should fill
+ * the entire body width (~1440px), not 48px.
+ */
+test.describe('Scenario · AppShell top desktop hide-collapsed — main placement', () => {
+  test('main fills the full body width (not 48px from padding-only)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/scenarios/appshell-top-hide-collapsed', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const m = await page.evaluate(() => {
+      const body = document.querySelector('.appshell__body') as HTMLElement;
+      const main = document.querySelector('.appshell__content') as HTMLElement;
+      return {
+        bodyRect: body.getBoundingClientRect(),
+        mainRect: main.getBoundingClientRect(),
+        gridCol: getComputedStyle(main).gridColumnStart,
+      };
+    });
+    expect(m.gridCol, `main should be pinned to grid-column 2 (got ${m.gridCol})`).toBe('2');
+    expect(m.mainRect.width, `main should span the full body (~${m.bodyRect.width}px), not 48px`).toBeGreaterThan(m.bodyRect.width - 5);
+  });
+});
+
+/**
  * Scenario 7c — top mobile drawer with `collapsedRail=true`. The desktop
  * rail rule (`.appshell--header-top.appshell--rail.is-collapsed
  * .appshell__body { grid-template-columns: 72px 1fr }`) is the highest-

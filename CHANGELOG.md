@@ -108,6 +108,23 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   rule paint as designed. Comment in the CSS documents the trap so a
   future contributor doesn't reintroduce it.
 
+### Bug caught by user (hide-mode collapse)
+- In `headerLayout="top"` without `collapsedRail`, when the user collapsed
+  the sidebar the aside went `position: absolute` and slid off-screen
+  correctly — BUT the `<main>` then auto-placed into the freed grid col 1
+  (0 width) instead of col 2 (1fr). Visible artifact: a 48px-wide main
+  strip (just its own 24+24 padding) + a phantom scrollbar at the body's
+  right edge.
+  Root cause: an absolutely-positioned grid item leaves the auto-placement
+  flow. With aside out, main (the next in-flow item) takes col 1.
+  Fix: `.appshell--header-top:not(.appshell--no-nav) .appshell__content
+  { grid-column: 2 }` inside the desktop media. Main is now ALWAYS pinned
+  to col 2 when there's a sidebar, regardless of whether the aside is in
+  flow or absolute. `no-nav` is excluded so a single-column grid doesn't
+  spawn an implicit second track.
+  Pinned by a smoke geometry assertion: at 1440px viewport collapsed-no-rail,
+  `main.width >= body.width - 5` (within rounding).
+
 ## [1.30.6] — 2026-05-29
 
 **Patch. Compact + milestone alignment.** In `density="compact"` the milestone

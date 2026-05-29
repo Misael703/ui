@@ -276,6 +276,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
   });
 
+  it('CSS: desktop main is explicitly pinned to grid-column 2 (hide-mode collapse bug guard)', () => {
+    // When the aside goes `position: absolute` (hide-mode collapsed), it
+    // leaves the grid flow → main auto-places to col 1 (0 width). Explicit
+    // `grid-column: 2` keeps it in the 1fr column. Scoped to the desktop
+    // media so mobile single-column grids are not affected.
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--no-nav\)\s+\.appshell__content\s*\{[^}]*grid-column:\s*2/);
+  });
+
   it('CSS: mobile aside height uses calc(100vh - header) with dvh fallback (no `bottom: 0`)', () => {
     // Pre-fix the aside used `bottom: 0` which iOS Safari clips by the URL
     // bar. Now: explicit height with the dvh override.

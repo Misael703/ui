@@ -371,6 +371,45 @@ export function ScenarioAppShellTopMobileRail() {
   );
 }
 
+/* 7e — Desktop hide-mode collapsed (no rail). The aside goes
+   `position: absolute` and slides off-screen; before v1.31's grid-column fix,
+   the <main> would auto-place into the freed col 1 (0 width) and only its
+   own padding kept it visible — a 48px-wide strip with a phantom scrollbar
+   at the body's right edge. The visible bug: a thin vertical line where the
+   main's right edge should be at the viewport edge. */
+export function ScenarioAppShellTopHideCollapsed() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-hide-collapsed">
+      <K.AppShell
+        headerLayout="top"
+        defaultCollapsed
+        sections={sections}
+        header={{
+          left: ({ toggle }) => (
+            <button
+              type="button"
+              data-testid="trigger"
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <K.MenuIcon size={18} />
+            </button>
+          ),
+          center: <strong>Despachos</strong>,
+          right: <K.Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 24 }} data-testid="content">contenido a full width</div>
+      </K.AppShell>
+    </div>
+  );
+}
+
 /* 7d — top-bar-only variant: no `sections` means no aside, no drawer logic.
    The mobile header rules (`grid-template-columns: auto 1fr auto`) must
    still fire so a long center brand doesn't choke against the right zone
