@@ -229,8 +229,14 @@ export function ScenarioTimelineMilestone() {
   return (
     <div style={{ padding: 24, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'start' }} data-scenario="timeline-milestone">
       {tones.map((t) => (
+        // Each tone renders a milestone anchor + a default operational item
+        // below — the 1.30.1 center-alignment fix is exercised end-to-end
+        // (the regression only appeared when MIXING sizes, not in an
+        // all-milestone row). The marker centres of both items must sit on
+        // the same vertical axis.
         <K.Timeline key={t} data-testid={`tl-${t}`}>
           <K.TimelineItem variant="milestone" tone={t} title={`anchor ${t}`} />
+          <K.TimelineItem tone={t} title={`event ${t}`} />
         </K.Timeline>
       ))}
     </div>
