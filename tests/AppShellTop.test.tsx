@@ -374,7 +374,8 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       );
       fireEvent.click(getByTestId('trigger'));
       expect(container.querySelector('.appshell')).toHaveClass('is-mobile-open');
-      fireEvent.keyDown(window, { key: 'Escape' });
+      // Listener lives on `document` (shared `useEscape` hook) — fire there.
+      fireEvent.keyDown(document, { key: 'Escape' });
       expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
     });
   });
@@ -397,6 +398,113 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       expect(scrim).toBeTruthy();
       fireEvent.click(scrim);
       expect(container.querySelector('.appshell__scrim')).toBeNull();
+    });
+  });
+
+  /* A11y hardening (post-1.31 review): the closed mobile drawer must hide
+     from assistive tech; the open drawer must trap focus and return it on
+     close; the body must lock scroll. Pre-fix, `isMobile` was a ref so the
+     `aria-hidden` attribute never landed (React doesn't re-render on ref
+     mutation). These tests pin the fix. */
+  it('mobile (closed): aria-hidden lands on the aside post-mount (state, not ref)', async () => {
+    await new Promise<void>((resolve) => {
+      withMatchMedia(true, () => {
+        const { container } = render(
+          <AppShell
+            headerLayout="top"
+            sections={sections}
+            header={{ left: ({ toggle }) => <button onClick={toggle}>m</button>, center: 'b' }}
+          >x</AppShell>
+        );
+        // After the matchMedia effect fires, the aside picks up aria-hidden.
+        setTimeout(() => {
+          const aside = container.querySelector('aside.appshell__sidebar');
+          expect(aside?.getAttribute('aria-hidden')).toBe('true');
+          resolve();
+        }, 0);
+      });
+    });
+  });
+
+  it('mobile (open): aria-hidden is removed', async () => {
+    await new Promise<void>((resolve) => {
+      withMatchMedia(true, () => {
+        const { container, getByTestId } = render(
+          <AppShell
+            headerLayout="top"
+            sections={sections}
+            header={{ left: ({ toggle }) => <button data-testid="t" onClick={toggle}>m</button>, center: 'b' }}
+          >x</AppShell>
+        );
+        setTimeout(() => {
+          fireEvent.click(getByTestId('t'));
+          const aside = container.querySelector('aside.appshell__sidebar');
+          expect(aside?.hasAttribute('aria-hidden')).toBe(false);
+          resolve();
+        }, 0);
+      });
+    });
+  });
+
+  it('desktop: aria-hidden is not applied (the drawer concept does not exist there)', () => {
+    withMatchMedia(false, () => {
+      const { container } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{ left: ({ toggle }) => <button onClick={toggle}>m</button>, center: 'b' }}
+        >x</AppShell>
+      );
+      const aside = container.querySelector('aside.appshell__sidebar');
+      expect(aside?.hasAttribute('aria-hidden')).toBe(false);
+    });
+  });
+
+  it('mobile: opening the drawer locks body scroll; closing releases it', () => {
+    withMatchMedia(true, () => {
+      // Reset any stale state from prior tests.
+      document.body.style.overflow = '';
+      const { getByTestId } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{ left: ({ toggle }) => <button data-testid="t" onClick={toggle}>m</button>, center: 'b' }}
+        >x</AppShell>
+      );
+      expect(document.body.style.overflow).not.toBe('hidden');
+      fireEvent.click(getByTestId('t'));
+      expect(document.body.style.overflow).toBe('hidden');
+      fireEvent.click(getByTestId('t'));
+      expect(document.body.style.overflow).not.toBe('hidden');
+    });
+  });
+
+  it('mobile: opening the drawer moves focus into it; closing returns focus to the trigger', () => {
+    withMatchMedia(true, () => {
+      const { getByTestId, container } = render(
+        <AppShell
+          headerLayout="top"
+          sections={[{ label: 'Op', items: [
+            { id: 'a', label: 'Inicio', href: '/a' },
+            { id: 'b', label: 'Pedidos', href: '/b' },
+          ] }]}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'b',
+          }}
+        >x</AppShell>
+      );
+      const trigger = getByTestId('trigger') as HTMLButtonElement;
+      trigger.focus();
+      expect(document.activeElement).toBe(trigger);
+      fireEvent.click(trigger);
+      // The focus trap moves focus to the first tabbable inside the aside —
+      // here, the first nav link.
+      const firstLink = container.querySelector('aside.appshell__sidebar a[href]') as HTMLElement;
+      expect(document.activeElement).toBe(firstLink);
+      // Close (ESC) — focus restored to the trigger.
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(document.activeElement).toBe(trigger);
     });
   });
 });

@@ -50,6 +50,29 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   mobile fixed-overlay offscreen aside (375px), trigger-tap opens to `left:0`,
   ESC closes, scrim-tap closes.
 
+### A11y hardening (post-review)
+- **`aria-hidden` actually lands** on the closed mobile drawer: `isMobile`
+  switched from `useRef` to `useState`, so the breakpoint flip triggers a
+  re-render and the attribute reaches the DOM. Pre-fix it was dead code (a
+  ref mutation never re-renders).
+- **Focus trap inside the open drawer** via the shared `useFocusTrap` hook
+  (extracted from Overlay.tsx alongside `useEscape` and `useScrollLock`).
+  Opening the drawer focuses the first nav link; Tab/Shift+Tab cycle within;
+  closing the drawer restores focus to the trigger.
+- **Body scroll lock** while the drawer is open, shared with the
+  Modal/Drawer counter (kit-wide nesting safe).
+- 5 new vitest assertions cover aria-hidden lands closed / removed open /
+  absent on desktop, body overflow:hidden engages on open, focus moves +
+  returns on close.
+
+### Internal
+- `useFocusTrap`, `useEscape`, `useScrollLock` extracted from
+  `src/components/Overlay.tsx` to `src/hooks/` so Modal/Drawer and the
+  AppShell mobile drawer share a single implementation. Re-exported via
+  `src/hooks/index.ts` for internal consumers only — NOT added to the
+  public barrel `src/index.ts` (kept internal until names + docs stabilise).
+  Modal/Drawer behaviour byte-identical (9/9 tests still green).
+
 ## [1.30.6] — 2026-05-29
 
 **Patch. Compact + milestone alignment.** In `density="compact"` the milestone

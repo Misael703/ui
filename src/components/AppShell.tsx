@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight, MenuIcon } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
 
 // ---------- AppShell (Sidebar + Topbar + Content) -----------------------
 // Designed to drop into a Next.js app/layout.tsx as a Client Component shell.
@@ -270,34 +271,39 @@ function AppShellTopBranch({
   const hasSidebar = sections.length > 0;
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  // Track whether matchMedia says we are below the mobile breakpoint. A ref
-  // so the toggle() closure handed to header slots always reads the latest
-  // value without forcing a re-render of every consumer trigger; a state
-  // would be needed only if rendering depended on it (it doesn't — the CSS
-  // does the work). The listener also cleans up `mobileOpen` when the user
-  // resizes back into desktop, so a stale-open drawer doesn't ghost.
-  const isMobileRef = React.useRef(false);
+  // Track whether matchMedia says we are below the mobile breakpoint. State
+  // (not ref) so React re-renders when it flips — `aria-hidden` on the
+  // closed mobile drawer is derived from this, and a ref-only value would
+  // never land on the DOM (the ref update doesn't trigger a re-render).
+  // Initial render uses `false` (SSR-safe; matchMedia is browser-only) and
+  // the effect corrects it post-mount. The listener also clears
+  // `mobileOpen` when the user resizes back into desktop, so a stale-open
+  // drawer doesn't ghost.
+  const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mql = window.matchMedia(TOP_MOBILE_BREAKPOINT);
-    isMobileRef.current = mql.matches;
+    setIsMobile(mql.matches);
     const onChange = (e: MediaQueryListEvent) => {
-      isMobileRef.current = e.matches;
+      setIsMobile(e.matches);
       if (!e.matches) setMobileOpen(false);
     };
     mql.addEventListener('change', onChange);
     return () => mql.removeEventListener('change', onChange);
   }, []);
 
-  // ESC closes the drawer. Only active while open to avoid leaking the
-  // global listener; tracks `mobileOpen` directly (no ref) since the
-  // effect re-runs cheaply on the rare open/close.
-  React.useEffect(() => {
-    if (!mobileOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [mobileOpen]);
+  // ESC closes the drawer (only active while open — no leaked listener).
+  const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
+  useEscape(mobileOpen, closeMobileDrawer);
+  // Focus trap inside the open drawer: focuses the first nav link on open,
+  // cycles Tab/Shift+Tab within, restores focus to the trigger on close.
+  // Same hook used by Modal/Drawer — single source of truth for the trap.
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(drawerRef, mobileOpen);
+  // Lock body scroll while the drawer is open so the content behind the
+  // scrim doesn't drift on touch. Shares a global counter with Modal/Drawer
+  // (kit-wide nesting safe).
+  useScrollLock(mobileOpen);
 
   // The DWIM toggle: mobile flips the drawer, desktop flips `collapsed`.
   // Same API surface (`headerApi.toggle`) — the consumer's hamburger keeps
@@ -305,14 +311,13 @@ function AppShellTopBranch({
   const headerApi: AppShellHeaderApi = {
     collapsed,
     toggle: () => {
-      if (isMobileRef.current) setMobileOpen((o) => !o);
+      if (isMobile) setMobileOpen((o) => !o);
       else setCollapsed(!collapsed);
     },
     setCollapsed,
   };
   const slot = (s: AppShellHeaderSlot): React.ReactNode =>
     typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
-  const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
 
   return (
     <div className={cx(
@@ -334,13 +339,14 @@ function AppShellTopBranch({
       <div className="appshell__body">
         {hasSidebar && (
           <aside
+            ref={drawerRef}
             className="appshell__sidebar"
             aria-label={t['appshell.mainNav']}
-            /* When the drawer is closed in mobile, hide the nav from
-               assistive tech so a screen reader doesn't tab through 30
-               offscreen links. The check is best-effort (initial render is
-               desktop-shaped → not hidden); the listener flips it on resize. */
-            aria-hidden={isMobileRef.current && !mobileOpen ? true : undefined}
+            /* Closed mobile drawer: hide from assistive tech so a screen
+               reader doesn't tab through 30 offscreen links. Now that
+               `isMobile` is state (not a ref), this attribute actually
+               lands on the DOM at every relevant render. */
+            aria-hidden={isMobile && !mobileOpen ? true : undefined}
           >
             <nav className="appshell__nav">
               {sections.map((s, i) => (
