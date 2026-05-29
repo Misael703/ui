@@ -3105,6 +3105,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline--compact .timeline__item { gap: var(--space-2); }
 .timeline--compact .timeline__marker { width: 16px; height: 16px; border-width: 2px; margin-top: 3px; }
 .timeline--compact .timeline__marker > svg { width: 10px; height: 10px; }
+/* In compact density, the milestone marker shrinks to 16px (the compact rule's
+   `.timeline--compact .timeline__marker { width: 16px }` wins on specificity
+   over `.timeline__marker--milestone { width: 32px }`). The 1.30.1 milestone
+   `margin-left: -4` was sized to align the 32px milestone CENTRE with the 24px
+   default centre — in compact, where milestone and default are BOTH 16px, no
+   shift is needed and the −4 misaligns the milestone 4px to the left of the
+   connector. Reset to 0 in compact only. v1.30.6 visual fix. */
+.timeline--compact .timeline__marker--milestone { margin-left: 0; }
 /* Compact marker: margin-top:3 + height:16 = bottom 19; top:17 = −2px overlap (v1.30.5). */
 .timeline--compact .timeline__item:not(:last-child)::before { left: 7px; top: 17px; }
 .timeline--compact .timeline__title { font-size: var(--text-xs); font-weight: 600; }

@@ -221,6 +221,39 @@ test.describe('Scenario · Timeline milestone variant', () => {
     }
   });
 
+  test('compact: milestone marker centre aligns with connector + default markers (v1.30.6)', async ({ page }) => {
+    // In compact, milestone shrinks to 16px (compact CSS wins on specificity)
+    // but the 1.30.1 `margin-left: -4` (sized for the 32px milestone in default
+    // density) was not overridden — it shifted the compact milestone 4px LEFT
+    // of the connector. v1.30.6 resets margin-left to 0 in compact so the
+    // 3 markers + connector all sit on the same x-axis.
+    await page.goto('/scenarios/timeline-milestone-compact', { waitUntil: 'networkidle' });
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const centres = await page.evaluate((tone) => {
+        const root = document.querySelector(`[data-testid="tlc-${tone}"]`)!;
+        const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
+        // items[0] default, items[1] milestone, items[2] default
+        const d0 = items[0].querySelector('.timeline__marker') as HTMLElement;
+        const m  = items[1].querySelector('.timeline__marker--milestone') as HTMLElement;
+        const d1 = items[2].querySelector('.timeline__marker') as HTMLElement;
+        const beforeCS = getComputedStyle(items[0], '::before');
+        const beforeLeft  = parseFloat(beforeCS.left);
+        const beforeWidth = parseFloat(beforeCS.width);
+        const prevRect = items[0].getBoundingClientRect();
+        return {
+          connectorCx: prevRect.left + beforeLeft + beforeWidth / 2,
+          d0Cx: d0.getBoundingClientRect().left + d0.getBoundingClientRect().width / 2,
+          mCx:  m.getBoundingClientRect().left  + m.getBoundingClientRect().width  / 2,
+          d1Cx: d1.getBoundingClientRect().left + d1.getBoundingClientRect().width / 2,
+        };
+      }, t);
+      expect(Math.abs(centres.connectorCx - centres.d0Cx), `tone ${t} compact: default[0] ≠ connector`).toBeLessThanOrEqual(1);
+      expect(Math.abs(centres.connectorCx - centres.mCx),  `tone ${t} compact: milestone (${centres.mCx.toFixed(2)}) ≠ connector (${centres.connectorCx.toFixed(2)})`).toBeLessThanOrEqual(1);
+      expect(Math.abs(centres.connectorCx - centres.d1Cx), `tone ${t} compact: default[2] ≠ connector`).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('the connector vertical line is centered on the marker x-axis (v1.30.4)', async ({ page }) => {
     // Pre-1.30.4 the marker box-sizing was content-box (the kit ships no global
     // reset), so `width: 24px + border: 2px` rendered at 28px → centre x=14,

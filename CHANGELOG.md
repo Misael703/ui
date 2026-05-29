@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.6] — 2026-05-29
+
+**Patch. Compact + milestone alignment.** In `density="compact"` the milestone
+marker shrinks from 32px to 16px (compact CSS wins on specificity over the
+milestone width rule). But the 1.30.1 `margin-left: -4` — sized to centre the
+**32px** milestone against the 24px default in default density — was not
+overridden in compact. Result: a 16px milestone with margin-left:-4 sat 4px
+LEFT of the 16px default and the connector. Visible as a dog-leg in story #10.
+
+### Fixed
+- **`.timeline--compact .timeline__marker--milestone { margin-left: 0 }`.** In
+  compact, milestone and default markers are both 16px → nothing to compensate
+  → no shift. All three markers + the connector now share the same x-axis.
+- New smoke scenario `/scenarios/timeline-milestone-compact` (`default →
+  milestone → default` per tone at compact density) + assertion that the
+  3 marker centres land within 1px of the connector centre per tone.
+
 ## [1.30.5] — 2026-05-29
 
 **Patch. Connector top symmetry.** 1.30.3 closed the gap on the BOTTOM side of

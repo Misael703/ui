@@ -224,6 +224,29 @@ export function ScenarioSemanticBadgeRow() {
  * fill color reading from the per-item `--timeline-tone`. Catches a future
  * drift in the milestone CSS (e.g. someone reverting size or losing the halo).
  */
+/**
+ * Scenario 6b — **Timeline milestone in compact density** (v1.30.6). Seam: in
+ * compact, the milestone marker shrinks to 16px (compact CSS wins on
+ * specificity), but the 1.30.1 `margin-left: -4` (designed for the 32px
+ * milestone in default density) was not overridden — it shifted the compact
+ * milestone 4px LEFT of the connector. v1.30.6 resets margin-left to 0 in
+ * compact so all three marker centres line up with the connector.
+ */
+export function ScenarioTimelineMilestoneCompact() {
+  const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
+  return (
+    <div style={{ padding: 24, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'start' }} data-scenario="timeline-milestone-compact">
+      {tones.map((t) => (
+        <K.Timeline key={t} density="compact" data-testid={`tlc-${t}`}>
+          <K.TimelineItem tone={t} title={`before ${t}`} />
+          <K.TimelineItem variant="milestone" tone={t} title={`anchor ${t}`} />
+          <K.TimelineItem tone={t} title={`event ${t}`} />
+        </K.Timeline>
+      ))}
+    </div>
+  );
+}
+
 export function ScenarioTimelineMilestone() {
   const tones = ['neutral', 'success', 'info', 'warning', 'danger'] as const;
   return (
