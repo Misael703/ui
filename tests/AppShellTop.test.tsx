@@ -269,6 +269,19 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*--appshell-header-height:\s*56px/);
   });
 
+  it('CSS: top shell heights use 100vh + 100dvh fallback (iOS Safari URL-bar safe)', () => {
+    // `100vh` first (older browsers), `100dvh` second (overrides on Chrome
+    // 108+ / Safari 16.4+ to track the dynamic viewport edge). Both must be
+    // present in the same rule.
+    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
+  });
+
+  it('CSS: mobile aside height uses calc(100vh - header) with dvh fallback (no `bottom: 0`)', () => {
+    // Pre-fix the aside used `bottom: 0` which iOS Safari clips by the URL
+    // bar. Now: explicit height with the dvh override.
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*height:\s*calc\(100vh\s*-\s*var\(--appshell-header-height\)\)[^}]*height:\s*calc\(100dvh\s*-\s*var\(--appshell-header-height\)\)/);
+  });
+
   it('CSS: header min-height reads from the same var (single source of truth)', () => {
     expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*min-height:\s*var\(--appshell-header-height\)/);
   });

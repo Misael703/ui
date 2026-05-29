@@ -61,6 +61,32 @@ describe('AppShell', () => {
     fireEvent.click(screen.getByLabelText(/Colapsar/i));
     expect(screen.getByLabelText(/Expandir/i)).toBeInTheDocument();
   });
+
+  /* Audit P1 #4 fix (v1.31.0): the side brand sidebar must carry
+     `data-tone="inverse"` so descendants (Avatar / Badge / inline icons /
+     links) re-scope their foreground tokens. Pre-fix, only the `top` brand
+     HEADER carried inverse — the `side` brand sidebar surface was the only
+     band where descendants kept default foreground colors (potential AA
+     contrast failure on text against the brand-primary surface). */
+  it('side brand sidebar carries data-tone="inverse" (band-aware descendants)', () => {
+    const { container } = render(
+      <AppShell theme="brand" brand="A" sections={[]}>
+        <div />
+      </AppShell>
+    );
+    const aside = container.querySelector('aside.appshell__sidebar');
+    expect(aside?.getAttribute('data-tone')).toBe('inverse');
+  });
+
+  it('side default sidebar does NOT carry data-tone (no re-scoping in light theme)', () => {
+    const { container } = render(
+      <AppShell brand="A" sections={[]}>
+        <div />
+      </AppShell>
+    );
+    const aside = container.querySelector('aside.appshell__sidebar');
+    expect(aside?.hasAttribute('data-tone')).toBe(false);
+  });
 });
 
 describe('PageHeader', () => {

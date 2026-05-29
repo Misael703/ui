@@ -2730,8 +2730,15 @@ button, input, select, textarea { box-sizing: border-box; }
      the content scrolls. Without this the whole .appshell grows past 100vh
      and the PAGE scrolls, carrying the header away and desyncing the sidebar.
      The shell now owns the viewport height → render it at the root or inside a
-     100vh container. `side` is untouched (it uses the sticky model). */
+     100vh container. `side` is untouched (it uses the sticky model).
+     `dvh` is the **dynamic** viewport unit: shrinks with the iOS Safari
+     URL bar so the bottom of the shell stays inside the visible area
+     (Chrome 108+, Safari 16.4+). Older browsers ignore the second
+     declaration and keep `100vh` — same shape, just clipped at the address
+     bar. Two declarations (not `dvh` alone) because some browsers still
+     fall back to default `auto` if they don't recognise the unit. */
   height: 100vh;
+  height: 100dvh;
   /* Public var so consumers can anchor sticky sub-headers/drawers to the
      header's bottom edge without hardcoding the 56. Kept in sync with the
      header `min-height` rule below; if you bump one, bump both. */
@@ -2850,18 +2857,28 @@ button, input, select, textarea { box-sizing: border-box; }
   .appshell--header-top .appshell__sidebar {
     position: fixed;
     top: var(--appshell-header-height);
-    bottom: 0; left: 0;
+    left: 0;
     width: min(280px, 85vw);
+    /* iOS Safari clips `bottom: 0` on fixed elements by the URL bar
+       (the dynamic viewport edge). Size by height instead so the
+       bottom stays at the visible viewport edge: `calc(100vh - header)`
+       for legacy, overridden by `dvh` on supporting browsers. */
+    height: calc(100vh - var(--appshell-header-height));
+    height: calc(100dvh - var(--appshell-header-height));
     transform: translateX(-100%);
     transition: transform var(--duration-base) var(--ease-standard);
     z-index: 40;
-    background: var(--bg-surface);
-    border-right: 1px solid var(--border-default);
     overflow: auto;
-    height: auto;
+    /* `background` + `border-right` intentionally NOT restated — the base
+       `.appshell__sidebar` already paints `var(--bg-surface)` + the default
+       border, and `.appshell--brand .appshell__sidebar` (specificity (0,2,0),
+       same as this rule) re-paints the surface to primary on brand. Restating
+       them here ties on specificity and wins by source order, which silently
+       broke the brand variant before this comment existed. */
   }
   /* Brand surfaces lose the dark hairline against the primary blue;
-     swap for the white-α idiom used on brand bands. */
+     swap for the white-α idiom used on brand bands. The (0,3,0) compound
+     beats both base and the brand rule above. */
   .appshell--brand.appshell--header-top .appshell__sidebar {
     border-right-color: rgba(255, 255, 255, 0.12);
   }
@@ -2875,7 +2892,11 @@ button, input, select, textarea { box-sizing: border-box; }
     display: block;
     position: fixed;
     top: var(--appshell-header-height);
-    left: 0; right: 0; bottom: 0;
+    left: 0; right: 0;
+    /* Same iOS URL-bar reasoning as the aside above: size by height,
+       not `bottom: 0`, so the scrim doesn't clip behind the URL bar. */
+    height: calc(100vh - var(--appshell-header-height));
+    height: calc(100dvh - var(--appshell-header-height));
     background: var(--backdrop);
     z-index: 35;
   }

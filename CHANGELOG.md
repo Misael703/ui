@@ -73,6 +73,41 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   public barrel `src/index.ts` (kept internal until names + docs stabilise).
   Modal/Drawer behaviour byte-identical (9/9 tests still green).
 
+### iOS Safari URL-bar safety (post-review)
+- **`100vh` → `100vh` + `100dvh` fallback** on `.appshell.appshell--header-top`
+  height so the shell tracks the dynamic viewport edge as the URL bar
+  shows/hides. Older browsers ignore the second declaration and keep `100vh`
+  (same shape, clipped at the bar). Chrome 108+, Safari 16.4+ use `dvh`.
+- **Mobile aside + scrim sized by `calc(100vh - header)` / `calc(100dvh -
+  header)`** instead of `bottom: 0` — iOS Safari clipped fixed `bottom: 0`
+  by the URL bar. Now the bottom edge tracks the visible viewport.
+
+### `side` brand sidebar band-aware (audit P1 #4)
+- `<aside class="appshell__sidebar">` now carries `data-tone="inverse"`
+  when `theme="brand"`, mirroring the `top` brand header treatment.
+  Descendants (Avatar / Badge / inline icons / links) re-scope foreground
+  tokens automatically — previously they kept their default colors against
+  the brand-primary surface, a potential AA contrast failure on text.
+
+### Mobile drawer variant smoke (matrix)
+- 3 new smoke routes pin the variant combinations: `brand` (sidebar
+  surface stays themed + white-α right border), `collapsedRail`
+  (mobile overrides the desktop 72px rail rule), `no-nav` (no aside +
+  header still compacts to `auto 1fr auto`).
+- Visual pass via Playwright MCP confirmed the 4 mobile scenarios at
+  375×667 + desktop at 1280×800 with no regression.
+
+### Bug caught by the variant smoke
+- The original mobile rule restated `background: var(--bg-surface)` on
+  the aside, which TIED on specificity with `.appshell--brand
+  .appshell__sidebar { background: var(--color-primary) }` and won by
+  source order — silently flattening the brand surface to white in
+  mobile. The brand smoke caught it (sum of RGB channels = 765 = white).
+  Fix: drop the redundant `background` / `border-right` from the mobile
+  rule (both already on the base `.appshell__sidebar`), let the brand
+  rule paint as designed. Comment in the CSS documents the trap so a
+  future contributor doesn't reintroduce it.
+
 ## [1.30.6] — 2026-05-29
 
 **Patch. Compact + milestone alignment.** In `density="compact"` the milestone

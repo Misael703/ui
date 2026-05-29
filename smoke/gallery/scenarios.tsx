@@ -253,6 +253,14 @@ export function ScenarioTimelineMilestoneCompact() {
  * same `header.left` render-prop trigger that toggles `collapsed` on desktop
  * must DWIM into open/close drawer on mobile. ESC + scrim-tap also close.
  * Asserted via Playwright resize across the breakpoint.
+ *
+ * 7b/7c/7d add the variant matrix:
+ *   - brand: drawer over brand-themed shell (sidebar border switches to the
+ *     white-α hairline; data-tone="inverse" cascades into descendants).
+ *   - rail: `collapsedRail=true` does NOT interfere with the mobile overlay
+ *     (mobile rules override the rail's `grid-template-columns: 72px 1fr`).
+ *   - no-nav: `sections=[]` → no aside, no drawer logic; the header still
+ *     compacts to `auto 1fr auto` so the brand/right zones don't choke.
  */
 export function ScenarioAppShellTopMobile() {
   return (
@@ -287,6 +295,97 @@ export function ScenarioAppShellTopMobile() {
             <div key={i} style={{ height: 200, marginBottom: 12, border: '1px dashed var(--border-default)', borderRadius: 12 }} />
           ))}
         </div>
+      </K.AppShell>
+    </div>
+  );
+}
+
+/* 7b — brand variant: mobile drawer over a fully-themed shell. Sidebar tint
+   is `--color-primary`; the new white-α `border-right-color` rule must fire
+   so the right edge separator stays visible against the dark surface. */
+export function ScenarioAppShellTopMobileBrand() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-brand">
+      <K.AppShell
+        headerLayout="top"
+        theme="brand"
+        sections={sections}
+        header={{
+          left: ({ toggle }) => (
+            <button
+              type="button"
+              data-testid="trigger"
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.24)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <K.MenuIcon size={18} />
+            </button>
+          ),
+          center: <strong>Despachos</strong>,
+          right: <K.Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 16 }}>contenido</div>
+      </K.AppShell>
+    </div>
+  );
+}
+
+/* 7c — collapsedRail variant: mobile rules must override the 72px rail
+   (`grid-template-columns: 72px 1fr` on desktop) and put the aside as a
+   fixed overlay anyway. */
+export function ScenarioAppShellTopMobileRail() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-rail">
+      <K.AppShell
+        headerLayout="top"
+        collapsedRail
+        sections={sections}
+        header={{
+          left: ({ toggle }) => (
+            <button
+              type="button"
+              data-testid="trigger"
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <K.MenuIcon size={18} />
+            </button>
+          ),
+          center: <strong>Despachos</strong>,
+        }}
+      >
+        <div style={{ padding: 16 }}>contenido</div>
+      </K.AppShell>
+    </div>
+  );
+}
+
+/* 7d — top-bar-only variant: no `sections` means no aside, no drawer logic.
+   The mobile header rules (`grid-template-columns: auto 1fr auto`) must
+   still fire so a long center brand doesn't choke against the right zone
+   in 375px. */
+export function ScenarioAppShellTopMobileNoNav() {
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-nonav">
+      <K.AppShell
+        headerLayout="top"
+        header={{
+          left: <strong style={{ fontSize: 14 }}>Cobros</strong>,
+          right: <span style={{ color: 'var(--fg-muted)', fontSize: 12 }}>Mesón Khipu</span>,
+        }}
+      >
+        <div style={{ padding: 16 }}>flujo plano sin nav</div>
       </K.AppShell>
     </div>
   );

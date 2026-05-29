@@ -445,7 +445,17 @@ export function AppShell(props: AppShellProps) {
   const { brand, brandCollapsed, topbar, user } = props;
   return (
     <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
-      <aside className="appshell__sidebar" aria-label={t['appshell.mainNav']}>
+      {/* On a brand sidebar the surface is dark, so re-scope foreground
+          tokens via data-tone="inverse" — anything inside (Avatar, badges,
+          inline icons, links) becomes band-aware automatically without
+          per-call-site colors. Mirrors the `top` brand header treatment;
+          fixes audit P1 #4 where the side brand sidebar was the only
+          band where descendants kept their default foreground colors. */}
+      <aside
+        className="appshell__sidebar"
+        aria-label={t['appshell.mainNav']}
+        data-tone={theme === 'brand' ? 'inverse' : undefined}
+      >
         <div className="appshell__brand">
           {collapsed ? (brandCollapsed ?? brand) : brand}
         </div>
