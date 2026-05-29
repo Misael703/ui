@@ -5,6 +5,25 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.2] — 2026-05-29
+
+**Patch. Visual regression fix.** The connector line between a default item
+and a milestone item below it ended ~6px ABOVE the milestone marker — the line
+hung in the air instead of reaching into the marker top.
+
+### Fixed
+- **Connector reaches the milestone marker top.** The default item's
+  connector is calibrated for the 24px marker that normally follows it
+  (`bottom: -12px`); when a 32px milestone marker follows, the larger marker
+  border sits 6px lower and the translucent halo above it doesn't bridge the
+  gap visually — leaving the line hanging. Now `.timeline__item:has(+
+  .timeline__item--milestone)::before { bottom: -20px }` extends the line so
+  it lands 2px past the marker border top → solid line into solid border, no
+  visible gap. Scoped via `:has(+ …)` so default → default connectors are
+  untouched. Pinned by an extended Playwright spec on
+  `/scenarios/timeline-milestone` that asserts the connector's pseudo bottom Y
+  reaches at least the milestone marker top Y, for each of the 5 tones.
+
 ## [1.30.1] — 2026-05-30
 
 **Patch. Visual regression fix.** v1.30.0 added the `milestone` variant

@@ -207,10 +207,10 @@ test.describe('Scenario · Timeline milestone variant', () => {
       const centres = await page.evaluate((tone) => {
         const root = document.querySelector(`[data-testid="tl-${tone}"]`)!;
         const m = (root.querySelector('.timeline__marker--milestone') as HTMLElement).getBoundingClientRect();
-        // The default item's marker is the only `.timeline__marker` NOT also
-        // carrying the milestone class — pick the second item's marker.
+        // Scenario layout (v1.30.2): [default, milestone, default]. The default
+        // BELOW the milestone is items[2]; items[0] is the default ABOVE.
         const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
-        const defaultMarker = items[1].querySelector('.timeline__marker') as HTMLElement;
+        const defaultMarker = items[2].querySelector('.timeline__marker') as HTMLElement;
         const d = defaultMarker.getBoundingClientRect();
         return { milestoneCx: m.left + m.width / 2, defaultCx: d.left + d.width / 2 };
       }, t);
@@ -218,6 +218,43 @@ test.describe('Scenario · Timeline milestone variant', () => {
         Math.abs(centres.milestoneCx - centres.defaultCx),
         `tone ${t}: milestone centre (${centres.milestoneCx.toFixed(2)}) ≠ default centre (${centres.defaultCx.toFixed(2)})`,
       ).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('the connector from a default item REACHES the milestone marker top (v1.30.2 regression)', async ({ page }) => {
+    await page.goto('/scenarios/timeline-milestone', { waitUntil: 'networkidle' });
+    // The default item's connector ends at `bottom: -12px` relative to its
+    // box — calibrated for the 24px marker that follows. When a 32px milestone
+    // follows, that ending sits ~6px ABOVE the milestone marker border top
+    // (the larger marker's border lands lower; the halo above it is
+    // translucent so it doesn't bridge the gap visually). v1.30.2 extends the
+    // connector to `bottom: -20px` ONLY when followed by a milestone, so the
+    // line reaches into the milestone marker top. Asserted by computing the
+    // pseudo's visual bottom Y vs the milestone marker top Y for each tone.
+    const tones = ['neutral', 'success', 'info', 'warning', 'danger'];
+    for (const t of tones) {
+      const reach = await page.evaluate((tone) => {
+        const root = document.querySelector(`[data-testid="tl-${tone}"]`)!;
+        const items = Array.from(root.querySelectorAll('.timeline__item')) as HTMLElement[];
+        // items[0] = default ABOVE, items[1] = milestone.
+        const prev = items[0];
+        const milestone = items[1].querySelector('.timeline__marker--milestone') as HTMLElement;
+        const prevRect = prev.getBoundingClientRect();
+        const markerRect = milestone.getBoundingClientRect();
+        // `getComputedStyle(el, '::before').bottom` returns the resolved
+        // numeric value (e.g. "-20px"). A negative bottom means the pseudo's
+        // bottom edge sits OUTSIDE its container — `|value|` pixels below the
+        // container's bottom edge.
+        const beforeBottom = parseFloat(getComputedStyle(prev, '::before').bottom);
+        const connectorEndY = prevRect.bottom - beforeBottom; // since beforeBottom is negative
+        // `reach` ≥ 0 means the connector reaches at least the marker top
+        // (the line continues into the marker, no air gap).
+        return { reach: connectorEndY - markerRect.top, connectorEndY, markerTopY: markerRect.top };
+      }, t);
+      expect(
+        reach.reach,
+        `tone ${t}: connector hangs ${(-reach.reach).toFixed(1)}px above the milestone marker (ended at y=${reach.connectorEndY.toFixed(1)}, marker top y=${reach.markerTopY.toFixed(1)})`,
+      ).toBeGreaterThanOrEqual(0);
     }
   });
 });

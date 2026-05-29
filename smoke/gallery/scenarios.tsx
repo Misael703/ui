@@ -229,12 +229,15 @@ export function ScenarioTimelineMilestone() {
   return (
     <div style={{ padding: 24, display: 'grid', gap: 16, gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'start' }} data-scenario="timeline-milestone">
       {tones.map((t) => (
-        // Each tone renders a milestone anchor + a default operational item
-        // below — the 1.30.1 center-alignment fix is exercised end-to-end
-        // (the regression only appeared when MIXING sizes, not in an
-        // all-milestone row). The marker centres of both items must sit on
-        // the same vertical axis.
+        // Each tone renders default → milestone → default. Two seams in one
+        // strip: the 1.30.1 center-alignment fix (X-axis: milestone marker
+        // centred with default markers) AND the 1.30.2 connector-reach fix
+        // (Y-axis: the previous default's connector must REACH the
+        // milestone marker top, not hang in the air above the halo). The
+        // top default item exposes the 1.30.2 bug; the bottom one exposes
+        // the milestone→default direction.
         <K.Timeline key={t} data-testid={`tl-${t}`}>
+          <K.TimelineItem tone={t} title={`before ${t}`} />
           <K.TimelineItem variant="milestone" tone={t} title={`anchor ${t}`} />
           <K.TimelineItem tone={t} title={`event ${t}`} />
         </K.Timeline>

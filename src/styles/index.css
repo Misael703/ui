@@ -3067,6 +3067,18 @@ button, input, select, textarea { box-sizing: border-box; }
 .timeline__item:has(> .timeline__marker--milestone):not(:last-child)::before {
   top: 36px; /* 32px marker + 2px margin-top + 2px clearance (was 28px for 24px) */
 }
+/* When a milestone FOLLOWS a default item, extend the previous item's
+   connector down so it reaches into the milestone marker's top edge instead
+   of hanging in the air ~6px above it. The default rule's `bottom: -12px`
+   was sized for the 24px marker (margin-top: 2px → border top at y=2);
+   the milestone marker is at the same margin-top but its border top sits
+   6px lower (because the line also has to clear the translucent halo
+   between the line end and the border to read continuous). The new
+   `bottom: -20px` lands the line 2px past the milestone border top — solid
+   line → solid border, no visible gap. v1.30.2 visual regression fix. */
+.timeline__item:has(+ .timeline__item--milestone):not(:last-child)::before {
+  bottom: calc(var(--space-4) * -1 - 4px);
+}
 /* Pending milestone: preserve the "not yet" semantics — bigger anchor slot
    but still hollow muted, no halo. */
 .timeline__item--pending .timeline__marker--milestone {
