@@ -554,8 +554,11 @@ test.describe('Scenario · AppShell side mobile drawer', () => {
   test('hamburger opens; chevron closes (does NOT toggle collapsed)', async ({ page }) => {
     const root = page.locator('.appshell');
     await expect(root).not.toHaveClass(/is-mobile-open/);
+    // Scenario boots with defaultCollapsed=true to exercise the binary-
+    // drawer-in-mobile semantics (chevron close, brand full).
+    const collapsedBefore = await root.evaluate((el) => el.classList.contains('is-collapsed'));
 
-    // Open via the hamburger button (aria-label varies by locale).
+    // Open via the hamburger button.
     await page.locator('.appshell__hamburger').click();
     await page.waitForTimeout(150);
     await expect(root).toHaveClass(/is-mobile-open/);
@@ -566,8 +569,19 @@ test.describe('Scenario · AppShell side mobile drawer', () => {
     await chevron.click();
     await page.waitForTimeout(150);
     await expect(root).not.toHaveClass(/is-mobile-open/);
-    // And `collapsed` is left untouched.
-    await expect(root).not.toHaveClass(/is-collapsed/);
+    // And `collapsed` is left untouched (still matches its initial value).
+    const collapsedAfter = await root.evaluate((el) => el.classList.contains('is-collapsed'));
+    expect(collapsedAfter, `collapse state should not change via chevron in mobile (was ${collapsedBefore}, now ${collapsedAfter})`).toBe(collapsedBefore);
+  });
+
+  test('mobile-open shows the FULL brand even when collapsed=true (binary drawer)', async ({ page }) => {
+    await page.locator('.appshell__hamburger').click();
+    await page.waitForTimeout(150);
+    // Pre-fix: brandCollapsed ("EA") rendered while drawer was open → tiny
+    // mark in an empty band. Post-fix the full brand renders.
+    const brandText = await page.locator('.appshell__brand').textContent();
+    expect(brandText).toContain('El Alba · v0.1');
+    expect(brandText).not.toBe('EA');
   });
 
   test('ESC closes the drawer + body scroll lock engages', async ({ page }) => {

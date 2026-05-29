@@ -122,6 +122,13 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   brand-text, foot-text, navchildren, sidebar-foot layout). A persisted
   `collapsed=true` (from desktop via `persistKey` or controlled mode) no
   longer strips the drawer's content when the user reaches it on a phone.
+- **Brand block now picks the FULL `brand` in mobile-open** (instead of
+  `brandCollapsed`). Pre-fix, a shell with `defaultCollapsed=true` or a
+  persisted desktop collapse showed `brandCollapsed` (mark-only) inside
+  the open mobile drawer — a tiny logo floating in an empty band, while
+  the labels below rendered full-size. Inconsistent. Now both the brand
+  content selection AND the visibility cascade treat the open mobile
+  drawer as fully expanded.
 - **ESC closes the drawer; focus traps inside the open drawer; body
   scroll locks while open.** Reuses the shared `useFocusTrap` /
   `useEscape` / `useScrollLock` hooks (the same Modal/Drawer and the top

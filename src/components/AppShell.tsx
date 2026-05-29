@@ -488,7 +488,12 @@ export function AppShell(props: AppShellProps) {
         aria-hidden={isMobile && !mobileOpen ? true : undefined}
       >
         <div className="appshell__brand">
-          {collapsed ? (brandCollapsed ?? brand) : brand}
+          {/* Drawer is binary open/closed in mobile — show the FULL brand
+              even if `collapsed=true` (persisted from desktop). The CSS
+              `.is-collapsed.is-mobile-open` overrides already restore the
+              brand-text + padding; selecting `brandCollapsed` here would
+              undo all that and surface a tiny mark in an empty band. */}
+          {collapsed && !collapseButtonInMobileDrawer ? (brandCollapsed ?? brand) : brand}
         </div>
         <nav className="appshell__nav">
           {sections.map((s, i) => (

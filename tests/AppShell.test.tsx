@@ -191,6 +191,64 @@ describe('AppShell', () => {
     });
   });
 
+  it('side mobile open: shows the FULL brand even when collapsed=true (binary drawer)', () => {
+    withMatchMedia(true, () => {
+      const { container, getByLabelText } = render(
+        <AppShell
+          brand={<span data-testid="brand-full">El Alba · v0.1</span>}
+          brandCollapsed={<span data-testid="brand-mark">EA</span>}
+          defaultCollapsed
+          sections={[]}
+        >
+          <div />
+        </AppShell>
+      );
+      fireEvent.click(getByLabelText(/Abrir menú/i));
+      // Pre-fix: brandCollapsed ("EA") rendered while drawer was open in
+      // mobile, giving a tiny mark in an empty band. Now the full brand
+      // ("El Alba · v0.1") renders because the drawer is binary in mobile.
+      expect(container.querySelector('[data-testid="brand-full"]')).toBeTruthy();
+      expect(container.querySelector('[data-testid="brand-mark"]')).toBeNull();
+    });
+  });
+
+  it('side mobile closed: still picks brandCollapsed when collapsed=true (no drawer open)', () => {
+    withMatchMedia(true, () => {
+      const { container } = render(
+        <AppShell
+          brand={<span data-testid="brand-full">El Alba · v0.1</span>}
+          brandCollapsed={<span data-testid="brand-mark">EA</span>}
+          defaultCollapsed
+          sections={[]}
+        >
+          <div />
+        </AppShell>
+      );
+      // Drawer closed → the existing collapsed rendering is preserved (the
+      // mobile aside is offscreen anyway, but selection is consistent with
+      // the desktop semantics).
+      expect(container.querySelector('[data-testid="brand-mark"]')).toBeTruthy();
+      expect(container.querySelector('[data-testid="brand-full"]')).toBeNull();
+    });
+  });
+
+  it('side desktop collapsed: brandCollapsed wins (original behaviour)', () => {
+    withMatchMedia(false, () => {
+      const { container } = render(
+        <AppShell
+          brand={<span data-testid="brand-full">El Alba · v0.1</span>}
+          brandCollapsed={<span data-testid="brand-mark">EA</span>}
+          defaultCollapsed
+          sections={[]}
+        >
+          <div />
+        </AppShell>
+      );
+      expect(container.querySelector('[data-testid="brand-mark"]')).toBeTruthy();
+      expect(container.querySelector('[data-testid="brand-full"]')).toBeNull();
+    });
+  });
+
   it('side mobile closed: aria-hidden lands on the aside (state, not ref)', async () => {
     await new Promise<void>((resolve) => {
       withMatchMedia(true, () => {

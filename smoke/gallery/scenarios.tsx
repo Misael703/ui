@@ -442,13 +442,22 @@ export function ScenarioAppShellSideMobile() {
     <div style={{ height: '100vh' }} data-scenario="appshell-side-mobile">
       <K.AppShell
         theme="brand"
-        brand={<strong>El Alba</strong>}
+        defaultCollapsed
+        brand={<strong style={{ color: 'white' }}>El Alba · v0.1</strong>}
+        brandCollapsed={<strong style={{ color: 'white', fontSize: 14 }}>EA</strong>}
         sections={[
           { label: 'Operación', items: [
-            { id: 'home', label: 'Inicio', href: '#', active: true },
-            { id: 'orders', label: 'Pedidos', href: '#' },
+            { id: 'home', label: 'Inicio', icon: <K.MenuIcon size={18} />, href: '#', active: true },
+            { id: 'orders', label: 'Pedidos', icon: <K.MenuIcon size={18} />, href: '#', badge: 12 },
+            { id: 'products', label: 'Productos', icon: <K.MenuIcon size={18} />, href: '#' },
+            { id: 'dispatch', label: 'Despacho', icon: <K.MenuIcon size={18} />, href: '#' },
+          ] },
+          { label: 'Administración', items: [
+            { id: 'clients', label: 'Clientes', icon: <K.MenuIcon size={18} />, href: '#' },
+            { id: 'config', label: 'Configuración', icon: <K.MenuIcon size={18} />, href: '#' },
           ] },
         ]}
+        footer={<span className="appshell__foot-text" style={{ color: 'white' }}>Despachos · v0.1</span>}
         topbar={<span>Despacho</span>}
       >
         <div style={{ padding: 16 }} data-testid="content">
