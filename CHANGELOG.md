@@ -142,6 +142,22 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   assertions covering the chevron-closes + ESC-closes-with-scroll-lock
   paths.
 
+### No rail in mobile (caught by user)
+- Desktop body-grid rules for the `side` rail and the `top` hide/rail were
+  unscoped — they fired at every viewport. With `collapsed=true` persisted
+  from desktop (via `persistKey` or controlled mode) and the user on a
+  phone, the outer grid resolved to `72px 1fr` or `0 1fr` even though the
+  aside was already a fixed overlay. Visible artifact: a 72px (or 0)
+  empty grid track on the left of the content area — a phantom rail
+  margin pushing the content off-center.
+  Fix: scope the three desktop rules to `@media (min-width: 901px)`:
+  - `.appshell.is-collapsed { grid-template-columns: 72px 1fr }`
+  - `.appshell--header-top.is-collapsed .appshell__body { 0 1fr }`
+  - `.appshell--header-top.appshell--rail.is-collapsed .appshell__body { 72px 1fr }`
+  In mobile, the outer grid stays single-column (`1fr`) regardless of
+  `collapsed` / `collapsedRail`. The aside (fixed overlay) owns the
+  visibility of the menu; the grid only describes the content area.
+
 ### Bug caught by user (hide-mode collapse)
 - In `headerLayout="top"` without `collapsedRail`, when the user collapsed
   the sidebar the aside went `position: absolute` and slid off-screen

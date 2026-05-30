@@ -2518,7 +2518,13 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: 100vh; background: var(--bg-canvas);
   transition: grid-template-columns var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
-.appshell.is-collapsed { grid-template-columns: 72px 1fr; }
+/* Side rail collapse — scoped to desktop. Mobile is a portal-overlay drawer
+   (binary open/closed); a 72px rail would leave an empty gap to the left
+   of the content when the drawer is closed-but-collapsed. The mobile rule
+   below (single `1fr` column) owns the outer grid below 900px. */
+@media (min-width: 901px) {
+  .appshell.is-collapsed { grid-template-columns: 72px 1fr; }
+}
 .appshell__sidebar {
   background: var(--bg-surface);
   border-right: 1px solid var(--border-default);
@@ -2764,13 +2770,17 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: 0;
   transition: grid-template-columns var(--duration-base) var(--ease-standard);
 }
-.appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
-/* `collapsedRail`: collapse to a 72px icon rail instead of hiding the
-   sidebar (4 classes > the 3-class hide rule above, so this wins). The
-   nav-icon/label-hide/active-bar mechanics are shared with the `side`
-   layout via the root `.is-collapsed` (labels hidden, icons + active bar
-   kept). */
-.appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+/* Top hide-mode + rail body grid — desktop-only. In mobile the body is
+   single-column (`1fr`) regardless of `collapsed` / `collapsedRail`; the
+   aside is a fixed overlay (out of grid flow). Leaving these unscoped
+   leaked into mobile: collapsed+rail produced a 72px empty grid track
+   to the left of the content (the aside was no longer occupying it),
+   reading as a 72px left margin on the page. Scoped to `min-width:901px`
+   to match the rail/hide rules block below. */
+@media (min-width: 901px) {
+  .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
+  .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+}
 /* Top-bar-only (`sections` omitted, v1.27.0): no sidebar at all → body is a
    single column. The `<aside>` itself is not rendered (in the JSX), this just
    collapses the grid track. Placed after the rail rule so it wins on the (rare)

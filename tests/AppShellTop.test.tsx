@@ -276,6 +276,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
   });
 
+  it('CSS: top hide-mode + rail body grid rules live inside @media (min-width:901px) (mobile gap guard)', () => {
+    // The 0+1fr / 72px+1fr body grids only make sense on desktop, where the
+    // aside is in flow. In mobile the aside is fixed-overlay and any extra
+    // grid track on the left reads as a 72px / 0 margin on the content.
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*0\s+1fr/);
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+  });
+
   it('CSS: desktop main is explicitly pinned to grid-column 2 (hide-mode collapse bug guard)', () => {
     // When the aside goes `position: absolute` (hide-mode collapsed), it
     // leaves the grid flow → main auto-places to col 1 (0 width). Explicit

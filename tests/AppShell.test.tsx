@@ -26,6 +26,14 @@ describe('AppShell sidebar header alignment (CSS)', () => {
 
   /* Side mobile drawer (v1.31.0) — iOS Safari URL-bar safety + binary
      drawer (no collapsed-rail intermediate state in mobile). */
+  it('CSS: side rail (72px) is scoped to desktop (no rail gap in mobile)', () => {
+    // Pre-fix `.appshell.is-collapsed { grid-template-columns: 72px 1fr }`
+    // fired at every viewport. In mobile the aside is a fixed overlay, so a
+    // 72px grid track on the left became a visible empty margin next to the
+    // content. Must live inside `@media (min-width: 901px)`.
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell\.is-collapsed\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+  });
+
   it('CSS: side mobile aside uses 100vh + 100dvh fallback (no `bottom: 0`)', () => {
     expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell__sidebar\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
   });
