@@ -336,6 +336,52 @@ export function ScenarioAppShellTopMobileBrand() {
   );
 }
 
+/* 7c-controlled — top + collapsedRail with a CONTROLLED static button
+   (the TopbarRail Storybook story pattern). Pre-1.31 last fix, flipping
+   `collapsed` via a static consumer button (no render-prop) in mobile
+   read as dead — the aside was a fixed overlay that ignored collapsed.
+   Now `collapsed` mirrors to `mobileOpen` in mobile so the static button
+   opens the drawer. */
+export function ScenarioAppShellTopMobileRailControlled() {
+  function Inner() {
+    const [collapsed, setCollapsed] = React.useState(true);
+    return (
+      <K.AppShell
+        headerLayout="top"
+        collapsedRail
+        sections={sections}
+        collapsed={collapsed}
+        onCollapsedChange={setCollapsed}
+        header={{
+          left: (
+            <button
+              type="button"
+              data-testid="static-trigger"
+              onClick={() => setCollapsed((c) => !c)}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid var(--border-default)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <K.MenuIcon size={18} />
+            </button>
+          ),
+          center: <strong>Despachos</strong>,
+        }}
+      >
+        <div style={{ padding: 16 }}>contenido controlled</div>
+      </K.AppShell>
+    );
+  }
+  return (
+    <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-rail-controlled">
+      <Inner />
+    </div>
+  );
+}
+
 /* 7c — collapsedRail variant: mobile rules must override the 72px rail
    (`grid-template-columns: 72px 1fr` on desktop) and put the aside as a
    fixed overlay anyway. */

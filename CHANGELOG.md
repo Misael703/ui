@@ -142,6 +142,21 @@ and there was no built-in hamburger in the `top` header. Reported by despachos
   assertions covering the chevron-closes + ESC-closes-with-scroll-lock
   paths.
 
+### Controlled static button in mobile (caught by user)
+- A controlled consumer with a static button in `header.left` that calls
+  `setCollapsed` directly (i.e., not the render-prop `headerApi.toggle`)
+  read as dead in mobile: flipping `collapsed` had no visual effect
+  because the aside was a fixed overlay independent of `collapsed`. The
+  TopbarRail Storybook story is exactly this shape, and any consumer
+  using a custom header chrome with its own controlled state hits the
+  same wall.
+  Fix: in mobile, mirror `collapsed` → `mobileOpen`. Any change to
+  `collapsed` (controlled or uncontrolled) flips the drawer. A prev-value
+  ref prevents the initial-render auto-open that would otherwise fire
+  just because the shell happens to default to `collapsed=false`.
+  Semantics now: `collapsed=true` means "menu hidden" in both viewports —
+  rail/hide on desktop, drawer-closed on mobile.
+
 ### No rail in mobile (caught by user)
 - Desktop body-grid rules for the `side` rail and the `top` hide/rail were
   unscoped — they fired at every viewport. With `collapsed=true` persisted

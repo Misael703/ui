@@ -631,6 +631,36 @@ test.describe('Scenario · AppShell top desktop hide-collapsed — main placemen
 });
 
 /**
+ * Scenario 7c-controlled — top + collapsedRail + a CONTROLLED static
+ * button. The bug the user reported: a button that calls setCollapsed
+ * directly (no render-prop, no headerApi.toggle) read as dead in mobile
+ * because flipping `collapsed` had no visual effect (aside was a fixed
+ * overlay independent of collapsed). Fix mirrors `collapsed` to
+ * `mobileOpen` in mobile.
+ */
+test.describe('Scenario · AppShell top mobile drawer — controlled static button', () => {
+  test('controlled: static button that flips `collapsed` opens the drawer in mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile-rail-controlled', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const root = page.locator('.appshell');
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+    // Scenario boots with collapsed=true; drawer closed.
+
+    // Click the consumer-placed static button (which only calls setCollapsed).
+    await page.getByTestId('static-trigger').click();
+    await page.waitForTimeout(300);
+    await expect(root).toHaveClass(/is-mobile-open/);
+
+    // Click again: drawer closes.
+    await page.getByTestId('static-trigger').click();
+    await page.waitForTimeout(300);
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+  });
+});
+
+/**
  * Scenario 7c — top mobile drawer with `collapsedRail=true`. The desktop
  * rail rule (`.appshell--header-top.appshell--rail.is-collapsed
  * .appshell__body { grid-template-columns: 72px 1fr }`) is the highest-

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
@@ -405,6 +406,59 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       expect(container.querySelector('.appshell')).toHaveClass('is-mobile-open');
       // Listener lives on `document` (shared `useEscape` hook) — fire there.
       fireEvent.keyDown(document, { key: 'Escape' });
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('mobile + controlled: flipping `collapsed` mirrors to mobileOpen (drawer opens)', () => {
+    // The bug the user reported: a controlled consumer with a static
+    // button (no render-prop) that calls setCollapsed directly read as
+    // dead in mobile, because flipping `collapsed` is invisible in mobile
+    // (aside is fixed-overlay). Fix: in mobile, any `collapsed` change
+    // mirrors to `mobileOpen` so the drawer responds.
+    withMatchMedia(true, () => {
+      function Controlled() {
+        const [collapsed, setCollapsed] = React.useState(true);
+        return (
+          <AppShell
+            headerLayout="top"
+            sections={sections}
+            collapsed={collapsed}
+            onCollapsedChange={setCollapsed}
+            header={{
+              // Static button (NOT a render-prop) that flips controlled state.
+              left: <button data-testid="static-trigger" onClick={() => setCollapsed((c) => !c)}>m</button>,
+              center: 'brand',
+            }}
+          >x</AppShell>
+        );
+      }
+      const { container, getByTestId } = render(<Controlled />);
+      const root = container.querySelector('.appshell')!;
+      expect(root).not.toHaveClass('is-mobile-open');
+      // Initial is-collapsed=true (drawer closed in mobile).
+      expect(root).toHaveClass('is-collapsed');
+      fireEvent.click(getByTestId('static-trigger'));
+      // collapsed flipped → sync sets mobileOpen=true → drawer opens.
+      expect(root).toHaveClass('is-mobile-open');
+      // Click again: collapsed=true → drawer closes.
+      fireEvent.click(getByTestId('static-trigger'));
+      expect(root).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('mobile: initial render does NOT auto-open the drawer (prev-collapsed ref guard)', () => {
+    // Sync effect must only fire when `collapsed` actually changes. Otherwise
+    // mobile users would open onto a pre-open drawer just because their shell
+    // happens to default to `collapsed=false`.
+    withMatchMedia(true, () => {
+      const { container } = render(
+        <AppShell
+          headerLayout="top"
+          sections={sections}
+          header={{ left: <span /> , center: 'brand' }}
+        >x</AppShell>
+      );
       expect(container.querySelector('.appshell')).not.toHaveClass('is-mobile-open');
     });
   });

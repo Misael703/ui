@@ -292,6 +292,29 @@ function AppShellTopBranch({
     return () => mql.removeEventListener('change', onChange);
   }, []);
 
+  // Mirror `collapsed` to `mobileOpen` in mobile: any flip of `collapsed`
+  // (e.g. a controlled consumer's static hamburger that calls setCollapsed
+  // directly instead of going through `headerApi.toggle()`) opens/closes
+  // the drawer. Without this sync, a controlled consumer's button reads as
+  // dead in mobile — flipping `collapsed` is invisible because the aside
+  // is a fixed overlay that ignores collapsed in mobile.
+  //
+  // Semantics: `collapsed=true` means "menu hidden" in BOTH viewports
+  // (rail/hide on desktop, drawer-closed on mobile). The DWIM `toggle()`
+  // for the render-prop API still does its mobileOpen flip directly, but
+  // any out-of-band `collapsed` change also propagates here.
+  //
+  // Initial render must NOT auto-open the drawer just because
+  // `collapsed=false` happens to be the default — track previous value
+  // and only mirror when it actually changes.
+  const prevCollapsed = React.useRef(collapsed);
+  React.useEffect(() => {
+    if (!isMobile) return;
+    if (prevCollapsed.current === collapsed) return;
+    prevCollapsed.current = collapsed;
+    setMobileOpen(!collapsed);
+  }, [isMobile, collapsed]);
+
   // ESC closes the drawer (only active while open — no leaked listener).
   const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
   useEscape(mobileOpen, closeMobileDrawer);
