@@ -5,6 +5,24 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.1] — 2026-06-01
+
+**Patch. Scrollbar-width compensation in `useScrollLock`.** Setting
+`overflow: hidden` on the body to lock scroll while a Modal / Drawer /
+AppShell mobile drawer is open silently removed the page's vertical
+scrollbar. Without compensating, the visible viewport widened by the
+scrollbar width (~15px) and any layout that was sized to "viewport
+minus scrollbar" — including the AppShell header — looked ~15px
+narrower than fixed-position overlays (scrim, drawer) that always span
+the full viewport. Visible as a vertical strip of scrim showing past
+the right edge of the header when the mobile drawer opened.
+
+### Fixed
+- `useScrollLock` now reserves the scrollbar gutter via `padding-right`
+  on lock, and restores the original value on unlock. Page width stays
+  stable across the lock/unlock cycle, so the header (and any other
+  body-flow content) no longer mismatches with the scrim/drawer.
+
 ## [1.31.0] — 2026-06-01
 
 ### BREAKING CHANGES

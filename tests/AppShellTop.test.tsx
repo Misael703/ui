@@ -550,6 +550,28 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     });
   });
 
+  it('mobile: scroll lock preserves the body paddingRight value across lock/unlock (gutter compensation)', () => {
+    withMatchMedia(true, () => {
+      // Pre-set a custom padding-right on the body — the consumer's design.
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '12px';
+      const { getByTestId } = render(
+        <AppShell
+          sections={sections}
+          header={{ left: ({ toggle }) => <button data-testid="t" onClick={toggle}>m</button>, center: 'b' }}
+        >x</AppShell>
+      );
+      fireEvent.click(getByTestId('t'));
+      // Lock: paddingRight may or may not have been adjusted (jsdom reports
+      // scrollbar width = 0, so no gutter reservation happens here). The
+      // important contract is the RESTORE: closing must return to "12px".
+      fireEvent.click(getByTestId('t'));
+      expect(document.body.style.paddingRight, 'consumer padding-right must be restored').toBe('12px');
+      // Cleanup so the next test doesn't inherit.
+      document.body.style.paddingRight = '';
+    });
+  });
+
   it('mobile: opening the drawer moves focus into it; closing returns focus to the trigger', () => {
     withMatchMedia(true, () => {
       const { getByTestId, container } = render(
