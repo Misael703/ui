@@ -60,7 +60,6 @@ export function AdminDashboard(): React.ReactElement {
   return (
     <div style={{ height: '100vh' }}>
       <AppShell
-        headerLayout="top"
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
         sections={sections}

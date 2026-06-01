@@ -1,3 +1,139 @@
+# Consolidación a un solo AppShell — v1.31 BREAKING (2026-05-30)
+
+## Decisión
+
+Eliminar `headerLayout="side"`. El kit ya no expone dos layouts: queda solo
+`top`. Sin fase de deprecation porque no hay consumers reales del `side`
+(memoria del usuario: cobros-mesón y barritas usan `top`; despachos en build).
+
+Bump: **1.31.0 con sección BREAKING** en CHANGELOG. Saltarse v2.0.0 a
+propósito — semver tolerable porque la API removida no tiene callers.
+
+## Inventario
+
+### Eliminar (código)
+- **AppShell.tsx**: rama `side` del `AppShell()` (~60 líneas) — todo lo que
+  vive después del `if (props.headerLayout === 'top') { ... }`.
+- **AppShellSideProps interface**: tipos `side`-only (`brand`,
+  `brandCollapsed`, `topbar`, `user`, `headerLayout?: 'side'`).
+- **Discriminated union** `AppShellProps = AppShellSideProps |
+  AppShellTopProps`. Pasa a ser un solo interface (el `top`).
+- **`headerLayout` prop**: deja de ser parte de la API pública.
+- **`AppShellTopBranch`** subcomponente: se absorbe directamente en
+  `AppShell()` (ya no hay rama).
+
+### Eliminar (CSS, ~400 líneas)
+- `.appshell { grid-template-columns: 248px 1fr }` (default side outer grid)
+- `.appshell.is-collapsed { grid-template-columns: 72px 1fr }` (side rail)
+- `.appshell__brand`, `.appshell__brand-text`, `.appshell__foot-text`
+- `.appshell.is-collapsed .appshell__brand[-text]`
+- `.appshell.is-collapsed .appshell__navlabel[-section]`,
+  `.appshell.is-collapsed .appshell__navbadge`,
+  `.appshell.is-collapsed .appshell__navchildren`
+- `.appshell.is-collapsed .appshell__sidebar-foot`,
+  `.appshell.is-collapsed .appshell__collapse`
+- `.appshell--brand .appshell__sidebar`, `.appshell--brand .appshell__brand`,
+  `.appshell--brand .appshell__nav*`, `.appshell--brand
+  .appshell__sidebar-foot`, `.appshell--brand .appshell__collapse[:hover]`
+  (esos son los re-tints de brand para el sidebar side — el aside `top` no
+  los necesita en modo expandido normal)
+- `.appshell__sidebar-foot`, `.appshell__collapse[:hover]` (el chevron y
+  su contenedor solo existían en side)
+- `.appshell__main`, `.appshell__topbar`, `.appshell__topbar-content`,
+  `.appshell__topbar-user`, `.appshell__hamburger[:hover]`
+- `.appshell__scrim` base (queda solo dentro del bloque `top` mobile)
+- `@media (max-width: 900px) { ... }` legacy side mobile (todo el bloque)
+
+### Eliminar (locale)
+- `appshell.expandMenu` / `appshell.collapseMenu` / `appshell.expand` /
+  `appshell.collapse` (chevron labels solo-side)
+- `appshell.openMenu` (hamburger label solo-side)
+- `appshell.closeMenu` (chevron en mobile open solo-side)
+
+### Conservar (locale)
+- `appshell.mainNav` (aria-label del aside, usado por top también)
+- `appshell.breadcrumb` (PageHeader)
+
+### Eliminar (stories)
+- `Shell` (sidebar default + brand)
+- `BrandWithText` / `BrandTextColapsable` / `BrandTextColapsadoInicial`
+- `FootWithText` / `FooterTextColapsable` / `FooterTextColapsadoInicial`
+- El branch `side` del `Playground`
+
+### Conservar (stories)
+- `Playground` (sin la opción side — solo theme × headerTheme × rail × collapse)
+- `TopbarRail`, `TopbarUncontrolledRenderProp`, `TopbarOnlyNoNav`,
+  `TopbarMobileDrawer`
+
+### Eliminar (tests)
+- `tests/AppShell.test.tsx`: tests "renders sections, brand and content",
+  "toggles collapsed" (los del side branch), "side brand data-tone",
+  "side default data-tone", "side mobile open: chevron click closes",
+  "side desktop: chevron click toggles collapsed", "side mobile open:
+  ESC closes", "side mobile open: body scroll locked", "side mobile:
+  shows full brand", "side mobile closed: brandCollapsed", "side
+  desktop collapsed: brandCollapsed", "side mobile closed: aria-hidden",
+  "CSS: side rail 72px desktop-scoped", "CSS: side mobile aside 100dvh",
+  "CSS: side mobile-open neutralizes is-collapsed" (todo lo "side-").
+- `tests/AppShellPersist.test.tsx`: tests `side layout built-in collapse
+  button`, `top uncontrolled + persistKey + header render-prop toggle`
+  ya cubre el resto.
+- `tests/AppShellProps.test.tsx`: simplificar (no más discriminated union
+  → menos a testear).
+
+### Conservar (tests)
+- Todo `AppShellTop.test.tsx` (48 tests del top).
+- `AppShellPersist.test.tsx` casos `top`.
+- Tests del header alignment (CSS regex del brand padding — desaparece
+  con el brand block; ese test entero se borra).
+
+### Eliminar (smoke)
+- `smoke/app/scenarios/appshell-side-mobile/` + página
+- `ScenarioAppShellSideMobile` en gallery
+- 2 e2e tests en `scenarios.spec.ts` del describe "Scenario · AppShell
+  side mobile drawer"
+
+### Conservar (smoke)
+- Todos los scenarios top (7 escenarios: appshell-top-combobox,
+  appshell-top-mobile, appshell-top-mobile-brand, appshell-top-mobile-rail,
+  appshell-top-mobile-rail-controlled, appshell-top-mobile-nonav,
+  appshell-top-hide-collapsed).
+
+### CHANGELOG (sección BREAKING)
+```
+### BREAKING CHANGES
+- `headerLayout="side"` removed. The kit now exposes only one layout
+  (full-width header above the body). All side-only props removed:
+  `brand`, `brandCollapsed`, `topbar`, `user`. Consumers using `side`
+  must migrate: move brand to `header.center`, move user to
+  `header.right`, replace built-in hamburger with a render-prop trigger
+  in `header.left`. Removed locale keys: `appshell.expandMenu`,
+  `appshell.collapseMenu`, `appshell.expand`, `appshell.collapse`,
+  `appshell.openMenu`, `appshell.closeMenu`.
+- `headerLayout` prop removed (was the discriminator). `AppShellProps`
+  is no longer a discriminated union — single interface with `header`
+  + `sections` + `theme` + `headerTheme` + `collapsedRail` + the
+  shared base.
+```
+
+## Checklist
+
+- [ ] CSS: delete side rules (~400 lines)
+- [ ] React: collapse `AppShell()` to single body (no discriminator)
+- [ ] Types: `AppShellProps` simple interface
+- [ ] Locale: drop unused keys + es.ts entries
+- [ ] Stories: delete side stories, update Playground
+- [ ] Tests: delete side tests, simplify Props test
+- [ ] Smoke: delete side scenario + spec block
+- [ ] CHANGELOG: add BREAKING section at top of 1.31.0
+- [ ] `npm test` verde
+- [ ] `npm run smoke:ci` verde
+- [ ] Visual MCP: top mobile + desktop sanity
+- [ ] Commit + push (un solo commit grande con BREAKING)
+- [ ] CI verde → listo para merge
+
+---
+
 # AppShell `top` — Mobile drawer (2026-05-29)
 
 ## Problema

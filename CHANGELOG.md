@@ -5,14 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.31.0] — 2026-05-29
+## [1.31.0] — 2026-06-01
 
-**Minor. `headerLayout="top"` mobile drawer.** Pre-1.31, under 900px the `top`
-shell rendered the header + content but had no way to reach the nav: the legacy
-`@media (max-width: 900px)` block was written for `side` (recolumns `.appshell`
-via `grid-template-columns`, no-op on `top` which uses `grid-template-rows`),
-and there was no built-in hamburger in the `top` header. Reported by despachos
-+ cobros-mesón on their phones — the sidebar was simply unreachable.
+### BREAKING CHANGES
+- **`headerLayout="side"` removed.** The kit now exposes a single layout
+  (full-width header above the body). All `side`-only props removed:
+  `brand`, `brandCollapsed`, `topbar`, `user`. Migration: move brand to
+  `header.center`, move user/utilities to `header.right`, replace the
+  built-in hamburger with a render-prop trigger in `header.left`.
+- **`headerLayout` prop removed** (was the discriminator). `AppShellProps`
+  is no longer a discriminated union — a single flat interface exports
+  the kept props: `header`, `sections`, `theme`, `headerTheme`,
+  `collapsedRail`, `defaultCollapsed`, `collapsed`, `onCollapsedChange`,
+  `persistKey`, `footer`, `linkAs`, `className`, `children`.
+- **Removed locale keys**: `appshell.expandMenu`, `appshell.collapseMenu`,
+  `appshell.expand`, `appshell.collapse`, `appshell.openMenu`,
+  `appshell.closeMenu` (all chevron/hamburger labels were `side`-only).
+  Kept: `appshell.mainNav`, `appshell.breadcrumb`.
+- **Built-in collapse chevron removed** (was a `side`-only idiom). Collapse
+  is driven exclusively by the consumer's `header.left` render-prop now.
+- **CSS removed**: `.appshell__brand[-text]`, `.appshell__foot-text`,
+  `.appshell.is-collapsed .appshell__brand`, `.appshell--brand
+  .appshell__brand`, `.appshell--brand .appshell__collapse*`,
+  `.appshell__main`, `.appshell__topbar*`, `.appshell__hamburger*`,
+  `.appshell__collapse*`, and the legacy `@media (max-width: 900px)`
+  block that powered the `side` mobile drawer. ~400 lines of CSS deleted.
+
+**Minor (renamed scope). Mobile drawer + responsive hardening.** Pre-1.31,
+under 900px the shell rendered the header + content but had no way to reach
+the nav: the legacy `@media (max-width: 900px)` block was written for
+`side` (recolumns `.appshell` via `grid-template-columns`, no-op on the
+`top` shape which uses `grid-template-rows`), and there was no built-in
+hamburger. Reported by despachos + cobros-mesón on their phones — the
+sidebar was simply unreachable.
 
 ### Added
 - **Mobile drawer in `headerLayout="top"`.** Below 900px the sidebar becomes a

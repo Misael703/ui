@@ -1,12 +1,16 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronLeft, ChevronRight, MenuIcon } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
 
-// ---------- AppShell (Sidebar + Topbar + Content) -----------------------
+// ---------- AppShell (full-width header + sidebar + content) ------------
 // Designed to drop into a Next.js app/layout.tsx as a Client Component shell.
+//
+// v1.31 BREAKING: the kit no longer exposes a `side` layout. Only the
+// `top` shape exists: a full-width header above the body, three header
+// slots (left/center/right), a sidebar below for navigation, and a content
+// area that owns its own scroll. The `headerLayout` prop is removed.
 
 export interface NavItem {
   id: string;
@@ -27,20 +31,22 @@ export interface NavSection {
 
 export type AppShellTheme = 'default' | 'brand';
 
-export type AppShellHeaderLayout = 'side' | 'top';
-
 /**
  * Collapse API handed to header-slot render-props so a consumer-placed control
- * (e.g. a hamburger in `left`) can drive the sidebar — crucially in
- * **uncontrolled** mode, where the `top` layout otherwise has no toggle
- * affordance. This is what lets `persistKey` (uncontrolled) coexist with a
- * custom header trigger: the kit owns the state + persistence, the consumer
- * owns the trigger's look and placement.
+ * (e.g. a hamburger in `header.left`) can drive the sidebar — crucially in
+ * **uncontrolled** mode, where there is no built-in toggle affordance. This
+ * is what lets `persistKey` (uncontrolled) coexist with a custom header
+ * trigger: the kit owns the state + persistence, the consumer owns the
+ * trigger's look and placement.
+ *
+ * `toggle()` is DWIM by viewport: on desktop it flips `collapsed` (the
+ * rail/hide state); below 900px it flips an overlay drawer instead — same
+ * single click handler regardless of breakpoint.
  */
 export interface AppShellHeaderApi {
   /** Current collapsed state. */
   collapsed: boolean;
-  /** Flip the collapsed state (persisted if `persistKey` is set). */
+  /** Flip the collapsed state on desktop, or the drawer in mobile. */
   toggle: () => void;
   /** Set the collapsed state explicitly. */
   setCollapsed: (collapsed: boolean) => void;
@@ -49,7 +55,7 @@ export interface AppShellHeaderApi {
 /**
  * A header slot: a static node, or a render-prop receiving {@link AppShellHeaderApi}.
  * The function form is the only way to toggle an uncontrolled shell from the
- * header (no built-in toggle exists in `top`).
+ * header (no built-in toggle exists).
  */
 export type AppShellHeaderSlot =
   | React.ReactNode
@@ -65,23 +71,35 @@ export interface AppShellHeader {
 }
 
 /**
- * Props shared by both layouts. The layout-specific props live in
- * `AppShellSideProps` / `AppShellTopProps`; `AppShellProps` is the
- * discriminated union of the two, keyed on `headerLayout`.
+ * AppShell props.
+ *
+ * @example
+ * <AppShell
+ *   sections={sections}
+ *   header={{
+ *     left: ({ toggle }) => <button onClick={toggle}>Menu</button>,
+ *     center: <Logo />,
+ *     right: <Avatar />,
+ *   }}
+ * >
+ *   {children}
+ * </AppShell>
  */
-export interface AppShellBaseProps {
+export interface AppShellProps {
   /**
    * Navigation sections that populate the sidebar. Omit (or pass an empty
-   * array) in `headerLayout="top"` to render a **top-bar-only** shell — no
-   * sidebar at all, body collapses to a single column. Use when the app is
-   * flat-route (no panel nav), e.g. a kiosk/cobros-mesón style layout.
-   * Required (effectively) in `headerLayout="side"`: that layout is the
-   * sidebar; omitting sections renders an empty rail.
+   * array) to render a **top-bar-only** shell — no sidebar at all, body
+   * collapses to a single column. Use when the app is flat-route (no panel
+   * nav), e.g. a kiosk/checkout flow.
    */
   sections?: NavSection[];
+  /** Slot at the bottom of the sidebar (version label, env tag, etc.). */
   footer?: React.ReactNode;
+  /** Initial collapsed state (uncontrolled). */
   defaultCollapsed?: boolean;
+  /** Controlled collapsed state — pair with `onCollapsedChange`. */
   collapsed?: boolean;
+  /** Called when `collapsed` flips (controlled mode handshake). */
   onCollapsedChange?: (c: boolean) => void;
   /**
    * Persist the collapsed state in `localStorage[persistKey]` so it survives
@@ -95,83 +113,32 @@ export interface AppShellBaseProps {
   children: React.ReactNode;
   className?: string;
   /**
-   * Color theme (applies to both layouts):
+   * Sidebar color theme:
    * - `default` (light): claro, mejor para apps data-heavy de uso prolongado.
    * - `brand`: superficie azul de marca con texto blanco. Mayor brand recall.
-   *   En `side` tiñe el sidebar; en `top` tiñe header + sidebar (un solo knob).
+   *
+   * The header band's theme is `headerTheme`, defaulting to this value so
+   * `theme="brand"` tints both bands by default.
    */
   theme?: AppShellTheme;
-  /** Render-prop for navigation links so the host app can use Next.js Link, etc. */
-  linkAs?: (item: NavItem, content: React.ReactNode, className: string) => React.ReactNode;
-}
-
-/**
- * Sidebar layout (default, `headerLayout="side"` or omitted). The brand
- * block + collapse rail live in the sidebar; the topbar sits over the
- * content with a mobile hamburger. `header` is **not** valid here — that
- * slot belongs to the `top` layout.
- */
-export interface AppShellSideProps extends AppShellBaseProps {
-  headerLayout?: 'side';
-  /** Brand node in the sidebar header (expanded state). */
-  brand?: React.ReactNode;
-  /** Brand node shown when the rail is collapsed. Falls back to `brand`. */
-  brandCollapsed?: React.ReactNode;
-  /** Content of the topbar over the page (search, etc.). */
-  topbar?: React.ReactNode;
-  /** User slot at the right of the topbar (avatar/menu). */
-  user?: React.ReactNode;
-  /** Not valid in the `side` layout — the header slots belong to `top`. */
-  header?: never;
-}
-
-/**
- * Top-header layout (`headerLayout="top"`, v1.15.0). Full-width header
- * above the body with three slots (`header.{left,center,right}`); the
- * centre slot lands at the **true viewport centre** (1fr·auto·1fr grid).
- * The sidebar has no brand block and `collapsed` hides it entirely (no
- * 72px rail); the header is **invariant** to the collapse. `theme="brand"`
- * tints both bands. The `side`-only props are **not** valid here — put your
- * chrome in `header`.
- */
-export interface AppShellTopProps extends AppShellBaseProps {
-  headerLayout: 'top';
-  /** Slots for the full-width header. Brand usually goes in `center`. */
-  header?: AppShellHeader;
   /**
-   * Theme of the **header band only**, independent of the sidebar (`theme`).
-   * Defaults to `theme`, so `theme="brand"` still tints both bands (no
-   * change for existing consumers). Set `theme="default" headerTheme="brand"`
-   * for a branded top bar over a neutral, legible sidebar — common in
-   * data-heavy admin apps.
+   * Header band theme, independent of the sidebar (`theme`). Defaults to
+   * `theme`. Set `theme="default" headerTheme="brand"` for a branded top
+   * bar over a neutral, legible sidebar — common in data-heavy admin apps.
    */
   headerTheme?: AppShellTheme;
   /**
    * Collapse to an icon rail (72px) instead of hiding the sidebar entirely.
-   * Default `false` → `collapsed` hides the sidebar (the original `top`
-   * behavior). `true` → `collapsed` keeps a 72px rail showing the nav icons
-   * (labels hidden, active-item bar kept) — like the `side` layout — and
-   * renders a built-in expand/collapse toggle at the bottom of the rail.
+   * Default `false` → `collapsed` hides the sidebar (slides off-screen).
+   * `true` → `collapsed` keeps a 72px rail showing the nav icons (labels
+   * hidden, active-item bar kept).
    */
   collapsedRail?: boolean;
-  /** Not valid in `top` — use `header.center` for the brand. */
-  brand?: never;
-  /** Not valid in `top` — the sidebar collapses entirely. */
-  brandCollapsed?: never;
-  /** Not valid in `top` — use the `header` slots. */
-  topbar?: never;
-  /** Not valid in `top` — use `header.right`. */
-  user?: never;
+  /** Slots for the full-width header. */
+  header?: AppShellHeader;
+  /** Render-prop for navigation links so the host app can use Next.js Link, etc. */
+  linkAs?: (item: NavItem, content: React.ReactNode, className: string) => React.ReactNode;
 }
-
-/**
- * Discriminated union keyed on `headerLayout`. TypeScript enforces that
- * `header` is only accepted with `headerLayout="top"` and that
- * `brand`/`brandCollapsed`/`topbar`/`user` are only accepted with the
- * (default) `side` layout — passing the wrong prop for the layout is a
- * compile error instead of being silently ignored at runtime.
- */
-export type AppShellProps = AppShellSideProps | AppShellTopProps;
 
 // Recursive nav item, memoized so a single item's parent re-render doesn't
 // churn through every other item in the tree. Stability of `linkAs` and
@@ -182,7 +149,7 @@ export type AppShellProps = AppShellSideProps | AppShellTopProps;
 interface NavItemNodeProps {
   item: NavItem;
   depth: number;
-  linkAs?: AppShellBaseProps['linkAs'];
+  linkAs?: AppShellProps['linkAs'];
   onCloseMobile: () => void;
 }
 
@@ -228,47 +195,62 @@ const NavItemNode = React.memo(function NavItemNode({
 });
 
 /**
- * Mobile drawer breakpoint for `headerLayout="top"`. Below this, `toggle()`
- * flips an overlay drawer (`is-mobile-open`) instead of the desktop
- * collapse — see CSS `@media (max-width: 900px)` for the visual shape.
- * Kept in sync with that media query; if you change one, change both.
+ * Mobile drawer breakpoint. Below this, `toggle()` flips an overlay drawer
+ * (`is-mobile-open`) instead of the desktop collapse — see CSS
+ * `@media (max-width: 900px)` for the visual shape. Kept in sync with that
+ * media query; if you change one, change both.
  */
-const TOP_MOBILE_BREAKPOINT = '(max-width: 900px)';
+const MOBILE_BREAKPOINT = '(max-width: 900px)';
 
-/**
- * `headerLayout="top"` branch (v1.31.0 extracted from `AppShell` so the
- * mobile-drawer hooks — matchMedia listener + ESC handler + state — only
- * run when this layout is rendered, not for every `side` shell).
- *
- * The drawer is consumer-driven: there is no built-in hamburger in `top`.
- * In mobile (≤900px) `headerApi.toggle()` flips an overlay drawer instead
- * of toggling `collapsed`; in desktop it behaves as before. One control,
- * two behaviours by viewport — what Linear/Vercel do. `collapsed` is left
- * untouched in mobile so a user returning to desktop finds the rail/hide
- * state they configured.
- */
-interface AppShellTopBranchProps {
-  topProps: AppShellTopProps;
-  theme: AppShellTheme;
-  sections: NavSection[];
-  footer: React.ReactNode;
-  linkAs?: AppShellBaseProps['linkAs'];
-  className?: string;
-  collapsed: boolean;
-  setCollapsed: (v: boolean) => void;
-  children: React.ReactNode;
-}
-function AppShellTopBranch({
-  topProps, theme, sections, footer, linkAs, className,
-  collapsed, setCollapsed, children,
-}: AppShellTopBranchProps) {
+export function AppShell({
+  sections = [],
+  footer,
+  defaultCollapsed = false,
+  collapsed: ctrlCollapsed,
+  onCollapsedChange,
+  persistKey,
+  children,
+  className,
+  theme = 'default',
+  headerTheme: ctrlHeaderTheme,
+  collapsedRail = false,
+  header,
+  linkAs,
+}: AppShellProps) {
   const t = useLocale();
-  const { header } = topProps;
+  const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
+  const collapsed = ctrlCollapsed ?? internalCollapsed;
   // Header band themes independently of the sidebar; defaults to `theme`
-  // so `theme="brand"` keeps tinting both bands (back-compat).
-  const headerTheme = topProps.headerTheme ?? theme;
-  const collapsedRail = topProps.collapsedRail ?? false;
+  // so `theme="brand"` keeps tinting both bands.
+  const headerTheme = ctrlHeaderTheme ?? theme;
   const hasSidebar = sections.length > 0;
+
+  // SSR-safe persistence: the initial render uses `defaultCollapsed` (server
+  // and first client render agree → no hydration mismatch), then we sync from
+  // localStorage after mount. Only in uncontrolled mode; reads can throw
+  // (Safari private mode), so they're guarded. Runs once per persistKey.
+  React.useEffect(() => {
+    if (persistKey == null || ctrlCollapsed !== undefined) return;
+    try {
+      const stored = window.localStorage.getItem(persistKey);
+      if (stored === '0' || stored === '1') setInternalCollapsed(stored === '1');
+    } catch {
+      /* localStorage unavailable — keep defaultCollapsed */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once at mount; ctrlCollapsed read intentionally not tracked
+  }, [persistKey]);
+
+  const setCollapsed = (v: boolean) => {
+    if (ctrlCollapsed === undefined) setInternalCollapsed(v);
+    if (persistKey != null && ctrlCollapsed === undefined) {
+      try {
+        window.localStorage.setItem(persistKey, v ? '1' : '0');
+      } catch {
+        /* localStorage unavailable — persistence is best-effort */
+      }
+    }
+    onCollapsedChange?.(v);
+  };
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
   // Track whether matchMedia says we are below the mobile breakpoint. State
@@ -282,7 +264,7 @@ function AppShellTopBranch({
   const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia(TOP_MOBILE_BREAKPOINT);
+    const mql = window.matchMedia(MOBILE_BREAKPOINT);
     setIsMobile(mql.matches);
     const onChange = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
@@ -366,9 +348,7 @@ function AppShellTopBranch({
             className="appshell__sidebar"
             aria-label={t['appshell.mainNav']}
             /* Closed mobile drawer: hide from assistive tech so a screen
-               reader doesn't tab through 30 offscreen links. Now that
-               `isMobile` is state (not a ref), this attribute actually
-               lands on the DOM at every relevant render. */
+               reader doesn't tab through 30 offscreen links. */
             aria-hidden={isMobile && !mobileOpen ? true : undefined}
           >
             <nav className="appshell__nav">
@@ -397,182 +377,6 @@ function AppShellTopBranch({
           onClick={closeMobileDrawer}
           aria-hidden="true"
         />
-      )}
-    </div>
-  );
-}
-
-export function AppShell(props: AppShellProps) {
-  const {
-    sections = [], footer, defaultCollapsed = false,
-    collapsed: ctrlCollapsed, onCollapsedChange, persistKey,
-    children, className, theme = 'default', linkAs,
-  } = props;
-  const [internalCollapsed, setInternalCollapsed] = React.useState(defaultCollapsed);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const t = useLocale();
-  const collapsed = ctrlCollapsed ?? internalCollapsed;
-
-  // SSR-safe persistence: the initial render uses `defaultCollapsed` (server
-  // and first client render agree → no hydration mismatch), then we sync from
-  // localStorage after mount. Only in uncontrolled mode; reads can throw
-  // (Safari private mode), so they're guarded. Runs once per persistKey.
-  React.useEffect(() => {
-    if (persistKey == null || ctrlCollapsed !== undefined) return;
-    try {
-      const stored = window.localStorage.getItem(persistKey);
-      if (stored === '0' || stored === '1') setInternalCollapsed(stored === '1');
-    } catch {
-      /* localStorage unavailable — keep defaultCollapsed */
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once at mount; ctrlCollapsed read intentionally not tracked
-  }, [persistKey]);
-
-  const setCollapsed = (v: boolean) => {
-    if (ctrlCollapsed === undefined) setInternalCollapsed(v);
-    if (persistKey != null && ctrlCollapsed === undefined) {
-      try {
-        window.localStorage.setItem(persistKey, v ? '1' : '0');
-      } catch {
-        /* localStorage unavailable — persistence is best-effort */
-      }
-    }
-    onCollapsedChange?.(v);
-  };
-  const closeMobile = React.useCallback(() => setMobileOpen(false), []);
-
-  // Top-header variant: full-width header above the body. Topbar is
-  // invariant to `collapsed` (only the inner body's columns animate); brand
-  // lives in `header.center` at the true viewport centre. Default
-  // `headerLayout="side"` falls through to the legacy JSX below
-  // (byte-identical for existing consumers). The `props.headerLayout`
-  // check narrows the discriminated union, so `header` (top) and
-  // `brand`/`topbar`/`user` (side) are each only in scope in their branch.
-  if (props.headerLayout === 'top') {
-    return (
-      <AppShellTopBranch
-        topProps={props}
-        theme={theme}
-        sections={sections}
-        footer={footer}
-        linkAs={linkAs}
-        className={className}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      >
-        {children}
-      </AppShellTopBranch>
-    );
-  }
-
-  const { brand, brandCollapsed, topbar, user } = props;
-  // Mobile drawer hardening (v1.31.0) — same playbook as the top branch:
-  // - `isMobile` is state (not ref) so `aria-hidden` actually lands on the
-  //   aside when the drawer is closed in mobile.
-  // - The collapse chevron in the drawer footer pivots semantics when the
-  //   drawer is open in mobile: it closes the drawer instead of toggling
-  //   the rail (rail is meaningless on a portal-overlay drawer — the
-  //   previous "open + collapse-to-rail" state was a UX dead-end where the
-  //   drawer kept its 280px width but lost all labels). Icon stays
-  //   chevron-left as a "close to the left" affordance.
-  // - useFocusTrap + useEscape + useScrollLock from the shared hooks set
-  //   the same Modal/Drawer + top mobile drawer use.
-  const [isMobile, setIsMobile] = React.useState(false);
-  React.useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia('(max-width: 900px)');
-    setIsMobile(mql.matches);
-    const onChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-      if (!e.matches) setMobileOpen(false);
-    };
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, []);
-  const closeMobileDrawer = React.useCallback(() => setMobileOpen(false), []);
-  useEscape(mobileOpen, closeMobileDrawer);
-  const asideRef = React.useRef<HTMLElement>(null);
-  useFocusTrap(asideRef, mobileOpen);
-  useScrollLock(mobileOpen);
-  const collapseButtonInMobileDrawer = isMobile && mobileOpen;
-  return (
-    <div className={cx('appshell', `appshell--${theme}`, collapsed && 'is-collapsed', mobileOpen && 'is-mobile-open', className)}>
-      {/* On a brand sidebar the surface is dark, so re-scope foreground
-          tokens via data-tone="inverse" — anything inside (Avatar, badges,
-          inline icons, links) becomes band-aware automatically without
-          per-call-site colors. Mirrors the `top` brand header treatment;
-          fixes audit P1 #4 where the side brand sidebar was the only
-          band where descendants kept their default foreground colors. */}
-      <aside
-        ref={asideRef}
-        className="appshell__sidebar"
-        aria-label={t['appshell.mainNav']}
-        data-tone={theme === 'brand' ? 'inverse' : undefined}
-        aria-hidden={isMobile && !mobileOpen ? true : undefined}
-      >
-        <div className="appshell__brand">
-          {/* Drawer is binary open/closed in mobile — show the FULL brand
-              even if `collapsed=true` (persisted from desktop). The CSS
-              `.is-collapsed.is-mobile-open` overrides already restore the
-              brand-text + padding; selecting `brandCollapsed` here would
-              undo all that and surface a tiny mark in an empty band. */}
-          {collapsed && !collapseButtonInMobileDrawer ? (brandCollapsed ?? brand) : brand}
-        </div>
-        <nav className="appshell__nav">
-          {sections.map((s, i) => (
-            <div key={s.id ?? i} className="appshell__navsection">
-              {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
-              <ul>{s.items.map((it) => (
-                <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobile} />
-              ))}</ul>
-            </div>
-          ))}
-        </nav>
-        <div className="appshell__sidebar-foot">
-          {footer}
-          <button
-            type="button"
-            className="appshell__collapse"
-            onClick={() => {
-              if (collapseButtonInMobileDrawer) closeMobileDrawer();
-              else setCollapsed(!collapsed);
-            }}
-            aria-expanded={collapseButtonInMobileDrawer ? mobileOpen : !collapsed}
-            aria-label={
-              collapseButtonInMobileDrawer
-                ? t['appshell.closeMenu']
-                : (collapsed ? t['appshell.expandMenu'] : t['appshell.collapseMenu'])
-            }
-            title={
-              collapseButtonInMobileDrawer
-                ? undefined
-                : (collapsed ? t['appshell.expand'] : t['appshell.collapse'])
-            }
-          >
-            {collapseButtonInMobileDrawer
-              ? <ChevronLeft size={14} />
-              : (collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />)}
-          </button>
-        </div>
-      </aside>
-
-      <div className="appshell__main">
-        <header className="appshell__topbar">
-          <button
-            type="button"
-            className="appshell__hamburger"
-            aria-label={t['appshell.openMenu']}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((o) => !o)}
-          ><MenuIcon size={20} /></button>
-          <div className="appshell__topbar-content">{topbar}</div>
-          {user && <div className="appshell__topbar-user">{user}</div>}
-        </header>
-        <main className="appshell__content" role="main">{children}</main>
-      </div>
-
-      {mobileOpen && (
-        <div className="appshell__scrim" onClick={closeMobileDrawer} aria-hidden="true" />
       )}
     </div>
   );

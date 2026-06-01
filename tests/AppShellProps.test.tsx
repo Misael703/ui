@@ -3,48 +3,43 @@ import { render } from '@testing-library/react';
 import { AppShell } from '../src/components/AppShell';
 
 /**
- * AppShell props are a discriminated union keyed on `headerLayout`:
- * - `side` (default): brand / brandCollapsed / topbar / user
- * - `top`: header.{left,center,right}
- *
- * Passing a prop that doesn't belong to the active layout is a COMPILE
- * error (not silently ignored at runtime). The runtime tests below prove
- * each layout renders with its own props; the `_typeContract*` functions
- * below pin the type-level contract — validated by `tsc --noEmit`, not by
- * the runtime. If the union ever regresses to a flat interface, the
- * `@ts-expect-error` lines stop erroring and the build fails.
+ * AppShell props (v1.31+): single flat interface — no more discriminated
+ * union. The `headerLayout` prop was removed when the kit consolidated to a
+ * single layout. The `_typeContract` functions below pin removed props as
+ * type errors (validated by `tsc --noEmit`, not by the runtime).
  */
 const sections = [{ items: [{ id: 'home', label: 'Inicio', href: '#' }] }];
 
-describe('AppShell discriminated props', () => {
-  it('side layout (default) renders with brand/topbar/user', () => {
+describe('AppShell props', () => {
+  it('renders with header slots', () => {
     const { container } = render(
-      <AppShell brand="ALBA" topbar={<span>buscar</span>} user={<span>MO</span>} sections={sections}>
-        contenido
-      </AppShell>,
-    );
-    expect(container.querySelector('.appshell')).toBeTruthy();
-    expect(container.querySelector('.appshell__brand')).toBeTruthy();
-  });
-
-  it('top layout renders with header slots', () => {
-    const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>
+      <AppShell header={{ center: 'brand' }} sections={sections}>
         contenido
       </AppShell>,
     );
     expect(container.querySelector('.appshell--header-top')).toBeTruthy();
     expect(container.querySelector('.appshell__header-center')).toBeTruthy();
   });
+
+  it('renders without sections (top-bar-only)', () => {
+    const { container } = render(
+      <AppShell header={{ center: 'brand' }}>
+        contenido
+      </AppShell>,
+    );
+    expect(container.querySelector('.appshell--no-nav')).toBeTruthy();
+    expect(container.querySelector('.appshell__sidebar')).toBeNull();
+  });
 });
 
 // Type-level contract. Each @ts-expect-error MUST suppress a real error;
 // if the prop becomes accepted again, tsc fails the build.
-function _typeContractSideRejectsHeader() {
+function _typeContractRejectsHeaderLayout() {
   return (
     <AppShell
       sections={sections}
-      // @ts-expect-error — `header` solo es válido con headerLayout="top"
+      // @ts-expect-error — `headerLayout` was removed in 1.31 (only one layout exists)
+      headerLayout="top"
       header={{ center: 'x' }}
     >
       x
@@ -52,13 +47,24 @@ function _typeContractSideRejectsHeader() {
   );
 }
 
-function _typeContractTopRejectsBrand() {
+function _typeContractRejectsBrand() {
   return (
     <AppShell
-      headerLayout="top"
       sections={sections}
-      // @ts-expect-error — `brand` no es válido en headerLayout="top"
+      // @ts-expect-error — `brand` was removed in 1.31 (use `header.center`)
       brand="x"
+    >
+      x
+    </AppShell>
+  );
+}
+
+function _typeContractRejectsTopbar() {
+  return (
+    <AppShell
+      sections={sections}
+      // @ts-expect-error — `topbar` was removed in 1.31
+      topbar={<span>x</span>}
     >
       x
     </AppShell>

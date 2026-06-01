@@ -26,8 +26,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
   it('renders the top-layout modifier + header with three slots', () => {
     const { container } = render(
       <AppShell
-        headerLayout="top"
-        header={{
+                header={{
           left:   <button data-testid="hl">menu</button>,
           center: <span   data-testid="hc">brand</span>,
           right:  <span   data-testid="hr">user</span>,
@@ -45,7 +44,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('drops the sidebar brand block and the inline topbar in top layout', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell__brand')).toBeNull();
     expect(container.querySelector('.appshell__topbar')).toBeNull();
@@ -53,7 +52,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('theme="brand" applies to BOTH header and sidebar (headerTheme inherits theme)', () => {
     const { container } = render(
-      <AppShell headerLayout="top" theme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell theme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     const root = container.querySelector('.appshell');
     // sidebar brand (appshell--brand) + header brand (appshell--header-brand)
@@ -62,7 +61,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('headerTheme="brand" with theme="default" brands ONLY the header, not the sidebar', () => {
     const { container } = render(
-      <AppShell headerLayout="top" theme="default" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell theme="default" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     const root = container.querySelector('.appshell');
     expect(root).toHaveClass('appshell--default', 'appshell--header-brand');
@@ -72,14 +71,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('brand header carries data-tone="inverse" so its content is band-aware', () => {
     const { container } = render(
-      <AppShell headerLayout="top" headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell headerTheme="brand" header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell__header')).toHaveAttribute('data-tone', 'inverse');
   });
 
   it('default (non-brand) header has no data-tone', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell__header')).not.toHaveAttribute('data-tone');
   });
@@ -90,7 +89,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     // `header.left` control — in both hide and rail modes — so the shell never
     // renders its own toggle here. Avoids the two-control redundancy.
     const { container } = render(
-      <AppShell headerLayout="top" collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>
+      <AppShell collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell')).toHaveClass('appshell--rail');
     expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeNull();
@@ -101,7 +100,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     // so a header hamburger needs the API to flip the state. A static node
     // could never do this — only the render-prop form reaches setCollapsed.
     const { container } = render(
-      <AppShell headerLayout="top" header={{
+      <AppShell header={{
         left: ({ collapsed, toggle }) => (
           <button data-testid="burger" aria-expanded={!collapsed} onClick={toggle}>menu</button>
         ),
@@ -118,14 +117,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('static-node header slots still render unchanged (render-prop is opt-in)', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ left: <span data-testid="static">x</span>, center: 'b' }} sections={sections}>y</AppShell>
+      <AppShell header={{ left: <span data-testid="static">x</span>, center: 'b' }} sections={sections}>y</AppShell>
     );
     expect(container.querySelector('.appshell__header-left [data-testid="static"]')).toBeTruthy();
   });
 
   it('without collapsedRail there is no rail modifier (default = hide)', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'b' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'b' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell')).not.toHaveClass('appshell--rail');
   });
@@ -144,21 +143,20 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('default top layout (no headerTheme) does not brand the header', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'brand' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
     const root = container.querySelector('.appshell');
     expect(root).toHaveClass('appshell--header-default');
     expect(root).not.toHaveClass('appshell--header-brand');
   });
 
-  it('default (no headerLayout) is byte-identical to the legacy shell', () => {
+  it('renders the top header layout by default (no headerLayout prop)', () => {
+    // v1.31: the shell is always top — no discriminator needed.
     const { container } = render(
-      <AppShell brand={<span>brand</span>} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'brand' }} sections={sections}>x</AppShell>
     );
-    expect(container.querySelector('.appshell--header-top')).toBeNull();
-    expect(container.querySelector('.appshell__header')).toBeNull();
-    expect(container.querySelector('.appshell__brand')).toBeTruthy();
-    expect(container.querySelector('.appshell__topbar')).toBeTruthy();
+    expect(container.querySelector('.appshell--header-top')).toBeTruthy();
+    expect(container.querySelector('.appshell__header')).toBeTruthy();
   });
 
   // CSS guards: the topbar must (a) be invariant to collapse and (b) put the
@@ -229,7 +227,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
      area — no sidebar at all. For flat-route apps without panel nav. */
   it('without sections renders no sidebar, marks the shell `appshell--no-nav`', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'brand' }}>x</AppShell>
+      <AppShell header={{ center: 'brand' }}>x</AppShell>
     );
     const root = container.querySelector('.appshell')!;
     expect(root).toHaveClass('appshell--no-nav');
@@ -242,7 +240,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('explicit sections={[]} behaves the same as omitting it (top-bar-only)', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'b' }} sections={[]}>x</AppShell>
+      <AppShell header={{ center: 'b' }} sections={[]}>x</AppShell>
     );
     expect(container.querySelector('.appshell')).toHaveClass('appshell--no-nav');
     expect(container.querySelector('.appshell__sidebar')).toBeNull();
@@ -250,7 +248,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('with sections, no `appshell--no-nav` and the sidebar renders (back-compat)', () => {
     const { container } = render(
-      <AppShell headerLayout="top" header={{ center: 'b' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'b' }} sections={sections}>x</AppShell>
     );
     expect(container.querySelector('.appshell')).not.toHaveClass('appshell--no-nav');
     expect(container.querySelector('.appshell__sidebar')).toBeInTheDocument();
@@ -350,8 +348,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(true, () => {
       const { container, getByTestId } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{
             left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
             center: 'brand',
@@ -375,8 +372,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(false, () => {
       const { container, getByTestId } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{
             left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
             center: 'brand',
@@ -394,8 +390,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(true, () => {
       const { container, getByTestId } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{
             left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
             center: 'brand',
@@ -421,8 +416,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
         const [collapsed, setCollapsed] = React.useState(true);
         return (
           <AppShell
-            headerLayout="top"
-            sections={sections}
+                        sections={sections}
             collapsed={collapsed}
             onCollapsedChange={setCollapsed}
             header={{
@@ -454,8 +448,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(true, () => {
       const { container } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{ left: <span /> , center: 'brand' }}
         >x</AppShell>
       );
@@ -467,8 +460,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(true, () => {
       const { container, getByTestId } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{
             left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
             center: 'brand',
@@ -494,8 +486,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       withMatchMedia(true, () => {
         const { container } = render(
           <AppShell
-            headerLayout="top"
-            sections={sections}
+                        sections={sections}
             header={{ left: ({ toggle }) => <button onClick={toggle}>m</button>, center: 'b' }}
           >x</AppShell>
         );
@@ -514,8 +505,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       withMatchMedia(true, () => {
         const { container, getByTestId } = render(
           <AppShell
-            headerLayout="top"
-            sections={sections}
+                        sections={sections}
             header={{ left: ({ toggle }) => <button data-testid="t" onClick={toggle}>m</button>, center: 'b' }}
           >x</AppShell>
         );
@@ -533,8 +523,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(false, () => {
       const { container } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{ left: ({ toggle }) => <button onClick={toggle}>m</button>, center: 'b' }}
         >x</AppShell>
       );
@@ -549,8 +538,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       document.body.style.overflow = '';
       const { getByTestId } = render(
         <AppShell
-          headerLayout="top"
-          sections={sections}
+                    sections={sections}
           header={{ left: ({ toggle }) => <button data-testid="t" onClick={toggle}>m</button>, center: 'b' }}
         >x</AppShell>
       );
@@ -566,8 +554,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     withMatchMedia(true, () => {
       const { getByTestId, container } = render(
         <AppShell
-          headerLayout="top"
-          sections={[{ label: 'Op', items: [
+                    sections={[{ label: 'Op', items: [
             { id: 'a', label: 'Inicio', href: '/a' },
             { id: 'b', label: 'Pedidos', href: '/b' },
           ] }]}

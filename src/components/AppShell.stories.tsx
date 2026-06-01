@@ -31,155 +31,17 @@ const sections = [
   },
 ];
 
-const Shell = ({ theme, defaultCollapsed }: { theme?: AppShellTheme; defaultCollapsed?: boolean }) => (
-  <div style={{ height: 'calc(100vh - 32px)' }}>
-    <AppShell
-      theme={theme}
-      defaultCollapsed={defaultCollapsed}
-      brand={<Logo variant="horizontal" bg={theme === 'brand' ? 'dark' : 'light'} height={34} />}
-      brandCollapsed={<Logo variant="mark" bg={theme === 'brand' ? 'dark' : 'light'} height={34} />}
-      sections={sections}
-      topbar={
-        <div style={{ width: '100%', maxWidth: 360 }}>
-          <input className="input" placeholder="Buscar pedidos, productos, clientes…" />
-        </div>
-      }
-      user={<Avatar name="Misael Ocas" size={32} />}
-    >
-      <PageHeader
-        title="Pedidos"
-        description="Administra los pedidos abiertos del día"
-        actions={<Button>Nuevo pedido</Button>}
-      />
-      <div style={{ padding: 24, border: '1px dashed var(--border-default)', borderRadius: 12, textAlign: 'center', color: 'var(--fg-muted)' }}>
-        Aquí va el contenido de la página
-      </div>
-    </AppShell>
-  </div>
-);
-
-interface PlaygroundArgs {
-  headerLayout: 'side' | 'top';
-  theme: AppShellTheme;
-  headerTheme: AppShellTheme;
-  collapsedRail: boolean;
-  defaultCollapsed: boolean;
-}
-
-/**
- * **Playground** — configurable AppShell. Flip the controls to explore the
- * whole matrix; each control maps to a real prop:
- * `headerLayout` (side/top) × `theme` × `headerTheme` (top only) ×
- * `collapsedRail` (top only) × initial collapse. The named stories below
- * are kept as fixed references: the brand-text / footer collapse mechanism
- * (a usage pattern, not a single prop) and the collapsed rail look.
- */
-export const Playground: StoryObj<PlaygroundArgs> = {
-  argTypes: {
-    headerLayout: { control: 'inline-radio', options: ['side', 'top'] },
-    theme: { control: 'inline-radio', options: ['default', 'brand'] },
-    headerTheme: { control: 'inline-radio', options: ['default', 'brand'], if: { arg: 'headerLayout', eq: 'top' } },
-    collapsedRail: { control: 'boolean', if: { arg: 'headerLayout', eq: 'top' } },
-    defaultCollapsed: { control: 'boolean' },
-  },
-  args: { headerLayout: 'top', theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false },
-  render: (a) => {
-    // Remount the stateful shell when collapse-affecting args change, so the
-    // initial-collapse / rail controls take effect (useState init is read once).
-    const k = `${a.headerLayout}-${a.defaultCollapsed}-${a.collapsedRail}`;
-    return a.headerLayout === 'top'
-      ? <TopbarCenteredShell key={k} theme={a.theme} headerTheme={a.headerTheme} rail={a.collapsedRail} startCollapsed={a.defaultCollapsed} />
-      : <Shell key={k} theme={a.theme} defaultCollapsed={a.defaultCollapsed} />;
-  },
-};
-
-/**
- * Brand con texto y **sin** `brandCollapsed`. El texto va envuelto en
- * `<span className="appshell__brand-text">`: al colapsar el riel (botón
- * chevron abajo) el texto desaparece animado y solo queda el mark — sin
- * recortes. Reproduce el caso "Despachos · v0.1" sin necesidad de mantener
- * un nodo `brandCollapsed` aparte.
- */
-const BrandWithText = ({ collapsed }: { collapsed?: boolean }) => (
-  <div style={{ height: 'calc(100vh - 32px)' }}>
-    <AppShell
-      theme="brand"
-      defaultCollapsed={collapsed}
-      brand={
-        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Logo variant="mark" bg="dark" height={28} />
-          <span className="appshell__brand-text">Despachos · v0.1</span>
-        </span>
-      }
-      sections={sections}
-      user={<Avatar name="Misael Ocas" size={32} />}
-    >
-      <PageHeader title="Despacho" description="Riel colapsable sin brandCollapsed" />
-      <div style={{ padding: 24, border: '1px dashed var(--border-default)', borderRadius: 12, textAlign: 'center', color: 'var(--fg-muted)' }}>
-        Colapsa el riel con el chevron inferior: el texto del brand se va, el mark queda.
-      </div>
-    </AppShell>
-  </div>
-);
-
-export const BrandTextColapsable: StoryObj = {
-  name: 'Sidebar · Brand, texto colapsable',
-  render: () => <BrandWithText />,
-};
-
-export const BrandTextColapsadoInicial: StoryObj = {
-  name: 'Sidebar · Brand, texto colapsado',
-  render: () => <BrandWithText collapsed />,
-};
-
-/**
- * Footer con texto colapsable. Igual que `appshell__brand-text` pero para el
- * slot `footer`: envuelve el label de versión en
- * `<span className="appshell__brand-text">`-equivalente
- * `<span className="appshell__foot-text">` y al colapsar el riel el texto
- * desaparece animado en vez de partirse y solaparse con el toggle (caso
- * "Despachos · v0.1"). Colapsa el riel con el chevron inferior.
- */
-const FootWithText = ({ collapsed }: { collapsed?: boolean }) => (
-  <div style={{ height: 'calc(100vh - 32px)' }}>
-    <AppShell
-      theme="brand"
-      defaultCollapsed={collapsed}
-      brand={<Logo variant="horizontal" bg="dark" height={32} />}
-      brandCollapsed={<Logo variant="mark" bg="dark" height={32} />}
-      sections={sections}
-      footer={<span className="appshell__foot-text">Despachos · v0.1</span>}
-      user={<Avatar name="Misael Ocas" size={32} />}
-    >
-      <PageHeader title="Usuarios" description="Footer colapsable sin solape" />
-      <div style={{ padding: 24, border: '1px dashed var(--border-default)', borderRadius: 12, textAlign: 'center', color: 'var(--fg-muted)' }}>
-        Colapsa el riel: "Despachos · v0.1" se va, el toggle queda centrado.
-      </div>
-    </AppShell>
-  </div>
-);
-
-export const FooterTextColapsable: StoryObj = {
-  name: 'Sidebar · Footer colapsable',
-  render: () => <FootWithText />,
-};
-
-export const FooterTextColapsadoInicial: StoryObj = {
-  name: 'Sidebar · Footer colapsado',
-  render: () => <FootWithText collapsed />,
-};
-
-/* =============================================================================
- * `headerLayout="top"` — full-width header above the body (v1.15.0). Brand
- * lives in `header.center` at the TRUE viewport centre (`1fr auto 1fr`
- * column grid). Hamburger toggles `collapsed`: only the sidebar animates;
- * the topbar is invariant. `theme="brand"` tints both header and sidebar.
- * ===========================================================================*/
-
-function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, startCollapsed = false }: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean }) {
+/* Single shell used by the Playground + all named stories. Mirrors the
+   recommended pattern: brand in `header.center`, render-prop trigger in
+   `header.left` (so the shell owns collapse state), avatar in
+   `header.right`. Internal-scroll model — wrap in a 100vh container. */
+function ConfigurableShell({
+  theme = 'default',
+  headerTheme,
+  rail = false,
+  startCollapsed = false,
+}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean }) {
   const [collapsed, setCollapsed] = React.useState(startCollapsed);
-  // The header content (separators, icon buttons) follows the HEADER band's
-  // theme, which defaults to `theme`.
   const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
   return (
@@ -187,7 +49,6 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
       <AppShell
         theme={theme}
         headerTheme={headerTheme}
-        headerLayout="top"
         collapsedRail={rail}
         sections={sections}
         collapsed={collapsed}
@@ -222,9 +83,9 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
           ),
         }}
       >
-        {/* Sticky page sub-header: a direct child of the scroll container
-            (.appshell__content), so `top: 0` anchors to the top of the content
-            viewport while the header + sidebar stay put. */}
+        {/* A direct child of the scroll container (.appshell__content), so
+            `top: 0` anchors to the top of the content viewport while the
+            header and sidebar stay put. */}
         <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-canvas)', padding: '12px 24px', borderBottom: '1px solid var(--border-default)', fontWeight: 600 }}>
           Sub-header sticky · ancla al tope del contenido al scrollear
         </div>
@@ -239,20 +100,47 @@ function TopbarCenteredShell({ theme = 'default', headerTheme, rail = false, sta
   );
 }
 
+interface PlaygroundArgs {
+  theme: AppShellTheme;
+  headerTheme: AppShellTheme;
+  collapsedRail: boolean;
+  defaultCollapsed: boolean;
+}
+
+/**
+ * **Playground** — configurable AppShell. Flip the controls to explore the
+ * whole matrix: `theme` × `headerTheme` × `collapsedRail` × initial
+ * collapse. The named stories below pin the variants worth fixing in CI.
+ */
+export const Playground: StoryObj<PlaygroundArgs> = {
+  argTypes: {
+    theme: { control: 'inline-radio', options: ['default', 'brand'] },
+    headerTheme: { control: 'inline-radio', options: ['default', 'brand'] },
+    collapsedRail: { control: 'boolean' },
+    defaultCollapsed: { control: 'boolean' },
+  },
+  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false },
+  render: (a) => {
+    // Remount the stateful shell when collapse-affecting args change, so the
+    // initial-collapse / rail controls take effect (useState init is read once).
+    const k = `${a.defaultCollapsed}-${a.collapsedRail}`;
+    return <ConfigurableShell key={k} theme={a.theme} headerTheme={a.headerTheme} rail={a.collapsedRail} startCollapsed={a.defaultCollapsed} />;
+  },
+};
+
 /** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
- *  (icons, active-item bar) instead of hiding the sidebar. Collapse is driven
- *  by the header hamburger (`header.left`) — no built-in rail toggle, so there
- *  is a single control. Shown starting collapsed so the rail is visible.
- *  (Toggle `theme`/`collapsedRail` live in the Playground for the rest.) */
+ *  (icons, active-item bar) instead of hiding the sidebar. The render-prop
+ *  trigger drives the collapse. Shown starting collapsed so the rail is
+ *  visible. */
 export const TopbarRail: StoryObj = {
   name: 'Topbar · Rail (collapsedRail)',
-  render: () => <TopbarCenteredShell theme="brand" rail startCollapsed />,
+  render: () => <ConfigurableShell theme="brand" rail startCollapsed />,
 };
 
 /**
  * **Topbar · uncontrolled, header render-prop** (v1.23.0). The shell owns the
  * collapse state; the hamburger is a `header.left` **render-prop** that gets
- * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled `top`
+ * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled
  * shell from the header — and what lets `persistKey` (uncontrolled) coexist
  * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
  */
@@ -261,7 +149,6 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
   render: () => (
     <div style={{ height: '100vh' }}>
       <AppShell
-        headerLayout="top"
         collapsedRail
         sections={sections}
         header={{
@@ -295,17 +182,13 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
 /**
  * **Top-bar only** (v1.27.0) — for flat-route apps (kiosk, single-flow tools)
  * that don't need panel navigation. Omit `sections` and the shell renders just
- * the header band over a single-column content area (no sidebar at all). The
- * already-shipped `top` header slots (`left`/`center`/`right`) carry the brand
- * + chrome; no new component, no new variant. Empirical case: a checkout/cobros
- * mesón flow with a logo (linked home) + a context tag, nothing else.
+ * the header band over a single-column content area (no sidebar at all).
  */
 export const TopbarOnlyNoNav: StoryObj = {
   name: 'Topbar · Top-bar only (no sidebar)',
   render: () => (
     <div style={{ height: '100vh' }}>
       <AppShell
-        headerLayout="top"
         header={{
           left: <Logo variant="horizontal" bg="light" height={26} />,
           right: <span style={{ color: 'var(--fg-muted)', fontSize: 13 }}>Cobros Khipu · Mesón</span>,
@@ -325,9 +208,7 @@ export const TopbarOnlyNoNav: StoryObj = {
  * overlay anchored beneath the header. The same `header.left` render-prop
  * trigger that toggles `collapsed` on desktop now opens/closes the drawer
  * on mobile — one control, DWIM by viewport. ESC and a tap on the scrim
- * also close it. Resize the Storybook canvas (or open in your phone) to
- * see the breakpoint switch live; in a desktop frame this story looks
- * identical to `TopbarUncontrolledRenderProp`.
+ * also close it.
  */
 export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
@@ -335,7 +216,6 @@ export const TopbarMobileDrawer: StoryObj = {
   render: () => (
     <div style={{ height: '100vh' }}>
       <AppShell
-        headerLayout="top"
         sections={sections}
         header={{
           left: ({ collapsed, toggle }) => (

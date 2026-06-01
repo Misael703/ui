@@ -44,7 +44,7 @@ const block: React.CSSProperties = {
 };
 
 /**
- * AppShell `headerLayout="top"` (internal-scroll model, v1.24.0) with a sticky
+ * AppShell (internal-scroll model, v1.24.0) with a sticky
  * page sub-header and, low in the content, a searchable "Comuna" Combobox
  * (the v1.25.1 popover-resize case). Uncontrolled collapse driven by the
  * header render-prop (v1.23.0) — exercises that seam too.
@@ -54,7 +54,6 @@ export function ScenarioAppShellCombobox() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-combobox">
       <K.AppShell
-        headerLayout="top"
         collapsedRail
         sections={sections}
         header={{
@@ -151,7 +150,6 @@ export function ScenarioBrandCascade() {
   return (
     <div style={{ height: '100vh' }} data-scenario="brand-cascade">
       <K.AppShell
-        headerLayout="top"
         headerTheme="brand"
         sections={sections}
         header={{
@@ -266,7 +264,6 @@ export function ScenarioAppShellTopMobile() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile">
       <K.AppShell
-        headerLayout="top"
         sections={sections}
         header={{
           left: ({ collapsed, toggle }) => (
@@ -307,7 +304,6 @@ export function ScenarioAppShellTopMobileBrand() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-brand">
       <K.AppShell
-        headerLayout="top"
         theme="brand"
         sections={sections}
         header={{
@@ -347,7 +343,6 @@ export function ScenarioAppShellTopMobileRailControlled() {
     const [collapsed, setCollapsed] = React.useState(true);
     return (
       <K.AppShell
-        headerLayout="top"
         collapsedRail
         sections={sections}
         collapsed={collapsed}
@@ -389,7 +384,6 @@ export function ScenarioAppShellTopMobileRail() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-rail">
       <K.AppShell
-        headerLayout="top"
         collapsedRail
         sections={sections}
         header={{
@@ -427,7 +421,6 @@ export function ScenarioAppShellTopHideCollapsed() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-hide-collapsed">
       <K.AppShell
-        headerLayout="top"
         defaultCollapsed
         sections={sections}
         header={{
@@ -464,51 +457,12 @@ export function ScenarioAppShellTopMobileNoNav() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-nonav">
       <K.AppShell
-        headerLayout="top"
         header={{
           left: <strong style={{ fontSize: 14 }}>Cobros</strong>,
           right: <span style={{ color: 'var(--fg-muted)', fontSize: 12 }}>Mesón Khipu</span>,
         }}
       >
         <div style={{ padding: 16 }}>flujo plano sin nav</div>
-      </K.AppShell>
-    </div>
-  );
-}
-
-/* 7f — `side` layout in mobile: legacy drawer (slides from left, fixed
-   width 280px, scrim covers content). v1.31 closed three gaps: (1) the
-   chevron at the drawer foot used to toggle `collapsed` → drawer stayed
-   open at 280px but labels stripped (a UX dead-end). Now in mobile-open
-   the chevron closes the drawer. (2) No ESC / focus trap / body scroll
-   lock. Now via shared hooks. (3) iOS Safari clipped `bottom: 0`. Now
-   `100vh` + `100dvh` height. */
-export function ScenarioAppShellSideMobile() {
-  return (
-    <div style={{ height: '100vh' }} data-scenario="appshell-side-mobile">
-      <K.AppShell
-        theme="brand"
-        defaultCollapsed
-        brand={<strong style={{ color: 'white' }}>El Alba · v0.1</strong>}
-        brandCollapsed={<strong style={{ color: 'white', fontSize: 14 }}>EA</strong>}
-        sections={[
-          { label: 'Operación', items: [
-            { id: 'home', label: 'Inicio', icon: <K.MenuIcon size={18} />, href: '#', active: true },
-            { id: 'orders', label: 'Pedidos', icon: <K.MenuIcon size={18} />, href: '#', badge: 12 },
-            { id: 'products', label: 'Productos', icon: <K.MenuIcon size={18} />, href: '#' },
-            { id: 'dispatch', label: 'Despacho', icon: <K.MenuIcon size={18} />, href: '#' },
-          ] },
-          { label: 'Administración', items: [
-            { id: 'clients', label: 'Clientes', icon: <K.MenuIcon size={18} />, href: '#' },
-            { id: 'config', label: 'Configuración', icon: <K.MenuIcon size={18} />, href: '#' },
-          ] },
-        ]}
-        footer={<span className="appshell__foot-text" style={{ color: 'white' }}>Despachos · v0.1</span>}
-        topbar={<span>Despacho</span>}
-      >
-        <div style={{ padding: 16 }} data-testid="content">
-          contenido del side mobile
-        </div>
       </K.AppShell>
     </div>
   );

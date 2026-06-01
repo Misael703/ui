@@ -112,40 +112,7 @@ describe('usePopoverPosition — reposition listeners', () => {
   });
 });
 
-describe('Bug 2 — AppShell collapsed control', () => {
-  const sections = [{ items: [{ id: 'h', label: 'Home', href: '#' }] }];
-
-  it('exposes aria-expanded reflecting the collapsed state and stays clickable', () => {
-    const onCollapsedChange = vi.fn();
-    const { rerender } = render(
-      <AppShell theme="brand" sections={sections} collapsed={false} onCollapsedChange={onCollapsedChange}>
-        x
-      </AppShell>
-    );
-    const toggle = screen.getByRole('button', { name: 'Colapsar menú' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(toggle);
-    expect(onCollapsedChange).toHaveBeenCalledWith(true);
-
-    rerender(
-      <AppShell theme="brand" sections={sections} collapsed onCollapsedChange={onCollapsedChange}>
-        x
-      </AppShell>
-    );
-    const collapsedToggle = screen.getByRole('button', { name: 'Expandir menú' });
-    expect(collapsedToggle).toHaveAttribute('aria-expanded', 'false');
-    // Still in the DOM and clickable while collapsed (re-expand path exists).
-    fireEvent.click(collapsedToggle);
-    expect(onCollapsedChange).toHaveBeenLastCalledWith(false);
-  });
-
-  it('does not crash when collapsed without a brandCollapsed slot', () => {
-    expect(() =>
-      render(
-        <AppShell sections={sections} brand={<span>BIG BRAND NAME</span>} collapsed>
-          x
-        </AppShell>
-      )
-    ).not.toThrow();
-  });
-});
+/* Bug 2 (legacy): the side-only built-in chevron collapse toggle was
+   removed in v1.31 along with the `side` layout. The collapse is now
+   driven exclusively by the consumer's `header.left` render-prop trigger;
+   the kit no longer renders a built-in toggle. */

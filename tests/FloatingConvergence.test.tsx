@@ -157,35 +157,7 @@ describe('DatePicker / DateRangePicker — calendar via primitive', () => {
   });
 });
 
-describe('AppShell — appshell__brand-text convention', () => {
-  const sections = [{ items: [{ id: 'h', label: 'Home', href: '#' }] }];
-  const brand = (
-    <span>
-      <img data-testid="mark" alt="" />
-      <span className="appshell__brand-text">Despachos · v0.1</span>
-    </span>
-  );
-
-  it('keeps the mark and the brand-text span in the DOM when collapsed (CSS hides text, no clipping)', () => {
-    const { container } = render(
-      <AppShell sections={sections} brand={brand} collapsed>
-        x
-      </AppShell>
-    );
-    expect(container.querySelector('.appshell.is-collapsed')).toBeTruthy();
-    expect(screen.getByTestId('mark')).toBeInTheDocument();
-    const text = container.querySelector('.appshell__brand-text');
-    expect(text).toBeTruthy();
-    expect(text?.textContent).toBe('Despachos · v0.1');
-  });
-
-  it('renders the same brand markup when expanded', () => {
-    const { container } = render(
-      <AppShell sections={sections} brand={brand}>
-        x
-      </AppShell>
-    );
-    expect(container.querySelector('.appshell.is-collapsed')).toBeFalsy();
-    expect(container.querySelector('.appshell__brand-text')?.textContent).toBe('Despachos · v0.1');
-  });
-});
+/* The `appshell__brand-text` convention was a `side`-only opt-in for the
+   brand block to collapse with the rail. The `side` layout was removed in
+   v1.31; the brand now lives in `header.center` and is not affected by
+   collapse. No equivalent convention is needed in `top`. */

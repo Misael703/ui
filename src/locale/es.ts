@@ -26,12 +26,6 @@ export const esMessages: UiKitMessages = {
 
   // AppShell
   'appshell.mainNav': 'Navegación principal',
-  'appshell.expandMenu': 'Expandir menú',
-  'appshell.collapseMenu': 'Colapsar menú',
-  'appshell.expand': 'Expandir',
-  'appshell.collapse': 'Colapsar',
-  'appshell.openMenu': 'Abrir menú',
-  'appshell.closeMenu': 'Cerrar menú',
   'appshell.breadcrumb': 'Breadcrumb',
 
   // Notifications
