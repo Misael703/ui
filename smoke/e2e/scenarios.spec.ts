@@ -429,7 +429,7 @@ test.describe('Scenario · AppShell top — mobile drawer', () => {
       const r = el.getBoundingClientRect();
       return { position: s.position, transform: s.transform, right: Math.round(r.right) };
     });
-    expect(m.position, `mobile aside must be position:fixed (was ${m.position})`).toBe('fixed');
+    expect(m.position, `mobile aside must be position:absolute (was ${m.position})`).toBe('absolute');
     // translateX(-100%) → transform matrix shows the X translation. Cheap
     // proof: the right edge of the (translated) aside is at ≤0 (offscreen).
     expect(m.right, `mobile aside must be offscreen when closed (right=${m.right}px)`).toBeLessThanOrEqual(0);
@@ -475,20 +475,27 @@ test.describe('Scenario · AppShell top — mobile drawer', () => {
     await expect(page.locator('.appshell')).not.toHaveClass(/is-mobile-open/);
   });
 
-  test('mobile: the aside height uses dvh fallback (does not pin bottom: 0)', async ({ page }) => {
+  test('mobile: the aside matches .appshell__body height (anchored, not viewport math)', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
     await page.waitForTimeout(200);
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300);
 
-    // Pre-1.31 hardening, the aside used `bottom: 0` — iOS Safari clips that
-    // by the URL bar. Now it uses `height: calc(100vh - --appshell-header-
-    // height)` with a `100dvh` fallback. The serialized value lands either
-    // way; pin the rule.
-    const cssHeight = await page.locator('.appshell--header-top .appshell__sidebar').evaluate((el) => getComputedStyle(el).height);
-    // 667 viewport - 56 header = 611. Chromium serializes computed height
-    // as a px value; on browsers without dvh support the same number.
-    expect(parseInt(cssHeight, 10), `aside height should equal viewport - header (got ${cssHeight})`).toBeGreaterThanOrEqual(595);
-    expect(parseInt(cssHeight, 10), `aside height should not extend below viewport (got ${cssHeight})`).toBeLessThanOrEqual(615);
+    // v1.31.1: the aside lives inside .appshell__body with `position:
+    // absolute; top:0; bottom:0`. Its rendered height MATCHES the body's,
+    // regardless of what `--appshell-header-height` (var) says — the
+    // previous `calc(100dvh - header)` undershot or overshot whenever the
+    // rendered header differed from the var (e.g. consumer padding).
+    const m = await page.evaluate(() => {
+      const body = document.querySelector('.appshell__body') as HTMLElement;
+      const aside = document.querySelector('.appshell__sidebar') as HTMLElement;
+      return {
+        bodyH: Math.round(body.getBoundingClientRect().height),
+        asideH: Math.round(aside.getBoundingClientRect().height),
+      };
+    });
+    expect(m.asideH, `aside should match body height exactly (body=${m.bodyH}, aside=${m.asideH})`).toBe(m.bodyH);
   });
 });
 
@@ -520,7 +527,7 @@ test.describe('Scenario · AppShell top mobile drawer — brand variant', () => 
         borderRight: s.borderRightColor,
       };
     });
-    expect(m.position).toBe('fixed');
+    expect(m.position).toBe('absolute');
     // Brand sidebar: the existing `.appshell--brand .appshell__sidebar`
     // paints `--color-primary` (blue) — non-zero, non-white background.
     // We don't pin a specific hex (preset-dependent), only that it's not
@@ -610,7 +617,7 @@ test.describe('Scenario · AppShell top mobile drawer — collapsedRail variant'
     await page.waitForTimeout(200);
 
     const pos = await page.locator('.appshell__sidebar').evaluate((el) => getComputedStyle(el).position);
-    expect(pos, `rail mobile aside must be position:fixed (was ${pos})`).toBe('fixed');
+    expect(pos, `rail mobile aside must be position:absolute (was ${pos})`).toBe('absolute');
 
     await page.getByTestId('trigger').click();
     await page.waitForTimeout(300);

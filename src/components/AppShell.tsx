@@ -367,17 +367,20 @@ export function AppShell({
           </aside>
         )}
         <main className="appshell__content" role="main">{children}</main>
+        {/* Scrim is a child of the body so it MATCHES the body's exact
+            bounds via `position: absolute; inset: 0` — not a sibling of
+            the body using viewport-relative math, which couldn't keep up
+            when the actual header height drifted from the
+            `--appshell-header-height` var (e.g., 73 rendered vs 56 in the
+            var). Click-anywhere-out closes. */}
+        {mobileOpen && (
+          <div
+            className="appshell__scrim"
+            onClick={closeMobileDrawer}
+            aria-hidden="true"
+          />
+        )}
       </div>
-      {/* Scrim is only present (and only visible) while the drawer is open
-          in mobile. Click-anywhere-out closes; CSS keeps it under the
-          header so the trigger stays interactive. */}
-      {mobileOpen && (
-        <div
-          className="appshell__scrim"
-          onClick={closeMobileDrawer}
-          aria-hidden="true"
-        />
-      )}
     </div>
   );
 }

@@ -2661,6 +2661,16 @@ button, input, select, textarea { box-sizing: border-box; }
      header's bottom edge without hardcoding the 56. Kept in sync with the
      header `min-height` rule below; if you bump one, bump both. */
   --appshell-header-height: 56px;
+  /* Break out of any body margin / wrapper padding so the shell spans the
+     full viewport width. Without this, body's UA-default 8px margin (or
+     any container the consumer wraps the shell in) made the fixed-position
+     scrim + drawer extend past the shell's right edge — visible as a
+     vertical strip of scrim showing past the header. The classic CSS
+     breakout: `width: 100vw` for the full viewport, then `margin-left:
+     calc(50% - 50vw)` to recenter on the body's content edge so consumers
+     who DID reset body margin see the appshell rendering unchanged. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
 }
 .appshell--header-top .appshell__header {
   display: grid;
@@ -2681,6 +2691,14 @@ button, input, select, textarea { box-sizing: border-box; }
   grid-template-columns: 240px 1fr;
   min-height: 0;
   transition: grid-template-columns var(--duration-base) var(--ease-standard);
+  /* Positioning context for the mobile scrim + drawer. Anchoring them to
+     the body (not the viewport) makes them match the body's EXACT bounds
+     even when the header's rendered height drifts from
+     `--appshell-header-height` (e.g. consumer chrome makes the header
+     taller via padding or content). The scrim then perfectly covers the
+     same area the body occupies — no vertical extension past the body's
+     bottom edge. */
+  position: relative;
 }
 /* Top hide-mode + rail body grid — desktop-only. In mobile the body is
    single-column (`1fr`) regardless of `collapsed` / `collapsedRail`; the
@@ -2789,16 +2807,14 @@ button, input, select, textarea { box-sizing: border-box; }
      they used to open. Width caps at 85vw on narrow phones so a slice of
      content stays visible as a depth cue. */
   .appshell--header-top .appshell__sidebar {
-    position: fixed;
-    top: var(--appshell-header-height);
+    /* Anchored to `.appshell__body` (parent has `position: relative` in
+       this layout). Matches the body's exact bounds on top/left/bottom
+       regardless of the actual rendered header height. */
+    position: absolute;
+    top: 0;
+    bottom: 0;
     left: 0;
     width: min(280px, 85vw);
-    /* iOS Safari clips `bottom: 0` on fixed elements by the URL bar
-       (the dynamic viewport edge). Size by height instead so the
-       bottom stays at the visible viewport edge: `calc(100vh - header)`
-       for legacy, overridden by `dvh` on supporting browsers. */
-    height: calc(100vh - var(--appshell-header-height));
-    height: calc(100dvh - var(--appshell-header-height));
     transform: translateX(-100%);
     transition: transform var(--duration-base) var(--ease-standard);
     z-index: 40;
@@ -2824,13 +2840,14 @@ button, input, select, textarea { box-sizing: border-box; }
      the mobile aside is bumped to 40. */
   .appshell--header-top.is-mobile-open .appshell__scrim {
     display: block;
-    position: fixed;
-    top: var(--appshell-header-height);
-    left: 0; right: 0;
-    /* Same iOS URL-bar reasoning as the aside above: size by height,
-       not `bottom: 0`, so the scrim doesn't clip behind the URL bar. */
-    height: calc(100vh - var(--appshell-header-height));
-    height: calc(100dvh - var(--appshell-header-height));
+    /* Anchored to `.appshell__body` (its parent in v1.31.1) — `inset: 0`
+       makes it match the body's EXACT bounds regardless of the actual
+       rendered header height. The previous `position: fixed; top: var(
+       --appshell-header-height); height: calc(100dvh - header)` overshot
+       the body's bottom whenever consumer chrome made the rendered header
+       taller than the 56px var (e.g. via padding around a logo). */
+    position: absolute;
+    inset: 0;
     background: var(--backdrop);
     z-index: 35;
   }

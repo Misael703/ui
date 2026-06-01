@@ -5,6 +5,36 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.1] — 2026-06-01
+
+**Patch. AppShell mobile scrim / drawer now match the body's exact
+bounds.** User reported the mobile scrim mismatched the body in both
+axes:
+- Horizontal: scrim spanned the full viewport (320) while the header was
+  constrained by body's UA-default 8px margin (304) → ~8px gap on the
+  right.
+- Vertical: scrim was sized by `calc(100dvh − var(--appshell-header-
+  height))` using the 56px var, but the rendered header was 73px tall
+  (consumer chrome with padding around the logo) → scrim extended
+  ~17px past the body's bottom.
+
+### Fixed
+- `.appshell.appshell--header-top` spans the full viewport via the
+  classic breakout: `width: 100vw` + `margin-left: calc(50% - 50vw)`.
+  Consumers who already reset body margin see no difference.
+- The scrim moved into `.appshell__body` (was a sibling). It now uses
+  `position: absolute; inset: 0` against the body, so it matches the
+  body's bounds in both axes — no viewport math, no header-height var
+  to keep in sync.
+- The mobile drawer (aside) likewise switched from `position: fixed;
+  top: var(--appshell-header-height); height: calc(100dvh - header)` to
+  `position: absolute; top: 0; bottom: 0` anchored to the body. Same
+  argument: the body knows its own height.
+
+### Internal
+- `.appshell--header-top .appshell__body` gets `position: relative` so
+  the scrim + drawer can anchor to it.
+
 ## [1.31.0] — 2026-06-01
 
 ### BREAKING CHANGES
