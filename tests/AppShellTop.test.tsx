@@ -17,7 +17,10 @@ import { AppShell } from '../src/components/AppShell';
  * legacy `.appshell.is-collapsed` rule (2-class specificity) and breaks the
  * layout; logo not in true viewport center.
  */
-const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  // Strip CSS comments — they often contain `{` / `}` which break the
+  // `[^}]*` regex used to match property bodies.
+  .replace(/\/\*[\s\S]*?\*\//g, '');
 const sections = [
   { label: 'Operación', items: [{ id: 'home', label: 'Inicio', href: '#' }] },
 ];
@@ -291,10 +294,11 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--no-nav\)\s+\.appshell__content\s*\{[^}]*grid-column:\s*2/);
   });
 
-  it('CSS: mobile aside height uses calc(100vh - header) with dvh fallback (no `bottom: 0`)', () => {
-    // Pre-fix the aside used `bottom: 0` which iOS Safari clips by the URL
-    // bar. Now: explicit height with the dvh override.
-    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*height:\s*calc\(100vh\s*-\s*var\(--appshell-header-height\)\)[^}]*height:\s*calc\(100dvh\s*-\s*var\(--appshell-header-height\)\)/);
+  it('CSS: mobile aside uses top:0 + bottom:0 (matches body bounds, no viewport math)', () => {
+    // v1.31.1: replaced `calc(100vh - header)` with `top: 0; bottom: 0`
+    // anchored to .appshell__body. The body knows its own height; we don't
+    // need to subtract the header twice.
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*top:\s*0[^}]*bottom:\s*0/);
   });
 
   it('CSS: header min-height reads from the same var (single source of truth)', () => {
@@ -308,10 +312,13 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
   });
 
-  it('CSS: mobile (≤900px) makes the top sidebar a fixed overlay anchored under the header', () => {
-    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*position:\s*fixed/);
-    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*top:\s*var\(--appshell-header-height\)/);
+  it('CSS: mobile (≤900px) anchors the top sidebar to .appshell__body (position:absolute, no fragile viewport math)', () => {
+    expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*position:\s*absolute/);
     expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
+  });
+
+  it('CSS: .appshell--header-top .appshell__body is the positioning context (position:relative) for the absolute scrim/aside', () => {
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__body\s*\{[^}]*position:\s*relative/);
   });
 
   it('CSS: mobile header compacts to `auto 1fr auto` (center stretches, ends stay compact)', () => {
@@ -322,8 +329,8 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(0\)/);
   });
 
-  it('CSS: mobile scrim covers below the header (not over it) so the trigger remains interactive', () => {
-    expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__scrim\s*\{[^}]*top:\s*var\(--appshell-header-height\)/);
+  it('CSS: mobile scrim matches the body exactly via `inset: 0` (anchored to .appshell__body)', () => {
+    expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__scrim\s*\{[^}]*position:\s*absolute[^}]*inset:\s*0/);
   });
 
   /* React side of the drawer — jsdom + a matchMedia mock so the consumer
@@ -548,6 +555,15 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       fireEvent.click(getByTestId('t'));
       expect(document.body.style.overflow).not.toBe('hidden');
     });
+  });
+
+  it('CSS: .appshell.appshell--header-top breaks out of body margin (width:100vw + recentering margin)', () => {
+    // v1.31.1: body's UA-default 8px margin (or any consumer wrapping) made
+    // the fixed scrim/drawer extend past the shell's right edge. The shell
+    // now spans the full viewport via the classic breakout: width:100vw
+    // plus margin-left:calc(50% - 50vw) to recenter when body has its own
+    // padding.
+    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*width:\s*100vw[^}]*margin-left:\s*calc\(50%\s*-\s*50vw\)/);
   });
 
   it('mobile: opening the drawer moves focus into it; closing returns focus to the trigger', () => {
