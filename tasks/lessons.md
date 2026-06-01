@@ -37,3 +37,22 @@ enough. And before trusting any browser verification, confirm the dev server is
 *yours*: free the port first (`lsof -ti tcp:PORT | xargs kill`) and check the
 dev log started clean, or you're QA-ing a ghost. Assert the change in the
 *served* CSS/DOM (computed style), not just in `node_modules` on disk.
+
+[2026-05-29] Context: I shipped the AppShell mobile drawer (PR #47) with
+`tests green + smoke green + CI green` and reported "ready for merge". The
+user replied "qué hiciste para revisarlo y qué falta" — and the answer was
+*not enough*. Self-review surfaced three real issues I'd introduced in the
+same PR: (A) `aria-hidden` was dead code because `isMobile` was a ref, so
+React never re-rendered and the attribute never landed; (B) no focus trap
+inside the drawer despite having diagnosed "P1 #6 focus trap mobile no
+existe" for the side layout in the same session; (C) no body scroll lock
+despite the kit already shipping `useScrollLock` for Modal/Drawer. All three
+fixable, all three would have been bugs in production.
+→ Rule: before presenting a PR as "ready", run a self-review pass that asks
+three specific questions, in this order: (1) what bugs did I introduce in
+THIS PR (state vs ref, listeners without re-render, missing aria-hidden /
+focus / scroll-lock)? (2) what cases from the recent audit does this PR
+perpetuate? (3) which combinations of props are NOT covered by my tests
+(theme × headerTheme × rail × persistKey × breakpoint)? If you can't answer
+all three with evidence, the PR is not ready — write the answers down before
+asking for merge approval.

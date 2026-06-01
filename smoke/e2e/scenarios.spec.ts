@@ -394,3 +394,254 @@ test.describe('Scenario · semantic Badge row coherence', () => {
     expect(max - min, `semantic Badge bg spread too wide: ${(max - min).toFixed(3)} (${JSON.stringify(all)})`).toBeLessThan(0.06);
   });
 });
+
+/**
+ * Scenario 7 — AppShell `top` mobile drawer (v1.31.0). Until 1.31, under
+ * 900px the `top` shell rendered the header + content but had NO way to
+ * reach the nav (the legacy `@media (max-width: 900px)` block was written
+ * for `side` and was a no-op on `top` because it recolumned `.appshell`
+ * via grid-template-columns while `top` uses grid-template-rows).
+ *
+ * Geometry assertions: at 1024×768 the aside is in-flow (NOT fixed) and
+ * visible; at 375×667 it is fixed-overlay translated off-screen; tapping
+ * the consumer trigger slides it in; ESC closes it.
+ */
+test.describe('Scenario · AppShell top — mobile drawer', () => {
+  test('desktop (≥901px): sidebar is in-flow and visible', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 720 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const aside = page.locator('.appshell__sidebar');
+    await expect(aside).toBeVisible();
+    const pos = await aside.evaluate((el) => getComputedStyle(el).position);
+    // Desktop: the aside is a grid item (default static / relative), NOT fixed.
+    expect(pos, `desktop aside should not be fixed (was ${pos})`).not.toBe('fixed');
+  });
+
+  test('mobile (≤900px): sidebar starts as a translated-off fixed overlay', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const m = await page.locator('.appshell__sidebar').evaluate((el) => {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return { position: s.position, transform: s.transform, right: Math.round(r.right) };
+    });
+    expect(m.position, `mobile aside must be position:fixed (was ${m.position})`).toBe('fixed');
+    // translateX(-100%) → transform matrix shows the X translation. Cheap
+    // proof: the right edge of the (translated) aside is at ≤0 (offscreen).
+    expect(m.right, `mobile aside must be offscreen when closed (right=${m.right}px)`).toBeLessThanOrEqual(0);
+
+    // No scrim while closed.
+    expect(await page.locator('.appshell__scrim').count()).toBe(0);
+  });
+
+  test('mobile: tapping the trigger opens the drawer; ESC closes it', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300); // wait for the slide transition
+
+    const openX = await page.locator('.appshell__sidebar').evaluate((el) => Math.round(el.getBoundingClientRect().left));
+    expect(openX, `open aside should sit at left:0 (was ${openX}px)`).toBe(0);
+
+    // Scrim is rendered + the root carries the state class.
+    await expect(page.locator('.appshell__scrim')).toBeVisible();
+    await expect(page.locator('.appshell')).toHaveClass(/is-mobile-open/);
+
+    // ESC closes.
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell')).not.toHaveClass(/is-mobile-open/);
+    expect(await page.locator('.appshell__scrim').count()).toBe(0);
+  });
+
+  test('mobile: tapping the scrim also closes the drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell__scrim')).toBeVisible();
+
+    // Click the scrim where the aside is NOT (right side of the viewport).
+    await page.locator('.appshell__scrim').click({ position: { x: 350, y: 400 } });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.appshell')).not.toHaveClass(/is-mobile-open/);
+  });
+
+  test('mobile: the aside height uses dvh fallback (does not pin bottom: 0)', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    // Pre-1.31 hardening, the aside used `bottom: 0` — iOS Safari clips that
+    // by the URL bar. Now it uses `height: calc(100vh - --appshell-header-
+    // height)` with a `100dvh` fallback. The serialized value lands either
+    // way; pin the rule.
+    const cssHeight = await page.locator('.appshell--header-top .appshell__sidebar').evaluate((el) => getComputedStyle(el).height);
+    // 667 viewport - 56 header = 611. Chromium serializes computed height
+    // as a px value; on browsers without dvh support the same number.
+    expect(parseInt(cssHeight, 10), `aside height should equal viewport - header (got ${cssHeight})`).toBeGreaterThanOrEqual(595);
+    expect(parseInt(cssHeight, 10), `aside height should not extend below viewport (got ${cssHeight})`).toBeLessThanOrEqual(615);
+  });
+});
+
+/**
+ * Scenario 7b — top mobile drawer over the BRAND theme. Variant guards:
+ * (1) the brand sidebar surface stays themed in the drawer; (2) the white-α
+ * `border-right-color` override fires so the right edge is visible against
+ * the primary blue; (3) `data-tone="inverse"` is NOT on the brand sidebar
+ * yet for `top` (intentional — `top`'s only branded band is the header,
+ * which already carries inverse; the brand sidebar's contrast on a top shell
+ * is the same as on a side shell, audited separately in P1 #4).
+ */
+test.describe('Scenario · AppShell top mobile drawer — brand variant', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile-brand', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+  });
+
+  test('aside renders fixed overlay with brand surface + white-α right border', async ({ page }) => {
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300);
+
+    const m = await page.locator('.appshell__sidebar').evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        position: s.position,
+        bg: s.backgroundColor,
+        borderRight: s.borderRightColor,
+      };
+    });
+    expect(m.position).toBe('fixed');
+    // Brand sidebar: the existing `.appshell--brand .appshell__sidebar`
+    // paints `--color-primary` (blue) — non-zero, non-white background.
+    // We don't pin a specific hex (preset-dependent), only that it's not
+    // the default surface.
+    const c = m.bg.match(/\d+/g)?.map(Number) ?? [];
+    expect(c.length, `expected rgb background, got ${m.bg}`).toBeGreaterThanOrEqual(3);
+    // Brand blue is dark — sum of channels well under white (765).
+    expect(c[0] + c[1] + c[2], `brand sidebar should be dark (sum=${c[0] + c[1] + c[2]})`).toBeLessThan(500);
+
+    // The white-α hairline on brand surfaces:
+    const br = m.borderRight.match(/\d+/g)?.map(Number) ?? [];
+    expect(br.slice(0, 3).every((v) => v === 255), `expected white-α border (got ${m.borderRight})`).toBe(true);
+  });
+});
+
+/**
+ * Scenario 7e — Desktop hide-mode collapsed without rail (1.31.0 bug guard).
+ * Pre-fix, the absolute aside vacated grid col 1 and auto-placement put the
+ * <main> into col 1 (0 width) instead of col 2 (1fr). Visible artifact:
+ * a 48px main strip + a phantom scrollbar at the viewport's right edge.
+ * Fix: explicit `grid-column: 2` on `.appshell__content` in the desktop
+ * media. This test pins the geometry: at 1440px viewport, main should fill
+ * the entire body width (~1440px), not 48px.
+ */
+test.describe('Scenario · AppShell top desktop hide-collapsed — main placement', () => {
+  test('main fills the full body width (not 48px from padding-only)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/scenarios/appshell-top-hide-collapsed', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const m = await page.evaluate(() => {
+      const body = document.querySelector('.appshell__body') as HTMLElement;
+      const main = document.querySelector('.appshell__content') as HTMLElement;
+      return {
+        bodyRect: body.getBoundingClientRect(),
+        mainRect: main.getBoundingClientRect(),
+        gridCol: getComputedStyle(main).gridColumnStart,
+      };
+    });
+    expect(m.gridCol, `main should be pinned to grid-column 2 (got ${m.gridCol})`).toBe('2');
+    expect(m.mainRect.width, `main should span the full body (~${m.bodyRect.width}px), not 48px`).toBeGreaterThan(m.bodyRect.width - 5);
+  });
+});
+
+/**
+ * Scenario 7c-controlled — top + collapsedRail + a CONTROLLED static
+ * button. The bug the user reported: a button that calls setCollapsed
+ * directly (no render-prop, no headerApi.toggle) read as dead in mobile
+ * because flipping `collapsed` had no visual effect (aside was a fixed
+ * overlay independent of collapsed). Fix mirrors `collapsed` to
+ * `mobileOpen` in mobile.
+ */
+test.describe('Scenario · AppShell top mobile drawer — controlled static button', () => {
+  test('controlled: static button that flips `collapsed` opens the drawer in mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile-rail-controlled', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const root = page.locator('.appshell');
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+    // Scenario boots with collapsed=true; drawer closed.
+
+    // Click the consumer-placed static button (which only calls setCollapsed).
+    await page.getByTestId('static-trigger').click();
+    await page.waitForTimeout(300);
+    await expect(root).toHaveClass(/is-mobile-open/);
+
+    // Click again: drawer closes.
+    await page.getByTestId('static-trigger').click();
+    await page.waitForTimeout(300);
+    await expect(root).not.toHaveClass(/is-mobile-open/);
+  });
+});
+
+/**
+ * Scenario 7c — top mobile drawer with `collapsedRail=true`. The desktop
+ * rail rule (`.appshell--header-top.appshell--rail.is-collapsed
+ * .appshell__body { grid-template-columns: 72px 1fr }`) is the highest-
+ * specificity desktop body rule. Our mobile block overrides it via source
+ * order at the same `@media (max-width: 900px)`. Pin that the aside still
+ * becomes a fixed overlay regardless of `rail`.
+ */
+test.describe('Scenario · AppShell top mobile drawer — collapsedRail variant', () => {
+  test('aside is still a fixed overlay even with collapsedRail=true', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile-rail', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    const pos = await page.locator('.appshell__sidebar').evaluate((el) => getComputedStyle(el).position);
+    expect(pos, `rail mobile aside must be position:fixed (was ${pos})`).toBe('fixed');
+
+    await page.getByTestId('trigger').click();
+    await page.waitForTimeout(300);
+    const left = await page.locator('.appshell__sidebar').evaluate((el) => Math.round(el.getBoundingClientRect().left));
+    expect(left, `open rail aside should sit at left:0 (was ${left}px)`).toBe(0);
+  });
+});
+
+/**
+ * Scenario 7d — top-bar-only (`sections=[]`) in mobile. No aside is rendered,
+ * the drawer concept does not apply — but the mobile header rule
+ * (`grid-template-columns: auto 1fr auto`) must still compact so a long
+ * brand + right zone don't choke at 375px.
+ */
+test.describe('Scenario · AppShell top mobile — top-bar-only variant', () => {
+  test('no aside, header still compacts to auto/1fr/auto', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/scenarios/appshell-top-mobile-nonav', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+
+    expect(await page.locator('.appshell').getAttribute('class')).toContain('appshell--no-nav');
+    expect(await page.locator('.appshell__sidebar').count()).toBe(0);
+    expect(await page.locator('.appshell__scrim').count()).toBe(0);
+
+    const cols = await page.locator('.appshell__header').evaluate((el) => getComputedStyle(el).gridTemplateColumns);
+    // The compact `auto 1fr auto` resolves to "<small> <big> <small>" with
+    // the middle column taking the stretch. Verify the 3 columns and that
+    // the middle is the largest (stretches via 1fr).
+    const widths = cols.split(/\s+/).map((w) => parseFloat(w));
+    expect(widths.length, `expected 3 columns, got ${cols}`).toBe(3);
+    expect(widths[1], `the center column should be the largest (1fr): ${cols}`).toBeGreaterThan(widths[0]);
+    expect(widths[1]).toBeGreaterThan(widths[2]);
+  });
+});

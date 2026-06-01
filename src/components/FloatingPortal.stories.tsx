@@ -142,9 +142,13 @@ export const DateRangePickerInsideOverflow: StoryObj = {
 };
 
 /**
- * Bug 2: collapsed AppShell. The expand toggle and the footer slot stay
- * inside the 72px rail (centered, no overlap), and the brand clamps even
- * without a `brandCollapsed` slot.
+ * Bug 2 (legacy): collapsed AppShell. Pre-1.31 the `side` layout exposed a
+ * brand block + a built-in collapse chevron — both removed in 1.31 (the
+ * kit is now top-only). The original story documented the 72px rail
+ * behaviour for those slots; with side gone, the equivalent now lives in
+ * `headerLayout="top"` with `collapsedRail=true` (see the AppShell
+ * stories). This story stays as a reference test of the brand header band
+ * + collapsed rail rendering through a portal overflow.
  */
 export const AppShellCollapsed: StoryObj = {
   render: () => (
@@ -152,8 +156,9 @@ export const AppShellCollapsed: StoryObj = {
       <AppShell
         theme="brand"
         defaultCollapsed
-        brand={<span>FERRETERÍA EL ALBA</span>}
+        collapsedRail
         footer={<span style={{ fontSize: 12 }}>v1.1.0 · soporte</span>}
+        header={{ center: <span>FERRETERÍA EL ALBA</span> }}
         sections={[
           { items: [
             { id: 'h', label: 'Inicio', href: '#', active: true },

@@ -5,6 +5,216 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] — 2026-06-01
+
+### BREAKING CHANGES
+- **`headerLayout="side"` removed.** The kit now exposes a single layout
+  (full-width header above the body). All `side`-only props removed:
+  `brand`, `brandCollapsed`, `topbar`, `user`. Migration: move brand to
+  `header.center`, move user/utilities to `header.right`, replace the
+  built-in hamburger with a render-prop trigger in `header.left`.
+- **`headerLayout` prop removed** (was the discriminator). `AppShellProps`
+  is no longer a discriminated union — a single flat interface exports
+  the kept props: `header`, `sections`, `theme`, `headerTheme`,
+  `collapsedRail`, `defaultCollapsed`, `collapsed`, `onCollapsedChange`,
+  `persistKey`, `footer`, `linkAs`, `className`, `children`.
+- **Removed locale keys**: `appshell.expandMenu`, `appshell.collapseMenu`,
+  `appshell.expand`, `appshell.collapse`, `appshell.openMenu`,
+  `appshell.closeMenu` (all chevron/hamburger labels were `side`-only).
+  Kept: `appshell.mainNav`, `appshell.breadcrumb`.
+- **Built-in collapse chevron removed** (was a `side`-only idiom). Collapse
+  is driven exclusively by the consumer's `header.left` render-prop now.
+- **CSS removed**: `.appshell__brand[-text]`, `.appshell__foot-text`,
+  `.appshell.is-collapsed .appshell__brand`, `.appshell--brand
+  .appshell__brand`, `.appshell--brand .appshell__collapse*`,
+  `.appshell__main`, `.appshell__topbar*`, `.appshell__hamburger*`,
+  `.appshell__collapse*`, and the legacy `@media (max-width: 900px)`
+  block that powered the `side` mobile drawer. ~400 lines of CSS deleted.
+
+**Minor (renamed scope). Mobile drawer + responsive hardening.** Pre-1.31,
+under 900px the shell rendered the header + content but had no way to reach
+the nav: the legacy `@media (max-width: 900px)` block was written for
+`side` (recolumns `.appshell` via `grid-template-columns`, no-op on the
+`top` shape which uses `grid-template-rows`), and there was no built-in
+hamburger. Reported by despachos + cobros-mesón on their phones — the
+sidebar was simply unreachable.
+
+### Added
+- **Mobile drawer in `headerLayout="top"`.** Below 900px the sidebar becomes a
+  `position: fixed` overlay anchored beneath the header (`top:
+  var(--appshell-header-height)`), slides in from the left to `min(280px,
+  85vw)`, and dims the rest of the viewport with a scrim. ESC closes; tap on
+  scrim closes; tap on the consumer trigger toggles. No built-in hamburger —
+  the existing `header.left` render-prop drives it (consumer keeps the
+  trigger's look).
+- **`headerApi.toggle()` is now DWIM by viewport.** On desktop it flips
+  `collapsed` as before; on mobile (≤900px) it flips an overlay drawer
+  (`is-mobile-open`) and leaves `collapsed` untouched. Same single click
+  handler regardless of breakpoint — the pattern Linear / Vercel use. Listener
+  cleans up `mobileOpen` when the user resizes back into desktop so a stale
+  drawer cannot ghost.
+- **`--appshell-header-height: 56px`** exposed as a public CSS var on
+  `.appshell.appshell--header-top`. Consumer sticky sub-headers/drawers can
+  anchor to the header's bottom edge without hardcoding the 56. The header's
+  `min-height` now reads from the same var (single source of truth).
+- **`aria-hidden`** on the closed mobile drawer so screen readers don't tab
+  through 30 offscreen nav links.
+- Story `Topbar · Mobile drawer (≤900px)` + smoke scenario
+  `/scenarios/appshell-top-mobile` with Playwright assertions for the
+  open/close + scrim + ESC paths.
+
+### Changed
+- The desktop "hide / rail" overlay rules
+  (`.appshell--header-top:not(.appshell--rail).is-collapsed ...`) are now
+  scoped to `@media (min-width: 901px)` so they don't compete with the mobile
+  rules below the breakpoint. Pure refactor — desktop behaviour byte-identical
+  at ≥901px.
+
+### Smoke harness
+- New scenario `appshell-top-mobile` covers: desktop in-flow aside (≥1024px),
+  mobile fixed-overlay offscreen aside (375px), trigger-tap opens to `left:0`,
+  ESC closes, scrim-tap closes.
+
+### A11y hardening (post-review)
+- **`aria-hidden` actually lands** on the closed mobile drawer: `isMobile`
+  switched from `useRef` to `useState`, so the breakpoint flip triggers a
+  re-render and the attribute reaches the DOM. Pre-fix it was dead code (a
+  ref mutation never re-renders).
+- **Focus trap inside the open drawer** via the shared `useFocusTrap` hook
+  (extracted from Overlay.tsx alongside `useEscape` and `useScrollLock`).
+  Opening the drawer focuses the first nav link; Tab/Shift+Tab cycle within;
+  closing the drawer restores focus to the trigger.
+- **Body scroll lock** while the drawer is open, shared with the
+  Modal/Drawer counter (kit-wide nesting safe).
+- 5 new vitest assertions cover aria-hidden lands closed / removed open /
+  absent on desktop, body overflow:hidden engages on open, focus moves +
+  returns on close.
+
+### Internal
+- `useFocusTrap`, `useEscape`, `useScrollLock` extracted from
+  `src/components/Overlay.tsx` to `src/hooks/` so Modal/Drawer and the
+  AppShell mobile drawer share a single implementation. Re-exported via
+  `src/hooks/index.ts` for internal consumers only — NOT added to the
+  public barrel `src/index.ts` (kept internal until names + docs stabilise).
+  Modal/Drawer behaviour byte-identical (9/9 tests still green).
+
+### iOS Safari URL-bar safety (post-review)
+- **`100vh` → `100vh` + `100dvh` fallback** on `.appshell.appshell--header-top`
+  height so the shell tracks the dynamic viewport edge as the URL bar
+  shows/hides. Older browsers ignore the second declaration and keep `100vh`
+  (same shape, clipped at the bar). Chrome 108+, Safari 16.4+ use `dvh`.
+- **Mobile aside + scrim sized by `calc(100vh - header)` / `calc(100dvh -
+  header)`** instead of `bottom: 0` — iOS Safari clipped fixed `bottom: 0`
+  by the URL bar. Now the bottom edge tracks the visible viewport.
+
+### `side` brand sidebar band-aware (audit P1 #4)
+- `<aside class="appshell__sidebar">` now carries `data-tone="inverse"`
+  when `theme="brand"`, mirroring the `top` brand header treatment.
+  Descendants (Avatar / Badge / inline icons / links) re-scope foreground
+  tokens automatically — previously they kept their default colors against
+  the brand-primary surface, a potential AA contrast failure on text.
+
+### Mobile drawer variant smoke (matrix)
+- 3 new smoke routes pin the variant combinations: `brand` (sidebar
+  surface stays themed + white-α right border), `collapsedRail`
+  (mobile overrides the desktop 72px rail rule), `no-nav` (no aside +
+  header still compacts to `auto 1fr auto`).
+- Visual pass via Playwright MCP confirmed the 4 mobile scenarios at
+  375×667 + desktop at 1280×800 with no regression.
+
+### Bug caught by the variant smoke
+- The original mobile rule restated `background: var(--bg-surface)` on
+  the aside, which TIED on specificity with `.appshell--brand
+  .appshell__sidebar { background: var(--color-primary) }` and won by
+  source order — silently flattening the brand surface to white in
+  mobile. The brand smoke caught it (sum of RGB channels = 765 = white).
+  Fix: drop the redundant `background` / `border-right` from the mobile
+  rule (both already on the base `.appshell__sidebar`), let the brand
+  rule paint as designed. Comment in the CSS documents the trap so a
+  future contributor doesn't reintroduce it.
+
+### Side mobile drawer UX + a11y (audit P1 #6 fully closed)
+- **Chevron in the drawer foot is context-aware in mobile.** Pre-fix, tapping
+  the chevron while the drawer was open in mobile toggled `collapsed` — the
+  drawer stayed at 280px width but lost all labels (a UX dead-end: the user
+  wanted to close, but got an icon-only zombie drawer). Now, when
+  `isMobile && mobileOpen`, the chevron closes the drawer instead. Icon
+  stays `<` (chevron-left) as a "close back to the left" affordance.
+  `aria-label` switches to "Cerrar menú" (new i18n key
+  `appshell.closeMenu`).
+- **CSS neutralizes `.is-collapsed` visibility effects while
+  `.is-mobile-open`** (labels, badges, section labels, brand padding,
+  brand-text, foot-text, navchildren, sidebar-foot layout). A persisted
+  `collapsed=true` (from desktop via `persistKey` or controlled mode) no
+  longer strips the drawer's content when the user reaches it on a phone.
+- **Brand block now picks the FULL `brand` in mobile-open** (instead of
+  `brandCollapsed`). Pre-fix, a shell with `defaultCollapsed=true` or a
+  persisted desktop collapse showed `brandCollapsed` (mark-only) inside
+  the open mobile drawer — a tiny logo floating in an empty band, while
+  the labels below rendered full-size. Inconsistent. Now both the brand
+  content selection AND the visibility cascade treat the open mobile
+  drawer as fully expanded.
+- **ESC closes the drawer; focus traps inside the open drawer; body
+  scroll locks while open.** Reuses the shared `useFocusTrap` /
+  `useEscape` / `useScrollLock` hooks (the same Modal/Drawer and the top
+  mobile drawer use).
+- **`aria-hidden`** on the closed mobile side drawer (`isMobile` is state,
+  not ref, so the attribute actually lands).
+- **iOS Safari URL-bar safety** on the side aside: `top: 0; bottom: 0`
+  used to clip behind the URL bar. Now sized by `height: 100vh; height:
+  100dvh` (same pattern as the top mobile drawer).
+- New smoke scenario `/scenarios/appshell-side-mobile` + 2 e2e
+  assertions covering the chevron-closes + ESC-closes-with-scroll-lock
+  paths.
+
+### Controlled static button in mobile (caught by user)
+- A controlled consumer with a static button in `header.left` that calls
+  `setCollapsed` directly (i.e., not the render-prop `headerApi.toggle`)
+  read as dead in mobile: flipping `collapsed` had no visual effect
+  because the aside was a fixed overlay independent of `collapsed`. The
+  TopbarRail Storybook story is exactly this shape, and any consumer
+  using a custom header chrome with its own controlled state hits the
+  same wall.
+  Fix: in mobile, mirror `collapsed` → `mobileOpen`. Any change to
+  `collapsed` (controlled or uncontrolled) flips the drawer. A prev-value
+  ref prevents the initial-render auto-open that would otherwise fire
+  just because the shell happens to default to `collapsed=false`.
+  Semantics now: `collapsed=true` means "menu hidden" in both viewports —
+  rail/hide on desktop, drawer-closed on mobile.
+
+### No rail in mobile (caught by user)
+- Desktop body-grid rules for the `side` rail and the `top` hide/rail were
+  unscoped — they fired at every viewport. With `collapsed=true` persisted
+  from desktop (via `persistKey` or controlled mode) and the user on a
+  phone, the outer grid resolved to `72px 1fr` or `0 1fr` even though the
+  aside was already a fixed overlay. Visible artifact: a 72px (or 0)
+  empty grid track on the left of the content area — a phantom rail
+  margin pushing the content off-center.
+  Fix: scope the three desktop rules to `@media (min-width: 901px)`:
+  - `.appshell.is-collapsed { grid-template-columns: 72px 1fr }`
+  - `.appshell--header-top.is-collapsed .appshell__body { 0 1fr }`
+  - `.appshell--header-top.appshell--rail.is-collapsed .appshell__body { 72px 1fr }`
+  In mobile, the outer grid stays single-column (`1fr`) regardless of
+  `collapsed` / `collapsedRail`. The aside (fixed overlay) owns the
+  visibility of the menu; the grid only describes the content area.
+
+### Bug caught by user (hide-mode collapse)
+- In `headerLayout="top"` without `collapsedRail`, when the user collapsed
+  the sidebar the aside went `position: absolute` and slid off-screen
+  correctly — BUT the `<main>` then auto-placed into the freed grid col 1
+  (0 width) instead of col 2 (1fr). Visible artifact: a 48px-wide main
+  strip (just its own 24+24 padding) + a phantom scrollbar at the body's
+  right edge.
+  Root cause: an absolutely-positioned grid item leaves the auto-placement
+  flow. With aside out, main (the next in-flow item) takes col 1.
+  Fix: `.appshell--header-top:not(.appshell--no-nav) .appshell__content
+  { grid-column: 2 }` inside the desktop media. Main is now ALWAYS pinned
+  to col 2 when there's a sidebar, regardless of whether the aside is in
+  flow or absolute. `no-nav` is excluded so a single-column grid doesn't
+  spawn an implicit second track.
+  Pinned by a smoke geometry assertion: at 1440px viewport collapsed-no-rail,
+  `main.width >= body.width - 5` (within rounding).
+
 ## [1.30.6] — 2026-05-29
 
 **Patch. Compact + milestone alignment.** In `density="compact"` the milestone

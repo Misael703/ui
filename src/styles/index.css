@@ -2512,84 +2512,19 @@ button, input, select, textarea { box-sizing: border-box; }
 .cmdk__empty { padding: 24px; text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
 
 /* ---------- AppShell ---------- */
+/* v1.31.0: only `headerLayout="top"` exists. The shell is one container
+   sized by `.appshell.appshell--header-top { height: 100dvh }` below; the
+   base `.appshell` only owns the grid display + background. */
 .appshell {
   display: grid;
-  grid-template-columns: 248px 1fr;
-  min-height: 100vh; background: var(--bg-canvas);
-  transition: grid-template-columns var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+  background: var(--bg-canvas);
 }
-.appshell.is-collapsed { grid-template-columns: 72px 1fr; }
 .appshell__sidebar {
   background: var(--bg-surface);
   border-right: 1px solid var(--border-default);
   display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
   overflow: hidden;
 }
-.appshell__brand {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border-default);
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display); font-weight: 700;
-  text-transform: var(--tt-title); letter-spacing: var(--tracking-wide);
-}
-/* Keep the VERTICAL padding equal to the expanded state (12px) so the brand
-   header height matches the topbar in both states — collapsing only narrows
-   the horizontal padding for the rail. A 16px vertical here made the
-   collapsed brand 8px taller than the topbar, so the two header dividers
-   stopped aligning at the sidebar/main corner. */
-.appshell.is-collapsed .appshell__brand { padding: 12px 12px; overflow: hidden; }
-/* Brand text opt-out: wrap any textual part of `brand` in
-   <span class="appshell__brand-text"> and it collapses away with the rail
-   while the logo/mark stays. Mirrors the navlabel collapse below, so a
-   single `brand` works in both states without a separate `brandCollapsed`.
-   The global prefers-reduced-motion guard already neutralizes the
-   transition. */
-.appshell__brand-text {
-  overflow: hidden;
-  transition: opacity var(--duration-fast, 120ms) ease,
-              max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
-}
-.appshell.is-collapsed .appshell__brand-text {
-  opacity: 0;
-  max-width: 0;
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
-}
-/* Footer text opt-out — mirror of appshell__brand-text for the `footer` slot.
-   Wrap any textual part of `footer` (version label, env tag…) in
-   <span class="appshell__foot-text"> and it collapses away with the rail
-   instead of wrapping/overlapping the collapse toggle in the 72px rail. */
-.appshell__foot-text {
-  overflow: hidden;
-  white-space: nowrap;
-  transition: opacity var(--duration-fast, 120ms) ease,
-              max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
-}
-.appshell.is-collapsed .appshell__foot-text {
-  opacity: 0;
-  max-width: 0;
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
-}
-/* Collapsed rail (72px): stack the footer slot above a centered toggle so
-   neither falls outside the rail nor overlaps (Bug 2). The base foot is a
-   space-between row and the toggle has margin-left:auto — both wrong at
-   72px; reset to a centered column. */
-.appshell.is-collapsed .appshell__sidebar-foot {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 0;
-  overflow: hidden;
-}
-.appshell.is-collapsed .appshell__collapse { margin: 0 auto; }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
 .appshell__navlabel-section {
@@ -2665,10 +2600,6 @@ button, input, select, textarea { box-sizing: border-box; }
   border-right-color: transparent;
   color: var(--color-white);
 }
-.appshell--brand .appshell__brand {
-  border-bottom-color: rgba(255, 255, 255, 0.12);
-  color: var(--color-white);
-}
 .appshell--brand .appshell__navlabel-section {
   color: rgba(255, 255, 255, 0.55);
 }
@@ -2700,28 +2631,15 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--brand .appshell__sidebar-foot {
   border-top-color: rgba(255, 255, 255, 0.12);
 }
-.appshell--brand .appshell__collapse {
-  color: rgba(255, 255, 255, 0.7);
-  background: transparent;
-}
-.appshell--brand .appshell__collapse:hover {
-  color: var(--color-white);
-  background: rgba(255, 255, 255, 0.1);
-}
 
-/* `headerLayout="top"` — full-width header above the body. Two correctness
-   constraints:
-   1. **Specificity:** the outer override must use `.appshell.appshell--header-top`
-      (≥2 classes) so it beats the legacy `.appshell.is-collapsed`
-      (`grid-template-columns: 72px 1fr`); else the legacy rule wins on
-      collapse and the layout breaks (header gets squeezed into a 72px col).
-   2. **True viewport-centre:** the header uses `grid-template-columns:
+/* Full-width header above the body. Two correctness constraints:
+   1. **True viewport-centre:** the header uses `grid-template-columns:
       1fr auto 1fr` so the centre slot lands at the geometric middle of the
       viewport regardless of how wide the left or right zones grow.
-   The topbar is invariant to `is-collapsed` — only `.appshell__body`
-   animates its columns. `theme="brand"` tints the header to match the
-   sidebar (existing `.appshell--brand .appshell__sidebar` already paints
-   the sidebar). */
+   2. **Internal scroll model:** the shell is capped at `100dvh` so header
+      (row 1) and sidebar (row 2) stay static while only the content
+      scrolls. `theme="brand"` tints the header to match the sidebar
+      (`.appshell--brand .appshell__sidebar` paints the sidebar). */
 .appshell.appshell--header-top {
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
@@ -2730,8 +2648,19 @@ button, input, select, textarea { box-sizing: border-box; }
      the content scrolls. Without this the whole .appshell grows past 100vh
      and the PAGE scrolls, carrying the header away and desyncing the sidebar.
      The shell now owns the viewport height → render it at the root or inside a
-     100vh container. `side` is untouched (it uses the sticky model). */
+     100vh container. `side` is untouched (it uses the sticky model).
+     `dvh` is the **dynamic** viewport unit: shrinks with the iOS Safari
+     URL bar so the bottom of the shell stays inside the visible area
+     (Chrome 108+, Safari 16.4+). Older browsers ignore the second
+     declaration and keep `100vh` — same shape, just clipped at the address
+     bar. Two declarations (not `dvh` alone) because some browsers still
+     fall back to default `auto` if they don't recognise the unit. */
   height: 100vh;
+  height: 100dvh;
+  /* Public var so consumers can anchor sticky sub-headers/drawers to the
+     header's bottom edge without hardcoding the 56. Kept in sync with the
+     header `min-height` rule below; if you bump one, bump both. */
+  --appshell-header-height: 56px;
 }
 .appshell--header-top .appshell__header {
   display: grid;
@@ -2739,7 +2668,7 @@ button, input, select, textarea { box-sizing: border-box; }
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  min-height: 56px;
+  min-height: var(--appshell-header-height);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   color: var(--fg-default);
@@ -2753,22 +2682,25 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: 0;
   transition: grid-template-columns var(--duration-base) var(--ease-standard);
 }
-.appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
-/* `collapsedRail`: collapse to a 72px icon rail instead of hiding the
-   sidebar (4 classes > the 3-class hide rule above, so this wins). The
-   nav-icon/label-hide/active-bar mechanics are shared with the `side`
-   layout via the root `.is-collapsed` (labels hidden, icons + active bar
-   kept). */
-.appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+/* Top hide-mode + rail body grid — desktop-only. In mobile the body is
+   single-column (`1fr`) regardless of `collapsed` / `collapsedRail`; the
+   aside is a fixed overlay (out of grid flow). Leaving these unscoped
+   leaked into mobile: collapsed+rail produced a 72px empty grid track
+   to the left of the content (the aside was no longer occupying it),
+   reading as a 72px left margin on the page. Scoped to `min-width:901px`
+   to match the rail/hide rules block below. */
+@media (min-width: 901px) {
+  .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
+  .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+}
 /* Top-bar-only (`sections` omitted, v1.27.0): no sidebar at all → body is a
    single column. The `<aside>` itself is not rendered (in the JSX), this just
    collapses the grid track. Placed after the rail rule so it wins on the (rare)
    `appshell--no-nav.appshell--rail` combo by source order. */
 .appshell--header-top.appshell--no-nav .appshell__body { grid-template-columns: 1fr; }
-/* The base sidebar is `height: 100vh` (sticky model for `side`). In `top` the
-   body row is already bounded to `100vh − header`, so a 100vh sidebar would
-   overflow its row and introduce a SECOND scrollbar. `height: auto` lets the
-   grid item stretch to exactly the row height instead. */
+/* Sidebar stretches to its grid row height. The body row is already bounded
+   to `100dvh − header`, so the aside auto-sizes correctly without a fixed
+   height (which would risk a second scrollbar). */
 .appshell--header-top .appshell__sidebar { overflow: hidden; height: auto; }
 /* The single scroll container. `min-height: 0` lets this grid cell shrink
    below its content so `overflow-y` can engage; padding is inherited from the
@@ -2781,19 +2713,40 @@ button, input, select, textarea { box-sizing: border-box; }
    rail; instead the sidebar keeps its full width and translates off-screen
    to the left (overlaying, so it can slide past the edge) while the content
    reclaims the width immediately. Animated, and never narrows into a rail.
-   Rail mode keeps the smooth 240→72 width transition. */
-.appshell--header-top:not(.appshell--rail) .appshell__body {
-  transition: none;
-  position: relative;
-}
-.appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 240px;
-  transform: translateX(-100%);
-}
-.appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-  transition: transform var(--duration-base) var(--ease-standard);
+   Rail mode keeps the smooth 240→72 width transition.
+   Scoped to `min-width: 901px` so it does NOT compete with the mobile
+   drawer rules below the breakpoint — at mobile the overlay frame is
+   different (fixed, anchored under the header) and pre-1.31.0 letting this
+   desktop rule leak into mobile created a 4-class specificity floor that
+   the mobile rules had to fight to override. Keeping it desktop-scoped
+   keeps the mobile block simple. */
+@media (min-width: 901px) {
+  .appshell--header-top:not(.appshell--rail) .appshell__body {
+    transition: none;
+    position: relative;
+  }
+  .appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 240px;
+    transform: translateX(-100%);
+  }
+  .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
+  /* Hide-mode collapse bug (v1.31.0): when the aside goes `position: absolute`
+     it leaves the grid flow → grid auto-placement gives the next in-flow item
+     (the <main>) the FIRST column instead of the second. With body grid
+     `0 1fr` that drops the content into a 0-width column; the visible 48px
+     it kept was only its own padding, and content overflowed to a phantom
+     scrollbar at the body's right edge.
+     Fix: explicitly pin the content to column 2 whenever there IS a 2-column
+     body grid (every top layout EXCEPT `no-nav`, which is single-column).
+     `no-nav` is excluded so a `grid-column: 2` doesn't create an implicit
+     second track in its single-column grid. */
+  .appshell--header-top:not(.appshell--no-nav) .appshell__content {
+    grid-column: 2;
+  }
 }
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
@@ -2808,51 +2761,90 @@ button, input, select, textarea { box-sizing: border-box; }
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* Mobile drawer for `top` (v1.31.0). The legacy mobile block (search for
+   `@media (max-width: 900px)` below) was written for `side` and is a no-op
+   here: it recolumns `.appshell` via `grid-template-columns` but `top` uses
+   `grid-template-rows`, so the override slides right off. Result before this
+   block: under 900px the `top` shell rendered the header + content with NO
+   way to reach the nav. This block makes the aside an overlay anchored
+   beneath the header, driven by `is-mobile-open` (set by the React side via
+   the render-prop `toggle()` API — there is no built-in hamburger in `top`).
+   Header columns compact to `auto 1fr auto` so the center has room to stretch
+   over a narrow viewport instead of choking against fixed-end zones.
+
+   The desktop "hide / rail" overlay rules above are scoped to
+   `min-width: 901px`, so this block does not need to fight specificity to
+   reposition the aside. */
+@media (max-width: 900px) {
+  .appshell--header-top .appshell__header {
+    grid-template-columns: auto 1fr auto;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  /* Body becomes a single column; the sidebar is taken out of flow. */
+  .appshell--header-top .appshell__body { grid-template-columns: 1fr; }
+  /* Overlay frame. The aside leaves flow and anchors BELOW the header
+     (`top: var(--appshell-header-height)`) so the consumer-placed trigger in
+     `header.left` stays visible — the user can close from the same control
+     they used to open. Width caps at 85vw on narrow phones so a slice of
+     content stays visible as a depth cue. */
+  .appshell--header-top .appshell__sidebar {
+    position: fixed;
+    top: var(--appshell-header-height);
+    left: 0;
+    width: min(280px, 85vw);
+    /* iOS Safari clips `bottom: 0` on fixed elements by the URL bar
+       (the dynamic viewport edge). Size by height instead so the
+       bottom stays at the visible viewport edge: `calc(100vh - header)`
+       for legacy, overridden by `dvh` on supporting browsers. */
+    height: calc(100vh - var(--appshell-header-height));
+    height: calc(100dvh - var(--appshell-header-height));
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+    z-index: 40;
+    overflow: auto;
+    /* `background` + `border-right` intentionally NOT restated — the base
+       `.appshell__sidebar` already paints `var(--bg-surface)` + the default
+       border, and `.appshell--brand .appshell__sidebar` (specificity (0,2,0),
+       same as this rule) re-paints the surface to primary on brand. Restating
+       them here ties on specificity and wins by source order, which silently
+       broke the brand variant before this comment existed. */
+  }
+  /* Brand surfaces lose the dark hairline against the primary blue;
+     swap for the white-α idiom used on brand bands. The (0,3,0) compound
+     beats both base and the brand rule above. */
+  .appshell--brand.appshell--header-top .appshell__sidebar {
+    border-right-color: rgba(255, 255, 255, 0.12);
+  }
+  .appshell--header-top.is-mobile-open .appshell__sidebar {
+    transform: translateX(0);
+  }
+  /* Scrim covers content area below the header so the trigger remains
+     interactive for close. Higher z than the desktop scrim (30) because
+     the mobile aside is bumped to 40. */
+  .appshell--header-top.is-mobile-open .appshell__scrim {
+    display: block;
+    position: fixed;
+    top: var(--appshell-header-height);
+    left: 0; right: 0;
+    /* Same iOS URL-bar reasoning as the aside above: size by height,
+       not `bottom: 0`, so the scrim doesn't clip behind the URL bar. */
+    height: calc(100vh - var(--appshell-header-height));
+    height: calc(100dvh - var(--appshell-header-height));
+    background: var(--backdrop);
+    z-index: 35;
+  }
+}
+
 .appshell__sidebar-foot {
   border-top: 1px solid var(--border-default);
   padding: 8px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.appshell__collapse {
-  width: 28px; height: 28px; border-radius: var(--radius-sm);
-  background: transparent; border: 1px solid var(--border-default);
-  cursor: pointer; color: var(--fg-muted); margin-left: auto;
-}
-.appshell__collapse:hover { background: var(--bg-subtle); }
-
-.appshell__main { display: flex; flex-direction: column; min-width: 0; }
-.appshell__topbar {
-  display: flex; align-items: center; gap: 16px;
-  padding: 12px 24px; min-height: 64px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-default);
-  position: sticky; top: 0; z-index: 20;
-}
-.appshell__topbar-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; overflow: hidden; }
-/* flex:none keeps the user/avatar slot from shrinking when topbar content is wide. */
-.appshell__topbar-user { flex: none; display: flex; align-items: center; gap: 12px; }
-.appshell__hamburger {
-  display: none;
-  background: transparent; border: 0; cursor: pointer;
-  width: 36px; height: 36px; border-radius: var(--radius-sm);
-  font-size: var(--text-lg); color: var(--fg-default);
-}
-.appshell__hamburger:hover { background: var(--bg-subtle); }
 .appshell__content { padding: 24px; min-height: 0; }
-.appshell__scrim { display: none; position: fixed; inset: 0; background: var(--backdrop); z-index: 30; }
-
-@media (max-width: 900px) {
-  .appshell { grid-template-columns: 1fr; }
-  .appshell__sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 280px; transform: translateX(-100%);
-    transition: transform var(--duration-base) var(--ease-standard);
-    z-index: 40;
-  }
-  .appshell.is-mobile-open .appshell__sidebar { transform: translateX(0); }
-  .appshell.is-mobile-open .appshell__scrim { display: block; }
-  .appshell__hamburger { display: inline-flex; align-items: center; justify-content: center; }
-}
+/* Mobile drawer scrim base — actual display + frame lives inside the top
+   mobile block above (anchored under the header, dvh-sized). */
+.appshell__scrim { display: none; }
 
 /* ---------- Mobile responsive overrides --------------------------------- */
 /* Below --bp-md: tighten container padding and scale form inputs to fit. */

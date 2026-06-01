@@ -31,11 +31,6 @@ export interface UiKitMessages {
 
   // AppShell
   'appshell.mainNav': string;
-  'appshell.expandMenu': string;
-  'appshell.collapseMenu': string;
-  'appshell.expand': string;
-  'appshell.collapse': string;
-  'appshell.openMenu': string;
   'appshell.breadcrumb': string;
 
   // Notifications

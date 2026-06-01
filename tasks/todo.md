@@ -1,145 +1,488 @@
-# Persistencia de colapso del AppShell — `persistKey` (2026-05-26)
+# Consolidación a un solo AppShell — v1.31 BREAKING (2026-05-30)
+
+## Decisión
+
+Eliminar `headerLayout="side"`. El kit ya no expone dos layouts: queda solo
+`top`. Sin fase de deprecation porque no hay consumers reales del `side`
+(memoria del usuario: cobros-mesón y barritas usan `top`; despachos en build).
+
+Bump: **1.31.0 con sección BREAKING** en CHANGELOG. Saltarse v2.0.0 a
+propósito — semver tolerable porque la API removida no tiene callers.
+
+## Inventario
+
+### Eliminar (código)
+- **AppShell.tsx**: rama `side` del `AppShell()` (~60 líneas) — todo lo que
+  vive después del `if (props.headerLayout === 'top') { ... }`.
+- **AppShellSideProps interface**: tipos `side`-only (`brand`,
+  `brandCollapsed`, `topbar`, `user`, `headerLayout?: 'side'`).
+- **Discriminated union** `AppShellProps = AppShellSideProps |
+  AppShellTopProps`. Pasa a ser un solo interface (el `top`).
+- **`headerLayout` prop**: deja de ser parte de la API pública.
+- **`AppShellTopBranch`** subcomponente: se absorbe directamente en
+  `AppShell()` (ya no hay rama).
+
+### Eliminar (CSS, ~400 líneas)
+- `.appshell { grid-template-columns: 248px 1fr }` (default side outer grid)
+- `.appshell.is-collapsed { grid-template-columns: 72px 1fr }` (side rail)
+- `.appshell__brand`, `.appshell__brand-text`, `.appshell__foot-text`
+- `.appshell.is-collapsed .appshell__brand[-text]`
+- `.appshell.is-collapsed .appshell__navlabel[-section]`,
+  `.appshell.is-collapsed .appshell__navbadge`,
+  `.appshell.is-collapsed .appshell__navchildren`
+- `.appshell.is-collapsed .appshell__sidebar-foot`,
+  `.appshell.is-collapsed .appshell__collapse`
+- `.appshell--brand .appshell__sidebar`, `.appshell--brand .appshell__brand`,
+  `.appshell--brand .appshell__nav*`, `.appshell--brand
+  .appshell__sidebar-foot`, `.appshell--brand .appshell__collapse[:hover]`
+  (esos son los re-tints de brand para el sidebar side — el aside `top` no
+  los necesita en modo expandido normal)
+- `.appshell__sidebar-foot`, `.appshell__collapse[:hover]` (el chevron y
+  su contenedor solo existían en side)
+- `.appshell__main`, `.appshell__topbar`, `.appshell__topbar-content`,
+  `.appshell__topbar-user`, `.appshell__hamburger[:hover]`
+- `.appshell__scrim` base (queda solo dentro del bloque `top` mobile)
+- `@media (max-width: 900px) { ... }` legacy side mobile (todo el bloque)
+
+### Eliminar (locale)
+- `appshell.expandMenu` / `appshell.collapseMenu` / `appshell.expand` /
+  `appshell.collapse` (chevron labels solo-side)
+- `appshell.openMenu` (hamburger label solo-side)
+- `appshell.closeMenu` (chevron en mobile open solo-side)
+
+### Conservar (locale)
+- `appshell.mainNav` (aria-label del aside, usado por top también)
+- `appshell.breadcrumb` (PageHeader)
+
+### Eliminar (stories)
+- `Shell` (sidebar default + brand)
+- `BrandWithText` / `BrandTextColapsable` / `BrandTextColapsadoInicial`
+- `FootWithText` / `FooterTextColapsable` / `FooterTextColapsadoInicial`
+- El branch `side` del `Playground`
+
+### Conservar (stories)
+- `Playground` (sin la opción side — solo theme × headerTheme × rail × collapse)
+- `TopbarRail`, `TopbarUncontrolledRenderProp`, `TopbarOnlyNoNav`,
+  `TopbarMobileDrawer`
+
+### Eliminar (tests)
+- `tests/AppShell.test.tsx`: tests "renders sections, brand and content",
+  "toggles collapsed" (los del side branch), "side brand data-tone",
+  "side default data-tone", "side mobile open: chevron click closes",
+  "side desktop: chevron click toggles collapsed", "side mobile open:
+  ESC closes", "side mobile open: body scroll locked", "side mobile:
+  shows full brand", "side mobile closed: brandCollapsed", "side
+  desktop collapsed: brandCollapsed", "side mobile closed: aria-hidden",
+  "CSS: side rail 72px desktop-scoped", "CSS: side mobile aside 100dvh",
+  "CSS: side mobile-open neutralizes is-collapsed" (todo lo "side-").
+- `tests/AppShellPersist.test.tsx`: tests `side layout built-in collapse
+  button`, `top uncontrolled + persistKey + header render-prop toggle`
+  ya cubre el resto.
+- `tests/AppShellProps.test.tsx`: simplificar (no más discriminated union
+  → menos a testear).
+
+### Conservar (tests)
+- Todo `AppShellTop.test.tsx` (48 tests del top).
+- `AppShellPersist.test.tsx` casos `top`.
+- Tests del header alignment (CSS regex del brand padding — desaparece
+  con el brand block; ese test entero se borra).
+
+### Eliminar (smoke)
+- `smoke/app/scenarios/appshell-side-mobile/` + página
+- `ScenarioAppShellSideMobile` en gallery
+- 2 e2e tests en `scenarios.spec.ts` del describe "Scenario · AppShell
+  side mobile drawer"
+
+### Conservar (smoke)
+- Todos los scenarios top (7 escenarios: appshell-top-combobox,
+  appshell-top-mobile, appshell-top-mobile-brand, appshell-top-mobile-rail,
+  appshell-top-mobile-rail-controlled, appshell-top-mobile-nonav,
+  appshell-top-hide-collapsed).
+
+### CHANGELOG (sección BREAKING)
+```
+### BREAKING CHANGES
+- `headerLayout="side"` removed. The kit now exposes only one layout
+  (full-width header above the body). All side-only props removed:
+  `brand`, `brandCollapsed`, `topbar`, `user`. Consumers using `side`
+  must migrate: move brand to `header.center`, move user to
+  `header.right`, replace built-in hamburger with a render-prop trigger
+  in `header.left`. Removed locale keys: `appshell.expandMenu`,
+  `appshell.collapseMenu`, `appshell.expand`, `appshell.collapse`,
+  `appshell.openMenu`, `appshell.closeMenu`.
+- `headerLayout` prop removed (was the discriminator). `AppShellProps`
+  is no longer a discriminated union — single interface with `header`
+  + `sections` + `theme` + `headerTheme` + `collapsedRail` + the
+  shared base.
+```
+
+## Checklist
+
+- [ ] CSS: delete side rules (~400 lines)
+- [ ] React: collapse `AppShell()` to single body (no discriminator)
+- [ ] Types: `AppShellProps` simple interface
+- [ ] Locale: drop unused keys + es.ts entries
+- [ ] Stories: delete side stories, update Playground
+- [ ] Tests: delete side tests, simplify Props test
+- [ ] Smoke: delete side scenario + spec block
+- [ ] CHANGELOG: add BREAKING section at top of 1.31.0
+- [ ] `npm test` verde
+- [ ] `npm run smoke:ci` verde
+- [ ] Visual MCP: top mobile + desktop sanity
+- [ ] Commit + push (un solo commit grande con BREAKING)
+- [ ] CI verde → listo para merge
+
+---
+
+# AppShell `top` — Mobile drawer (2026-05-29)
 
 ## Problema
 
-Al recargar la página, `AppShell` vuelve a `defaultCollapsed`. Es el
-comportamiento esperado de React (`useState(defaultCollapsed)` se inicializa
-una vez por montaje, `AppShell.tsx:192`), no un bug. Falta **persistencia**.
-No se puso por defecto a propósito: barritas/despachos son Next.js App Router
-(SSR), y leer `localStorage` en el render inicial provoca hydration mismatch
-(server no tiene `localStorage`) + colisión de claves entre apps/instancias.
+`headerLayout="top"` quedó sin tratamiento mobile cuando se shipeó en 1.15.0. La
+media `@media (max-width: 900px)` (index.css:2844) está escrita para `side`:
+recolumna `.appshell` con `grid-template-columns` (en `top` el root usa
+`grid-template-rows` → no-op) y mueve el `<aside>` a `position: fixed; transform:
+translateX(-100%)` — lo cual en `top` deja el sidebar **invisible incluso
+expandido** y sin trigger built-in (el hamburger del `side` no se renderiza en
+`top`). Resultado: bajo 900px el `top` muestra solo el header y el contenido,
+sin acceso al nav.
 
-## Diseño: opt-in `persistKey`, SSR-safe
+Y el header `1fr auto 1fr` con `padding: 8px 16px` + `gap: 12px` no se reduce
+en pantallas chicas; en 375px con logo en center + Bell+separator+Avatar en
+right, los slots se chocan o desbordan.
 
-Prop nueva `persistKey?: string` en `AppShellBaseProps`. Si no se pasa, nada
-cambia (default actual intacto). Si se pasa, el kit recuerda el colapso en
-`localStorage[persistKey]`.
+## Diseño
 
-SSR-safe (patrón next-themes): el estado inicial sigue siendo `defaultCollapsed`
-→ server y primer render del cliente coinciden (sin mismatch). Tras montar, un
-`useEffect` lee `localStorage` y sincroniza. Trade-off aceptado: si el valor
-guardado difiere del default hay un frame de flash en el sidebar (animable por
-la transición existente); evitarlo requeriría un script inline bloqueante,
-sobre-ingeniería para un sidebar.
+Modelo overlay paralelo al `side` mobile, pero anclado **debajo** del header
+(no a `top: 0`) y disparado por el render-prop, **sin built-in hamburger**
+(consistencia con la decisión original del `top`: el consumer pone el trigger).
 
-Reglas:
-- `persistKey` solo gobierna el modo **no-controlado**. Si se pasa `collapsed`
-  (controlado), `persistKey` se ignora (el consumer ya es dueño de su estado y
-  su persistencia). Documentar en el JSDoc.
-- Lecturas/escrituras a `localStorage` envueltas en try/catch (Safari modo
-  privado, storage deshabilitado lanzan). Fallback: `defaultCollapsed`.
-- Valor almacenado: `'1'` / `'0'` (no `JSON`, no `'true'`).
+### API
 
-## Pasos
+El render-prop ya entrega `{ collapsed, toggle, setCollapsed }`. La semántica
+de `toggle()` se extiende: detecta breakpoint vía `matchMedia('(max-width:
+900px)')` y en mobile flippea `mobileOpen` en vez de `collapsed`. En desktop
+(actual) sigue idéntica.
 
-- [x] `src/components/AppShell.tsx`: `persistKey?: string` en `AppShellBaseProps`
-      con JSDoc (opt-in, SSR-safe, ignorado si controlado).
-- [x] `AppShell.tsx`: `useEffect` de sync post-mount (guard: `persistKey` &&
-      no-controlado) + escribir en `setCollapsed`. try/catch en ambos.
-- [x] `tests/AppShellPersist.test.tsx` (nuevo, 6 casos): read `'1'`; stored
-      `'0'` gana a `defaultCollapsed`; write en toggle; controlado ignora;
-      sin key no toca storage; no-crash si lanza.
-- [x] Story: descartado control en Playground (origen de storage compartido
-      entre stories → bleed). Cubierto por tests + DESIGN.md.
-- [x] CHANGELOG + DESIGN + package.json → 1.22.0 (feat minor).
-- [x] Gate: tsc 0 · eslint 0 · vitest 486/486 · build exit 0.
-- [ ] Esperar aprobación explícita antes de push/PR/release.
+- Desktop: `toggle()` ⇒ flip `collapsed`.
+- Mobile (≤900px): `toggle()` ⇒ flip `mobileOpen`. `collapsed` queda en su valor
+  previo (no se mezcla; cuando vuelve a desktop el rail/hide queda como estaba).
+
+Decisión: una sola API en vez de exponer `openMobile/closeMobile` separados.
+Razón: el consumer NO sabe en qué breakpoint está sin volver a calcular
+matchMedia él mismo; tener `toggle` "DWIM" deja el caller con un solo botón.
+
+ESC cierra el drawer mobile. Click en scrim también.
+
+### CSS
+
+Nueva sección bajo el bloque `top` con:
+
+```
+@media (max-width: 900px) {
+  .appshell--header-top .appshell__header {
+    padding: 8px 12px; gap: 8px;
+    grid-template-columns: auto 1fr auto;
+  }
+  .appshell--header-top .appshell__body { grid-template-columns: 1fr; }
+  .appshell--header-top .appshell__sidebar {
+    position: fixed; top: 56px; bottom: 0; left: 0;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+    z-index: 40; border-right: 1px solid var(--border-default);
+    background: var(--bg-surface);
+  }
+  .appshell--header-top.is-mobile-open .appshell__sidebar { transform: translateX(0); }
+  .appshell--header-top.is-mobile-open .appshell__scrim {
+    display: block; position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+    background: var(--backdrop); z-index: 30;
+  }
+}
+```
+
+Notas:
+- `top: 56px` matchea el `min-height` del header (línea 2742). Exponemos
+  también `--appshell-header-height: 56px` como var pública pasada a `:root` /
+  `.appshell--header-top` para que consumers anclen sticky sub-headers sin
+  hardcodear el 56.
+- El header pasa de `1fr auto 1fr` a `auto 1fr auto` en mobile: el center
+  estira (le da espacio al brand), left/right quedan compactos.
+- `position: fixed; top: 56px` ancla el aside DEBAJO del header; el scrim
+  también empieza desde 56 para que el header quede visible (afordance de
+  cierre vía render-prop trigger).
+
+### React
+
+En el branch `top` de `AppShell()`:
+
+1. Nuevo `useState(false)` para `topMobileOpen` (existe `mobileOpen` solo en
+   side branch — no compartir state entre branches, conservar el aislamiento).
+2. `useEffect` con `matchMedia('(max-width: 900px)')` setea ref `isMobileRef`
+   que `toggle()` consulta. Listener para `change` → cuando se vuelve desktop,
+   `setTopMobileOpen(false)` (cleanup).
+3. `headerApi.toggle` decide según `isMobileRef.current`: mobile → flip
+   `topMobileOpen`; desktop → flip `collapsed`.
+4. ESC handler global vía `useEffect` mientras `topMobileOpen` esté true.
+5. Render del `<div className="appshell__scrim">` cuando `topMobileOpen` (igual
+   patrón que el side branch).
+6. Class `is-mobile-open` se agrega al root cuando `topMobileOpen`.
+7. `<aside>` recibe `aria-hidden={isMobile && !topMobileOpen}` (mejora a11y, el
+   sidebar oculto no debe leerse).
+
+### Tests
+
+`tests/AppShellTop.test.tsx`:
+
+- [ ] CSS: hay `@media (max-width: 900px)` con `.appshell--header-top
+      .appshell__sidebar { position: fixed }`.
+- [ ] CSS: el header en mobile pasa a `grid-template-columns: auto 1fr auto`.
+- [ ] CSS: `is-mobile-open .appshell__sidebar` aplica `translateX(0)`.
+- [ ] CSS: scrim mobile usa `top: 56px` (no cubre el header).
+- [ ] CSS: `--appshell-header-height: 56px` definido como var pública.
+- [ ] React: render-prop `toggle()` en jsdom con `matchMedia` mockeado a mobile
+      flippea `is-mobile-open` y NO toca `is-collapsed`.
+- [ ] React: ESC cierra el drawer mobile.
+
+### Smoke (Playwright real)
+
+`smoke/gallery/scenarios.tsx`:
+
+- [ ] `ScenarioAppShellTopMobile` — `top` uncontrolled con render-prop,
+      sections, sin persistKey. Trigger en `header.left`.
+
+`smoke/app/scenarios/appshell-top-mobile/page.tsx` y entry en e2e:
+
+- [ ] `resize(375)` → aside cerrado (translateX(-100%)) → click trigger → aside
+      abierto + scrim visible → ESC → cerrado.
+- [ ] `resize(1280)` → aside visible siempre, sin scrim.
+
+### Bump
+
+`1.30.6 → 1.31.0` minor (feature, sin breaking).
+
+## Checklist
+
+- [x] CSS: nueva media + var `--appshell-header-height`
+- [x] AppShell.tsx: subcomponente `AppShellTopBranch`, `topMobileOpen` state,
+      matchMedia ref con cleanup en resize-back, ESC handler, `toggle()` DWIM,
+      `is-mobile-open` class, scrim render, aria-hidden en aside cerrado
+- [x] Story `Topbar · Mobile drawer (≤900px)` con viewport mobile1
+- [x] Tests CSS (8 nuevos) + React (4 nuevos: toggle mobile, toggle desktop,
+      ESC, scrim) — 521 verdes (+11)
+- [x] Smoke scenario `appshell-top-mobile` + page + spec (4 e2e) — 25 verdes
+- [x] CHANGELOG entrada `## [1.31.0] — 2026-05-29`
+- [x] `package.json` 1.30.6 → 1.31.0
+- [x] `npm test` verde (521/521)
+- [x] `npm run smoke:ci` verde (25/26, 1 skip pre-existente)
+- [ ] Commit en rama, PR a main, **esperar aprobación** antes de merge/release
 
 ## Review
 
-`persistKey` agregado como persistencia opt-in del colapso. Implementación en
-3 puntos de `AppShell.tsx`: prop+JSDoc en la base, `useEffect` de sync
-post-mount (SSR-safe, no-controlado, try/catch) y escritura guardada en
-`setCollapsed`. Default 100% intacto: sin la prop el kit no toca `localStorage`
-(test (d) lo pinea con spies). 486 tests verdes (+6), tsc/eslint/build limpios.
-Consumo: `<AppShell persistKey="despachos.sidebar" … />`. Pendiente: aprobación
-para release 1.22.0 (no se publica sin OK explícito).
+### Qué cambió
 
-## Adenda — quitar doble control en top+collapsedRail (Opción A)
+1. **CSS — `src/styles/index.css`** (2 cambios):
+   - `--appshell-header-height: 56px` expuesto como var pública en
+     `.appshell.appshell--header-top`; el `min-height` del header lee de ahí.
+   - Las reglas desktop hide/rail overlay
+     (`.appshell--header-top:not(.appshell--rail).is-collapsed ...`) ahora
+     viven dentro de `@media (min-width: 901px)` para no competir contra el
+     bloque mobile por specificity.
+   - Nueva `@media (max-width: 900px) { .appshell--header-top ... }` con
+     header compacto (`auto 1fr auto`), body 1col, aside `position: fixed`
+     anclado en `top: var(--appshell-header-height)` con
+     `width: min(280px, 85vw)`, scrim debajo del header.
 
-Detectado: `top`+`collapsedRail` tenía dos affordances de colapso (hamburger en
-`header.left` que cablea el consumer + chevron built-in abajo que renderizaba el
-componente desde 1.21.0). Origen del choque: el chevron de abajo es idiom de
-`side` (sin header), se filtró a `top` vía `collapsedRail`.
+2. **React — `src/components/AppShell.tsx`**:
+   - Extraído `AppShellTopBranch` (subcomponente interno) para que los hooks
+     del drawer corran solo cuando se renderiza el `top` (no se cuelan en el
+     `side`). Mismo árbol JSX que antes, más:
+     - `useState(false)` para `mobileOpen`
+     - `useRef(false)` + `useEffect(matchMedia)` para detectar breakpoint
+       con cleanup al resize-back a desktop
+     - `useEffect` con listener `Escape` global solo mientras drawer abierto
+     - `headerApi.toggle()` DWIM: mobile flip `mobileOpen`, desktop flip
+       `collapsed`. `collapsed` queda intacto en mobile.
+     - `aside aria-hidden={isMobileRef.current && !mobileOpen}`
+     - Scrim renderizado solo cuando `mobileOpen`
 
-Fix (Opción A): el componente ya NO renderiza el toggle built-in en `top`. El
-colapso en `top` lo maneja siempre el control del consumer en `header.left`,
-uniforme en hide y rail. `collapsedRail` queda puramente visual. `side` intacto.
+3. **Stories**: `Topbar · Mobile drawer (≤900px)` con viewport mobile1.
 
-- [x] `AppShell.tsx`: removido el bloque `collapsedRail && <button .appshell__collapse>` del render `top` (queda solo `footer`).
-- [x] `AppShellTop.test.tsx`: test invertido → en `top`+`collapsedRail` el toggle es `null`, el modifier `appshell--rail` sigue.
-- [x] `AppShellPersist.test.tsx`: write-path y no-crash reapuntados al toggle de `side`.
-- [x] DESIGN.md + CHANGELOG (`### Changed`) + comentario del story `TopbarRail`.
-- [x] Gate: tsc 0 · eslint 0 · vitest 486/486 · build exit 0.
-- [ ] Check visual en Storybook: browser MCP bloqueado por sesión previa; cubierto por la aserción de DOM del test (toggle null). Validar en despachos al consumir 1.22.0.
+4. **Tests** (`tests/AppShellTop.test.tsx`): 11 nuevos (8 CSS guards + 4
+   React behaviours con `matchMedia` mock). Todos verdes.
 
-## Adenda 2 — header render-prop (1.23.0)
+5. **Smoke** (`smoke/gallery/scenarios.tsx`, `smoke/app/scenarios/
+   appshell-top-mobile/page.tsx`, `smoke/e2e/scenarios.spec.ts`): 4 e2e
+   con resize real, click trigger, ESC, scrim-tap. Todos verdes.
 
-Gap medido por el consumer en 1.22.0: en `top`, `persistKey` (uncontrolled) no
-podía convivir con un trigger en el header. El kit renderizaba `header.{left,
-center,right}` como nodos estáticos sin handle al estado, y `top` no tiene
-toggle built-in → un shell uncontrolled no tenía cómo colapsar desde el header
-y `persistKey` era no-op ahí. (Mi propio test de persistencia usaba `side`, lo
-que escondió la inconsistencia.)
+6. **CHANGELOG**: entrada 1.31.0 documentando Added / Changed / Smoke.
 
-Fix: los slots del header aceptan render-prop `(api) => ReactNode` con
-`{ collapsed, toggle, setCollapsed }`. Tipos nuevos exportados:
-`AppShellHeaderApi`, `AppShellHeaderSlot`. Nodos estáticos sin cambio.
+### Decisiones que conviene anotar
 
-- [x] `AppShell.tsx`: tipos `AppShellHeaderApi`/`AppShellHeaderSlot`; slots con render-prop; `slot()` resolver + `headerApi` en el render `top`.
-- [x] Tests: `AppShellTop` (render-prop togglea uncontrolled + nodo estático intacto); `AppShellPersist` (TOP uncontrolled + persistKey + render-prop persiste; TOP lee stored).
-- [x] Story `Topbar · Uncontrolled (header render-prop)`.
-- [x] DESIGN.md (snippet canónico → render-prop) + CHANGELOG 1.23.0 + package.json.
-- [x] Gate: tsc 0 · eslint 0 · vitest 490/490 · build 0 · smoke OK.
-- [ ] Pendiente: confirmación explícita para push/PR/release 1.23.0.
+- **Un solo `toggle()` DWIM** en lugar de `openMobile/closeMobile` aparte.
+  Razón: el consumer no sabe en qué breakpoint está sin recalcular
+  matchMedia él mismo; tener `toggle` "smart" deja un solo botón en su lado.
+  Linear y Vercel hacen lo mismo.
+- **Sin built-in hamburger en `top`**. El kit no tiene posición sobre
+  cómo se ve el trigger; el `top` siempre fue "consumer-driven slot".
+  Romper esa decisión por mobile sería incoherente.
+- **Desktop rules scoped a `min-width: 901px`** en vez de pelear specificity
+  con `:not()` o repetir clases. Es la solución limpia y comentada para
+  futuros lectores ("por esto el bloque mobile abajo no necesita doble
+  clase").
+- **`isMobileRef` ref vs state**: no es state porque el render no depende
+  del breakpoint (el CSS hace ese trabajo). El único consumidor del valor
+  es el closure de `toggle()`. Ref evita renders innecesarios de cualquier
+  consumer-trigger que reciba `headerApi`.
+- **`aria-hidden` best-effort**: el primer render usa
+  `isMobileRef.current = false` (no se puede leer matchMedia en SSR), así
+  que en SSR el aside no está hidden incluso en mobile. El listener lo
+  corrige en cuanto hidrata. Aceptable — no hay flash visible (el CSS oculta
+  el aside) y un screen reader que justo hidrate antes del effect es un
+  caso de borde irreal.
 
-## Adenda 3 — scroll interno en top (1.24.0)
+### Sin push aún
 
-Bug del consumidor: en `top`, contenido largo scrollea la página entera y se
-lleva el header + desincroniza el sidebar. Causa: `.appshell { min-height:100vh }`
-sin scroll container interno. El `side` no sufre (modelo sticky).
+Branch `feat/appshell-top-mobile` con todo commiteado local. No pusheo ni
+abro PR sin tu OK explícito (memory: feedback-no-push-without-approval).
 
-Fix (spec del consumidor, corregida con el override del sidebar que me había
-saltado): modelo app-shell de scroll interno en `top`. Header (fila 1) + sidebar
-(fila 2) estáticos; scrollea solo `.appshell__content`. Default, scopeado a
-`--header-top` (no toca `side`), sin tocar el padding del content.
+---
 
-- [x] `index.css`: `.appshell.appshell--header-top { height: 100vh }`; `.appshell--header-top .appshell__sidebar { height: auto }` (evita 2º scrollbar vs base `height:100vh`); `.appshell--header-top .appshell__content { min-height:0; overflow-y:auto }`. (`body { min-height:0 }` ya estaba.)
-- [x] Stories: wrappers `top` → `100vh`; contenido alto (8×200) + sub-header sticky para demostrar scroll y anclaje.
-- [x] Tests: 4 guards de CSS en `AppShellTop` (height 100vh, sidebar auto, content overflow-y+min-height, global padding intacto).
-- [x] DESIGN.md (sección "two scroll models") + CHANGELOG 1.24.0 + package.json.
-- [x] Gate: tsc 0 · eslint 0 · vitest 494/494 · build 0 · smoke OK.
-- [ ] Check visual Playwright: browser MCP con lock de sesión previa (no liberable por MCP). Cubierto por 4 guards de CSS + smoke (Next app real buildea/renderiza). Validar en despachos al bump.
-- [ ] Pendiente: confirmación explícita para release 1.24.0.
+## Post-review hardening (commit 2)
 
-## Adenda 4 — iconos de view switcher + icon prop (1.25.0)
+Tras el primer push + PR #47, hice self-review honesto y encontré 3 gaps
+que YO había introducido en este mismo PR:
 
-Pedido despachos: switcher de 5 layouts con iconos; el kit no los tenía.
+### A) `aria-hidden` era código muerto
+Mi primer commit usó `useRef` para `isMobile`. El listener actualizaba el
+ref pero **no disparaba re-render** — el atributo nunca llegaba al DOM.
+El comentario que escribí en este mismo archivo decía "el listener lo
+corrige en cuanto hidrata", falso. **Fix:** `useRef` → `useState`. Paga
+1 re-render post-mount, normal. Ahora el screen reader sí ve el drawer
+cerrado como hidden.
 
-- [x] Icons.tsx: 5 iconos. `Rows3` (NO `Table` — colisiona con el wrapper `<table>` de Layout.tsx; `Rows3` es el nombre lucide estándar), `CalendarDays`, `Map`, `LayoutGrid`, `Columns3`. `MapPin` ya existía.
-- [x] Toggle.tsx: `icon?` prop en `ToggleGroupItem`/`SegmentedControlItem` (renderiza antes de children; layout vía flex gap ya existente). Children sigue funcionando (back-compat). Hallazgo: los iconos YA funcionaban vía children; el prop es la API explícita.
-- [x] smoke `ICON_NAMES`: +5 (el gate exige cubrir cada export Capitalizado).
-- [x] Tests: Toggle (icon+label, icon-only via aria-label, children-only back-compat).
-- [x] Story `SegmentedControl · view switcher (iconos)` (icon+label y icon-only).
-- [x] CHANGELOG 1.25.0 + package.json.
-- [x] Gate: tsc 0 · eslint 0 · vitest 497/497 · build 0 · smoke OK.
-- [ ] Pendiente: confirmación explícita para release 1.25.0 (parado antes de publicar por protocolo).
+### B) Sin focus trap en el drawer
+Tab se salía al header. Incoherencia total: el primer mensaje de la
+auditoría listó "P1 #6 Focus trap mobile no existe" como bug del `side`,
+y yo estaba a punto de shipear un nuevo case del mismo bug en `top`.
+**Fix:** extraje `useFocusTrap` de Overlay.tsx (Modal/Drawer lo usan
+hace tiempo) a `src/hooks/useFocusTrap.ts`. AppShell lo consume. Open
+foca primer link, Tab cycla, close vuelve foco al trigger.
 
-## Verificación
+### C) Sin body scroll lock
+Content scrolleaba bajo el scrim al swipe. **Fix:** extraje
+`useScrollLock` también, mismo contador global que Modal/Drawer (nesting-
+safe). Lo mismo con `useEscape` para no dejar un patrón duplicado.
 
-- Test de read-path: pre-seed `localStorage`, render con `persistKey`, assert
-  `.appshell.is-collapsed`.
-- Test de write-path: render top+`collapsedRail`, click `.appshell__collapse`,
-  assert `localStorage[key] === '1'`.
-- Manual en Storybook: togglear, recargar (F5), confirmar que recuerda — solo
-  si agrego el control; si no, lo valido en despachos al consumir 1.22.0.
+### Refactor colateral
 
-## /frontend-qa — auditoría kit-wide (2026-05-27)
+- 3 hooks (`useFocusTrap`, `useEscape`, `useScrollLock`) movidos de
+  `Overlay.tsx` a `src/hooks/`. Re-exportados desde `hooks/index.ts`
+  (interno). **NO** agregados al barrel público `src/index.ts` — son
+  internos hasta que tengan docs + nombres estables.
+- Overlay.tsx ahora importa de ahí. Modal/Drawer behaviour byte-idéntico
+  (9/9 tests verdes confirma).
 
-Scope: kit completo (no una ruta). Adaptado a librería. Stack React (no Angular).
+### Tests adicionales (+5)
 
-- [ ] Gate A — review estático: web-design-guidelines + design-taste-frontend + convenciones (sin browser)
-- [ ] Gate B — runtime Playwright en Storybook (superficies representativas) — NECESITA `npm run storybook` levantado
-- [ ] Gate C — polish (impeccable) + i18n/locale (español neutro, tú, sin tildes en imperativos)
-- [ ] Gate D — visual regression (baselines) — N/A primer run
-- [ ] Sign-off + informe de gaps/mejoras
+- `aria-hidden` lands cuando mobile + cerrado
+- `aria-hidden` ausente cuando mobile + abierto
+- `aria-hidden` ausente cuando desktop
+- `body.style.overflow=hidden` cuando drawer abierto
+- Focus va al primer link al abrir, vuelve al trigger al cerrar (ESC)
+
+Final: **526 unit + 25 smoke verdes**. CI corriendo sobre `feat/appshell-
+top-mobile` (commit 2 pushed).
+
+### Lo que sigue pendiente (próximos PRs, no este)
+
+- iOS Safari `100dvh` con fallback `100vh` (P1 #3 audit)
+- `data-tone="inverse"` en sidebar brand del `side` mobile (P1 #4 audit)
+- Smoke scenarios para brand/rail/no-nav en mobile (matriz de variantes)
+- Validación visual humana (mock1 viewport, Storybook abierto)
+
+---
+
+## Commit 4 (mismo PR) — Cerrado el "siguen pendientes"
+
+Usuario pidió hacer **todo en el mismo PR**. Ejecutado:
+
+### iOS Safari URL-bar safety
+- `.appshell.appshell--header-top { height: 100vh; height: 100dvh }`.
+  Los browsers viejos ignoran la segunda; los nuevos (Chrome 108+, Safari
+  16.4+) usan el viewport dinámico.
+- Mobile aside + scrim pasaron de `bottom: 0` a `calc(100vh - header)`
+  con el mismo dvh override. iOS antes clipa `bottom: 0` por la barra de
+  URL.
+
+### Side brand band-aware (audit P1 #4)
+- `<aside class="appshell__sidebar" data-tone={theme==='brand' ? 'inverse'
+  : undefined}>` en el `side`. Antes, Avatar/Badge/iconos en sidebar brand
+  no se re-tokenizaban. Espejo del header brand del `top`.
+
+### 3 smoke variants (brand / rail / no-nav)
+- Nuevos scenarios + páginas + 4 e2e asserts. La brand cazó un BUG REAL
+  que tenía oculto: mi regla mobile original restateaba `background:
+  var(--bg-surface)`, empataba en specificity con
+  `.appshell--brand .appshell__sidebar` y ganaba por source order →
+  brand sidebar quedaba **blanca** en mobile. Fix: saqué las propiedades
+  redundantes (`background` y `border-right` ya viven en la base).
+  Comentario en el CSS para que un futuro contributor no lo reintroduzca.
+
+### Visual pass (Playwright MCP)
+- Levanté el smoke server local (port 3100, `next start`), navegué con
+  el MCP a las 4 rutas mobile a 375×667 + desktop 1280×800. Screenshots
+  visuales confirmaron:
+  - **Default mobile cerrado**: header compacto, sin aside, sin scrim
+  - **Default mobile abierto**: aside 280px, scrim debajo del header,
+    Inicio activo con bar oro
+  - **Brand mobile abierto**: aside dark con texto white, hairline
+    white-α en el right border, active item con bg white-α 0.16
+  - **Rail mobile abierto**: el `collapsedRail` NO interfiere
+    (verifica que mis reglas mobile dominan sobre el rail desktop)
+  - **No-nav mobile**: sin aside, header con auto/1fr/auto, center
+    stretch
+  - **Desktop 1280**: sidebar 240px en grid, header centered, sin
+    overlay, byte-identical al pre-1.31
+
+### Tests resultantes
+
+| | Before commit 4 | After commit 4 |
+|---|---|---|
+| Unit | 526 | **530** (+4: 2 side brand data-tone + 2 CSS dvh) |
+| Smoke | 25 | **29** (+4: brand surface, rail overlay, no-nav header, aside dvh) |
+
+Visual pass humano (vía MCP) no cuenta como test automatizado pero
+confirma que las geometrías matemáticas se traducen a píxeles correctos.
+
+### Bug encontrado por mí ANTES de pedir merge
+
+Aplicando la regla nueva ("self-review antes de merge"):
+- ✅ ¿Qué bugs introduje en este PR? → El `background: var(--bg-surface)`
+  redundante. Cazado por el smoke brand, fixed antes de push.
+- ✅ ¿Qué cases de la auditoría perpetuaba? → P1 #4 cerrado.
+- ✅ ¿Qué combinaciones no estaban cubiertas? → brand/rail/no-nav,
+  ahora con smoke.
+- ✅ ¿Visual humano? → 4 mobile scenarios + 1 desktop con MCP.
+
+### Lo que sigue pendiente (próximos PRs, no este)
+
+- P1 #5 audit: contraste de `.appshell--brand .appshell__collapse`
+  (rgba(255,255,255,0.7) — verificar AA en preset)
+- P1 #6 audit (cerrado en commit 2 para `top`): focus trap en sidebar
+  mobile del `side` también — separate PR
+- P1 #7 audit: NavItem `<a href="#">` → `<button>` cuando no hay href
+- P2 #8-13: modernización del `side` layout (render-prop, BrandText
+  componente tipado, slot breadcrumbs, header-height var en `side`)
+- P3 + P4: roving tabindex, Cmd+\\ shortcut, CommandPalette integration
+
+### Lección que se va a `tasks/lessons.md`
+
+Patrón a fijar: **siempre auditar mi propio output ANTES de pedir
+aprobación de merge**. La pregunta "qué hiciste para revisarlo" debería
+ser implícita, no que tenga que preguntármela el usuario. Tres tipos de
+gaps a buscar siempre:
+- Bugs introducidos por mí en este mismo PR (refs vs state, listeners
+  sin re-render, etc.)
+- Casos en la auditoría reciente que el PR perpetúa
+- Combinaciones de props no testeadas (matriz)
