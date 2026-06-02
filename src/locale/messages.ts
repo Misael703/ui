@@ -35,6 +35,26 @@ export interface UiKitMessages {
   /** Accessible name for the kit's built-in menu toggle (opt-in via `showMenuToggle`). */
   'appshell.toggleMenu': string;
 
+  // TimeAgo / smart-time helpers
+  /** Sub-minute past: "ahora". */
+  'timeAgo.now': string;
+  /** Sub-minute future: "pronto". */
+  'timeAgo.soon': string;
+  /** Template: "hace {n} min" (past, 1-59 minutes). */
+  'timeAgo.minAgo': string;
+  /** Template: "en {n} min" (future, 1-59 minutes). */
+  'timeAgo.minIn': string;
+  /** Same-day prefix: "hoy". */
+  'timeAgo.today': string;
+  /** Day-before prefix: "ayer". */
+  'timeAgo.yesterday': string;
+  /** Day-after prefix: "mañana". */
+  'timeAgo.tomorrow': string;
+  /** Compact weekday names, index 0 = Sunday (matches `Date.prototype.getDay()`). */
+  'timeAgo.weekdaysShort': string[];
+  /** Compact month names, index 0 = January (matches `Date.prototype.getMonth()`). */
+  'timeAgo.monthsShort': string[];
+
   // Notifications
   'notifications.button': string;
   /** Template: " ({n} sin leer)" */
