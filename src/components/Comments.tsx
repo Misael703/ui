@@ -42,21 +42,40 @@ export function CommentThread({
 }: CommentThreadProps) {
   const [draft, setDraft] = React.useState('');
   const [internal, setInternal] = React.useState(false);
+  const [grown, setGrown] = React.useState(false);
   const t = useLocale();
   const ph = placeholder ?? t['comments.placeholder'];
   const isInline = inputLayout === 'inline';
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  // Captures the 1-line scrollHeight on first paint with the empty
+  // textarea. Anything taller than baseline + epsilon means the user
+  // has typed a newline (or wrapped past one line). Cleared when
+  // leaving inline mode so a re-entry re-measures.
+  const baselineRef = React.useRef<number | null>(null);
 
   // Auto-grow in inline mode: reset to single-row, then size to
   // scrollHeight, capped at INLINE_MAX_HEIGHT_PX. Runs on every draft
-  // change so deletes shrink the box too. Stacked mode keeps the static
-  // rows={3} height — no DOM measurement, no observable side-effect.
+  // change so deletes shrink the box too. Same pass detects whether the
+  // textarea has grown past its 1-line baseline so the wrap can flip
+  // alignment from `center` (steady state) to `flex-end` (multi-line).
+  // Stacked mode keeps the static rows={3} height — no DOM measurement,
+  // no observable side-effect.
   React.useLayoutEffect(() => {
-    if (!isInline) return;
+    if (!isInline) {
+      baselineRef.current = null;
+      setGrown(false);
+      return;
+    }
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, INLINE_MAX_HEIGHT_PX)}px`;
+    const sh = el.scrollHeight;
+    if (baselineRef.current == null) baselineRef.current = sh;
+    el.style.height = `${Math.min(sh, INLINE_MAX_HEIGHT_PX)}px`;
+    // 4px epsilon absorbs subpixel rounding / font-metrics noise on the
+    // baseline measurement; without it the wrap flicker-toggles between
+    // center and flex-end at the boundary.
+    setGrown(sh > (baselineRef.current ?? sh) + 4);
   }, [draft, isInline]);
 
   const submit = () => {
@@ -93,7 +112,7 @@ export function CommentThread({
         ))}
       </ul>
       {onAdd && (
-        <div className={cx('comments__compose', isInline && 'comments__compose--inline')}>
+        <div className={cx('comments__compose', isInline && 'comments__compose--inline', isInline && grown && 'is-grown')}>
           <textarea
             ref={textareaRef}
             className="textarea"

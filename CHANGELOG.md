@@ -5,6 +5,44 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.1] — 2026-06-02
+
+**Patch. Fixes two visual bugs in `CommentThread` `inputLayout="inline"`
+that broke the "clean chat-style" sensation in the steady (empty /
+1-line) state. Consumer-driven from despachos-ferreteria.**
+
+### Fixed
+- **Scrollbar visible on first paint with an empty textarea.** 1.35.0
+  promised "auto-grows up to ~5 lines (140px ceiling), then scrolls
+  internally" but the inline CSS override only set `min-height: 0`,
+  leaving the textarea without `max-height` or `overflow-y`. With JS
+  re-setting `style.height` to `scrollHeight` and the kit's base
+  textarea having `min-height: 96px`, browsers showed a phantom
+  scrollbar even in the empty state. Now `.comments__compose--inline
+  .textarea` has `max-height: 140px` (matches `INLINE_MAX_HEIGHT_PX`
+  in JS) and `overflow-y: auto` — the scrollbar appears only when the
+  content actually exceeds the ceiling.
+- **"Enviar" button mis-aligned to the bottom-right at 1-line state.**
+  1.35.0 used `align-items: end` so the button stays anchored to the
+  textarea's bottom edge as it grows multi-line — correct at 4-5
+  lines, but at the 1-line baseline (the steady state) the button
+  sits at the bottom-right while the placeholder is vertically
+  centered. The wrap now defaults to `align-items: center` and the
+  component toggles `.is-grown` when the textarea grows past its
+  1-line baseline (`scrollHeight > baseline + 4px`), flipping
+  alignment to `flex-end`. The 4px epsilon absorbs subpixel rounding
+  so the wrap doesn't flicker at the boundary.
+
+### Internal
+- New state `grown` + ref `baselineRef` in `CommentThread`. The
+  baseline is captured on the first inline-mode paint with the empty
+  textarea (= 1-line `scrollHeight` of the runtime font). Cleared
+  when leaving inline mode so a re-entry re-measures.
+
+### Compatibility
+Non-breaking. No API change. Consumers already on `inputLayout="inline"`
+see both bugs disappear without touching their code.
+
 ## [1.36.0] — 2026-06-02
 
 **Minor. New `<TimeAgo>` + `<TimeAgoDate>` components and smart-time
