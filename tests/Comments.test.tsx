@@ -32,6 +32,58 @@ describe('CommentThread', () => {
     render(<CommentThread comments={[]} onAdd={() => {}} />);
     expect(screen.getByText('Enviar')).toBeDisabled();
   });
+
+  describe('inputLayout="inline"', () => {
+    it('applies the inline modifier class and renders textarea + button as siblings', () => {
+      const { container } = render(
+        <CommentThread comments={[]} onAdd={() => {}} inputLayout="inline" />
+      );
+      const compose = container.querySelector('.comments__compose');
+      expect(compose).not.toBeNull();
+      expect(compose!.classList.contains('comments__compose--inline')).toBe(true);
+      // Children: textarea then button.
+      const kids = Array.from(compose!.children);
+      expect(kids[0]?.tagName).toBe('TEXTAREA');
+      expect(kids[1]?.tagName).toBe('BUTTON');
+    });
+
+    it('Enter (without Shift) submits in inline mode', () => {
+      const onAdd = vi.fn();
+      render(<CommentThread comments={[]} onAdd={onAdd} inputLayout="inline" />);
+      const ta = screen.getByPlaceholderText(/comentario/) as HTMLTextAreaElement;
+      fireEvent.change(ta, { target: { value: 'Hola' } });
+      fireEvent.keyDown(ta, { key: 'Enter' });
+      expect(onAdd).toHaveBeenCalledWith('Hola', false);
+    });
+
+    it('Shift+Enter does NOT submit in inline mode (newline)', () => {
+      const onAdd = vi.fn();
+      render(<CommentThread comments={[]} onAdd={onAdd} inputLayout="inline" />);
+      const ta = screen.getByPlaceholderText(/comentario/) as HTMLTextAreaElement;
+      fireEvent.change(ta, { target: { value: 'Hola' } });
+      fireEvent.keyDown(ta, { key: 'Enter', shiftKey: true });
+      expect(onAdd).not.toHaveBeenCalled();
+    });
+
+    it('hides the allowInternal checkbox in inline mode even if allowInternal=true', () => {
+      const { container } = render(
+        <CommentThread comments={[]} onAdd={() => {}} allowInternal inputLayout="inline" />
+      );
+      expect(container.querySelector('.comments__internal-toggle')).toBeNull();
+    });
+
+    it('stacked (default) still fires onAdd via the Enviar button, not Enter', () => {
+      const onAdd = vi.fn();
+      render(<CommentThread comments={[]} onAdd={onAdd} />);
+      const ta = screen.getByPlaceholderText(/comentario/) as HTMLTextAreaElement;
+      fireEvent.change(ta, { target: { value: 'Hola' } });
+      // Enter in stacked is a no-op for submit (default newline).
+      fireEvent.keyDown(ta, { key: 'Enter' });
+      expect(onAdd).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByText('Enviar'));
+      expect(onAdd).toHaveBeenCalledWith('Hola', false);
+    });
+  });
 });
 
 describe('AttachmentList', () => {

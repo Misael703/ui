@@ -5,6 +5,37 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.35.0] — 2026-06-02
+
+**Minor. `CommentThread` gains an opt-in inline (chat-style) compose
+layout — consumer-driven from despachos-ferreteria.** The default
+stacked layout (textarea above, action row below) reads as visually
+disjointed for short coordination comments, especially in empty
+states where there's nothing above to anchor the input vertically.
+The new `inputLayout="inline"` adopts the Linear/Slack quick-comment
+pattern.
+
+### Added
+- `inputLayout?: 'stacked' | 'inline'` on `CommentThreadProps`,
+  default `'stacked'`.
+- In `'inline'`:
+  - Textarea and submit share a single flex row, button anchored to
+    the textarea's bottom edge.
+  - Textarea starts at `rows={1}` and auto-grows up to ~5 lines
+    (140px ceiling), then scrolls internally.
+  - **Enter** submits; **Shift+Enter** inserts a newline — chat
+    convention.
+  - `allowInternal` is intentionally ignored — the checkbox doesn't
+    fit the compact row. Use `'stacked'` if you need it.
+- Storybook story `CommentThread · Inline (chat-style)` with empty
+  state + filled state side-by-side.
+
+### Compatibility
+Non-breaking. `inputLayout` defaults to `'stacked'`; consumers that
+omit it see identical behavior — rows=3, Enviar button below,
+`allowInternal` honoured. Enter in stacked mode still inserts a
+newline (default form behaviour).
+
 ## [1.34.0] — 2026-06-02
 
 **Minor. `AppShell` ships a built-in menu toggle — consumer-driven
