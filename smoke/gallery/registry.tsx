@@ -108,6 +108,8 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'TransferList', node: <Ctrl<TransferItem[]> init={[]} render={(v, s) => <K.TransferList source={[{ id: 'a', label: 'A' }]} selected={v} onChange={s} />} /> },
   { name: 'PermissionMatrix', node: <Ctrl<Record<string, string[]>> init={{}} render={(v, s) => <K.PermissionMatrix roles={[{ id: 'r', label: 'R' }]} actions={[{ id: 'a', label: 'A' }]} value={v} onChange={s} />} /> },
   { name: 'CommentThread', node: <K.CommentThread comments={[{ id: '1', author: { name: 'M' }, body: 'hola', timestamp: 'hoy' }]} onAdd={() => {}} /> },
+  { name: 'TimeAgo', node: <K.TimeAgo iso="2026-06-02T14:25:00" /> },
+  { name: 'TimeAgoDate', node: <K.TimeAgoDate iso="2026-06-02" /> },
   { name: 'AttachmentList', node: <K.AttachmentList attachments={[{ id: '1', name: 'a.pdf', size: '1KB' }]} /> },
   { name: 'ConfirmDialog', node: <K.ConfirmDialog open={false} onClose={() => {}} onConfirm={() => {}} title="¿Seguro?" /> },
   { name: 'Modal', node: <K.Modal open={false} onClose={() => {}} title="M">x</K.Modal> },

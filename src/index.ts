@@ -22,6 +22,8 @@ export * from './components/Icons';
 export * from './components/Logo';
 export * from './components/Display3';
 export * from './components/Notifications';
+export * from './components/TimeAgo';
+export * from './utils/smartTime';
 export * from './components/Code';
 export * from './components/Filters';
 export * from './components/Comments';

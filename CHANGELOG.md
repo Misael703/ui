@@ -5,6 +5,77 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.0] — 2026-06-02
+
+**Minor. New `<TimeAgo>` + `<TimeAgoDate>` components and smart-time
+helpers — consumer-driven from despachos-ferreteria feature 06.** The
+pattern (adaptive relative+absolute label, semantic `<time>` element,
+absolute datetime in the kit's `Tooltip`) was validated locally in
+despachos for months; promoted to the kit now that cobros-meson,
+rentools and marginapp are all heading toward feeds/history surfaces.
+
+### Added — components
+- `<TimeAgo iso="…" side?="top" now?={...} />` and
+  `<TimeAgoDate iso="…" side?="top" now?={...} />`. Both render a
+  semantic `<time dateTime={iso}>` wrapped in the kit's `Tooltip` (the
+  tooltip shows the absolute datetime regardless of how compact the
+  visible label is).
+- **SSR-safe hydration**: the first render (server + first client
+  paint) emits the absolute label so server and client HTML match
+  byte-for-byte; a `useEffect` then swaps to the smart relative label
+  post-mount. No hydration mismatches from clock skew / TZ drift.
+- New type export: `TimeAgoProps`.
+
+### Added — helpers
+All take `(iso: string, locale: UiKitMessages, now?: Date)` and return
+a string — useful when the consumer wants the formatted text without
+the component wrapper (chip label, inline string interpolation, etc).
+- `smartDateTime` — adaptive scale: `<1 min` → "ahora" / "pronto";
+  `<60 min` → "hace N min" / "en N min"; same day → "hoy HH:MM";
+  ±1 day → "ayer HH:MM" / "mañana HH:MM"; `<7 days` → "lun HH:MM";
+  same year → "12 mar"; else "12 mar 2025". Drops the HH:MM portion
+  when the input has no meaningful time-of-day.
+- `smartDate` — same scale, date-only (time always ignored).
+- `formatIsoDate` — absolute compact date: "12 mar" / "12 mar 2025".
+- `formatIsoDateTime` — absolute compact date+time: "12 mar, 14:30".
+
+Naming note: the kit already exposes `formatDate(d: Date, format)` in
+`utils/dateFormat` for the Pickers; the new helpers take an ISO string
++ locale and live in `utils/smartTime` under the `formatIso*` namespace
+to avoid clashing with the existing export.
+
+### Added — locale keys
+`timeAgo.now`, `timeAgo.soon`, `timeAgo.minAgo` (template `hace {n} min`),
+`timeAgo.minIn` (`en {n} min`), `timeAgo.today`, `timeAgo.yesterday`,
+`timeAgo.tomorrow`, `timeAgo.weekdaysShort` (lowercase 3-letter array,
+index 0 = Sunday to match `Date.prototype.getDay()`), and
+`timeAgo.monthsShort` (lowercase 3-letter array, index 0 = January).
+
+### Design notes
+- **Determinism, no Intl**: the kit formats dates manually rather than
+  via `Intl.DateTimeFormat`. Intl honours the runtime locale, which
+  differs between server and client in Next App Router and triggers
+  hydration warnings on edge cases. Manual formatting is byte-stable
+  across environments.
+- **Day-precision heuristic**: inputs of the form `YYYY-MM-DD` or
+  `YYYY-MM-DDT00:00:00Z` are treated as day-precision markers (no
+  meaningful time-of-day). The label drops the HH:MM portion in those
+  cases — otherwise every Bsale-sourced date would render with a
+  spurious "mié 00:00".
+- **TZ handling**: day-precision inputs (the two shapes above) are
+  pinned to the calendar day's local midnight so a negative TZ doesn't
+  shift the label by one day. Timestamps with a real time-of-day are
+  parsed as the JS spec dictates (UTC if `Z`, local otherwise).
+- **No internal ticker**: `<TimeAgo>` is stateless after the post-mount
+  flip. The consumer is responsible for triggering re-renders (e.g.
+  react-query refetch, focus refresh). A built-in tick-every-minute is
+  a deferred feature — keeps v1 simple and teardown-safe.
+
+### Compatibility
+Pure addition. No existing API touched. The new exports
+(`TimeAgo`, `TimeAgoDate`, `TimeAgoProps`, four helpers, nine locale
+keys) are additive and non-breaking.
+
 ## [1.35.0] — 2026-06-02
 
 **Minor. `CommentThread` gains an opt-in inline (chat-style) compose

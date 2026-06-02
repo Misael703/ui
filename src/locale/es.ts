@@ -29,6 +29,17 @@ export const esMessages: UiKitMessages = {
   'appshell.breadcrumb': 'Breadcrumb',
   'appshell.toggleMenu': 'Abrir menú',
 
+  // TimeAgo
+  'timeAgo.now': 'ahora',
+  'timeAgo.soon': 'pronto',
+  'timeAgo.minAgo': 'hace {n} min',
+  'timeAgo.minIn': 'en {n} min',
+  'timeAgo.today': 'hoy',
+  'timeAgo.yesterday': 'ayer',
+  'timeAgo.tomorrow': 'mañana',
+  'timeAgo.weekdaysShort': ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+  'timeAgo.monthsShort': ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+
   // Notifications
   'notifications.button': 'Notificaciones',
   'notifications.unreadSuffix': ' ({n} sin leer)',
