@@ -31,12 +31,19 @@ export const CommentThreadDemo: StoryObj = {
 };
 
 /**
- * **Inline (chat-style) compose** (v1.35.0) — `inputLayout="inline"` makes the
- * textarea + submit share a single row, the textarea auto-grows up to ~5
- * lines, and Enter submits while Shift+Enter inserts a newline. Use it for
- * short, chat-like coordination (Linear/Slack pattern). `allowInternal` is
- * ignored in this mode by design — if you need the internal toggle, stay
- * on the default `stacked` layout.
+ * **Inline (chat-style) compose** (v1.35.0, refined in 1.36.1) —
+ * `inputLayout="inline"` makes the textarea + submit share a single row,
+ * the textarea auto-grows up to ~5 lines, and Enter submits while
+ * Shift+Enter inserts a newline. Use it for short, chat-like coordination
+ * (Linear/Slack pattern). `allowInternal` is ignored in this mode by
+ * design — if you need the internal toggle, stay on the default `stacked`
+ * layout.
+ *
+ * **Behaviour to verify in the docs preview:** the empty / 1-line state
+ * shows no scrollbar and the "Enviar" button is vertically centered with
+ * the placeholder. Type `Shift+Enter` to wrap to multiple lines: the
+ * wrap class flips to `.is-grown`, the textarea anchors the button to
+ * the bottom-right, and the scrollbar appears only past ~5 lines.
  */
 export const CommentThreadInline: StoryObj = {
   name: 'CommentThread · Inline (chat-style)',

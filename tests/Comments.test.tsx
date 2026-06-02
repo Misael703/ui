@@ -65,6 +65,46 @@ describe('CommentThread', () => {
       expect(onAdd).not.toHaveBeenCalled();
     });
 
+    it('empty state does NOT carry the .is-grown modifier (button stays vertically centered)', () => {
+      const { container } = render(
+        <CommentThread comments={[]} onAdd={() => {}} inputLayout="inline" />
+      );
+      const compose = container.querySelector('.comments__compose')!;
+      expect(compose.classList.contains('comments__compose--inline')).toBe(true);
+      expect(compose.classList.contains('is-grown')).toBe(false);
+    });
+
+    it('multi-line draft flips the wrap into .is-grown', () => {
+      // jsdom doesn't compute layout — scrollHeight is always 0. Stub
+      // the getter so the auto-grow effect observes a growth past
+      // baseline + epsilon. The stub is per-instance via _stub on the
+      // node, restored to the prototype default after the test.
+      const proto = HTMLTextAreaElement.prototype;
+      const original = Object.getOwnPropertyDescriptor(proto, 'scrollHeight');
+      Object.defineProperty(proto, 'scrollHeight', {
+        configurable: true,
+        get(this: HTMLTextAreaElement & { _stub?: number }) {
+          return this._stub ?? 0;
+        },
+      });
+      try {
+        const { container } = render(
+          <CommentThread comments={[]} onAdd={() => {}} inputLayout="inline" />
+        );
+        const ta = container.querySelector('textarea')! as HTMLTextAreaElement & { _stub?: number };
+        // First paint with draft='' captured baseline at scrollHeight=0.
+        const compose = container.querySelector('.comments__compose')!;
+        expect(compose.classList.contains('is-grown')).toBe(false);
+        // Simulate the textarea growing past the 1-line baseline by 96px.
+        ta._stub = 96;
+        fireEvent.change(ta, { target: { value: 'line one\nline two\nline three' } });
+        expect(compose.classList.contains('is-grown')).toBe(true);
+      } finally {
+        if (original) Object.defineProperty(proto, 'scrollHeight', original);
+        else delete (proto as unknown as Record<string, unknown>).scrollHeight;
+      }
+    });
+
     it('hides the allowInternal checkbox in inline mode even if allowInternal=true', () => {
       const { container } = render(
         <CommentThread comments={[]} onAdd={() => {}} allowInternal inputLayout="inline" />

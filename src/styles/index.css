@@ -3499,13 +3499,21 @@ button, input, select, textarea { box-sizing: border-box; }
 .comments__compose { display: flex; flex-direction: column; gap: var(--space-2); }
 .comments__compose-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .comments__internal-toggle { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--fg-muted); cursor: pointer; }
-/* Inline (chat-style) compose: textarea + submit share a row. `align-items:
-   end` keeps the button anchored to the textarea's bottom edge as the
-   textarea auto-grows. The textarea overrides its own min-height so a
-   `rows={1}` start really starts at one line; `resize: none` because the
-   JS auto-grow owns the height. */
-.comments__compose--inline { flex-direction: row; align-items: end; gap: var(--space-2); }
-.comments__compose--inline .textarea { flex: 1; min-height: 0; resize: none; }
+/* Inline (chat-style) compose: textarea + submit share a row. Default
+   `align-items: center` keeps the button vertically aligned with the
+   placeholder when the textarea sits at one line — the steady state in
+   typical use. Once the textarea grows past the 1-line baseline the JS
+   adds `.is-grown`, which flips the alignment to `flex-end` so the
+   button anchors to the textarea's bottom edge rather than floating in
+   the middle of a tall multi-line input. The textarea overrides its
+   own min-height (the kit base sets 96px), caps growth at 140px to
+   match `INLINE_MAX_HEIGHT_PX` in JS, and uses `overflow-y: auto` so a
+   scrollbar appears only when content actually exceeds the ceiling —
+   not on first paint with an empty textarea. `resize: none` because
+   the JS auto-grow owns the height. */
+.comments__compose--inline           { flex-direction: row; align-items: center; gap: var(--space-2); }
+.comments__compose--inline.is-grown  { align-items: flex-end; }
+.comments__compose--inline .textarea { flex: 1; min-height: 0; max-height: 140px; resize: none; overflow-y: auto; }
 .comments__compose-submit { flex-shrink: 0; }
 
 /* ---------- AttachmentList -------------------------------------------- */
