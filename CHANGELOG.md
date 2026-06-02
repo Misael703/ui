@@ -5,6 +5,46 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] — 2026-06-02
+
+**Minor. `DateRangePicker` gains opt-in apply mode + uncontrolled
+support — consumer-driven from cobros-meson feature 07 (history view
+with server-side filtering).** Until now `value`/`onChange` were
+required and the picker was live: every day click fired `onChange`, and
+the bare "Aplicar" button only closed the popover. Two problems for
+consumers running a server query off the range:
+
+- No way to batch — the consumer either hit the backend on every
+  intermediate click, or had to detect the popover close itself
+  (the prior workaround used a `MutationObserver` on the trigger's
+  `aria-expanded`).
+- Footgun: if the consumer ignored the intermediate `{ from: d, to:
+  null }` from the first click, `value` never advanced and the picker
+  silently became unresponsive.
+
+### Added
+- `defaultValue?: DateRange` — initial value in uncontrolled mode
+  (omit `value`).
+- `onApply?: (range: DateRange) => void` — opt-in callback that fires
+  only when the user commits (via the "Aplicar" button or a preset).
+  Day clicks update an internal draft instead of firing `onChange`.
+- `onOpenChange?: (open: boolean) => void` — generic open/close hook.
+- Closing the popover without applying (Escape, outside-click, or
+  toggling the trigger) reverts the draft to the last applied value.
+- Storybook: `Rango de fechas · Modo Aplicar (uncontrolled)` story
+  showing the apply-only contract with a hit counter.
+
+### Changed
+- `value` and `onChange` are now optional (controlled mode is opt-in
+  via `value`). When both `value` and `onApply` are present, day clicks
+  no longer fire `onChange`; apply commits fire `onApply` and `onChange`
+  together so the controlled `value` stays in sync.
+
+### Compatibility
+- Non-breaking. Existing consumers passing `value` + `onChange` without
+  `onApply` see identical behavior: live `onChange` on every click and
+  "Aplicar" closes only. The new behavior is opt-in via `onApply`.
+
 ## [1.31.1] — 2026-06-01
 
 **Patch. AppShell mobile scrim / drawer now match the body's exact
