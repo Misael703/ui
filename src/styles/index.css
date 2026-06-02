@@ -3499,6 +3499,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .comments__compose { display: flex; flex-direction: column; gap: var(--space-2); }
 .comments__compose-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .comments__internal-toggle { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--fg-muted); cursor: pointer; }
+/* Inline (chat-style) compose: textarea + submit share a row. `align-items:
+   end` keeps the button anchored to the textarea's bottom edge as the
+   textarea auto-grows. The textarea overrides its own min-height so a
+   `rows={1}` start really starts at one line; `resize: none` because the
+   JS auto-grow owns the height. */
+.comments__compose--inline { flex-direction: row; align-items: end; gap: var(--space-2); }
+.comments__compose--inline .textarea { flex: 1; min-height: 0; resize: none; }
+.comments__compose-submit { flex-shrink: 0; }
 
 /* ---------- AttachmentList -------------------------------------------- */
 .attachments { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }

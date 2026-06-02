@@ -20,22 +20,59 @@ export interface CommentThreadProps extends React.HTMLAttributes<HTMLDivElement>
   onAdd?: (body: string, internal: boolean) => void;
   placeholder?: string;
   allowInternal?: boolean;
+  /**
+   * Compose layout. Default `'stacked'`: textarea on top, action row
+   * below (form-style). `'inline'`: textarea and submit button share a
+   * single row, the textarea auto-grows, and Enter submits while
+   * Shift+Enter inserts a newline — chat convention (Slack/Linear).
+   * `allowInternal` is ignored in `'inline'`; if you need the internal
+   * toggle, use `'stacked'`.
+   */
+  inputLayout?: 'stacked' | 'inline';
 }
+
+// Inline mode auto-grow ceiling. ~5 lines at the kit's default
+// textarea font/line-height; beyond this the textarea scrolls.
+const INLINE_MAX_HEIGHT_PX = 140;
 
 export function CommentThread({
   comments, onAdd, placeholder,
-  allowInternal = false, className, ...rest
+  allowInternal = false, inputLayout = 'stacked',
+  className, ...rest
 }: CommentThreadProps) {
   const [draft, setDraft] = React.useState('');
   const [internal, setInternal] = React.useState(false);
   const t = useLocale();
   const ph = placeholder ?? t['comments.placeholder'];
+  const isInline = inputLayout === 'inline';
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow in inline mode: reset to single-row, then size to
+  // scrollHeight, capped at INLINE_MAX_HEIGHT_PX. Runs on every draft
+  // change so deletes shrink the box too. Stacked mode keeps the static
+  // rows={3} height — no DOM measurement, no observable side-effect.
+  React.useLayoutEffect(() => {
+    if (!isInline) return;
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, INLINE_MAX_HEIGHT_PX)}px`;
+  }, [draft, isInline]);
 
   const submit = () => {
     if (!draft.trim() || !onAdd) return;
     onAdd(draft, internal);
     setDraft('');
     setInternal(false);
+  };
+
+  // Enter submits in inline mode; Shift+Enter inserts a newline. In
+  // stacked mode Enter keeps its default newline behaviour (form style).
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!isInline) return;
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    e.preventDefault();
+    submit();
   };
 
   return (
@@ -56,25 +93,33 @@ export function CommentThread({
         ))}
       </ul>
       {onAdd && (
-        <div className="comments__compose">
+        <div className={cx('comments__compose', isInline && 'comments__compose--inline')}>
           <textarea
+            ref={textareaRef}
             className="textarea"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKeyDown}
             placeholder={ph}
-            rows={3}
+            rows={isInline ? 1 : 3}
           />
-          <div className="comments__compose-actions">
-            {allowInternal && (
-              <label className="comments__internal-toggle">
-                <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} />
-                <span>{t['comments.internalOnly']}</span>
-              </label>
-            )}
-            <button type="button" className="btn btn--primary btn--sm" disabled={!draft.trim()} onClick={submit}>
+          {isInline ? (
+            <button type="button" className="btn btn--primary btn--sm comments__compose-submit" disabled={!draft.trim()} onClick={submit}>
               {t['comments.send']}
             </button>
-          </div>
+          ) : (
+            <div className="comments__compose-actions">
+              {allowInternal && (
+                <label className="comments__internal-toggle">
+                  <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} />
+                  <span>{t['comments.internalOnly']}</span>
+                </label>
+              )}
+              <button type="button" className="btn btn--primary btn--sm" disabled={!draft.trim()} onClick={submit}>
+                {t['comments.send']}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
