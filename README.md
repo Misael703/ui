@@ -254,6 +254,8 @@ import { AppShell } from '@misael703/ui';
 
 Para los `items.icon` del nav (especialmente en modo `collapsedRail`, donde sólo se ve el icono), usa el set ya empaquetado en `@misael703/ui` — no es necesario dibujar SVGs a mano: `Home`, `List`, `Wallet`, `History`, `ShoppingCart`, `CreditCard`, `Settings`, `Users`, etc. Catálogo completo en la sección [Iconos](#iconos) más abajo.
 
+Para el toggle de la hamburguesa (drawer móvil + colapsar el rail en desktop), pasa `showMenuToggle` y el kit lo renderiza al inicio de `header.left` con `aria-label`, `aria-expanded`, foco visible y el mismo `toggle()` DWIM (drawer en mobile, colapsado en desktop). Si necesitás un trigger custom seguís teniendo el render-prop `header.left={(api) => <button onClick={api.toggle}>…</button>}` — ambos coexisten (toggle del kit primero, contenido del consumer después).
+
 ### DataTable con miles de filas (virtualization)
 
 El kit no incluye virtualización built-in — para datasets grandes (>200 filas), envuelve el `<DataTable>` con `react-window` o `@tanstack/react-virtual`. Patrón base:

@@ -5,6 +5,42 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.34.0] — 2026-06-02
+
+**Minor. `AppShell` ships a built-in menu toggle — consumer-driven
+from cobros-meson feature 07.** Until now, getting a working drawer
+trigger (mobile) or rail/hide toggle (desktop) required passing a
+function to `header.left` that consumed the `headerApi.toggle`
+render-prop. Every consumer re-implemented the same hamburger; the
+mobile path was particularly fragile because forgetting to wire the
+trigger left the drawer inaccessible. The new `showMenuToggle` opt-in
+solves both with one prop.
+
+### Added
+- `showMenuToggle?: boolean` on `AppShellProps`. When `true` and the
+  shell has a sidebar (`sections.length > 0`), the kit prepends a
+  standard `MenuIcon` button to `header.left`. Click drives the same
+  DWIM `toggle()` (drawer in mobile, collapsed in desktop). The button
+  carries `aria-label`, `aria-expanded`, `aria-controls` pointing at
+  the sidebar `id`, and uses the kit's focus ring.
+- New locale key `appshell.toggleMenu` (default ES "Abrir menú").
+- Stable `id="appshell-sidebar"` on the `<aside>` so `aria-controls`
+  has a target.
+- Storybook story `Topbar · Built-in menu toggle (showMenuToggle)`.
+
+### Changed
+- `.appshell--header-top .appshell__header-left` gained `gap: 10px` so
+  the built-in toggle has breathing room from whatever the consumer
+  puts in `header.left`. Additive; harmless for consumers that ship a
+  single element in that slot (most cases).
+
+### Compatibility
+Non-breaking. `showMenuToggle` defaults to `false` — the render-prop
+remains the only path otherwise. When both are provided, the kit
+toggle renders first and the consumer's slot content renders after
+it, so existing render-prop consumers can opt in without losing their
+custom trigger.
+
 ## [1.33.0] — 2026-06-02
 
 **Minor. Bundles two consumer-driven changes from cobros-meson

@@ -593,4 +593,58 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       expect(document.activeElement).toBe(trigger);
     });
   });
+
+  describe('built-in menu toggle (showMenuToggle)', () => {
+    it('renders the kit toggle when showMenuToggle + sidebar; click flips collapsed (aria-expanded)', () => {
+      const { container } = render(
+        <AppShell showMenuToggle sections={sections} header={{ center: 'brand' }}>
+          x
+        </AppShell>
+      );
+      const btn = container.querySelector('.appshell__menu-toggle') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+      expect(btn.getAttribute('aria-label')).toBe('Abrir menú');
+      // Initially expanded (defaultCollapsed=false → !collapsed === true).
+      expect(btn.getAttribute('aria-expanded')).toBe('true');
+      fireEvent.click(btn);
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('kit toggle renders BEFORE the consumer\'s header.left content', () => {
+      const { container } = render(
+        <AppShell
+          showMenuToggle
+          sections={sections}
+          header={{ left: <span data-testid="consumer-left">x</span>, center: 'b' }}
+        >
+          x
+        </AppShell>
+      );
+      const left = container.querySelector('.appshell__header-left')!;
+      const kids = Array.from(left.children);
+      expect(kids[0]?.classList.contains('appshell__menu-toggle')).toBe(true);
+      expect(kids[1]?.getAttribute('data-testid')).toBe('consumer-left');
+    });
+
+    it('does not render the toggle when there is no sidebar (top-bar-only shell)', () => {
+      const { container } = render(
+        <AppShell showMenuToggle header={{ center: 'brand' }}>
+          x
+        </AppShell>
+      );
+      expect(container.querySelector('.appshell__menu-toggle')).toBeNull();
+    });
+
+    it('aria-controls points to the aside id', () => {
+      const { container } = render(
+        <AppShell showMenuToggle sections={sections} header={{ center: 'brand' }}>
+          x
+        </AppShell>
+      );
+      const btn = container.querySelector('.appshell__menu-toggle')!;
+      const aside = container.querySelector('aside.appshell__sidebar')!;
+      expect(btn.getAttribute('aria-controls')).toBe(aside.id);
+      expect(aside.id).toBeTruthy();
+    });
+  });
 });

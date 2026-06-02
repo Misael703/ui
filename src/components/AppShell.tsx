@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { useLocale } from '../locale/LocaleProvider';
 import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
+import { MenuIcon } from './Icons';
 
 // ---------- AppShell (full-width header + sidebar + content) ------------
 // Designed to drop into a Next.js app/layout.tsx as a Client Component shell.
@@ -134,6 +135,16 @@ export interface AppShellProps {
    * hidden, active-item bar kept).
    */
   collapsedRail?: boolean;
+  /**
+   * Render the kit's standard menu toggle (hamburger) at the start of
+   * `header.left`. Default trigger for the drawer (mobile) / collapsed
+   * state (desktop), so consumers don't need the `header.left`
+   * render-prop just to get a working toggle. The render-prop remains
+   * available — when both are provided, the kit toggle renders first
+   * and the consumer's slot content renders after it. Ignored when
+   * `sections` is empty (top-bar-only shell).
+   */
+  showMenuToggle?: boolean;
   /** Slots for the full-width header. */
   header?: AppShellHeader;
   /** Render-prop for navigation links so the host app can use Next.js Link, etc. */
@@ -202,6 +213,12 @@ const NavItemNode = React.memo(function NavItemNode({
  */
 const MOBILE_BREAKPOINT = '(max-width: 900px)';
 
+// Stable id for `aria-controls` on the built-in menu toggle. Static (not
+// per-instance via useId) because a page only renders one AppShell; if a
+// host ever ships two, the duplicate id is the lesser problem vs. losing
+// SSR/CSR id stability for the toggle's aria-controls handshake.
+const SIDEBAR_ID = 'appshell-sidebar';
+
 export function AppShell({
   sections = [],
   footer,
@@ -214,6 +231,7 @@ export function AppShell({
   theme = 'default',
   headerTheme: ctrlHeaderTheme,
   collapsedRail = false,
+  showMenuToggle = false,
   header,
   linkAs,
 }: AppShellProps) {
@@ -337,7 +355,21 @@ export function AppShell({
           via data-tone="inverse" — anything inside (Avatar, badges, links)
           becomes band-aware automatically without per-call-site colors. */}
       <header className="appshell__header" role="banner" data-tone={headerTheme === 'brand' ? 'inverse' : undefined}>
-        <div className="appshell__header-left">{slot(header?.left)}</div>
+        <div className="appshell__header-left">
+          {showMenuToggle && hasSidebar && (
+            <button
+              type="button"
+              className="appshell__menu-toggle"
+              aria-label={t['appshell.toggleMenu']}
+              aria-expanded={isMobile ? mobileOpen : !collapsed}
+              aria-controls={SIDEBAR_ID}
+              onClick={headerApi.toggle}
+            >
+              <MenuIcon size={20} />
+            </button>
+          )}
+          {slot(header?.left)}
+        </div>
         <div className="appshell__header-center">{slot(header?.center)}</div>
         <div className="appshell__header-right">{slot(header?.right)}</div>
       </header>
@@ -345,6 +377,7 @@ export function AppShell({
         {hasSidebar && (
           <aside
             ref={drawerRef}
+            id={SIDEBAR_ID}
             className="appshell__sidebar"
             aria-label={t['appshell.mainNav']}
             /* Closed mobile drawer: hide from assistive tech so a screen

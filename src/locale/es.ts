@@ -27,6 +27,7 @@ export const esMessages: UiKitMessages = {
   // AppShell
   'appshell.mainNav': 'Navegación principal',
   'appshell.breadcrumb': 'Breadcrumb',
+  'appshell.toggleMenu': 'Abrir menú',
 
   // Notifications
   'notifications.button': 'Notificaciones',
