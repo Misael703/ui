@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.0] — 2026-06-02
+
+**Minor. Close three icon gaps + improve discovery of the existing
+69-icon set.** Consumer feedback from cobros-meson feature 07
+reported that the kit "only exports `CalendarIcon` and `MenuIcon`" —
+in fact 69 icons were already shipping via the barrel since v1.x,
+but discovery from a consumer's vantage point was poor: no README
+catalogue, no mention in the AppShell section, so several consumers
+ended up hand-drawing SVGs for items that already existed.
+
+### Added
+- `List` — three-line list with leading bullets (lucide). Distinct
+  from `Rows3` (table view) and `MenuIcon` (hamburger).
+- `Wallet` — classic wallet (lucide). Distinct from `CreditCard`.
+- `History` — counter-clockwise refresh with inner clock (lucide).
+  Distinct from `Clock` (instant) and `RefreshCw` (generic refresh).
+
+### Docs
+- README: the `### Iconos` section now lists the full catalogue
+  grouped by category, with a pointer to `Storybook › Foundations /
+  Icons › Galería` for visual browsing.
+- README: the AppShell example now notes that `items.icon` can use
+  the bundled set directly — especially relevant for `collapsedRail`
+  navs where the icon is the only affordance.
+
 ## [1.32.0] — 2026-06-02
 
 **Minor. `DateRangePicker` gains opt-in apply mode + uncontrolled

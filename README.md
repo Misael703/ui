@@ -252,6 +252,8 @@ import { AppShell } from '@misael703/ui';
 </AppShell>
 ```
 
+Para los `items.icon` del nav (especialmente en modo `collapsedRail`, donde sólo se ve el icono), usa el set ya empaquetado en `@misael703/ui` — no es necesario dibujar SVGs a mano: `Home`, `List`, `Wallet`, `History`, `ShoppingCart`, `CreditCard`, `Settings`, `Users`, etc. Catálogo completo en la sección [Iconos](#iconos) más abajo.
+
 ### DataTable con miles de filas (virtualization)
 
 El kit no incluye virtualización built-in — para datasets grandes (>200 filas), envuelve el `<DataTable>` con `react-window` o `@tanstack/react-virtual`. Patrón base:
@@ -315,7 +317,7 @@ import { LineChart } from '@misael703/ui';
 
 ### Iconos
 
-`@misael703/ui` exporta un set de íconos SVG (24×24, `currentColor`, stroke 1.75) listos para usar:
+`@misael703/ui` exporta un set completo de íconos SVG (24×24, `currentColor`, stroke 1.75) directamente desde el barrel — no es necesario redibujarlos a mano:
 
 ```tsx
 import { Search, ShoppingCart, ChevronRight } from '@misael703/ui';
@@ -325,6 +327,20 @@ import { Search, ShoppingCart, ChevronRight } from '@misael703/ui';
 ```
 
 Heredan `color` del padre y aceptan `size`, `strokeWidth`, `className` y `title` (a11y).
+
+Catálogo (ver la grilla completa con búsqueda en Storybook → `Foundations/Icons › Galería`):
+
+| Categoría | Iconos disponibles |
+|---|---|
+| **Chevrons / arrows** | `ChevronUp`, `ChevronDown`, `ChevronLeft`, `ChevronRight`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| **Status / feedback** | `Check`, `X`, `Plus`, `Minus`, `Info`, `AlertTriangle`, `AlertCircle`, `CheckCircle` |
+| **Navegación / acciones** | `Search`, `Filter`, `Settings`, `Bell`, `User`, `Users`, `Home`, `LogOut`, `MenuIcon`, `List`, `MoreHorizontal`, `MoreVertical` |
+| **Archivos / datos** | `FileText`, `Folder`, `Download`, `Upload`, `Trash`, `Edit`, `Eye`, `EyeOff`, `Copy`, `Link`, `ExternalLink` |
+| **Commerce / hardware** | `ShoppingCart`, `Package`, `Truck`, `Tag`, `CreditCard`, `Wallet`, `Tool`, `Wrench` |
+| **Fechas / tiempo** | `CalendarIcon`, `CalendarDays`, `Clock`, `History`, `RefreshCw`, `Loader` |
+| **Vistas (switchers)** | `Rows3`, `LayoutGrid`, `Columns3` |
+| **Text formatting** | `Bold`, `Italic`, `Underline`, `AlignLeft`, `AlignCenter`, `AlignRight` |
+| **Misc** | `Star`, `Heart`, `Mail`, `Phone`, `MapPin`, `Map`, `Lock`, `Unlock`, `Sun`, `Moon`, `Globe`, `Building` |
 
 ### Fuentes (opcional)
 
