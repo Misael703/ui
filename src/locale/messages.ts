@@ -32,6 +32,8 @@ export interface UiKitMessages {
   // AppShell
   'appshell.mainNav': string;
   'appshell.breadcrumb': string;
+  /** Accessible name for the kit's built-in menu toggle (opt-in via `showMenuToggle`). */
+  'appshell.toggleMenu': string;
 
   // Notifications
   'notifications.button': string;

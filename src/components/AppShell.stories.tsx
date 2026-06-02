@@ -145,6 +145,35 @@ export const TopbarRail: StoryObj = {
  * shell from the header — and what lets `persistKey` (uncontrolled) coexist
  * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
  */
+/**
+ * **Topbar · Built-in menu toggle** (v1.34.0) — `showMenuToggle` opts the
+ * consumer into the kit's default hamburger trigger. No render-prop needed:
+ * the toggle is prepended to `header.left` and drives the DWIM `toggle()`
+ * (drawer in mobile, collapse in desktop). The render-prop API stays
+ * available for custom triggers — both can coexist.
+ */
+export const TopbarBuiltinMenuToggle: StoryObj = {
+  name: 'Topbar · Built-in menu toggle (showMenuToggle)',
+  render: () => (
+    <div style={{ height: '100vh' }}>
+      <AppShell
+        collapsedRail
+        showMenuToggle
+        sections={sections}
+        header={{
+          center: <Logo variant="horizontal" bg="light" height={28} />,
+          right: <Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Dashboard" description="`showMenuToggle` renderiza el toggle estándar del kit — no hace falta render-prop" />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};
+
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: () => (
