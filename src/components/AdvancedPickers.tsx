@@ -172,8 +172,24 @@ export function MultiCombobox<T = string>({
 export interface DateRange { from: Date | null; to: Date | null }
 
 export interface DateRangePickerProps {
-  value: DateRange;
-  onChange: (v: DateRange) => void;
+  /** Controlled value. Omit to make the picker uncontrolled (see `defaultValue`). */
+  value?: DateRange;
+  /**
+   * In legacy mode, fires on every day click. In apply mode (when `onApply` is
+   * provided), fires only at apply time so a controlled `value` can stay in sync.
+   */
+  onChange?: (v: DateRange) => void;
+  /** Initial value when uncontrolled. Ignored if `value` is provided. */
+  defaultValue?: DateRange;
+  /**
+   * Opt-in: enables apply mode. Day clicks only mutate an internal draft; the
+   * consumer is notified when the user confirms (button "Apply" or a preset).
+   * Closing the popover without applying reverts the draft to the last applied
+   * value. Useful when each commit triggers a server-side query.
+   */
+  onApply?: (v: DateRange) => void;
+  /** Fires on open/close transitions. */
+  onOpenChange?: (open: boolean) => void;
   minDate?: Date;
   maxDate?: Date;
   presets?: Array<{ label: string; range: () => DateRange }>;
@@ -187,16 +203,38 @@ export interface DateRangePickerProps {
   format?: DateFormat;
 }
 
+const EMPTY_RANGE: DateRange = { from: null, to: null };
+
 export function DateRangePicker({
-  value, onChange, minDate, maxDate, presets,
+  value, onChange, defaultValue, onApply, onOpenChange,
+  minDate, maxDate, presets,
   invalid, disabled, className, id, format = 'auto',
 }: DateRangePickerProps) {
   const locale = useLocale();
   const weekdays = locale['picker.weekdaysShort'];
   const months = locale['calendar.months'];
   const fmt = resolveDateFormat(format);
+  const isControlled = value !== undefined;
+  const applyMode = !!onApply;
+  const initial = isControlled ? (value as DateRange) : (defaultValue ?? EMPTY_RANGE);
+  const [draft, setDraft] = React.useState<DateRange>(initial);
+  const [lastApplied, setLastApplied] = React.useState<DateRange>(initial);
+  // Resync draft/lastApplied when controlled `value` changes externally.
+  const vFrom = value?.from?.getTime() ?? 0;
+  const vTo = value?.to?.getTime() ?? 0;
+  React.useEffect(() => {
+    if (!isControlled) return;
+    setDraft(value as DateRange);
+    setLastApplied(value as DateRange);
+  }, [isControlled, vFrom, vTo]);
+  // Legacy-controlled (no `onApply`) keeps prior semantics: `value` drives render
+  // directly. Otherwise the draft is truth.
+  const current: DateRange = isControlled && !applyMode ? (value as DateRange) : draft;
+  // The trigger label shows the last-committed range in apply mode; in legacy it
+  // tracks `current` (so live edits stay reflected, as before).
+  const displayed: DateRange = applyMode ? lastApplied : current;
   const [open, setOpen] = React.useState(false);
-  const [view, setView] = React.useState(() => startOfMonth(value.from ?? new Date()));
+  const [view, setView] = React.useState(() => startOfMonth(initial.from ?? new Date()));
   const [hover, setHover] = React.useState<Date | null>(null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
@@ -212,9 +250,15 @@ export function DateRangePicker({
     offset: 6,
   });
 
+  const closeWithoutCommit = React.useCallback(() => {
+    if (applyMode) setDraft(lastApplied);
+    setOpen(false);
+    onOpenChange?.(false);
+  }, [applyMode, lastApplied, onOpenChange]);
+
   useDismiss({
     open,
-    onDismiss: () => setOpen(false),
+    onDismiss: closeWithoutCommit,
     refs: [wrapRef, popoverRef],
     returnFocusRef: triggerRef,
   });
@@ -230,29 +274,56 @@ export function DateRangePicker({
     (maxDate && d > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate()));
 
   const inRange = (d: Date) => {
-    if (!value.from) return false;
-    const end = value.to ?? hover;
-    if (!end) return isSameDay(d, value.from);
-    const a = value.from < end ? value.from : end;
-    const b = value.from < end ? end : value.from;
+    if (!current.from) return false;
+    const end = current.to ?? hover;
+    if (!end) return isSameDay(d, current.from);
+    const a = current.from < end ? current.from : end;
+    const b = current.from < end ? end : current.from;
     return d >= new Date(a.getFullYear(), a.getMonth(), a.getDate()) &&
            d <= new Date(b.getFullYear(), b.getMonth(), b.getDate());
   };
 
   const click = (d: Date) => {
-    if (!value.from || (value.from && value.to)) {
-      onChange({ from: d, to: null });
-    } else {
-      const from = value.from;
-      if (d < from) onChange({ from: d, to: from });
-      else onChange({ from, to: d });
+    let next: DateRange;
+    if (!current.from || (current.from && current.to)) next = { from: d, to: null };
+    else {
+      const from = current.from;
+      next = d < from ? { from: d, to: from } : { from, to: d };
     }
+    if (applyMode) setDraft(next);
+    else onChange?.(next);
   };
 
-  const label = value.from
-    ? value.to
-      ? `${formatDate(value.from, fmt)} → ${formatDate(value.to, fmt)}`
-      : `${formatDate(value.from, fmt)} → …`
+  // Commits a range and closes. In apply mode this fires `onApply` (and `onChange`
+  // when controlled, to keep `value` in sync). In legacy mode, only preset commits
+  // propagate via `onChange`; the bare "Apply" button stays close-only as before.
+  const commit = (next: DateRange, fromPreset = false) => {
+    if (applyMode) {
+      onApply!(next);
+      setLastApplied(next);
+      setDraft(next);
+      if (isControlled) onChange?.(next);
+    } else if (fromPreset) {
+      onChange?.(next);
+    }
+    setOpen(false);
+    onOpenChange?.(false);
+  };
+
+  const clear = () => {
+    if (applyMode) setDraft(EMPTY_RANGE);
+    else onChange?.(EMPTY_RANGE);
+  };
+
+  const toggleOpen = () => {
+    if (open) closeWithoutCommit();
+    else { setOpen(true); onOpenChange?.(true); }
+  };
+
+  const label = displayed.from
+    ? displayed.to
+      ? `${formatDate(displayed.from, fmt)} → ${formatDate(displayed.to, fmt)}`
+      : `${formatDate(displayed.from, fmt)} → …`
     : locale['picker.selectRange'];
 
   const renderMonth = (offset: number) => {
@@ -264,7 +335,7 @@ export function DateRangePicker({
           {weekdays.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
           {cells.map((d, i) => {
             if (!d) return <span key={`b${i}`} />;
-            const sel = (value.from && isSameDay(d, value.from)) || (value.to && isSameDay(d, value.to));
+            const sel = (current.from && isSameDay(d, current.from)) || (current.to && isSameDay(d, current.to));
             const ir = inRange(d);
             const today = isSameDay(d, new Date());
             const off = isDisabled(d);
@@ -292,7 +363,7 @@ export function DateRangePicker({
         type="button"
         className="daterange__trigger"
         disabled={disabled}
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -317,7 +388,7 @@ export function DateRangePicker({
             <ul className="daterange__presets">
               {presets.map((p, i) => (
                 <li key={i}>
-                  <button type="button" onClick={() => { onChange(p.range()); setOpen(false); }}>{p.label}</button>
+                  <button type="button" onClick={() => commit(p.range(), true)}>{p.label}</button>
                 </li>
               ))}
             </ul>
@@ -333,8 +404,8 @@ export function DateRangePicker({
               {renderMonth(1)}
             </div>
             <div className="daterange__actions">
-              <button type="button" className="daterange__clear" onClick={() => onChange({ from: null, to: null })}>{locale['common.clear']}</button>
-              <button type="button" className="daterange__apply" onClick={() => setOpen(false)} disabled={!value.from || !value.to}>{locale['common.apply']}</button>
+              <button type="button" className="daterange__clear" onClick={clear}>{locale['common.clear']}</button>
+              <button type="button" className="daterange__apply" onClick={() => commit(current)} disabled={!current.from || !current.to}>{locale['common.apply']}</button>
             </div>
           </div>
         </div>
