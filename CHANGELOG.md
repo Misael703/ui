@@ -7,47 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.33.0] — 2026-06-02
 
-**Minor. Close three icon gaps + improve discovery of the existing
-69-icon set.** Consumer feedback from cobros-meson feature 07
-reported that the kit "only exports `CalendarIcon` and `MenuIcon`" —
-in fact 69 icons were already shipping via the barrel since v1.x,
-but discovery from a consumer's vantage point was poor: no README
-catalogue, no mention in the AppShell section, so several consumers
-ended up hand-drawing SVGs for items that already existed.
+**Minor. Bundles two consumer-driven changes from cobros-meson
+feature 07: `DateRangePicker` gains opt-in apply mode + uncontrolled
+support, and three icon gaps land with a full catalogue in the
+README.**
 
-### Added
-- `List` — three-line list with leading bullets (lucide). Distinct
-  from `Rows3` (table view) and `MenuIcon` (hamburger).
-- `Wallet` — classic wallet (lucide). Distinct from `CreditCard`.
-- `History` — counter-clockwise refresh with inner clock (lucide).
-  Distinct from `Clock` (instant) and `RefreshCw` (generic refresh).
+> Note on versioning: an intermediate `1.32.0` tag exists on `main`
+> for the DateRangePicker apply-mode commit but was never published
+> to npm — `1.33.0` is the first published version that includes
+> those changes. Consumers using `^1.x` get both features
+> automatically via `1.33.0`.
 
-### Docs
-- README: the `### Iconos` section now lists the full catalogue
-  grouped by category, with a pointer to `Storybook › Foundations /
-  Icons › Galería` for visual browsing.
-- README: the AppShell example now notes that `items.icon` can use
-  the bundled set directly — especially relevant for `collapsedRail`
-  navs where the icon is the only affordance.
-
-## [1.32.0] — 2026-06-02
-
-**Minor. `DateRangePicker` gains opt-in apply mode + uncontrolled
-support — consumer-driven from cobros-meson feature 07 (history view
-with server-side filtering).** Until now `value`/`onChange` were
-required and the picker was live: every day click fired `onChange`, and
-the bare "Aplicar" button only closed the popover. Two problems for
-consumers running a server query off the range:
-
-- No way to batch — the consumer either hit the backend on every
-  intermediate click, or had to detect the popover close itself
-  (the prior workaround used a `MutationObserver` on the trigger's
-  `aria-expanded`).
-- Footgun: if the consumer ignored the intermediate `{ from: d, to:
-  null }` from the first click, `value` never advanced and the picker
-  silently became unresponsive.
-
-### Added
+### Added — `DateRangePicker` apply mode (originally tagged 1.32.0)
+`DateRangePicker` was previously controlled-only and live: every day
+click fired `onChange`, the "Aplicar" button just closed the popover.
+Two problems for consumers running a server query off the range —
+no way to batch, and a footgun where ignoring the intermediate
+`{ from: d, to: null }` silently froze the picker. The apply mode
+fixes both.
 - `defaultValue?: DateRange` — initial value in uncontrolled mode
   (omit `value`).
 - `onApply?: (range: DateRange) => void` — opt-in callback that fires
@@ -59,16 +36,36 @@ consumers running a server query off the range:
 - Storybook: `Rango de fechas · Modo Aplicar (uncontrolled)` story
   showing the apply-only contract with a hit counter.
 
-### Changed
+### Added — icons
+Three lucide-style icons that close real gaps vs the 69-icon set
+already shipping from the barrel. Consumer feedback claimed the kit
+"only exports `CalendarIcon` and `MenuIcon`" — the gap was discovery,
+not amplitude (see Docs below).
+- `List` — three-line list with leading bullets. Distinct from
+  `Rows3` (table view) and `MenuIcon` (hamburger).
+- `Wallet` — classic wallet. Distinct from `CreditCard`.
+- `History` — counter-clockwise refresh with inner clock. Distinct
+  from `Clock` (instant) and `RefreshCw` (generic refresh).
+
+### Changed — `DateRangePicker`
 - `value` and `onChange` are now optional (controlled mode is opt-in
   via `value`). When both `value` and `onApply` are present, day clicks
-  no longer fire `onChange`; apply commits fire `onApply` and `onChange`
-  together so the controlled `value` stays in sync.
+  no longer fire `onChange`; apply commits fire `onApply` and
+  `onChange` together so the controlled `value` stays in sync.
+
+### Docs
+- README: the `### Iconos` section now lists the full catalogue
+  grouped by category, with a pointer to `Storybook › Foundations /
+  Icons › Galería` for visual browsing.
+- README: the AppShell example now notes that `items.icon` can use
+  the bundled set directly — especially relevant for `collapsedRail`
+  navs where the icon is the only affordance.
 
 ### Compatibility
-- Non-breaking. Existing consumers passing `value` + `onChange` without
-  `onApply` see identical behavior: live `onChange` on every click and
-  "Aplicar" closes only. The new behavior is opt-in via `onApply`.
+Non-breaking. Existing `DateRangePicker` consumers passing `value` +
+`onChange` without `onApply` see identical behavior: live `onChange`
+on every click and "Aplicar" closes only. The new behavior is opt-in
+via `onApply`. Icon additions are pure additions to the barrel.
 
 ## [1.31.1] — 2026-06-01
 
