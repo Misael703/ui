@@ -4,7 +4,8 @@ import { AppShell, PageHeader, type AppShellTheme } from './AppShell';
 import { Button } from './Button';
 import { Avatar } from './Display2';
 import { Logo } from './Logo';
-import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell } from './Icons';
+import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, ChevronDown } from './Icons';
+import { Popover } from './Popover';
 
 export default {
   title: 'Layout/AppShell',
@@ -244,3 +245,141 @@ export const TopbarMobileDrawer: StoryObj = {
     </div>
   ),
 };
+
+/**
+ * **Topbar · User menu (popover)** — Linear / Vercel / Notion pattern.
+ * Caso real: en mobile el slot `header.right` con avatar + nombre + rol +
+ * chevron desbordaba (~280px de contenido contra un viewport de 320).
+ * Patrón: el avatar es el ÚNICO control visible; un Popover monta el
+ * nombre + rol + acciones al hacer click. Mismo layout mobile y desktop,
+ * sin breakpoint hacks. Cierra con ESC o tap fuera (`useDismiss` interno).
+ *
+ * Estructura del slot derecho:
+ * - Trigger: `<Avatar />` solo (32×32)
+ * - Contenido del popover: header (nombre + rol) + separador + items de
+ *   menú (Mi perfil, Configuración, Cerrar sesión)
+ */
+export const TopbarUserMenu: StoryObj = {
+  name: 'Topbar · User menu (popover)',
+  render: () => (
+    <div style={{ height: '100vh' }}>
+      {/* Local rule: under 900px, collapse the user pill to its avatar
+          (hide name/role + chevron). Same breakpoint the kit's mobile
+          drawer uses (`(max-width: 900px)`). Lives inline because it's a
+          consumer-side decision — the kit doesn't ship a generic
+          "hide-on-mobile" utility class. */}
+      <style>{`
+        @media (max-width: 900px) {
+          .user-pill .user-pill__text { display: none !important; }
+          .user-pill { padding: 0 !important; gap: 0 !important; }
+        }
+        .user-menu-item {
+          display: block;
+          width: 100%;
+          text-align: left;
+          padding: 8px 12px;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+          border-radius: var(--radius-sm);
+          font-family: var(--font-body);
+          font-size: 13px;
+          color: var(--fg-default);
+          transition: background var(--duration-fast, 120ms) ease, color var(--duration-fast, 120ms) ease;
+        }
+        .user-menu-item:hover,
+        .user-menu-item:focus-visible {
+          background: var(--bg-subtle);
+          outline: none;
+        }
+        .user-menu-item--danger { color: var(--color-danger, #c0392b); }
+        .user-menu-item--danger:hover,
+        .user-menu-item--danger:focus-visible {
+          background: var(--color-danger-50, rgba(192, 57, 43, 0.08));
+          color: var(--color-danger, #c0392b);
+        }
+      `}</style>
+      <AppShell
+        theme="brand"
+        sections={sections}
+        header={{
+          left: ({ collapsed, toggle }) => (
+            <button
+              type="button"
+              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+              aria-expanded={!collapsed}
+              onClick={toggle}
+              style={{
+                width: 40, height: 40, borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.24)', background: 'transparent',
+                color: 'inherit', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            ><MenuIcon size={18} /></button>
+          ),
+          center: <Logo variant="horizontal" bg="dark" height={28} />,
+          right: (
+            <Popover
+              placement="bottom"
+              align="end"
+              ariaLabel="Menú de usuario"
+              trigger={
+                <button
+                  type="button"
+                  aria-label="Abrir menú de usuario"
+                  className="user-pill"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 10,
+                    background: 'transparent', border: 0, padding: '4px 8px 4px 4px',
+                    borderRadius: 999, cursor: 'pointer',
+                    color: 'inherit', fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  <Avatar name="Administrador Admin" size={32} />
+                  {/* Texto + chevron solo en desktop — `.user-pill__text` se
+                      esconde bajo 900px via `<style>` local. Mobile: el botón
+                      colapsa a un avatar de 40×40 (el padding + gap). */}
+                  <span
+                    className="user-pill__text"
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}
+                  >
+                    <strong style={{ fontSize: 14 }}>Administrador Admin</strong>
+                    <span style={{ fontSize: 12, opacity: 0.7 }}>Administrador</span>
+                  </span>
+                  <span className="user-pill__text" aria-hidden="true" style={{ display: 'inline-flex' }}>
+                    <ChevronDown size={16} />
+                  </span>
+                </button>
+              }
+              contentClassName="elalba-user-menu"
+            >
+              <div style={{ minWidth: 220, padding: 4 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '10px 12px' }}>
+                  <Avatar name="Administrador Admin" size={40} />
+                  <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                    <strong style={{ fontSize: 13 }}>Administrador Admin</strong>
+                    <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Administrador</span>
+                  </div>
+                </div>
+                <div style={{ height: 1, background: 'var(--border-default)', margin: '4px 0' }} />
+                <button type="button" className="user-menu-item">Mi perfil</button>
+                <button type="button" className="user-menu-item">Configuración</button>
+                <div style={{ height: 1, background: 'var(--border-default)', margin: '4px 0' }} />
+                <button type="button" className="user-menu-item user-menu-item--danger">Cerrar sesión</button>
+              </div>
+            </Popover>
+          ),
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader
+            title="Dashboard"
+            description="Click sobre el avatar para abrir el menú. Misma forma en mobile y desktop — sin overflow ni breakpoint hacks."
+          />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};
+
