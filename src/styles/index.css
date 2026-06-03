@@ -2661,6 +2661,14 @@ button, input, select, textarea { box-sizing: border-box; }
      header's bottom edge without hardcoding the 56. Kept in sync with the
      header `min-height` rule below; if you bump one, bump both. */
   --appshell-header-height: 56px;
+  /* Public vars for the header band's inner padding. Defaults preserve the
+     prior hardcoded values (8px vertical / 16px horizontal). Override
+     `--appshell-header-pad-x` to align the header's edge controls with the
+     content gutter (`.appshell__content` is 24px) — e.g.
+     `.appshell { --appshell-header-pad-x: 24px; }`. The mobile rule reuses
+     the same vars with a tighter horizontal fallback. */
+  --appshell-header-pad-y: 8px;
+  --appshell-header-pad-x: 16px;
   /* Break out of any body margin / wrapper padding so the shell spans the
      full viewport width. Without this, body's UA-default 8px margin (or
      any container the consumer wraps the shell in) made the fixed-position
@@ -2677,7 +2685,7 @@ button, input, select, textarea { box-sizing: border-box; }
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
+  padding: var(--appshell-header-pad-y, 8px) var(--appshell-header-pad-x, 16px);
   min-height: var(--appshell-header-height);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
@@ -2809,7 +2817,10 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 900px) {
   .appshell--header-top .appshell__header {
     grid-template-columns: auto 1fr auto;
-    padding: 8px 12px;
+    /* Same vars as desktop, tighter horizontal fallback (12 vs 16). A
+       consumer that sets `--appshell-header-pad-x` gets it on both
+       breakpoints; left unset, mobile keeps its prior 12px. */
+    padding: var(--appshell-header-pad-y, 8px) var(--appshell-header-pad-x, 12px);
     gap: 8px;
   }
   /* Body becomes a single column; the sidebar is taken out of flow. */

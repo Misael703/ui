@@ -174,6 +174,38 @@ export const TopbarBuiltinMenuToggle: StoryObj = {
   ),
 };
 
+/**
+ * **Topbar · Header padding override** (v1.37.0) — the header band's inner
+ * padding is driven by two overridable CSS vars,
+ * `--appshell-header-pad-y` (default 8px) and `--appshell-header-pad-x`
+ * (default 16px desktop / 12px mobile). Set `--appshell-header-pad-x: 24px`
+ * on `.appshell` (or any ancestor) to align the header's edge controls
+ * with the content gutter (`.appshell__content` is 24px). This story sets
+ * the var inline so the hamburger / avatar line up vertically with the
+ * dashed content box below.
+ */
+export const TopbarHeaderPaddingOverride: StoryObj = {
+  name: 'Topbar · Header padding override (CSS var)',
+  render: () => (
+    <div style={{ height: '100vh', ['--appshell-header-pad-x' as string]: '24px' }}>
+      <AppShell
+        collapsedRail
+        showMenuToggle
+        sections={sections}
+        header={{
+          center: <Logo variant="horizontal" bg="light" height={28} />,
+          right: <Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Dashboard" description="`--appshell-header-pad-x: 24px` alinea los controles del header con el gutter del contenido" />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};
+
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: () => (

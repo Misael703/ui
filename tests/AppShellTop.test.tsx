@@ -225,6 +225,13 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell__content\s*\{[^}]*padding:\s*24px/);
   });
 
+  it('CSS: the top header padding is driven by overridable vars (not hardcoded)', () => {
+    // The header band reads `--appshell-header-pad-x/-y` so consumers can
+    // align its edge controls with the content gutter without redeclaring
+    // the rule. Defaults preserve the prior 8/16.
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*padding:\s*var\(--appshell-header-pad-y,\s*8px\)\s*var\(--appshell-header-pad-x,\s*16px\)/);
+  });
+
   /* Top-bar-only mode (v1.27.0). `sections` is optional in `top`; omitting it
      (or passing []) renders just the header band over a single-column content
      area — no sidebar at all. For flat-route apps without panel nav. */
