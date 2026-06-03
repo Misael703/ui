@@ -5,6 +5,51 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.2] — 2026-06-03
+
+**Patch. Closes two bugs in `CommentThread` inline that survived
+1.36.1. The scrollbar one took a few wrong stabs before pinning the
+root cause — root-cause notes are recorded below to save the next
+person the loop.**
+
+### Fixed
+- **Phantom scrollbar that 1.36.1 did NOT fix — root cause was font
+  loading, not border-box math.** The auto-grow effect was running
+  too early, while the textarea was still measuring against the
+  browser's fallback font metrics. The kit's web fonts (Outfit / DM
+  Sans) carry a taller line-height than the fallback, so when the
+  swap completes the textarea's real natural height grows by ~2px —
+  exactly the gap that left `overflow-y: auto` showing a scrollbar
+  at rest. The earlier border-compensation theory looked plausible
+  (`scrollHeight + computedBorder` SHOULD match the rendered box)
+  but the underlying metric was shifting under us as the font loaded.
+  The fix runs the auto-grow once on mount and then again when
+  `document.fonts.ready` resolves: in prod (font cached) the second
+  pass is essentially free, on a cold load it re-measures right after
+  the font swap. The auto-grow also switched from `useLayoutEffect`
+  to `useEffect` so the first read happens after paint, and it now
+  uses `el.offsetHeight` after `style.height = 'auto'` (rendered box,
+  border-box border already included) instead of computing
+  `scrollHeight + computedBorder`.
+- **Compose row sits below the vertical centre in empty state.**
+  `.comments` is a flex column with `gap: var(--space-4)`. Even when
+  `comments` is empty the `<ul class="comments__list">` was still
+  rendering (0 height, no children), and the flex gap applied between
+  the invisible list and the compose — leaving a 16px phantom slot
+  above the compose. Measured: 36px above vs 20px below the compose
+  in a `CardBody` of 101px. Fix is to skip the `<ul>` entirely when
+  `comments.length === 0`. When at least one comment exists, the list
+  renders normally and the gap is the same as before.
+
+### Internal
+- Storybook story `CommentThread · Inline (chat-style)` empty-state
+  panel is now framed in a card-like container that mirrors how the
+  consumer wraps it — the centring fix is visible at a glance.
+
+### Compatibility
+Non-breaking. No API change. Consumers on `inputLayout="inline"` see
+both bugs disappear without touching their code.
+
 ## [1.36.1] — 2026-06-02
 
 **Patch. Fixes two visual bugs in `CommentThread` `inputLayout="inline"`

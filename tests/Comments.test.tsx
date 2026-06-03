@@ -8,6 +8,16 @@ const baseComments = [
 ];
 
 describe('CommentThread', () => {
+  it('does not render the <ul> when comments is empty (avoids phantom flex gap)', () => {
+    const { container } = render(<CommentThread comments={[]} onAdd={() => {}} />);
+    expect(container.querySelector('.comments__list')).toBeNull();
+  });
+
+  it('renders the <ul> only when there is at least one comment', () => {
+    const { container } = render(<CommentThread comments={baseComments} />);
+    expect(container.querySelector('.comments__list')).not.toBeNull();
+  });
+
   it('renders all comments', () => {
     render(<CommentThread comments={baseComments} />);
     expect(screen.getByText('Patricia')).toBeInTheDocument();
