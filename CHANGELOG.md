@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.37.0] — 2026-06-03
+
+**Minor. `AppShell` header padding is now overridable via CSS vars —
+consumer-driven from despachos-ferreteria.** The header band's inner
+padding was hardcoded (`8px 16px` desktop, `8px 12px` mobile), so the
+edge controls (hamburger, avatar) couldn't be aligned with the content
+gutter (`.appshell__content` is 24px) without redeclaring the internal
+rule.
+
+### Added
+- `--appshell-header-pad-y` (default `8px`) and
+  `--appshell-header-pad-x` (default `16px` desktop / `12px` mobile)
+  on `.appshell`. Override either on `.appshell` or any ancestor —
+  e.g. `.appshell { --appshell-header-pad-x: 24px; }` aligns the
+  header controls with the content gutter. A consumer-set
+  `--appshell-header-pad-x` applies to both breakpoints; left unset,
+  each keeps its prior hardcoded fallback.
+- Storybook story `Topbar · Header padding override (CSS var)`.
+
+### Compatibility
+Non-breaking. The vars default to the previous hardcoded values, so
+every existing consumer renders identically without any change.
+
 ## [1.36.2] — 2026-06-03
 
 **Patch. Closes two bugs in `CommentThread` inline that survived
