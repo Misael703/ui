@@ -57,12 +57,12 @@ export const CommentThreadInline: StoryObj = {
       set((c) => [...c, { id: String(c.length + 1), author: { name: 'Tú' }, body, timestamp: 'ahora' }]);
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, maxWidth: 960 }}>
-        <div>
-          <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>Empty state</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 12, padding: 20 }}>
+          <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 12 }}>Empty state (no comments)</div>
           <CommentThread comments={empty} onAdd={append(setEmpty)} inputLayout="inline" />
         </div>
-        <div>
-          <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>Con historial</div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 12, padding: 20 }}>
+          <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 12 }}>Con historial</div>
           <CommentThread comments={withHistory} onAdd={append(setWithHistory)} inputLayout="inline" />
         </div>
       </div>

@@ -60,7 +60,7 @@ export function CommentThread({
   // alignment from `center` (steady state) to `flex-end` (multi-line).
   // Stacked mode keeps the static rows={3} height — no DOM measurement,
   // no observable side-effect.
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (!isInline) {
       baselineRef.current = null;
       setGrown(false);
@@ -68,14 +68,46 @@ export function CommentThread({
     }
     const el = textareaRef.current;
     if (!el) return;
-    el.style.height = 'auto';
-    const sh = el.scrollHeight;
-    if (baselineRef.current == null) baselineRef.current = sh;
-    el.style.height = `${Math.min(sh, INLINE_MAX_HEIGHT_PX)}px`;
-    // 4px epsilon absorbs subpixel rounding / font-metrics noise on the
-    // baseline measurement; without it the wrap flicker-toggles between
-    // center and flex-end at the boundary.
-    setGrown(sh > (baselineRef.current ?? sh) + 4);
+    // Auto-grow runs once now (with whatever font metrics are in play)
+    // and once more after web fonts settle. Without the second pass,
+    // a cold load that swaps from fallback to custom font (Outfit/DM
+    // Sans here) leaves the textarea's calculated height 2px short
+    // of the post-swap content box — `overflow-y: auto` then shows a
+    // phantom scrollbar at rest until the next draft change. This was
+    // the root cause of the 1.36.x scrollbar bug; both the
+    // `scrollHeight + border` and the `offsetHeight` reads were
+    // honest, the metric *itself* was changing under our feet as the
+    // font finished loading. `useEffect` (not `useLayoutEffect`) so
+    // the first measurement runs after paint, never during reconcile.
+    let cancelled = false;
+    const measure = () => {
+      if (cancelled) return;
+      const node = textareaRef.current;
+      if (!node) return;
+      node.style.height = 'auto';
+      // `offsetHeight` after `'auto'` is the textarea's natural
+      // rendered box, border-box border included — no separate border
+      // math, no `getComputedStyle` round-trip.
+      const natural = node.offsetHeight;
+      // `scrollHeight` here is used only for the grown-vs-baseline
+      // delta: what matters is the *change*, not the absolute.
+      const sh = node.scrollHeight;
+      if (baselineRef.current == null) baselineRef.current = sh;
+      node.style.height = `${Math.min(natural, INLINE_MAX_HEIGHT_PX)}px`;
+      // 4px epsilon absorbs subpixel rounding / font-metrics noise on
+      // the baseline measurement; without it the wrap flicker-toggles
+      // between center and flex-end at the boundary.
+      setGrown(sh > (baselineRef.current ?? sh) + 4);
+    };
+    measure();
+    // `document.fonts.ready` resolves immediately when no fonts are
+    // pending (the hot path in prod where the font is cached), so the
+    // re-measure is essentially free; on a cold load it fires when the
+    // swap completes and the textarea reflows to its real metric.
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure).catch(() => { /* fonts.ready can reject on aborted nav */ });
+    }
+    return () => { cancelled = true; };
   }, [draft, isInline]);
 
   const submit = () => {
@@ -96,21 +128,29 @@ export function CommentThread({
 
   return (
     <div className={cx('comments', className)} {...rest}>
-      <ul className="comments__list">
-        {comments.map((c) => (
-          <li key={c.id} className={cx('comment', c.internal && 'comment--internal')}>
-            <Avatar name={c.author.name} src={c.author.avatarSrc} size={32} />
-            <div className="comment__body">
-              <div className="comment__head">
-                <span className="comment__author">{c.author.name}</span>
-                <span className="comment__time">{c.timestamp}</span>
-                {c.internal && <span className="comment__tag">{t['comments.internalTag']}</span>}
+      {comments.length > 0 && (
+        // Skip the list element entirely when empty. `.comments` is a
+        // flex column with `gap: var(--space-4)`; an empty `<ul>` would
+        // still consume a gap slot, leaving a phantom 16px between
+        // "nothing" and the compose row. The visual symptom: the
+        // compose sits below the vertical center of the container in
+        // empty state.
+        <ul className="comments__list">
+          {comments.map((c) => (
+            <li key={c.id} className={cx('comment', c.internal && 'comment--internal')}>
+              <Avatar name={c.author.name} src={c.author.avatarSrc} size={32} />
+              <div className="comment__body">
+                <div className="comment__head">
+                  <span className="comment__author">{c.author.name}</span>
+                  <span className="comment__time">{c.timestamp}</span>
+                  {c.internal && <span className="comment__tag">{t['comments.internalTag']}</span>}
+                </div>
+                <div className="comment__text">{c.body}</div>
               </div>
-              <div className="comment__text">{c.body}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
       {onAdd && (
         <div className={cx('comments__compose', isInline && 'comments__compose--inline', isInline && grown && 'is-grown')}>
           <textarea
