@@ -89,7 +89,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'TableToolbar', node: <K.TableToolbar><span>t</span></K.TableToolbar> },
   { name: 'Pagination', node: <Ctrl init={1} render={(v, s) => <K.Pagination page={v} pageSize={10} total={50} onPageChange={s} />} /> },
   { name: 'Accordion', node: <K.Accordion defaultOpen={['a']}><K.AccordionItem id="a" title="A">x</K.AccordionItem></K.Accordion> },
-  { name: 'Collapsible', node: <K.Collapsible><K.CollapsibleTrigger>t</K.CollapsibleTrigger><K.CollapsibleContent>c</K.CollapsibleContent></K.Collapsible> },
+  { name: 'Collapsible', node: <K.Collapsible><K.CollapsibleTrigger>Ver detalles</K.CollapsibleTrigger><K.CollapsibleContent>c</K.CollapsibleContent></K.Collapsible> },
   { name: 'Breadcrumbs', node: <K.Breadcrumbs items={[{ label: 'Inicio', href: '/' }, { label: 'Aquí' }]} /> },
   { name: 'EmptyState', node: <K.EmptyState title="Vacío" description="nada" /> },
   { name: 'Kpi', node: <K.Kpi label="Ventas" value="$1M" /> },

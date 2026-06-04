@@ -5,6 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.2] — 2026-06-04
+
+**Patch. `Carousel` pagination dots are now a 24×24 tap target + the
+responsive smoke sweep grows two new gates (more routes, touch
+targets).**
+
+### Fixed
+- `Carousel` pagination dots were an 8×8 button — below the WCAG 2.5.8
+  24×24 minimum target size and genuinely hard to tap on a phone. The
+  button is now a 24×24 hit area with the small visual dot rendered as
+  a centered `::before`, so the look is unchanged (8px dot, 24px active
+  pill) while the tap target meets the floor. Caught by the new
+  touch-target sweep below.
+
+### Internal — testing
+- `smoke/e2e/responsive.spec.ts` grew two gates:
+  - **More routes** in the page-overflow + console breakpoint check:
+    added `/scenarios`, `/scenarios/modal`, `/scenarios/brand`,
+    `/scenarios/table`, `/scenarios/badges`. The `timeline-milestone*`
+    scenarios stay out — they're fixed `repeat(5, 1fr)` desktop
+    comparison grids (a geometry harness, asserted by scenarios.spec.ts)
+    that don't shrink to 375px by design.
+  - **Touch-target floor** (WCAG 2.5.8) on `/gallery` at 375px:
+    interactive controls under 24×24 in BOTH dimensions are flagged.
+    Native form inputs (UA-sized checkbox/radio/switch) and
+    wide-but-short controls are out of scope. `Rating`, `TagInput`, and
+    `JsonViewer` are allowlisted (intentionally compact, non-touch-first
+    affordances); everything else must meet the floor.
+
+### Compatibility
+Non-breaking. The `Carousel` dot keeps its visual size and behavior; only
+the hit area grew.
+
 ## [1.38.1] — 2026-06-04
 
 **Patch. `Container` no longer overflows a width-constrained parent +
