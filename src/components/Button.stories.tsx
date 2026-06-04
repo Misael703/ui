@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button, ButtonGroup } from './Button';
+import { ArrowLeft } from './Icons';
 
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button',
@@ -7,7 +8,7 @@ const meta: Meta<typeof Button> = {
   tags: ['autodocs'],
   args: { children: 'Guardar pedido', variant: 'primary', size: 'md' },
   argTypes: {
-    variant: { control: 'select', options: ['primary', 'secondary', 'outline', 'ghost', 'subtle', 'danger', 'success', 'warning'] },
+    variant: { control: 'select', options: ['primary', 'secondary', 'outline', 'ghost', 'subtle', 'danger', 'success', 'warning', 'link'] },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
   },
 };
@@ -23,6 +24,14 @@ export const Success: S = { args: { variant: 'success', children: 'Confirmar pag
 export const Warning: S = { args: { variant: 'warning', children: 'Continuar con stock bajo' } };
 export const Loading: S = { args: { loading: true, children: 'Procesando…' } };
 export const Disabled: S = { args: { disabled: true } };
+
+/**
+ * **`variant="link"`** — text affordance (transparent, underline on hover).
+ * Unlike the surface variants it does NOT animate a press on `:active` (no
+ * scale, no shadow) — a text link doesn't get "pressed". Click it to confirm
+ * it doesn't shrink.
+ */
+export const Link: S = { args: { variant: 'link', iconLeft: <ArrowLeft size={16} />, children: 'Volver a órdenes' } };
 export const FullWidth: S = { args: { fullWidth: true } };
 
 export const AllSizes: S = {

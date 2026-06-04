@@ -263,6 +263,15 @@ export interface DatePickerProps {
   onChange: (date: Date | null) => void;
   minDate?: Date;
   maxDate?: Date;
+  /**
+   * Disable arbitrary days (holidays, blackout dates, specific weekdays). A
+   * day for which this returns `true` renders disabled — greyed, not
+   * focusable (keyboard Tab skips it), not clickable, and never emitted via
+   * `onChange`. Composes with `minDate`/`maxDate`: a day is disabled if it
+   * falls outside the range OR the predicate marks it. E.g. disable Sundays:
+   * `d => d.getDay() === 0`.
+   */
+  isDateDisabled?: (date: Date) => boolean;
   placeholder?: string;
   disabled?: boolean;
   invalid?: boolean;
@@ -276,7 +285,7 @@ export interface DatePickerProps {
 }
 
 export function DatePicker({
-  value, onChange, minDate, maxDate, placeholder,
+  value, onChange, minDate, maxDate, isDateDisabled, placeholder,
   disabled, invalid, className, id, format = 'auto',
 }: DatePickerProps) {
   const locale = useLocale();
@@ -314,8 +323,11 @@ export function DatePicker({
   const { cells } = buildMonthGrid(view, 0);
 
   const isDisabled = (d: Date) =>
-    (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
-    (maxDate && d > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate()));
+    !!(
+      (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
+      (maxDate && d > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate())) ||
+      isDateDisabled?.(d)
+    );
 
   return (
     <div ref={wrapRef} className={cx('datepicker', invalid && 'is-invalid', disabled && 'is-disabled', className)}>

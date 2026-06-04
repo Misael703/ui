@@ -5,6 +5,50 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.40.0] — 2026-06-04
+
+**Minor. Two independent changes — consumer-driven from
+despachos-ferreteria.**
+
+### Added — `isDateDisabled` on `DatePicker` and `DateRangePicker`
+Until now the date pickers could only constrain a contiguous range via
+`minDate`/`maxDate`. The new `isDateDisabled?: (date: Date) => boolean`
+predicate disables arbitrary days — specific weekdays, holidays,
+blackout dates — so the rule is enforced in the calendar instead of
+documented in a hint and caught on submit.
+- A day the predicate marks renders disabled: greyed (`is-disabled`),
+  native-`disabled` (so keyboard Tab skips it and it can't be clicked),
+  and never emitted via `onChange`.
+- Composes with `minDate`/`maxDate`: a day is disabled if it falls
+  outside the range OR the predicate marks it.
+- `DateRangePicker`: a range endpoint can never land on a disabled day;
+  a disabled day inside an otherwise-valid span stays greyed but is
+  included (the span is allowed).
+- E.g. block Sundays: `isDateDisabled={d => d.getDay() === 0}`.
+- A single predicate covers every case (weekday, holiday set, blackout
+  ranges) without adding N props, so no `disabledDaysOfWeek` sugar was
+  added — the predicate is what consumers use.
+
+### Fixed — `Button variant="link"` no longer animates a press
+The press effect (`scale(0.98)` + shadow) lives in the global
+`.btn:active` rule, which `.btn--link` inherited — so a text link
+"shrank" on click like a pressable surface. `link` is a text
+affordance, not a surface: `.btn--link:active` now resets `transform`
+and `box-shadow`, so its only feedback is the existing hover (secondary
+color + underline). The other variants (`primary`, `outline`, `ghost`,
+`subtle`, `danger`, …) keep the press unchanged.
+
+### Internal
+- Storybook: `DatePicker con días deshabilitados` (Sundays) and a
+  `Button` `Link` story (with `iconLeft`, mirroring "Volver a órdenes");
+  `link` added to the variant control. The smoke gallery `DatePicker`
+  entry now disables Sundays so this stays visible.
+
+### Compatibility
+Non-breaking, both parts. Without `isDateDisabled` the pickers behave
+exactly as before; the `link` button just stops shrinking on click. No
+API removed, no code changes for consumers.
+
 ## [1.39.0] — 2026-06-04
 
 **Minor. `Combobox` now distinguishes the selected option from the
