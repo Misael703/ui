@@ -248,6 +248,13 @@ export function Container({ size = 'lg', className, style, ...rest }: ContainerP
     <div
       className={cx('container', `container--${size}`, className)}
       style={{
+        // border-box so `width: 100%` includes the inline gutter. Without
+        // it (content-box default) the padding adds OUTSIDE the 100%, so
+        // the container renders 2×var(--space-4) wider than its parent and
+        // overflows any width-constrained context (a column, a card, a
+        // narrow viewport). Masked on a full-viewport page by the body's
+        // own margins, but a real bug elsewhere.
+        boxSizing: 'border-box',
         width: '100%',
         maxWidth: CONTAINER_MAX[size],
         marginInline: 'auto',
