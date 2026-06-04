@@ -5,6 +5,47 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.39.0] — 2026-06-04
+
+**Minor. `Combobox` now distinguishes the selected option from the
+keyboard/hover highlight — consumer-driven from despachos-ferreteria.**
+With a value already chosen, opening the dropdown showed two grey rows:
+the selected option (`--color-primary-50` tint) and the first option
+(the `active` descendant, which defaulted to index 0). In palettes
+where the selected tint reads close to the `active` grey, the two were
+indistinguishable — looked like "two selected".
+
+### Changed
+- The selected option now carries an unambiguous **check marker** (the
+  kit `Check` icon, brand-accent colored), the standard accessible
+  pattern (Radix Select, Headless UI, Linear). The `active`
+  (keyboard/hover) highlight stays background-only and never shows the
+  check, so the two states are always distinguishable regardless of
+  palette. This brings `Combobox` in line with `MultiCombobox`, which
+  already marked selected rows with a check.
+- On open with a value, the `active` descendant now starts ON the
+  selected option (and scrolls it into view) instead of index 0. With
+  no value, it still starts on the first option. Typing to filter still
+  resets the highlight to the first match.
+- The listbox now keeps the active option scrolled into view as the
+  keyboard cursor moves (the list adjusts its own `scrollTop` only —
+  it never scrolls the page).
+- The clear (`×`) button grew from 22×22 to 24×24 to meet the WCAG
+  2.5.8 tap-target floor — surfaced by the smoke touch-target sweep
+  once the gallery exercised the selected state.
+
+### Internal
+- The option row was restructured (content column + trailing check);
+  `renderOption` output sits in the content slot, the check trails — so
+  custom option renderers are unaffected.
+- Storybook: new `Combobox con selección` story (pre-selected value);
+  the smoke gallery `Combobox` entry now ships a selected value so this
+  regression stays visible.
+
+### Compatibility
+Non-breaking. No API change — consumers see the corrected behavior on
+bump, no code changes.
+
 ## [1.38.2] — 2026-06-04
 
 **Patch. `Carousel` pagination dots are now a 24×24 tap target + the
