@@ -30,6 +30,9 @@ indistinguishable — looked like "two selected".
 - The listbox now keeps the active option scrolled into view as the
   keyboard cursor moves (the list adjusts its own `scrollTop` only —
   it never scrolls the page).
+- The clear (`×`) button grew from 22×22 to 24×24 to meet the WCAG
+  2.5.8 tap-target floor — surfaced by the smoke touch-target sweep
+  once the gallery exercised the selected state.
 
 ### Internal
 - The option row was restructured (content column + trailing check);

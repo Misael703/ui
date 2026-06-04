@@ -1814,7 +1814,8 @@ button, input, select, textarea { box-sizing: border-box; }
 .combobox__trigger-placeholder { color: var(--fg-subtle); }
 .combobox__clear {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  width: 22px; height: 22px; border-radius: var(--radius-pill);
+  /* 24×24 meets the WCAG 2.5.8 tap-target floor (was 22). */
+  width: 24px; height: 24px; border-radius: var(--radius-pill);
   border: none; background: var(--bg-subtle);
   color: var(--fg-muted); cursor: pointer; font-size: var(--text-sm);
   display: inline-flex; align-items: center; justify-content: center;
