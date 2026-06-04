@@ -97,3 +97,67 @@ describe('Table surface — toolbar shares the DataTable rounded surface', () =>
     expect(decl(th, 'background')).toBe('var(--bg-subtle)');
   });
 });
+
+describe('Table elevation — opt-in via --table-elevation token', () => {
+  it('standalone table-wrap reads the token (default none → flat)', () => {
+    const w = ruleBody('.table-wrap');
+    expect(decl(w, 'box-shadow')).toBe('var(--table-elevation, none)');
+  });
+
+  it('toolbar surface reads the same token (consistent elevation)', () => {
+    const s = ruleBody('.table-surface');
+    expect(decl(s, 'box-shadow')).toBe('var(--table-elevation, none)');
+  });
+
+  it('the inner wrap inside a surface drops the shadow (no double elevation)', () => {
+    const w = ruleBody('.table-surface > .table-wrap');
+    expect(decl(w, 'box-shadow')).toBe('none');
+  });
+});
+
+describe('Table surface="flush" — drops own chrome for embedding in a Card', () => {
+  it('standalone flush table carries .table-wrap--flush', () => {
+    const { container } = render(
+      <DataTable
+        surface="flush"
+        rows={[{ id: '1', n: 'a' }]}
+        rowKey={(r) => r.id}
+        columns={[{ key: 'n', header: 'N' }]}
+      />
+    );
+    expect(container.querySelector('.table-wrap--flush')).toBeTruthy();
+  });
+
+  it('default (surface="card") does NOT carry the flush modifier', () => {
+    const { container } = render(
+      <DataTable
+        rows={[{ id: '1', n: 'a' }]}
+        rowKey={(r) => r.id}
+        columns={[{ key: 'n', header: 'N' }]}
+      />
+    );
+    expect(container.querySelector('.table-wrap--flush')).toBeNull();
+  });
+
+  it('flush + toolbar puts the modifier on the surface, not the inner wrap', () => {
+    const { container } = render(
+      <DataTable
+        surface="flush"
+        toolbar={<div>filtros</div>}
+        rows={[{ id: '1', n: 'a' }]}
+        rowKey={(r) => r.id}
+        columns={[{ key: 'n', header: 'N' }]}
+      />
+    );
+    expect(container.querySelector('.table-surface--flush')).toBeTruthy();
+    // Inner wrap should NOT also carry --flush (surface owns the chrome).
+    expect(container.querySelector('.table-wrap--flush')).toBeNull();
+  });
+
+  it('the flush rule drops border, radius and elevation', () => {
+    const f = ruleBody('.table-wrap--flush');
+    expect(decl(f, 'border')).toBe('0');
+    expect(decl(f, 'border-radius')).toBe('0');
+    expect(decl(f, 'box-shadow')).toBe('none');
+  });
+});

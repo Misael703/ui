@@ -250,11 +250,17 @@ export const ColumnaAccionAlineada: StoryObj = {
 
 /** P2 — DataTable dentro de un Card: el wrap es dueño de su borde/radio y
  * el header sigue la esquina redondeada → sin notch. */
+/**
+ * **Embebida en Card** — pasa `surface="flush"` para que el DataTable no
+ * dibuje su propio borde/radio dentro de la Card (que ya posee la
+ * superficie). Sin `flush` se ve el doble borde y el radio anidado.
+ */
 export const TablaSobreCard: StoryObj = {
   render: () => (
     <Card>
       <CardBody>
         <DataTable
+          surface="flush"
           rows={rows}
           rowKey={(r) => r.id}
           ariaLabel="Productos"
@@ -266,6 +272,32 @@ export const TablaSobreCard: StoryObj = {
         />
       </CardBody>
     </Card>
+  ),
+};
+
+/**
+ * **Elevada sobre canvas tintado** — un DataTable standalone es FLAT por
+ * default. Sobre un canvas tintado se funde con el fondo. Subí
+ * `--table-elevation` a una sombra real (aquí `var(--shadow-card)`) en un
+ * ancestro y el kit la aplica a `.table-wrap` y `.table-surface` sin tocar
+ * selectores internos — la misma sombra que usa `<Card>`, elevación
+ * consistente entre superficies.
+ */
+export const ElevadaSobreCanvas: StoryObj = {
+  name: 'Elevada sobre canvas tintado (--table-elevation)',
+  render: () => (
+    <div style={{ background: 'var(--bg-canvas, #eef1f5)', padding: 32, ['--table-elevation' as string]: 'var(--shadow-card)' }}>
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        ariaLabel="Productos"
+        columns={[
+          { key: 'name', header: 'Producto' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+        ]}
+      />
+    </div>
   ),
 };
 

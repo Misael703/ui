@@ -912,13 +912,38 @@ button, input, select, textarea { box-sizing: border-box; }
   background-repeat: no-repeat;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
+  /* Standalone DataTable is FLAT by default (no shadow), unlike `.card`,
+     because a table is embedded inside another surface more often than it
+     floats on its own — defaulting to a shadow would stack shadow-on-
+     shadow in the common case. On a tinted canvas where a flat table
+     fuses with the background, raise `--table-elevation` to a real shadow
+     (e.g. `var(--shadow-card)`) on `.appshell` or any ancestor — no need
+     to override this selector. */
+  box-shadow: var(--table-elevation, none);
   /* P2 — the DataTable OWNS its surface: border + radius + clipping +
      scroll all live here, so it never produces a corner notch in ANY
      container. `background-clip:padding-box` keeps the surface fill from
      bleeding under the border into the rounded corner. Do NOT wrap
      <DataTable> in your own bordered/rounded/overflow container — that
-     doubles the border and re-introduces the artifact (see DESIGN.md). */
+     doubles the border and re-introduces the artifact (see DESIGN.md).
+     For the legitimate embedded-in-Card case, pass `surface="flush"`
+     instead, which drops this border/radius/shadow. */
   background-clip: padding-box;
+}
+/* `surface="flush"`: the table draws no chrome of its own so it sits clean
+   inside an already-bordered/elevated parent (a Card). Keeps the scroll-
+   shadow background fill (the base surface color still matches the parent)
+   but drops border, radius, and elevation — and un-rounds the header so it
+   doesn't poke a radius into a square-cornered parent. */
+.table-wrap--flush {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.table-wrap--flush > .data-table thead tr:first-child th:first-child,
+.table-wrap--flush > .data-table thead tr:first-child th:last-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 /* Filled header follows the wrap's rounded top corners so the square `th`
    background can't poke past the radius — sticky or not, in any parent. */
@@ -1141,9 +1166,21 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-surface);
+  /* Same opt-in elevation token as `.table-wrap` — the toolbar'd table is
+     a surface too, so it elevates consistently on a tinted canvas. */
+  box-shadow: var(--table-elevation, none);
 }
 .table-surface__bar { border-bottom: 1px solid var(--border-default); }
-.table-surface > .table-wrap { border: 0; border-radius: 0; }
+/* The inner wrap defers ALL chrome to the surface — including the shadow,
+   so the elevation lands once on the outer surface, not twice. */
+.table-surface > .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
+/* `surface="flush"` with a toolbar: drop the surface's own chrome so the
+   whole thing sits flush inside a parent that owns the border/elevation. */
+.table-surface--flush {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 .table-surface .data-table thead tr:first-child th:first-child { border-top-left-radius: 0; }
 .table-surface .data-table thead tr:first-child th:last-child { border-top-right-radius: 0; }
 
