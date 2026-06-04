@@ -192,6 +192,15 @@ export interface DateRangePickerProps {
   onOpenChange?: (open: boolean) => void;
   minDate?: Date;
   maxDate?: Date;
+  /**
+   * Disable arbitrary days (holidays, blackout dates, specific weekdays). A
+   * day for which this returns `true` renders disabled — greyed, not
+   * focusable, not clickable. Composes with `minDate`/`maxDate`. A range
+   * endpoint can never land on a disabled day; a disabled day that falls
+   * inside an otherwise-valid span stays greyed but is included visually
+   * (the span is allowed). E.g. disable Sundays: `d => d.getDay() === 0`.
+   */
+  isDateDisabled?: (date: Date) => boolean;
   presets?: Array<{ label: string; range: () => DateRange }>;
   invalid?: boolean;
   disabled?: boolean;
@@ -207,7 +216,7 @@ const EMPTY_RANGE: DateRange = { from: null, to: null };
 
 export function DateRangePicker({
   value, onChange, defaultValue, onApply, onOpenChange,
-  minDate, maxDate, presets,
+  minDate, maxDate, isDateDisabled, presets,
   invalid, disabled, className, id, format = 'auto',
 }: DateRangePickerProps) {
   const locale = useLocale();
@@ -270,8 +279,11 @@ export function DateRangePicker({
   const monthGrid1 = React.useMemo(() => buildMonthGrid(view, 1), [view]);
 
   const isDisabled = (d: Date) =>
-    (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
-    (maxDate && d > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate()));
+    !!(
+      (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
+      (maxDate && d > new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate())) ||
+      isDateDisabled?.(d)
+    );
 
   const inRange = (d: Date) => {
     if (!current.from) return false;

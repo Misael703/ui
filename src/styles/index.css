@@ -174,6 +174,11 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: auto;
 }
 .btn--link:hover:not(:disabled) { color: var(--color-secondary-700); text-decoration: underline; }
+/* `link` is a TEXT affordance, not a pressable surface — cancel the global
+   `.btn:active` press (scale + shadow) so it behaves like a normal link.
+   The hover (secondary color + underline) is the only feedback it needs.
+   Other variants keep the press. */
+.btn--link:active:not(:disabled) { transform: none; box-shadow: none; }
 
 /* button group */
 .btn-group { display: inline-flex; }

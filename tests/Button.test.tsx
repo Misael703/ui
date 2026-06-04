@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Button } from '../src/components/Button';
+
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
+const rule = (sel: string) =>
+  css.match(new RegExp(`${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`))?.[1] ?? '';
 
 describe('Button', () => {
   it('renders children and variant class', () => {
@@ -38,6 +45,20 @@ describe('Button', () => {
       expect(btn).toBeInTheDocument();
       expect(btn.className).toContain(`btn--${v}`);
       unmount();
+    });
+  });
+
+  describe('CSS: variant="link" cancels the press animation', () => {
+    it('the global press still scales + shadows (other variants keep it)', () => {
+      const press = rule('.btn:active:not(:disabled)');
+      expect(press).toMatch(/transform:\s*scale\(0?\.98\)/);
+      expect(press).toMatch(/box-shadow:\s*var\(--shadow-xs\)/);
+    });
+
+    it('.btn--link:active resets transform + box-shadow (no press for a text link)', () => {
+      const linkActive = rule('.btn--link:active:not(:disabled)');
+      expect(linkActive).toMatch(/transform:\s*none/);
+      expect(linkActive).toMatch(/box-shadow:\s*none/);
     });
   });
 });

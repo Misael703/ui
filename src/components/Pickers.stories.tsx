@@ -89,6 +89,27 @@ export const DatePickerBasico: StoryObj = {
   },
 };
 
+/**
+ * **DatePicker con días deshabilitados** (v1.40.0): `isDateDisabled` recibe un
+ * predicado `(date) => boolean`. Los días que devuelven `true` quedan grises,
+ * no clickeables y fuera del tab order. Compone con `minDate`/`maxDate`. Acá
+ * los domingos están deshabilitados (`d => d.getDay() === 0`) — la regla se ve
+ * en el calendario, no en un hint.
+ */
+export const DatePickerDiasDeshabilitados: StoryObj = {
+  render: () => {
+    const [d, setD] = React.useState<Date | null>(null);
+    return (
+      <div>
+        <DatePicker value={d} onChange={setD} isDateDisabled={(date) => date.getDay() === 0} />
+        <p style={{ marginTop: 12, fontSize: 12, color: 'var(--fg-muted)' }}>
+          Domingos deshabilitados vía <code>isDateDisabled</code>.
+        </p>
+      </div>
+    );
+  },
+};
+
 export const DatePickerFormatos: StoryObj = {
   render: () => {
     const [d, setD] = React.useState<Date | null>(new Date(2026, 4, 2));
