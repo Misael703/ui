@@ -1833,13 +1833,19 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .combobox__option {
   padding: 8px 10px; border-radius: var(--radius-sm);
-  cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+  cursor: pointer;
+  /* Row: content column on the left, the selected check trailing right. */
+  display: flex; align-items: center; gap: 8px;
 }
+.combobox__option-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .combobox__option.is-active { background: var(--bg-subtle); }
 .combobox__option.is-selected { background: var(--color-primary-50); color: var(--color-primary); }
 .combobox__option.is-disabled { opacity: 0.4; cursor: not-allowed; }
 .combobox__option-label { font-size: var(--text-sm); color: var(--fg-default); }
 .combobox__option-desc { font-size: var(--text-xs); color: var(--fg-muted); }
+/* The check is the unambiguous selected marker (palette-independent); the
+   `active` highlight is background-only and never shows it. */
+.combobox__option-check { flex-shrink: 0; color: var(--color-primary); }
 .combobox__empty { padding: 16px; text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
 
 /* ---------- DatePicker ---------- */

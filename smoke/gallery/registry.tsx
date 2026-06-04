@@ -66,7 +66,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'TimePicker', node: <Ctrl init="08:00" render={(v, s) => <K.TimePicker value={v} onChange={s} />} /> },
   { name: 'RadioGroup', node: <Ctrl<string | null> init="a" render={(v, s) => <K.RadioGroup name="rg" value={v} onChange={s} options={[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]} />} /> },
   { name: 'CheckboxGroup', node: <Ctrl<string[]> init={['a']} render={(v, s) => <K.CheckboxGroup value={v} onChange={s} options={[{ value: 'a', label: 'A' }]} />} /> },
-  { name: 'Combobox', node: <Ctrl<string | null> init={null} render={(v, s) => <K.Combobox value={v} onChange={s} options={[{ value: 'a', label: 'A' }]} />} /> },
+  { name: 'Combobox', node: <Ctrl<string | null> init="b" render={(v, s) => <K.Combobox value={v} onChange={s} options={[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }, { value: 'c', label: 'C' }]} />} /> },
   { name: 'MultiCombobox', node: <Ctrl<string[]> init={[]} render={(v, s) => <K.MultiCombobox value={v} onChange={s} options={[{ value: 'a', label: 'A' }]} />} /> },
   { name: 'DatePicker', node: <Ctrl<Date | null> init={null} render={(v, s) => <K.DatePicker value={v} onChange={s} />} /> },
   { name: 'DateRangePicker', node: <Ctrl<{ from: Date | null; to: Date | null }> init={{ from: null, to: null }} render={(v, s) => <K.DateRangePicker value={v} onChange={s} />} /> },

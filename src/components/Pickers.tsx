@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { CalendarIcon, ChevronLeft, ChevronRight, X } from './Icons';
+import { CalendarIcon, ChevronLeft, ChevronRight, X, Check } from './Icons';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
@@ -92,7 +92,36 @@ export function Combobox<T = string>({
     closeOnEscape: false,
   });
 
-  React.useEffect(() => { setActive(0); }, [query, open]);
+  // Choose the active descendant on open (and on query change while open).
+  // With a confirmed value and no active query, start on the SELECTED option
+  // — not index 0 — so the keyboard cursor and the highlighted row agree and
+  // the selection scrolls into view. Typing resets to the first match.
+  React.useEffect(() => {
+    if (!open) return;
+    if (!query && value != null) {
+      const idx = filtered.findIndex((o) => o.value === value);
+      setActive(idx >= 0 ? idx : 0);
+    } else {
+      setActive(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- default only on open/query transitions; filtered/value read intentionally from closure
+  }, [query, open]);
+
+  // Keep the active option in view — on open (jump to the selected row) and
+  // as the keyboard cursor moves. Adjusts only the listbox's own scrollTop,
+  // never the page: the list is portaled, so scrollIntoView could scroll an
+  // ancestor instead.
+  React.useEffect(() => {
+    if (!open) return;
+    const list = listRef.current;
+    if (!list) return;
+    const el = list.querySelectorAll<HTMLElement>('[role="option"]')[active];
+    if (!el) return;
+    const top = el.offsetTop;
+    const bottom = top + el.offsetHeight;
+    if (top < list.scrollTop) list.scrollTop = top;
+    else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
+  }, [open, active]);
 
   const onKey = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'ArrowDown') {
@@ -204,14 +233,20 @@ export function Combobox<T = string>({
                   setOpen(false);
                 }}
               >
-                {renderOption ? (
-                  renderOption(o)
-                ) : (
-                  <>
-                    <span className="combobox__option-label">{o.label}</span>
-                    {o.description && <span className="combobox__option-desc">{o.description}</span>}
-                  </>
-                )}
+                <span className="combobox__option-content">
+                  {renderOption ? (
+                    renderOption(o)
+                  ) : (
+                    <>
+                      <span className="combobox__option-label">{o.label}</span>
+                      {o.description && <span className="combobox__option-desc">{o.description}</span>}
+                    </>
+                  )}
+                </span>
+                {/* Unambiguous selected marker — distinguishes the confirmed
+                    value from the keyboard/hover `active` highlight even when
+                    their backgrounds are close in a given palette. */}
+                {o.value === value && <Check size={16} className="combobox__option-check" aria-hidden="true" />}
               </li>
             ))
           )}

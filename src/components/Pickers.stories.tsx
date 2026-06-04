@@ -20,6 +20,21 @@ export const ComboboxBasico: StoryObj = {
 };
 
 /**
+ * **Combobox con selección** (v1.39.0): con un valor ya elegido, al abrir el
+ * dropdown la opción seleccionada lleva un ✓ (marcador inequívoco) y el cursor
+ * de teclado arranca SOBRE ella (scrolled into view), no en el primer ítem.
+ * Así el seleccionado y el `active` (resaltado de teclado/hover, solo fondo)
+ * no se confunden aunque sus fondos sean parecidos en una paleta dada. Abre la
+ * lista para verlo.
+ */
+export const ComboboxConSeleccion: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<string | null>('lij');
+    return <Combobox value={v} onChange={setV} options={opts} placeholder="Buscar producto…" />;
+  },
+};
+
+/**
  * **Combobox sin input** (v1.15.0): `searchable={false}` cambia el trigger
  * a un botón que muestra el label del valor seleccionado (o el placeholder),
  * sin filtrado — la lista siempre muestra todas las opciones. Mismo shell
