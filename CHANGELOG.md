@@ -5,6 +5,44 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.0] — 2026-06-04
+
+**Minor. `DataTable` surface control: opt-in elevation token +
+`surface="flush"` for embedding in a Card — consumer-driven from
+despachos-ferreteria.** A standalone `<DataTable>` on a tinted canvas
+read as flat because `.table-wrap` carried border + radius but no
+shadow, unlike `.card` (which has `--shadow-card`). And embedding a
+no-toolbar table in a `<Card>` doubled the border (the single-surface
+`.table-surface` mode only activates with a `toolbar`).
+
+### Added
+- `--table-elevation` token (default `none`), consumed by both
+  `.table-wrap` and `.table-surface`. Raise it to a real shadow on
+  `.appshell` or any ancestor — e.g.
+  `.appshell { --table-elevation: var(--shadow-card); }` — to make
+  tables float on a tinted canvas with the same elevation as `<Card>`.
+  When a toolbar is present the shadow lands once on the outer
+  `.table-surface`; the inner wrap resets it (no double elevation).
+- `surface?: 'card' | 'flush'` prop on `DataTable` (default `'card'`).
+  `'flush'` drops the table's own border, radius, and elevation (and
+  un-rounds the header) so it sits clean inside a parent that already
+  owns the surface — the embedded-in-`Card` case. Works with or
+  without a toolbar (the modifier lands on whichever element owns the
+  chrome).
+- Storybook: `Elevada sobre canvas tintado (--table-elevation)`;
+  `TablaSobreCard` updated to use `surface="flush"`.
+
+### Why elevation is opt-in (not a new default)
+A `<DataTable>` is embedded inside another surface (Card, panel, tab)
+more often than it floats standalone, so defaulting it to a shadow
+would stack shadow-on-shadow in the common case. The token keeps the
+flat default and lets a tinted-canvas page elevate per-app.
+
+### Compatibility
+Non-breaking. `--table-elevation` defaults to `none` (current flat
+look) and `surface` defaults to `'card'` (current chrome). Every
+existing consumer renders identically without any change.
+
 ## [1.37.0] — 2026-06-03
 
 **Minor. `AppShell` header padding is now overridable via CSS vars —

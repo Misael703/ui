@@ -232,6 +232,15 @@ export interface DataTableProps<T> {
    * legacy sibling pattern (`<TableToolbar/><DataTable/>`) still works.
    */
   toolbar?: React.ReactNode;
+  /**
+   * Surface chrome mode. Default `'card'`: the table draws its own
+   * border + radius (and `--table-elevation` if set), the standalone
+   * surface. `'flush'`: drops that chrome so the table sits clean inside
+   * a parent that already owns the surface (a `<Card>`) without doubling
+   * the border or nesting a radius. Use `'flush'` for the embedded-in-Card
+   * case; leave the default for standalone tables.
+   */
+  surface?: 'card' | 'flush';
   className?: string;
 }
 
@@ -253,6 +262,7 @@ export function DataTable<T>({
   empty, error, loading, stickyHeader, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
+  surface = 'card',
 }: DataTableProps<T>) {
   const t = useLocale();
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
@@ -299,6 +309,7 @@ export function DataTable<T>({
         'table-wrap',
         stickyHeader && 'table-wrap--sticky',
         mobileLayout === 'cards' && 'table-wrap--cards',
+        surface === 'flush' && toolbar == null && 'table-wrap--flush',
         className,
       )}
     >
@@ -416,7 +427,7 @@ export function DataTable<T>({
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
   return toolbar == null ? wrap : (
-    <div className="table-surface">
+    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush')}>
       <div className="table-surface__bar">{toolbar}</div>
       {wrap}
     </div>
