@@ -1,8 +1,24 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Carousel } from '../src/components/Carousel';
 
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
+
 describe('Carousel', () => {
+  it('dot is a 24×24 tap target with the visual dot in a ::before (WCAG 2.5.8)', () => {
+    // The button is the hit area (24×24); the small visual lives in
+    // `::before` so the tap target can meet the floor without enlarging
+    // the dot. Caught by the smoke touch-target sweep at 375px.
+    const dot = css.match(/\.carousel__dot\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(dot).toMatch(/width:\s*24px/);
+    expect(dot).toMatch(/height:\s*24px/);
+    const before = css.match(/\.carousel__dot::before\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(before).toMatch(/width:\s*8px/);
+  });
+
   it('navigates with prev/next buttons', () => {
     const onChange = vi.fn();
     render(

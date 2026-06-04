@@ -76,6 +76,64 @@ for (const { w, h } of BREAKPOINTS) {
 }
 
 /**
+ * Touch-target floor (WCAG 2.5.8, 24×24) at the mobile breakpoint.
+ *
+ * Scope is deliberately narrow to stay signal-rich:
+ * - Native form controls (`<input>` checkbox/radio/switch) are excluded —
+ *   their size is the user agent's, which WCAG exempts.
+ * - Only controls that are below 24px in BOTH dimensions are flagged. A
+ *   wide-but-short control (a 76×16 table sort button, a full-width
+ *   collapsible header, an inline breadcrumb link) has ample hit area along
+ *   its long axis, so it isn't a tap hazard.
+ *
+ * Components whose control is intentionally compact (and not a genuine
+ * hazard) are allowlisted with a reason. Anything else under 24×24 is a
+ * gate failure — that's how this caught the 8×8 Carousel dots.
+ */
+const TOUCH_MIN = 24;
+const TOUCH_SELECTOR = 'button, a[href], [role="button"], [role="tab"], [role="menuitem"], summary';
+const ALLOW_SMALL_TARGET = new Set<string>([
+  // Rating: 20×20 star buttons — a deliberately compact, inline rating
+  // affordance; enlarging them would distort the star row.
+  'Rating',
+  // TagInput: the 18×18 "×" remove button sits on a chip; the chip itself
+  // is the primary target, the × is a secondary affordance.
+  'TagInput',
+  // JsonViewer: 11×19 expand/collapse toggles in a dense tree — a code
+  // inspector, not a touch-first surface.
+  'JsonViewer',
+]);
+
+test('gallery: interactive targets meet the 24×24 floor at 375px', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto('/gallery', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+
+  const offenders = await page.evaluate(
+    ({ min, selector }) => {
+      const out: Record<string, string> = {};
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) continue; // not rendered
+        if (r.width < min - 0.5 && r.height < min - 0.5) {
+          const comp = el.closest<HTMLElement>('section[data-comp]')?.dataset.comp ?? '(outside)';
+          // Keep the smallest sample per component for the message.
+          out[comp] = out[comp] ?? `${Math.round(r.width)}x${Math.round(r.height)}`;
+        }
+      }
+      return Object.entries(out).map(([c, size]) => `${c} (${size})`);
+    },
+    { min: TOUCH_MIN, selector: TOUCH_SELECTOR },
+  );
+
+  const flagged = offenders.filter((o) => !ALLOW_SMALL_TARGET.has(o.split(' ')[0]));
+  expect(
+    flagged,
+    `interactive targets under ${TOUCH_MIN}×${TOUCH_MIN} at 375px:\n${flagged.join('\n')}`,
+  ).toEqual([]);
+});
+
+/**
  * Real consumer-representative routes (`/` RSC, `/client`) at each
  * breakpoint: no page-level horizontal overflow AND no console errors /
  * pageerrors triggered by the layout at that width (a media-query handler
@@ -84,7 +142,19 @@ for (const { w, h } of BREAKPOINTS) {
  * production-only hydration #418 (see smoke.spec.ts); its overflow is
  * gated above.
  */
-const REAL_ROUTES = ['/', '/client'];
+// `/` and `/client` are the consumer-representative routes; the scenario
+// routes below are real composed layouts (modal, brand surface, table,
+// badges) that should also hold up across breakpoints. The two
+// `timeline-milestone*` scenarios are intentionally excluded: they lay 5
+// timeline variants in a fixed `repeat(5, 1fr)` comparison grid (a desktop
+// geometry harness, asserted by scenarios.spec.ts) that does not shrink to
+// 375px — a harness artifact, not a component bug. AppShell scenario routes
+// are likewise out (their 100vw full-bleed breakout, see ALLOW_OVERFLOW).
+const REAL_ROUTES = [
+  '/', '/client',
+  '/scenarios', '/scenarios/modal', '/scenarios/brand',
+  '/scenarios/table', '/scenarios/badges',
+];
 
 for (const route of REAL_ROUTES) {
   for (const { w, h } of BREAKPOINTS) {

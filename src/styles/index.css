@@ -4214,15 +4214,24 @@ button, input, select, textarea { box-sizing: border-box; }
 .carousel__control:disabled { opacity: 0.4; cursor: not-allowed; }
 .carousel__control--prev { left: var(--space-2); }
 .carousel__control--next { right: var(--space-2); }
-.carousel__dots { display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-3); padding: 0; list-style: none; }
+.carousel__dots { display: flex; justify-content: center; gap: var(--space-1, 4px); margin-top: var(--space-3); padding: 0; list-style: none; }
+/* The visible dot is small (8px), but the BUTTON is a 24×24 tap target
+   (WCAG 2.5.8) — the dot is rendered as a centered `::before` so the hit
+   area can grow without enlarging the visual. The active state stretches
+   the dot into a 24px pill, same look as before. */
 .carousel__dot {
+  width: 24px; height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; cursor: pointer; padding: 0;
+}
+.carousel__dot::before {
+  content: "";
   width: 8px; height: 8px;
   border-radius: var(--radius-pill);
   background: var(--border-strong, var(--border-default));
-  border: 0; cursor: pointer; padding: 0;
   transition: background var(--duration-fast, 120ms), width var(--duration-fast, 120ms);
 }
-.carousel__dot.is-active { background: var(--color-primary); width: 24px; }
+.carousel__dot.is-active::before { background: var(--color-primary); width: 24px; }
 
 /* ---------- Resizable ------------------------------------------------- */
 .resizable { display: flex; width: 100%; height: 100%; }
