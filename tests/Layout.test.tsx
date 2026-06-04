@@ -107,6 +107,15 @@ describe('Container', () => {
     const { container } = render(<Container size="md">x</Container>);
     expect(container.querySelector('.container--md')).toBeInTheDocument();
   });
+
+  it('is border-box so width:100% includes the inline gutter (no parent overflow)', () => {
+    // Regression: content-box + width:100% + paddingInline made the
+    // container 2×var(--space-4) wider than its parent, overflowing any
+    // width-constrained context. The responsive smoke sweep caught it.
+    const { container } = render(<Container size="md">x</Container>);
+    const el = container.firstElementChild as HTMLElement;
+    expect(el.style.boxSizing).toBe('border-box');
+  });
 });
 
 describe('Grid', () => {

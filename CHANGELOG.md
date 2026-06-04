@@ -5,6 +5,35 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.1] — 2026-06-04
+
+**Patch. `Container` no longer overflows a width-constrained parent +
+new responsive-overflow smoke gate.**
+
+### Fixed
+- `<Container>` was `box-sizing: content-box` (the default) with
+  `width: 100%` + `paddingInline: var(--space-4)`, so it rendered
+  `2×var(--space-4)` (32px) wider than its parent and overflowed any
+  width-constrained context — a column, a card, a narrow viewport.
+  A full-viewport page masked it via the body's own margins. Now
+  `box-sizing: border-box`, so `width: 100%` includes the gutter and
+  the container exactly fits its parent. This is also the expected
+  semantics of a max-width container with an inline gutter.
+
+### Internal — testing
+- New `smoke/e2e/responsive.spec.ts`: a horizontal-overflow sweep at
+  375 / 768 / 1280 / 1920 px. On `/gallery` (every component, each in a
+  `data-comp` section) it gates per-component overflow and names the
+  offender; on the real routes (`/`, `/client`) it gates page-level
+  overflow + console errors at each breakpoint. This is the gate that
+  caught the `Container` bug above. `AppShell` is allowlisted (its
+  `100vw` full-bleed breakout overflows the synthetic padded gallery
+  section by design; no real consumer nests it in a card).
+
+### Compatibility
+Non-breaking. The `Container` fix only removes an unintended overflow;
+no API change.
+
 ## [1.38.0] — 2026-06-04
 
 **Minor. `DataTable` surface control: opt-in elevation token +
