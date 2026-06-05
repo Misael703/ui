@@ -316,18 +316,7 @@ export function DataTable<T>({
     else onSortChange(null);
   };
 
-  const wrap = (
-    <div
-      className={cx(
-        'table-wrap',
-        stickyHeader && 'table-wrap--sticky',
-        maxHeight != null && 'table-wrap--scroll',
-        mobileLayout === 'cards' && 'table-wrap--cards',
-        surface === 'flush' && toolbar == null && 'table-wrap--flush',
-        className,
-      )}
-      style={maxHeight != null ? { maxHeight } : undefined}
-    >
+  const tableEl = (
       <table
         className={cx(
           'table data-table',
@@ -435,6 +424,28 @@ export function DataTable<T>({
           )}
         </tbody>
       </table>
+  );
+  // Bounded mode (`maxHeight`): the table lives in an inner scroll
+  // container, while the outer `.table-wrap` keeps the border/radius and
+  // `overflow: hidden` clips it cleanly — including the sticky header's
+  // paint and the scrollbar corners. (A single element that is BOTH the
+  // rounded box AND the sticky scroll container can't clip the sticky paint
+  // to its radius in Chrome; splitting the two does, because the outer
+  // clipping element is no longer the sticky's scroll container.)
+  const wrap = (
+    <div
+      className={cx(
+        'table-wrap',
+        stickyHeader && 'table-wrap--sticky',
+        maxHeight != null && 'table-wrap--scroll',
+        mobileLayout === 'cards' && 'table-wrap--cards',
+        surface === 'flush' && toolbar == null && 'table-wrap--flush',
+        className,
+      )}
+    >
+      {maxHeight != null
+        ? <div className="table-wrap__scroll" style={{ maxHeight }}>{tableEl}</div>
+        : tableEl}
     </div>
   );
   // No toolbar → byte-identical legacy output. With a toolbar, the

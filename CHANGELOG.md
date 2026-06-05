@@ -5,6 +5,24 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.41.2] — 2026-06-05
+
+**Patch. `DataTable` bounded sticky header — proper structural fix for
+the rounded-corner leak.** 1.41.1's `clip-path` reduced but did not
+fully kill the grey leak where the scrollbar meets the rounded top
+corner. The real fix is structural: in `maxHeight` mode the table now
+lives in an **inner** `.table-wrap__scroll` (the scroll container,
+`overflow: auto`), wrapped by the **outer** `.table-wrap` which keeps the
+border + radius and `overflow: hidden`. Because the clipping element
+(outer) is no longer the sticky header's scroll container (inner), it
+clips everything — the sticky paint AND the scrollbar corners — to the
+rounded rect cleanly. Chrome's "can't clip the sticky it scrolls" bug
+simply doesn't apply once the two roles are separated.
+
+Verified at 6× zoom: clean rounded corner, scrollbar clipped below the
+curve, no grey leak; sticky still pins on scroll. Replaces the `clip-path`
+workaround from 1.41.1.
+
 ## [1.41.1] — 2026-06-05
 
 **Patch. `DataTable` bounded sticky header (`maxHeight`) no longer leaks
