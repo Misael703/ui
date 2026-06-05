@@ -233,6 +233,20 @@ describe('DataTable', () => {
     expect(container.querySelector('.table-wrap__sentinel')).toBeNull();
   });
 
+  it('CSS: the scroll surface uses the refined scrollbar (thin + transparent track)', () => {
+    // The native bar's square track broke the rounded-corner symmetry; the
+    // refined scrollbar (thin, floating rounded thumb, transparent track)
+    // applies to the table scroller and the public `.kit-scrollbar` utility.
+    const base = tableCss.match(/\.kit-scrollbar[^{]*\.table-wrap__scroll[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    expect(base).toMatch(/scrollbar-width:\s*thin/);
+    expect(base).toMatch(/scrollbar-color:[^;]*transparent/);
+    // the thumb floats (inset transparent border + content-box clip) on a
+    // transparent track — what keeps the corner clean.
+    const thumb = tableCss.match(/::-webkit-scrollbar-thumb[^{]*\{([^}]*background-clip:\s*content-box[^}]*)\}/)?.[1] ?? '';
+    expect(thumb).toMatch(/border:\s*3px solid transparent/);
+    expect(thumb).toMatch(/border-radius:\s*999px/);
+  });
+
   it('CSS: the stuck header gains a soft drop shadow (on-scroll elevation)', () => {
     const stuck = tableCss.match(/\.table-wrap--sticky\s+\.table-wrap__scroll\.is-stuck[^{]*\{([^}]*)\}/)?.[1] ?? '';
     // keeps the 1px separator AND adds a downward drop shadow
