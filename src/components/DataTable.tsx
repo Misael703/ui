@@ -285,6 +285,30 @@ export function DataTable<T>({
     if (headerCbRef.current) headerCbRef.current.indeterminate = !!someSelected;
   }, [someSelected]);
 
+  // On-scroll header elevation (bounded `maxHeight` + `stickyHeader` only).
+  // A zero-height sentinel sits at the top of the inner scroll container; an
+  // IntersectionObserver flips `stuck` when it leaves the scroller's top, so
+  // the sticky header gains a soft drop shadow once content scrolls beneath
+  // it. IO (not a scroll listener) → no per-frame work; SSR/jsdom-safe via
+  // the `typeof` guard. Ancestor-stick mode keeps the flush header (the
+  // outer scroller isn't ours to observe).
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = React.useState(false);
+  const elevatable = stickyHeader && maxHeight != null;
+  React.useEffect(() => {
+    if (!elevatable) { setStuck(false); return; }
+    const root = scrollRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      { root, threshold: 0 },
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, [elevatable]);
+
   // Latest-props ref so toggleRow stays referentially stable across selection
   // changes. Without this, every selection update would create a new
   // toggleRow, defeating React.memo on DataTableRow.
@@ -444,7 +468,16 @@ export function DataTable<T>({
       )}
     >
       {maxHeight != null
-        ? <div className="table-wrap__scroll" style={{ maxHeight }}>{tableEl}</div>
+        ? (
+          <div
+            ref={scrollRef}
+            className={cx('table-wrap__scroll', stuck && 'is-stuck')}
+            style={{ maxHeight }}
+          >
+            {elevatable && <div ref={sentinelRef} className="table-wrap__sentinel" aria-hidden="true" />}
+            {tableEl}
+          </div>
+        )
         : tableEl}
     </div>
   );

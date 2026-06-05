@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.42.0] — 2026-06-05
+
+**Minor. `DataTable` sticky header gains an on-scroll "command bar"
+elevation.** Now that the bounded sticky header is structurally solid
+(1.41.x), this is the polish: in `maxHeight` mode the sticky header sits
+**flush at rest** (just its 1px separator) and **lifts off with a soft
+downward shadow once content scrolls beneath it** — the depth cue that
+makes a sticky header read as a deliberate bar (Linear / Notion /
+Stripe).
+
+### Added
+- On-scroll header elevation, scoped to `stickyHeader` + `maxHeight`
+  (the bounded scroll box). A zero-height sentinel at the top of the
+  inner scroll container is watched by an `IntersectionObserver`; when it
+  leaves the top, the header gains `0 6px 8px -6px` warm shadow (the 1px
+  separator stays). IO, not a scroll listener — no per-frame work; the
+  shadow eases in via a `box-shadow` transition. SSR/jsdom-safe (guarded
+  on `typeof IntersectionObserver`).
+- Ancestor-stick mode (`stickyHeader` without `maxHeight`, e.g. inside a
+  `Modal`) keeps the flush header — the outer scroller isn't the table's
+  to observe.
+
+### Compatibility
+Non-breaking, additive. No API change; the elevation appears
+automatically on bounded sticky tables.
+
 ## [1.41.2] — 2026-06-05
 
 **Patch. `DataTable` bounded sticky header — proper structural fix for

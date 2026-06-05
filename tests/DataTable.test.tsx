@@ -219,6 +219,27 @@ describe('DataTable', () => {
     expect(inner).toMatch(/overflow:\s*auto/);
   });
 
+  it('renders the elevation sentinel only with stickyHeader + maxHeight', () => {
+    // bounded + sticky → sentinel present (the IO probe for on-scroll elevation)
+    const { container, rerender } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader maxHeight={300} />
+    );
+    expect(container.querySelector('.table-wrap__sentinel')).not.toBeNull();
+    // maxHeight WITHOUT sticky → no elevation, no sentinel
+    rerender(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} maxHeight={300} />);
+    expect(container.querySelector('.table-wrap__sentinel')).toBeNull();
+    // sticky WITHOUT maxHeight (ancestor mode) → no inner scroller, no sentinel
+    rerender(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader />);
+    expect(container.querySelector('.table-wrap__sentinel')).toBeNull();
+  });
+
+  it('CSS: the stuck header gains a soft drop shadow (on-scroll elevation)', () => {
+    const stuck = tableCss.match(/\.table-wrap--sticky\s+\.table-wrap__scroll\.is-stuck[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    // keeps the 1px separator AND adds a downward drop shadow
+    expect(stuck).toMatch(/inset 0 -1px 0 var\(--border-default\)/);
+    expect(stuck).toMatch(/0 6px 8px -6px/);
+  });
+
   it('mobileLayout=cards adds the wrapper class and data-label to cells', () => {
     const { container } = render(
       <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} mobileLayout="cards" />

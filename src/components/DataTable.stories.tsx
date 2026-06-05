@@ -175,6 +175,9 @@ const stickyRows = Array.from({ length: 30 }, (_, i) => ({
  * this for a standalone table with an internal scroll area. (Before 1.41.0
  * `stickyHeader` implied `max-height: 70vh` — that cap is now the explicit
  * `maxHeight` prop.)
+ *
+ * v1.42.0: scroll the body — the header sits flush at rest and lifts off with
+ * a soft shadow once content scrolls beneath it (the "command bar" elevation).
  */
 export const StickyHeader: StoryObj = {
   render: () => (
