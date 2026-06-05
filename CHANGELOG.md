@@ -5,6 +5,56 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.41.0] — 2026-06-05
+
+**Minor. `DataTable` sticky header decoupled from its own scroll box —
+fixes nested double-scroll + border artifacts inside a `Modal`.
+Consumer-driven from despachos-ferreteria.**
+
+Until now `stickyHeader` implied `max-height: 70vh; overflow-y: auto`
+on the wrap, forcing the table to be its own scroll container. Inside a
+`Modal` body (already `overflow-y: auto`) that produced two nested
+vertical scrollbars and rounded-corner / scrollbar-track artifacts where
+the sticky header met the wrap's radius.
+
+### ⚠️ Behavior change
+`stickyHeader` **no longer caps the height at `70vh`** — that cap moved
+to the new explicit `maxHeight` prop. A standalone table that relied on
+the implicit bounded scroll should add `maxHeight="70vh"` to restore it:
+
+```diff
+- <DataTable stickyHeader … />
++ <DataTable stickyHeader maxHeight="70vh" … />
+```
+
+Without `maxHeight`, `stickyHeader` now sticks the header to the nearest
+**scrolling ancestor** (a `Modal` body, the page) instead of an internal
+box — usually the nicer default, but a visible change for existing
+standalone sticky tables.
+
+### Added
+- `maxHeight?: string | number` on `DataTable`. Caps the table height
+  and scrolls the body inside a bounded box (the wrap becomes the
+  vertical scroll container; a `stickyHeader` pins to it). Accepts any
+  CSS length (`'70vh'`, `480`, `'30rem'`).
+
+### Changed
+- `stickyHeader` alone now leaves the wrap as a non-scroll-container
+  (`overflow: visible`) so the header sticks to an outer scroller — one
+  scroll, no nested bar, no corner artifacts. CSS forces `overflow-y` to
+  `auto` whenever `overflow-x` is `auto`, so a horizontal scroll and
+  stick-to-ancestor can't coexist: a **wide** table needs the bounded
+  (`maxHeight`) mode for its own horizontal scroll; without it a wider-
+  than-container table relies on the ancestor's scroll.
+
+### Internal
+- Storybook: `StickyHeader` now uses `maxHeight={300}` (was a `className`
+  max-height hack); new `Sticky header en Modal (un solo scroll)` story.
+
+### Compatibility
+API-additive (`maxHeight` is new, nothing removed), but `stickyHeader`'s
+runtime behavior changed — see the behavior-change note above.
+
 ## [1.40.0] — 2026-06-04
 
 **Minor. Two independent changes — consumer-driven from

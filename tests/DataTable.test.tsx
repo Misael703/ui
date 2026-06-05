@@ -1,7 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { DataTable, Accordion, AccordionItem, Breadcrumbs, TablePagination } from '../src/components/DataTable';
 import { LocaleProvider } from '../src/locale';
+
+const tableCss = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
 
 const rows = [
   { id: '1', name: 'Taladro', sku: 'TLD-1' },
@@ -172,6 +177,37 @@ describe('DataTable', () => {
       <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
     );
     expect(container.querySelector('.table-wrap--sticky')).toBeNull();
+  });
+
+  it('maxHeight adds the scroll class + inline max-height; sticky alone does NOT', () => {
+    const { container, rerender } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader />
+    );
+    // stickyHeader without maxHeight: sticky class, no scroll class, no inline cap.
+    let wrap = container.querySelector('.table-wrap') as HTMLElement;
+    expect(wrap.classList.contains('table-wrap--sticky')).toBe(true);
+    expect(wrap.classList.contains('table-wrap--scroll')).toBe(false);
+    expect(wrap.style.maxHeight).toBe('');
+    // with maxHeight: both classes + the inline cap.
+    rerender(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader maxHeight="70vh" />);
+    wrap = container.querySelector('.table-wrap') as HTMLElement;
+    expect(wrap.classList.contains('table-wrap--scroll')).toBe(true);
+    expect(wrap.style.maxHeight).toBe('70vh');
+  });
+
+  it('CSS: sticky decouples from a bounded box (no implicit 70vh)', () => {
+    // The sticky rule no longer imposes its own scroll/height — that moved to
+    // the opt-in `.table-wrap--scroll` (maxHeight prop).
+    const stickyRule = tableCss.match(/\.table-wrap--sticky\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(stickyRule).not.toMatch(/max-height/);
+    expect(stickyRule).not.toMatch(/70vh/);
+    // sticky WITHOUT a bounded box → wrap is not a scroll container, so the
+    // header can stick to an outer scroller (a Modal body).
+    const ancestor = tableCss.match(/\.table-wrap--sticky:not\(\.table-wrap--scroll\)\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(ancestor).toMatch(/overflow:\s*visible/);
+    // the bounded mode is the vertical scroll container.
+    const scrollRule = tableCss.match(/\.table-wrap--scroll\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(scrollRule).toMatch(/overflow-y:\s*auto/);
   });
 
   it('mobileLayout=cards adds the wrapper class and data-label to cells', () => {

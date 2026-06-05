@@ -4,6 +4,7 @@ import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePa
 import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
+import { Modal } from './Overlay';
 
 export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
 
@@ -154,31 +155,48 @@ export const ConError: StoryObj = {
  * wrapper es el contenedor de scroll (no lo envuelvas en tu propio
  * `overflow-y:auto`). Default `max-height:70vh`; aquí se override con un
  * `className`. */
+const stickyCols = [
+  { key: 'name', header: 'Producto' },
+  { key: 'sku', header: 'SKU' },
+  { key: 'stock', header: 'Stock', align: 'right' as const },
+  { key: 'price', header: 'Precio', align: 'right' as const, accessor: (r: { price: number }) => `$${r.price.toLocaleString('es-CL')}` },
+];
+const stickyRows = Array.from({ length: 30 }, (_, i) => ({
+  id: String(i + 1),
+  name: `Producto ${i + 1}`,
+  sku: `SKU-${String(i + 1).padStart(3, '0')}`,
+  stock: (i * 7) % 100,
+  price: 10000 + i * 4500,
+}));
+
+/**
+ * **`stickyHeader` + `maxHeight`** (v1.41.0): a bounded scroll region. The wrap
+ * caps at `maxHeight` and scrolls its body; the header pins to the box. Use
+ * this for a standalone table with an internal scroll area. (Before 1.41.0
+ * `stickyHeader` implied `max-height: 70vh` — that cap is now the explicit
+ * `maxHeight` prop.)
+ */
 export const StickyHeader: StoryObj = {
+  render: () => (
+    <DataTable stickyHeader maxHeight={300} rows={stickyRows} rowKey={(r) => r.id} ariaLabel="Inventario" columns={stickyCols} />
+  ),
+};
+
+/**
+ * **`stickyHeader` dentro de un Modal** (v1.41.0): sin `maxHeight`, el wrap no
+ * crea su propio scroll — el header se pega al scroll del `Modal` body. Un solo
+ * scroll, sin barras anidadas ni artefactos de borde. Abre el modal y scrollea.
+ */
+export const StickyHeaderEnModal: StoryObj = {
+  name: 'Sticky header en Modal (un solo scroll)',
   render: () => {
-    const manyRows = Array.from({ length: 30 }, (_, i) => ({
-      id: String(i + 1),
-      name: `Producto ${i + 1}`,
-      sku: `SKU-${String(i + 1).padStart(3, '0')}`,
-      stock: (i * 7) % 100,
-      price: 10000 + i * 4500,
-    }));
+    const [open, setOpen] = React.useState(false);
     return (
       <>
-        <style>{'.sticky-demo{max-height:300px}'}</style>
-        <DataTable
-          stickyHeader
-          className="sticky-demo"
-          rows={manyRows}
-          rowKey={(r) => r.id}
-          ariaLabel="Inventario"
-          columns={[
-            { key: 'name', header: 'Producto' },
-            { key: 'sku', header: 'SKU' },
-            { key: 'stock', header: 'Stock', align: 'right' },
-            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-          ]}
-        />
+        <Button onClick={() => setOpen(true)}>Abrir inventario</Button>
+        <Modal open={open} onClose={() => setOpen(false)} title="Inventario">
+          <DataTable stickyHeader rows={stickyRows} rowKey={(r) => r.id} ariaLabel="Inventario" columns={stickyCols} />
+        </Modal>
       </>
     );
   },

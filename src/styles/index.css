@@ -1023,15 +1023,20 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 600px) {
   .table-pagination { justify-content: center; }
 }
-.table-wrap--sticky {
-  /* `.table-wrap` is overflow-x:auto, which makes IT the nearest scroll
-     container — so a sticky thead sticks to it, not to an outer wrapper.
-     The sticky variant must therefore scroll vertically itself. Default cap
-     is overridable: pass a className with a different max-height to
-     <DataTable>. */
-  overflow-y: auto;
-  max-height: 70vh;
-}
+/* Bounded scroll region (`maxHeight` prop): the wrap is the vertical scroll
+   container and a `stickyHeader` thead pins to IT. `max-height` is applied
+   inline from the prop. Keeps the base `overflow-x: auto` so a wide table
+   still scrolls horizontally inside the box. */
+.table-wrap--scroll { overflow-y: auto; }
+/* `stickyHeader` WITHOUT a bounded box: the wrap must NOT be a scroll
+   container, otherwise the base `overflow-x: auto` would trap the sticky
+   thead against the wrap (CSS forces `overflow-y` to `auto` when
+   `overflow-x` is `auto`). `overflow: visible` lets the thead stick to the
+   nearest scrolling ANCESTOR (a Modal body, the page) — one scroll, no
+   nested scrollbar, no rounded-corner / scrollbar-track artifacts. A wide
+   table then relies on that ancestor for horizontal scroll (use `maxHeight`
+   for an internal one). */
+.table-wrap--sticky:not(.table-wrap--scroll) { overflow: visible; }
 .table-wrap--sticky .table thead th {
   position: sticky;
   top: 0;
