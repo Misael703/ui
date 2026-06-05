@@ -1026,8 +1026,16 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Bounded scroll region (`maxHeight` prop): the wrap is the vertical scroll
    container and a `stickyHeader` thead pins to IT. `max-height` is applied
    inline from the prop. Keeps the base `overflow-x: auto` so a wide table
-   still scrolls horizontally inside the box. */
-.table-wrap--scroll { overflow-y: auto; }
+   still scrolls horizontally inside the box.
+   `clip-path` (not just `overflow` + `border-radius`) is what clips the
+   rounded corners here: Chrome does NOT clip a `position: sticky`
+   descendant's paint to the container's border-radius, so the sticky
+   header's grey fill leaked past the top corners. `clip-path: inset(round)`
+   clips ALL descendants — sticky included — to the same rounded rect. */
+.table-wrap--scroll {
+  overflow-y: auto;
+  clip-path: inset(0 round var(--radius-lg));
+}
 /* `stickyHeader` WITHOUT a bounded box: the wrap must NOT be a scroll
    container, otherwise the base `overflow-x: auto` would trap the sticky
    thead against the wrap (CSS forces `overflow-y` to `auto` when

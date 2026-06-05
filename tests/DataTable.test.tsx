@@ -205,9 +205,12 @@ describe('DataTable', () => {
     // header can stick to an outer scroller (a Modal body).
     const ancestor = tableCss.match(/\.table-wrap--sticky:not\(\.table-wrap--scroll\)\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(ancestor).toMatch(/overflow:\s*visible/);
-    // the bounded mode is the vertical scroll container.
+    // the bounded mode is the vertical scroll container, clipped via
+    // clip-path so the sticky header doesn't leak past the rounded corners
+    // (overflow + border-radius alone doesn't clip sticky paint in Chrome).
     const scrollRule = tableCss.match(/\.table-wrap--scroll\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(scrollRule).toMatch(/overflow-y:\s*auto/);
+    expect(scrollRule).toMatch(/clip-path:\s*inset\(0 round/);
   });
 
   it('mobileLayout=cards adds the wrapper class and data-label to cells', () => {

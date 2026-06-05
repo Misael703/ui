@@ -5,6 +5,19 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.41.1] — 2026-06-05
+
+**Patch. `DataTable` bounded sticky header (`maxHeight`) no longer leaks
+its grey fill past the rounded top corners.** Follow-up to 1.41.0:
+in the bounded-scroll mode the sticky `thead` background bled past the
+wrap's `border-radius` at the top corners. Chrome does NOT clip a
+`position: sticky` descendant's paint to an ancestor's
+`overflow` + `border-radius`, so the header's `--bg-subtle` grey poked
+out of the corner. Fixed with `clip-path: inset(0 round var(--radius-lg))`
+on `.table-wrap--scroll`, which clips ALL descendants — sticky included —
+to the rounded rect. Rounded corners preserved; sticky behavior
+unchanged.
+
 ## [1.41.0] — 2026-06-05
 
 **Minor. `DataTable` sticky header decoupled from its own scroll box —
