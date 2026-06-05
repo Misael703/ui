@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.43.0] — 2026-06-05
+
+**Minor. Refined scrollbar across the kit's scroll surfaces — fixes the
+rounded-corner asymmetry on the `DataTable`.** The native scrollbar's
+square track filled the corner of a rounded scroll container, so the
+scrollbar side read as square while the opposite side stayed rounded.
+That's not table-specific — every rounded kit scroll surface had the
+same latent defect.
+
+### Changed
+- Kit scroll surfaces (`.table-wrap__scroll`, `.modal__body`,
+  `.drawer__body`, `.combobox__list`, `.multicombo__list`,
+  `.menu__panel`, `.cmdk__list`, `.notif__list`, `.transfer__list`) now
+  use a thin scrollbar with a **floating, rounded thumb on a transparent
+  track** (`scrollbar-width: thin` + `scrollbar-color` for Firefox/modern
+  Chrome; `::-webkit-scrollbar` with an inset `background-clip:
+  content-box` thumb for Safari/older Chrome — both paths land a clean
+  result). The transparent track + inset thumb leave the rounded corners
+  clean and symmetric.
+
+### Added
+- Public `.kit-scrollbar` utility class — opt any scroll container into
+  the same refined scrollbar.
+
+### Compatibility
+Non-breaking, additive. Only the kit's OWN scroll surfaces are styled;
+the consumer's page (`html`/`body`) scrollbar is untouched.
+
 ## [1.42.0] — 2026-06-05
 
 **Minor. `DataTable` sticky header gains an on-scroll "command bar"
