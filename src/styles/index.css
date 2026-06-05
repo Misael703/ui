@@ -1035,6 +1035,11 @@ button, input, select, textarea { box-sizing: border-box; }
      still scrolls horizontally inside the box. */
 .table-wrap--scroll { overflow: hidden; }
 .table-wrap__scroll { overflow: auto; }
+/* Sentinel: a zero-height probe at the very top of the scroll content. An
+   IntersectionObserver watches it against the scroller — once it scrolls
+   out of the top, the header is "stuck" and the inner scroller gets
+   `is-stuck` (see the elevation rule below). Non-layout-affecting. */
+.table-wrap__sentinel { height: 0; }
 /* `stickyHeader` WITHOUT a bounded box: the wrap must NOT be a scroll
    container, otherwise the base `overflow-x: auto` would trap the sticky
    thead against the wrap (CSS forces `overflow-y` to `auto` when
@@ -1054,8 +1059,21 @@ button, input, select, textarea { box-sizing: border-box; }
      (Was `--bg-surface`, which silently turned every sticky header white.) */
   background: var(--bg-subtle);
   /* Sticky cells lose the bottom border the row would normally have, so
-     paint one explicitly. */
+     paint one explicitly. The shadow transitions so the on-scroll
+     elevation below blooms in rather than snapping. */
   box-shadow: inset 0 -1px 0 var(--border-default);
+  transition: box-shadow var(--duration-base, 200ms) var(--ease-standard, ease);
+}
+/* On-scroll elevation: at rest the header is flush (just the 1px
+   separator); once the content scrolls beneath it (`is-stuck`, set by the
+   sentinel observer in bounded `maxHeight` mode) a soft downward shadow
+   blooms under the header — the "command bar lifts off the content" cue.
+   The large negative spread keeps it a tight band below the header, not a
+   halo. Scoped to `--sticky` so a non-sticky header never gets it. */
+.table-wrap--sticky .table-wrap__scroll.is-stuck .data-table thead th {
+  box-shadow:
+    inset 0 -1px 0 var(--border-default),
+    0 6px 8px -6px rgba(12, 18, 32, 0.18);
 }
 
 /* Mobile card layout: below 600px, each row becomes a stacked card.
