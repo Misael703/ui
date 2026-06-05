@@ -162,14 +162,27 @@ export interface DataTableProps<T> {
   error?: React.ReactNode;
   loading?: boolean;
   /**
-   * Sticky-position the table header so it stays visible while the body
-   * scrolls. The wrapper itself becomes the vertical scroll container
-   * (the table is already overflow-x:auto, so an outer scroller can't reach
-   * the header). Defaults to `max-height: 70vh`; override by passing a
-   * `className` with a different `max-height`. Do NOT wrap `<DataTable>` in
-   * your own `overflow-y:auto` container — that breaks the sticky context.
+   * Keep the table header pinned while rows scroll past it
+   * (`position: sticky`). The header sticks to the nearest scrolling
+   * ancestor: pair it with `maxHeight` to scroll inside a bounded box, or
+   * leave `maxHeight` unset to let the header stick to an outer scroller
+   * (a `Modal` body, the page) — one scroll, no nested scrollbar.
+   *
+   * NOTE: a wide table needs its own horizontal scroll, which only exists in
+   * the bounded (`maxHeight`) mode. Without `maxHeight` the wrap is not a
+   * scroll container, so a wider-than-container table overflows its parent —
+   * use `maxHeight` for wide tables, or keep the table within its width.
    */
   stickyHeader?: boolean;
+  /**
+   * Cap the table's height and scroll its body inside a bounded box (the
+   * wrap becomes the vertical scroll container). Accepts any CSS length
+   * (`'70vh'`, `480`, `'30rem'`). Combine with `stickyHeader` for a
+   * scroll-region table whose header stays pinned to the box. Leaving this
+   * unset (with `stickyHeader`) makes the header stick to an outer scroller
+   * instead — see `stickyHeader`.
+   */
+  maxHeight?: string | number;
   /**
    * Layout for narrow viewports (`<600px`):
    * - `'table'` (default): the table scrolls horizontally inside its wrapper.
@@ -259,7 +272,7 @@ export function DataTable<T>({
   columns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, stickyHeader, mobileLayout = 'table',
+  empty, error, loading, stickyHeader, maxHeight, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
   surface = 'card',
@@ -308,10 +321,12 @@ export function DataTable<T>({
       className={cx(
         'table-wrap',
         stickyHeader && 'table-wrap--sticky',
+        maxHeight != null && 'table-wrap--scroll',
         mobileLayout === 'cards' && 'table-wrap--cards',
         surface === 'flush' && toolbar == null && 'table-wrap--flush',
         className,
       )}
+      style={maxHeight != null ? { maxHeight } : undefined}
     >
       <table
         className={cx(
