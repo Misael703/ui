@@ -1023,19 +1023,18 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 600px) {
   .table-pagination { justify-content: center; }
 }
-/* Bounded scroll region (`maxHeight` prop): the wrap is the vertical scroll
-   container and a `stickyHeader` thead pins to IT. `max-height` is applied
-   inline from the prop. Keeps the base `overflow-x: auto` so a wide table
-   still scrolls horizontally inside the box.
-   `clip-path` (not just `overflow` + `border-radius`) is what clips the
-   rounded corners here: Chrome does NOT clip a `position: sticky`
-   descendant's paint to the container's border-radius, so the sticky
-   header's grey fill leaked past the top corners. `clip-path: inset(round)`
-   clips ALL descendants — sticky included — to the same rounded rect. */
-.table-wrap--scroll {
-  overflow-y: auto;
-  clip-path: inset(0 round var(--radius-lg));
-}
+/* Bounded scroll region (`maxHeight` prop) — split into two elements:
+   - the OUTER `.table-wrap--scroll` keeps the border + radius and
+     `overflow: hidden`, so it CLIPS everything to the rounded rect: the
+     scrollbar corners AND the sticky header's paint. It is NOT the scroll
+     container, so it's free to clip the sticky descendant (the Chrome bug
+     only stops a container from clipping the sticky IT scrolls).
+   - the INNER `.table-wrap__scroll` is the vertical scroll container
+     (`overflow: auto`, `max-height` inline from the prop); a `stickyHeader`
+     thead pins to IT. `overflow: auto` covers both axes, so a wide table
+     still scrolls horizontally inside the box. */
+.table-wrap--scroll { overflow: hidden; }
+.table-wrap__scroll { overflow: auto; }
 /* `stickyHeader` WITHOUT a bounded box: the wrap must NOT be a scroll
    container, otherwise the base `overflow-x: auto` would trap the sticky
    thead against the wrap (CSS forces `overflow-y` to `auto` when

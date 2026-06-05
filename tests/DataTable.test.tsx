@@ -179,23 +179,27 @@ describe('DataTable', () => {
     expect(container.querySelector('.table-wrap--sticky')).toBeNull();
   });
 
-  it('maxHeight adds the scroll class + inline max-height; sticky alone does NOT', () => {
+  it('maxHeight wraps the table in an inner scroll container with the inline cap; sticky alone does NOT', () => {
     const { container, rerender } = render(
       <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader />
     );
-    // stickyHeader without maxHeight: sticky class, no scroll class, no inline cap.
+    // stickyHeader without maxHeight: sticky class, no scroll class, no inner scroller.
     let wrap = container.querySelector('.table-wrap') as HTMLElement;
     expect(wrap.classList.contains('table-wrap--sticky')).toBe(true);
     expect(wrap.classList.contains('table-wrap--scroll')).toBe(false);
-    expect(wrap.style.maxHeight).toBe('');
-    // with maxHeight: both classes + the inline cap.
+    expect(container.querySelector('.table-wrap__scroll')).toBeNull();
+    expect(wrap.querySelector(':scope > table')).not.toBeNull(); // table is a direct child
+    // with maxHeight: outer gets --scroll, inner scroller holds the cap + the table.
     rerender(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} stickyHeader maxHeight="70vh" />);
     wrap = container.querySelector('.table-wrap') as HTMLElement;
     expect(wrap.classList.contains('table-wrap--scroll')).toBe(true);
-    expect(wrap.style.maxHeight).toBe('70vh');
+    const inner = container.querySelector('.table-wrap__scroll') as HTMLElement;
+    expect(inner).not.toBeNull();
+    expect(inner.style.maxHeight).toBe('70vh');
+    expect(inner.querySelector(':scope > table')).not.toBeNull(); // table moved inside the scroller
   });
 
-  it('CSS: sticky decouples from a bounded box (no implicit 70vh)', () => {
+  it('CSS: sticky decouples from a bounded box (no implicit 70vh); bounded mode clips via an outer box', () => {
     // The sticky rule no longer imposes its own scroll/height — that moved to
     // the opt-in `.table-wrap--scroll` (maxHeight prop).
     const stickyRule = tableCss.match(/\.table-wrap--sticky\s*\{([^}]*)\}/)?.[1] ?? '';
@@ -205,12 +209,14 @@ describe('DataTable', () => {
     // header can stick to an outer scroller (a Modal body).
     const ancestor = tableCss.match(/\.table-wrap--sticky:not\(\.table-wrap--scroll\)\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(ancestor).toMatch(/overflow:\s*visible/);
-    // the bounded mode is the vertical scroll container, clipped via
-    // clip-path so the sticky header doesn't leak past the rounded corners
-    // (overflow + border-radius alone doesn't clip sticky paint in Chrome).
-    const scrollRule = tableCss.match(/\.table-wrap--scroll\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(scrollRule).toMatch(/overflow-y:\s*auto/);
-    expect(scrollRule).toMatch(/clip-path:\s*inset\(0 round/);
+    // Bounded mode: outer clips (overflow:hidden + the base radius), inner
+    // scrolls. The outer is NOT the sticky's scroll container, so it clips
+    // the sticky paint + scrollbar corners cleanly (what overflow+radius on
+    // a single element can't do in Chrome).
+    const outer = tableCss.match(/\.table-wrap--scroll\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(outer).toMatch(/overflow:\s*hidden/);
+    const inner = tableCss.match(/\.table-wrap__scroll\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(inner).toMatch(/overflow:\s*auto/);
   });
 
   it('mobileLayout=cards adds the wrapper class and data-label to cells', () => {
