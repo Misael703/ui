@@ -1909,30 +1909,47 @@ button, input, select, textarea { box-sizing: border-box; }
 /* The wrapper carries the focus ring (`:focus-within`) so input + toggle
    light up as one cohesive compound input. Children get their own borders
    removed of focus styling — otherwise the ring breaks across the seam. */
+/* Single seamless field — the calendar is an integrated, muted trailing
+   affordance (like the `.select` chevron), NOT a separate grey segment.
+   The wrapper IS the field (border/radius/height/focus on it, same tokens
+   as `.input`/`.select`); the input and toggle are borderless/transparent
+   inside it. `width: fit-content` keeps the focus ring hugging the field
+   rather than spanning a flex/grid parent. */
 .datepicker {
   position: relative; display: inline-flex; align-items: stretch;
-  border-radius: var(--radius-sm);
-  /* Resist horizontal stretch from a flex/grid parent — the focus ring
-     should hug input+toggle, not span the parent container's width. */
   width: fit-content;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  min-height: var(--field-min-h, 44px);
+  color: var(--fg-default);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
-.datepicker:focus-within { outline: none; box-shadow: var(--focus-ring-accent); }
+.datepicker:focus-within {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring-brand);
+}
+.datepicker.is-invalid { border-color: var(--color-danger); }
+.datepicker.is-disabled { background: var(--bg-subtle); cursor: not-allowed; }
+.datepicker.is-disabled .datepicker__input,
+.datepicker.is-disabled .datepicker__toggle { color: var(--fg-subtle); cursor: not-allowed; }
 .datepicker__input {
-  height: 40px; padding: 0 12px; min-width: 160px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  background: var(--bg-surface); color: var(--fg-default);
+  flex: 1; min-width: 132px;
+  border: none; background: transparent; color: inherit;
+  padding: 0 0 0 var(--field-pad-x, 14px);
   font-family: var(--font-body); font-size: var(--text-sm);
 }
+.datepicker__input::placeholder { color: var(--fg-subtle); }
 .datepicker__input:focus { outline: none; }
-.datepicker.is-invalid .datepicker__input { border-color: var(--color-danger); }
 .datepicker__toggle {
-  width: 40px; height: 40px; padding: 0;
+  flex-shrink: 0; width: 40px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border-default); border-left: none;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--bg-subtle); color: var(--fg-default); cursor: pointer;
+  border: none; background: transparent;
+  color: var(--fg-subtle); cursor: pointer;
+  transition: color var(--duration-fast);
 }
+.datepicker__toggle:hover:not(:disabled) { color: var(--fg-default); }
 .datepicker__toggle:focus-visible { outline: none; }
 .datepicker__popover {
   position: absolute; top: calc(100% + 4px); left: 0;

@@ -1,7 +1,36 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { DatePicker } from '../src/components/Pickers';
 import { DateRangePicker } from '../src/components/AdvancedPickers';
+
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
+
+describe('DatePicker field consistency (matches .input/.select)', () => {
+  it('the wrapper IS the field — same border + radius tokens as .input', () => {
+    const wrap = css.match(/\.datepicker\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(wrap).toMatch(/border:\s*1px solid var\(--border-strong\)/);
+    expect(wrap).toMatch(/border-radius:\s*var\(--radius-md\)/);
+    expect(wrap).toMatch(/min-height:\s*var\(--field-min-h/);
+  });
+
+  it('the calendar toggle is an integrated muted icon, not a grey segment', () => {
+    const toggle = css.match(/(?:^|\})\s*\.datepicker__toggle\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(toggle).toMatch(/background:\s*transparent/);
+    expect(toggle).toMatch(/border:\s*none/);
+    expect(toggle).toMatch(/color:\s*var\(--fg-subtle\)/);
+    // no longer paints its own --bg-subtle box
+    expect(toggle).not.toMatch(/background:\s*var\(--bg-subtle\)/);
+  });
+
+  it('the input is borderless/transparent inside the field', () => {
+    const input = css.match(/\.datepicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(input).toMatch(/border:\s*none/);
+    expect(input).toMatch(/background:\s*transparent/);
+  });
+});
 
 /**
  * `isDateDisabled` predicate (v1.40.0). A day for which it returns `true`
