@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.44.0] — 2026-06-08
+
+**Minor. `DatePicker` now looks like the other form fields — one seamless
+field with an integrated calendar icon, not a divided control with a grey
+toggle segment.** In a filter row next to `Select`/`Input`, the date
+picker stood out: a two-segment control (text input + a separate
+`--bg-subtle` grey button for the calendar), with a lighter border
+(`--border-default`) and tighter radius (`--radius-sm`) than the
+canonical field.
+
+### Changed
+- The `.datepicker` wrapper IS the field now — `border: 1px solid
+  var(--border-strong)`, `border-radius: var(--radius-md)`, `min-height:
+  var(--field-min-h)` (so it tracks `.fields--dense` like the other
+  fields), focus ring `--focus-ring-brand` + primary border. Same as
+  `.input`/`.select`.
+- The text input is borderless/transparent inside the field; the
+  calendar `.datepicker__toggle` is an **integrated, muted icon**
+  (`--fg-subtle`, transparent, no border) that darkens on hover — like
+  the `.select` chevron, not a separate grey box.
+
+### Compatibility
+Non-breaking. CSS-only; no markup or API change. `DateRangePicker` was
+already a single `--border-strong` / `--radius-md` field, so it's
+unchanged.
+
 ## [1.43.0] — 2026-06-05
 
 **Minor. Refined scrollbar across the kit's scroll surfaces — fixes the
