@@ -19,6 +19,7 @@ export default defineConfig({
     'src/hooks/*.ts',
     'src/components/!(*.stories).tsx',
     'src/presets/elalba/defaults.ts',
+    'src/cl/index.ts',
   ],
   format: ['esm', 'cjs'],
   dts: true,
