@@ -34,6 +34,8 @@ export interface UiKitMessages {
   'table.expandColumn': string;
   /** ColumnToggle trigger label / menu name ("Columnas"). */
   'table.columns': string;
+  /** EditableCell: shown (via title/aria) when an async commit rejects. */
+  'editable.commitError': string;
 
   // AppShell
   'appshell.mainNav': string;

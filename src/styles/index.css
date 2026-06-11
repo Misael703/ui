@@ -1130,6 +1130,30 @@ button, input, select, textarea { box-sizing: border-box; }
 .column-toggle__item:hover { background: var(--bg-subtle); }
 .column-toggle__item:has(input:disabled) { cursor: not-allowed; color: var(--fg-subtle); }
 
+/* EditableCell. At rest it reads as plain cell text — the pencil only
+   surfaces on hover/focus, so a table full of editable cells doesn't
+   shout 40 icons. The edit input reuses `.input` but compact (cell
+   register), so it doesn't blow up the row height. */
+.editable-cell {
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: 100%;
+  border: 0; background: transparent; padding: 2px 4px; margin: -2px -4px;
+  border-radius: var(--radius-sm);
+  font: inherit; color: inherit; text-align: inherit; cursor: pointer;
+}
+.editable-cell:hover { background: var(--bg-subtle); }
+.editable-cell:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+.editable-cell.is-disabled { cursor: default; color: var(--fg-subtle); }
+.editable-cell__value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.editable-cell__icon { flex-shrink: 0; color: var(--fg-subtle); opacity: 0; transition: opacity var(--duration-fast); }
+.editable-cell:hover .editable-cell__icon,
+.editable-cell:focus-visible .editable-cell__icon { opacity: 1; }
+.editable-cell__input {
+  min-height: 0; height: 26px;
+  padding: 0 6px; font-size: inherit;
+  width: 100%; min-width: 80px;
+}
+
 /* Totals band (`Column.footer`). Reads as the header's counterpart: same
    grey band, but the VALUES keep the body register (weight 600, not the
    header's muted all-caps) — totals are data, not labels. The separator is

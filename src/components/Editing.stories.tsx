@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ConfirmDialog, DescriptionList, DescriptionListItem, DiffViewer, TransferList, type TransferItem } from './Editing';
+import { ConfirmDialog, DescriptionList, DescriptionListItem, DiffViewer, TransferList, EditableCell, type TransferItem } from './Editing';
 import { Button } from './Button';
 import { Badge } from './Display';
 
@@ -69,6 +69,44 @@ export const TransferListDemo: StoryObj = {
         sourceTitle="Permisos disponibles"
         selectedTitle="Asignados al rol Bodeguero"
       />
+    );
+  },
+};
+
+/**
+ * **EditableCell** (v1.50.0): primitive click-to-edit con semántica
+ * Airtable/Notion — click o Enter edita, Enter/blur comitea, Esc cancela.
+ * `onCommit` async-aware: pendiente deshabilita el input; si rechaza, la
+ * celda SIGUE editando con el draft intacto (un PATCH fallido nunca pierde
+ * el tipeo). El display usa `formatDisplay` (acá `formatCurrency`); la
+ * edición siempre trabaja sobre el valor crudo. Compone dentro de DataTable
+ * vía `accessor` — el kit shipea la CELDA, no un subsistema de tabla
+ * editable: la orquestación del commit (optimistic, refetch, toast) queda
+ * en el consumer. El segundo demo simula un server que rechaza.
+ */
+export const EditableCellDemo: StoryObj = {
+  render: () => {
+    const [price, setPrice] = React.useState('45000');
+    const [stock, setStock] = React.useState('24');
+    return (
+      <div style={{ display: 'grid', gap: 12, maxWidth: 280 }}>
+        <EditableCell
+          value={price}
+          onCommit={(v) => setPrice(v)}
+          type="number"
+          formatDisplay={(v) => `$${Number(v).toLocaleString('es-CL')}`}
+          ariaLabel="Editar precio"
+        />
+        <EditableCell
+          value={stock}
+          onCommit={(v) => new Promise<void>((resolve, reject) => {
+            setTimeout(() => { Number(v) > 100 ? reject(new Error('stock máximo 100')) : (setStock(v), resolve()); }, 600);
+          })}
+          type="number"
+          validate={(v) => (Number(v) < 0 ? 'No puede ser negativo' : null)}
+          ariaLabel="Editar stock (server simulado; >100 falla)"
+        />
+      </div>
     );
   },
 };
