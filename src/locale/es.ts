@@ -25,6 +25,7 @@ export const esMessages: UiKitMessages = {
   'table.rowAction': 'Ver {label}',
   'table.expandRow': 'Expandir detalle de {label}',
   'table.expandColumn': 'Detalle',
+  'table.columns': 'Columnas',
 
   // AppShell
   'appshell.mainNav': 'Navegación principal',

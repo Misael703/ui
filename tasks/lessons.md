@@ -56,3 +56,12 @@ perpetuate? (3) which combinations of props are NOT covered by my tests
 (theme × headerTheme × rail × persistKey × breakpoint)? If you can't answer
 all three with evidence, the PR is not ready — write the answers down before
 asking for merge approval.
+
+[2026-06-11] Context: cadena background de merge quedó colgada en `until gh pr
+checks N | grep "Passed:"` — dentro de scripts multilínea el hook de rtk NO
+reescribe `gh pr checks`, así que el output es la tabla cruda de gh (sin el
+summary "Passed: N" que rtk sintetiza); el grep nunca matchea. → Rule: en
+loops de espera de CI dentro de scripts background, no parsear texto de
+formato variable; usar salida estructurada estable: `gh pr checks N --json
+bucket --jq '[.[] | select(.bucket=="pending")] | length'` y comparar contra
+"0". Mismo principio para cualquier comando que rtk reescriba en foreground.

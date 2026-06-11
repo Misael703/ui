@@ -87,6 +87,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'DataTable', node: <K.DataTable rows={rows} rowKey={(r) => r.id} columns={cols} ariaLabel="t" /> },
   { name: 'TablePagination', node: <Ctrl init={1} render={(v, s) => <K.TablePagination page={v} pageSize={10} total={50} onPageChange={s} />} /> },
   { name: 'TableToolbar', node: <K.TableToolbar><span>t</span></K.TableToolbar> },
+  { name: 'ColumnToggle', node: <Ctrl init={new Set<string>()} render={(v, s) => <K.ColumnToggle columns={cols} hiddenKeys={v} onChange={s} />} /> },
   { name: 'Pagination', node: <Ctrl init={1} render={(v, s) => <K.Pagination page={v} pageSize={10} total={50} onPageChange={s} />} /> },
   { name: 'Accordion', node: <K.Accordion defaultOpen={['a']}><K.AccordionItem id="a" title="A">x</K.AccordionItem></K.Accordion> },
   { name: 'Collapsible', node: <K.Collapsible><K.CollapsibleTrigger>Ver detalles</K.CollapsibleTrigger><K.CollapsibleContent>c</K.CollapsibleContent></K.Collapsible> },

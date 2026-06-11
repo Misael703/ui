@@ -1118,6 +1118,18 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 12px 16px;
 }
 
+/* ColumnToggle: checkbox list inside the toolbar popover. Each item is the
+   kit Checkbox's own <label> (children = column header) with row-sized hit
+   area and field-register typography layered on. */
+.column-toggle { display: grid; gap: 2px; min-width: 180px; padding: 4px; }
+.column-toggle__item {
+  padding: 6px 8px; border-radius: var(--radius-sm);
+  font-size: var(--text-sm); color: var(--fg-default);
+  user-select: none;
+}
+.column-toggle__item:hover { background: var(--bg-subtle); }
+.column-toggle__item:has(input:disabled) { cursor: not-allowed; color: var(--fg-subtle); }
+
 /* Totals band (`Column.footer`). Reads as the header's counterpart: same
    grey band, but the VALUES keep the body register (weight 600, not the
    header's muted all-caps) — totals are data, not labels. The separator is
