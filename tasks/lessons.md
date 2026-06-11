@@ -65,3 +65,11 @@ loops de espera de CI dentro de scripts background, no parsear texto de
 formato variable; usar salida estructurada estable: `gh pr checks N --json
 bucket --jq '[.[] | select(.bucket=="pending")] | length'` y comparar contra
 "0". Mismo principio para cualquier comando que rtk reescriba en foreground.
+
+[2026-06-11] Context: PR #76 mergeó con CI verde pero el workflow de publish
+falló en su step de Lint — el CI de PRs no corre eslint, solo publish.yml lo
+hace; mi pre-check local linteaba solo los archivos tocados y con `| tail -1`
+que tragó el error real (ternario-como-statement en una story). → Rule: antes
+de pushear CUALQUIER PR del kit, correr `npm run lint` completo y verificar
+exit code 0 — es el gate exacto del publish. Nunca filtrar la salida de un
+gate con tail/grep sin verificar también el exit code.
