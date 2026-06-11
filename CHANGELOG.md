@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.51.0] — 2026-06-11
+
+**Minor. Row virtualization — `useVirtualRows` + `DataTable.virtualizeRows`.**
+Last of the audit's P2 batch: a 5,000-row client-side table costs ~30 DOM
+rows. Closes the kit's oldest documented limit ("tested up to ~200 rows").
+
+### Added
+
+- **`useVirtualRows(scrollRef, { count, rowHeight, overscan?, enabled? })`**
+  (public hook) — fixed-height windowing, zero dependencies: passive scroll
+  listener + ResizeObserver, re-renders only when the ROW window changes
+  (quantized, not per scroll pixel). `enabled: false` returns the full
+  range with zero padding, so callers keep one uniform render path.
+  Deliberately fixed-height only — variable heights need a measurement
+  cache (tanstack-virtual territory); the kit's dense rows are uniform by
+  design.
+- **`DataTable.virtualizeRows?: { rowHeight, overscan? }`** — windows the
+  body between two pixel-exact spacer rows. Requires `maxHeight` (the
+  bounded scroller is the measuring viewport). **Auto-disables** with
+  `renderExpanded` or `mobileLayout="cards"` (both break height
+  uniformity) — a correct full render beats a broken windowed one.
+  Selection / select-all / sorting keep operating on the FULL `rows`
+  array; sticky header, on-scroll elevation and the totals footer all
+  compose with the windowing. `aria-rowcount` declares the real dataset
+  size to assistive tech.
+
 ## [1.50.0] — 2026-06-11
 
 **Minor. `EditableCell` — click-to-edit primitive for inline editing.**
