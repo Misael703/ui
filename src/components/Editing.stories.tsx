@@ -100,7 +100,11 @@ export const EditableCellDemo: StoryObj = {
         <EditableCell
           value={stock}
           onCommit={(v) => new Promise<void>((resolve, reject) => {
-            setTimeout(() => { Number(v) > 100 ? reject(new Error('stock máximo 100')) : (setStock(v), resolve()); }, 600);
+            setTimeout(() => {
+              if (Number(v) > 100) { reject(new Error('stock máximo 100')); return; }
+              setStock(v);
+              resolve();
+            }, 600);
           })}
           type="number"
           validate={(v) => (Number(v) < 0 ? 'No puede ser negativo' : null)}
