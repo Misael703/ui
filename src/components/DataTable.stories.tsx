@@ -42,6 +42,39 @@ export const DataTableBasica: StoryObj = {
 };
 
 /**
+ * **Expansión de filas** (v1.48.0): `renderExpanded` agrega la columna de
+ * chevron; el panel abierto es un `<tr>` extra que abarca todas las columnas,
+ * recostado sobre la banda gris del header. Controlado igual que la
+ * selección (`expandedKeys`/`onExpandedChange`). El toggle es un `<button>`
+ * real con `aria-expanded` + `aria-controls`.
+ */
+export const ConExpansion: StoryObj = {
+  render: () => {
+    const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['1']));
+    return (
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        expandedKeys={expanded}
+        onExpandedChange={setExpanded}
+        renderExpanded={(r) => (
+          <div style={{ display: 'grid', gap: 4, fontSize: 'var(--text-sm)' }}>
+            <strong>{r.name}</strong>
+            <span>SKU {r.sku} · {r.stock} unidades en bodega central</span>
+            <span>Último movimiento: hace 3 días</span>
+          </div>
+        )}
+        columns={[
+          { key: 'name', header: 'Producto' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'stock', header: 'Stock', numeric: true },
+        ]}
+      />
+    );
+  },
+};
+
+/**
  * **Fila de totales** (v1.47.0): `Column.footer` renderiza un `<tfoot>` con
  * la banda gris del header pero registro de dato (peso 600) — los totales
  * son datos, no labels. Con `maxHeight` el footer queda fijo al fondo del
