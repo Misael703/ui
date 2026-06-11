@@ -5,6 +5,33 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.46.0] — 2026-06-10
+
+**Minor. `Combobox` async mode — server-driven options for large catalogs.**
+Second deliverable of the ERP-readiness audit: a Combobox over a
+thousands-of-items source (e.g. a Bsale product catalog) no longer needs
+every option in memory.
+
+### Added
+
+- **`Combobox.onQueryChange?: (query: string) => void`** — called on every
+  change of the typed query, including the reset to `''` after a selection
+  or clear (so the consumer can restore the base list for the next open).
+  The consumer fetches and re-passes `options`; debouncing stays on the
+  consumer side — the kit imposes no network policy. When provided,
+  client-side filtering is **skipped**: the source already filtered, and
+  re-filtering with the default substring match would hide fuzzy or
+  accent-insensitive server results. Pass an explicit `filter` to layer
+  client filtering back on top.
+- **`Combobox.loading?: boolean`** — while `true` and there is nothing to
+  show, the listbox renders a "Cargando" row (spinner + `common.loading`)
+  instead of `emptyMessage`, so a pending fetch never flashes
+  "Sin resultados". Options already on screen stay visible
+  (stale-while-revalidate). The listbox exposes `aria-busy` while loading.
+
+Both props are additive — existing Comboboxes (sync, default substring
+filter) behave byte-identically.
+
 ## [1.45.0] — 2026-06-10
 
 **Minor. Number formatters in core + a new country-specific entry point
