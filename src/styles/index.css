@@ -1904,6 +1904,7 @@ button, input, select, textarea { box-sizing: border-box; }
    `active` highlight is background-only and never shows it. */
 .combobox__option-check { flex-shrink: 0; color: var(--color-primary); }
 .combobox__empty { padding: 16px; text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
+.combobox__loading { display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 /* ---------- DatePicker ---------- */
 /* The wrapper carries the focus ring (`:focus-within`) so input + toggle

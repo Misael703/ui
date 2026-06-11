@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check } from './Icons';
+import { Spinner } from './Display';
 import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
@@ -42,6 +43,24 @@ export interface ComboboxProps<T = string> {
    * `label` as text — only the listbox rows are customized.
    */
   renderOption?: (option: ComboboxOption<T>) => React.ReactNode;
+  /**
+   * Async pattern: called on every change of the typed query — including the
+   * reset to `''` after a selection or clear, so the consumer can restore the
+   * base list for the next open. The consumer fetches and re-passes
+   * `options`; debouncing stays on the consumer side (the kit imposes no
+   * network policy). When provided, client-side filtering is skipped — the
+   * source already filtered, and re-filtering with the default substring
+   * match would hide fuzzy/accent-insensitive server results. Pass an
+   * explicit `filter` to layer client filtering back on top.
+   */
+  onQueryChange?: (query: string) => void;
+  /**
+   * Marks the options as in-flight. While `true` and there is nothing to
+   * show, the listbox renders a loading row instead of `emptyMessage`, so a
+   * pending fetch never flashes "no results". Options already on screen stay
+   * visible (stale-while-revalidate).
+   */
+  loading?: boolean;
 }
 
 const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
@@ -49,9 +68,10 @@ const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
 
 export function Combobox<T = string>({
   value, onChange, options, placeholder,
-  emptyMessage, filter = defaultFilter,
+  emptyMessage, filter,
   className, invalid, disabled, id,
   searchable = true, renderOption,
+  onQueryChange, loading,
 }: ComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -70,10 +90,20 @@ export function Combobox<T = string>({
     () => options.find((o) => o.value === value) ?? null,
     [options, value]
   );
+  // Async mode (onQueryChange present) trusts the consumer's options as
+  // already filtered; an explicit `filter` always wins over that default.
+  const effectiveFilter = filter ?? (onQueryChange ? undefined : defaultFilter);
   const filtered = React.useMemo(
-    () => (query ? options.filter((o) => filter(o, query)) : options),
-    [options, query, filter]
+    () => (query && effectiveFilter ? options.filter((o) => effectiveFilter(o, query)) : options),
+    [options, query, effectiveFilter]
   );
+
+  // Single funnel for query updates so the async consumer hears every change,
+  // including the kit's own resets to '' on select/clear.
+  const updateQuery = (q: string) => {
+    setQuery(q);
+    onQueryChange?.(q);
+  };
 
   const pos = usePopoverPosition(wrapRef, listRef, {
     open,
@@ -142,7 +172,7 @@ export function Combobox<T = string>({
       const opt = filtered[active];
       if (opt && !opt.disabled) {
         onChange(opt.value);
-        setQuery('');
+        updateQuery('');
         setOpen(false);
       }
     } else if (e.key === 'Escape') {
@@ -165,7 +195,7 @@ export function Combobox<T = string>({
           disabled={disabled}
           value={open ? query : selected?.label ?? ''}
           onFocus={() => setOpen(true)}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onChange={(e) => { updateQuery(e.target.value); setOpen(true); }}
           onKeyDown={onKey}
         />
       ) : (
@@ -195,7 +225,7 @@ export function Combobox<T = string>({
         <button
           type="button"
           className="combobox__clear"
-          onClick={() => { onChange(null); setQuery(''); inputRef.current?.focus(); }}
+          onClick={() => { onChange(null); updateQuery(''); inputRef.current?.focus(); }}
           aria-label={locale['picker.clearSelection']}
         ><X size={16} /></button>
       )}
@@ -205,6 +235,7 @@ export function Combobox<T = string>({
           ref={listRef}
           id={listboxId}
           role="listbox"
+          aria-busy={loading || undefined}
           className={cx('combobox__list', 'is-floating')}
           style={{
             position: 'fixed',
@@ -215,7 +246,14 @@ export function Combobox<T = string>({
           }}
         >
           {filtered.length === 0 ? (
-            <li className="combobox__empty">{empty}</li>
+            loading ? (
+              <li className="combobox__empty combobox__loading">
+                <Spinner size="sm" aria-hidden="true" />
+                {locale['common.loading']}…
+              </li>
+            ) : (
+              <li className="combobox__empty">{empty}</li>
+            )
           ) : (
             filtered.map((o, i) => (
               <li
@@ -229,7 +267,7 @@ export function Combobox<T = string>({
                   e.preventDefault();
                   if (o.disabled) return;
                   onChange(o.value);
-                  setQuery('');
+                  updateQuery('');
                   setOpen(false);
                 }}
               >

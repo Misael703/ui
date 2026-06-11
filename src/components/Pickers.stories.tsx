@@ -35,6 +35,42 @@ export const ComboboxConSeleccion: StoryObj = {
 };
 
 /**
+ * **Combobox async** (v1.46.0): `onQueryChange` notifica cada query tipeada
+ * (incluido el reset a `''` tras seleccionar/limpiar); el consumer fetchea y
+ * re-pasa `options` — el debounce vive en el consumer. En modo async el kit
+ * NO re-filtra en el cliente (el server ya filtró). `loading` muestra una
+ * fila "Cargando" en vez de "Sin resultados" mientras el fetch está en vuelo;
+ * las options ya visibles se mantienen (stale-while-revalidate). Acá el
+ * "server" responde con 600ms de latencia simulada.
+ */
+export const ComboboxAsync: StoryObj = {
+  render: () => {
+    const [v, setV] = React.useState<string | null>(null);
+    const [results, setResults] = React.useState(opts);
+    const [loading, setLoading] = React.useState(false);
+    const timer = React.useRef<ReturnType<typeof setTimeout>>();
+    const search = (q: string) => {
+      setLoading(true);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setResults(opts.filter((o) => o.label.toLowerCase().includes(q.toLowerCase())));
+        setLoading(false);
+      }, 600);
+    };
+    return (
+      <Combobox
+        value={v}
+        onChange={setV}
+        options={results}
+        loading={loading}
+        onQueryChange={search}
+        placeholder="Buscar producto (async)…"
+      />
+    );
+  },
+};
+
+/**
  * **Combobox sin input** (v1.15.0): `searchable={false}` cambia el trigger
  * a un botón que muestra el label del valor seleccionado (o el placeholder),
  * sin filtrado — la lista siempre muestra todas las opciones. Mismo shell
