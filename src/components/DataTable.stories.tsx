@@ -42,6 +42,45 @@ export const DataTableBasica: StoryObj = {
 };
 
 /**
+ * **Virtualización** (v1.51.0): `virtualizeRows` ventanea 5.000 filas a
+ * ~30 nodos DOM con spacers pixel-exactos. Requiere `maxHeight` y alturas
+ * uniformes — se auto-desactiva con `renderExpanded` o `cards`. La
+ * selección opera sobre el dataset completo (solo el DOM se ventanea).
+ * El sticky header + footer de totales conviven con el windowing.
+ */
+export const Virtualizada: StoryObj = {
+  render: () => {
+    const big = React.useMemo(() => Array.from({ length: 5000 }, (_, i) => ({
+      id: String(i),
+      name: `Producto ${i}`,
+      sku: `SKU-${10000 + i}`,
+      price: 990 + (i % 90) * 1000,
+    })), []);
+    const [sel, setSel] = React.useState<Set<string>>(new Set());
+    const total = React.useMemo(() => big.reduce((s, r) => s + r.price, 0), [big]);
+    return (
+      <DataTable
+        rows={big}
+        rowKey={(r) => r.id}
+        stickyHeader
+        maxHeight={400}
+        virtualizeRows={{ rowHeight: 31 }}
+        selectable
+        selectedKeys={sel}
+        onSelectionChange={setSel}
+        columns={[
+          { key: 'name', header: 'Producto', footer: 'Total (5.000)' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'price', header: 'Precio', numeric: true,
+            accessor: (r) => `$${r.price.toLocaleString('es-CL')}`,
+            footer: `$${total.toLocaleString('es-CL')}` },
+        ]}
+      />
+    );
+  },
+};
+
+/**
  * **Visibilidad de columnas** (v1.49.0): `hiddenColumnKeys` filtra columnas
  * sin mutar el array canónico — header, celdas, footer y colSpans siguen
  * solos. `<ColumnToggle>` en el toolbar es el menú listo: popover con

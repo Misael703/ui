@@ -47,7 +47,7 @@ export * from './components/Collapsible';
 
 // Shared floating primitive (Portal + positioning hook + dismiss helper).
 export * from './components/Portal';
-export { usePopoverPosition, useDismiss } from './hooks';
+export { usePopoverPosition, useDismiss, useVirtualRows } from './hooks';
 export type {
   PopoverSide,
   PopoverAlign,
@@ -55,4 +55,6 @@ export type {
   UsePopoverPositionOptions,
   PopoverPosition,
   UseDismissOptions,
+  UseVirtualRowsOptions,
+  VirtualRowsRange,
 } from './hooks';

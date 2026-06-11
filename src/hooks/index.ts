@@ -9,6 +9,8 @@ export type {
 } from './usePopoverPosition';
 export { useDismiss } from './useDismiss';
 export type { UseDismissOptions } from './useDismiss';
+export { useVirtualRows } from './useVirtualRows';
+export type { UseVirtualRowsOptions, VirtualRowsRange } from './useVirtualRows';
 // Internal overlay/drawer primitives — used by Modal/Drawer and the AppShell
 // top mobile drawer. Not re-exported from src/index.ts (kept internal until
 // they have stable docs + names).

@@ -5,6 +5,7 @@ import { ChevronUp, ChevronDown, ChevronRight, MoreVertical } from './Icons';
 import { Checkbox } from './Form';
 import { Popover } from './Popover';
 import { Button } from './Button';
+import { useVirtualRows } from '../hooks/useVirtualRows';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -295,6 +296,19 @@ export interface DataTableProps<T> {
    */
   hiddenColumnKeys?: Set<string>;
   /**
+   * Fixed-height row windowing for large client-side datasets (1k-50k
+   * rows): only the rows around the viewport hit the DOM; the rest become
+   * two pixel-exact spacers. Requires `maxHeight` (the bounded scroller is
+   * the measuring viewport) and UNIFORM row heights — it silently disables
+   * itself when combined with `renderExpanded` (detail panels change row
+   * heights) or `mobileLayout="cards"` (cards re-flow every row), because
+   * a correct full render beats a broken windowed one. Selection,
+   * select-all and sorting keep operating on the FULL `rows` array — only
+   * the DOM is windowed. Prefer server pagination when you have it; this
+   * is for the genuinely client-side big list.
+   */
+  virtualizeRows?: { rowHeight: number; overscan?: number };
+  /**
    * Toolbar / filter zone that shares the table's rounded surface. When
    * set, the DataTable renders it INSIDE its own border+radius+overflow
    * surface (`.table-surface`): the toolbar is clipped to the radius,
@@ -324,9 +338,8 @@ export interface DataTableProps<T> {
  * State priority (only one body state renders at a time):
  *   error > loading > empty > rows
  *
- * Known limits (deferred to a later release):
- * - No virtualization; tested up to ~200 rows. For large datasets, plug
- *   in react-window/tanstack-virtual around the body rows.
+ * Large datasets: prefer server pagination; for genuinely client-side big
+ * lists use `virtualizeRows` (fixed-height windowing, v1.51.0).
  */
 export function DataTable<T>({
   columns: allColumns, rows, rowKey,
@@ -336,7 +349,7 @@ export function DataTable<T>({
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
   renderExpanded, expandedKeys, onExpandedChange,
-  hiddenColumnKeys,
+  hiddenColumnKeys, virtualizeRows,
   surface = 'card',
 }: DataTableProps<T>) {
   const t = useLocale();
@@ -414,6 +427,18 @@ export function DataTable<T>({
   const tableId = React.useId();
   const totalCols = columns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0);
 
+  // Row windowing — gated to the combinations where fixed-height math is
+  // actually true (see the prop's JSDoc). When the gate is off the hook is
+  // inert and returns the full range, so there is ONE render path below.
+  const virtual =
+    virtualizeRows != null && maxHeight != null && !expandable && mobileLayout !== 'cards';
+  const vrange = useVirtualRows(scrollRef, {
+    count: rows.length,
+    rowHeight: virtualizeRows?.rowHeight ?? 1,
+    overscan: virtualizeRows?.overscan,
+    enabled: virtual,
+  });
+
   const onSort = (col: Column<T>) => {
     if (!col.sortable || !onSortChange) return;
     if (!sort || sort.key !== col.key) onSortChange({ key: col.key, dir: 'asc' });
@@ -428,6 +453,9 @@ export function DataTable<T>({
           density === 'comfortable' && 'table--comfortable',
         )}
         aria-label={ariaLabel}
+        // With windowing the DOM row count lies to assistive tech; declare
+        // the real dataset size (+1 = the header row, per the ARIA spec).
+        aria-rowcount={virtual ? rows.length + 1 : undefined}
       >
         <thead>
           <tr>
@@ -509,7 +537,13 @@ export function DataTable<T>({
               </td>
             </tr>
           ) : (
-            rows.map((r) => {
+            <>
+            {virtual && vrange.padTop > 0 && (
+              <tr className="data-table__spacer" aria-hidden="true">
+                <td colSpan={totalCols} style={{ height: vrange.padTop }} />
+              </tr>
+            )}
+            {(virtual ? rows.slice(vrange.start, vrange.end) : rows).map((r) => {
               const k = rowKey(r);
               const label = rowLabel ? rowLabel(r) : k;
               const href = rowHref?.(r);
@@ -545,7 +579,13 @@ export function DataTable<T>({
                   )}
                 </React.Fragment>
               );
-            })
+            })}
+            {virtual && vrange.padBottom > 0 && (
+              <tr className="data-table__spacer" aria-hidden="true">
+                <td colSpan={totalCols} style={{ height: vrange.padBottom }} />
+              </tr>
+            )}
+            </>
           )}
         </tbody>
         {columns.some((c) => c.footer != null) && !error && !loading && rows.length > 0 && (
