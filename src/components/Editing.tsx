@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Modal } from './Overlay';
-import { ChevronLeft, ChevronRight } from './Icons';
+import { ChevronLeft, ChevronRight, Edit as EditIcon } from './Icons';
 import { Checkbox } from './Form';
 import { useLocale } from '../locale/LocaleProvider';
 
@@ -240,5 +240,142 @@ export function TransferList({
       </div>
       {renderColumn(selTitle, right, rightChecked, setRightChecked)}
     </div>
+  );
+}
+
+// ---------- EditableCell ---------------------------------------------------
+export interface EditableCellProps {
+  /** Committed value (controlled — the consumer owns it). */
+  value: string;
+  /**
+   * Called on commit (Enter or blur) with the edited raw value. May return
+   * a promise: while it's pending the input is disabled; on rejection the
+   * cell STAYS in edit mode with the invalid style, so the user's typing
+   * is never lost to a failed PATCH. Not called when the value is
+   * unchanged.
+   */
+  onCommit: (next: string) => void | Promise<void>;
+  /** Input mode. `'number'` renders a numeric input. */
+  type?: 'text' | 'number';
+  /**
+   * Display-mode formatter (e.g. `formatCurrency`) — editing always works
+   * on the RAW `value`; only the resting presentation is formatted.
+   */
+  formatDisplay?: (value: string) => React.ReactNode;
+  /**
+   * Sync validation before commit. Return an error message to block the
+   * commit (cell stays editing, invalid style, message via title/aria);
+   * return `null` to allow it.
+   */
+  validate?: (next: string) => string | null;
+  disabled?: boolean;
+  placeholder?: string;
+  /** Accessible name of the edit affordance (e.g. "Editar precio de Taladro"). */
+  ariaLabel?: string;
+  className?: string;
+}
+
+/**
+ * Click-to-edit primitive for inline editing (Airtable/Notion semantics):
+ * click or Enter to edit, Enter/blur commits, Escape cancels. Composable
+ * anywhere — typically inside a `DataTable` cell via `accessor`. The kit
+ * deliberately ships the CELL, not an editable-table subsystem: commit
+ * orchestration (optimistic update, refetch, toast) stays in the consumer,
+ * where the data layer lives.
+ */
+export function EditableCell({
+  value, onCommit, type = 'text', formatDisplay, validate,
+  disabled, placeholder, ariaLabel, className,
+}: EditableCellProps) {
+  const t = useLocale();
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(value);
+  const [pending, setPending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  // Distinguishes Escape-initiated blur from a committing blur.
+  const cancelledRef = React.useRef(false);
+
+  const startEdit = () => {
+    if (disabled) return;
+    setDraft(value);
+    setError(null);
+    setEditing(true);
+  };
+
+  React.useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  const commit = async () => {
+    if (pending) return;
+    if (draft === value) { setEditing(false); setError(null); return; }
+    const invalid = validate?.(draft) ?? null;
+    if (invalid) {
+      setError(invalid);
+      inputRef.current?.focus();
+      return;
+    }
+    try {
+      setPending(true);
+      await onCommit(draft);
+      setEditing(false);
+      setError(null);
+    } catch {
+      // Keep the draft and the edit mode — the user decides to retry or Esc.
+      setError(t['editable.commitError']);
+      inputRef.current?.focus();
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const cancel = () => {
+    cancelledRef.current = true;
+    setEditing(false);
+    setError(null);
+  };
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        className={cx('editable-cell', disabled && 'is-disabled', className)}
+        onClick={startEdit}
+        disabled={disabled}
+        aria-label={ariaLabel}
+      >
+        <span className="editable-cell__value">
+          {formatDisplay ? formatDisplay(value) : (value || placeholder)}
+        </span>
+        <EditIcon size={12} className="editable-cell__icon" aria-hidden="true" />
+      </button>
+    );
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      type={type}
+      className={cx('input', 'editable-cell__input', error != null && 'is-invalid', className)}
+      value={draft}
+      disabled={pending}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      aria-invalid={error != null || undefined}
+      title={error ?? undefined}
+      onChange={(e) => { setDraft(e.target.value); setError(null); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') { e.preventDefault(); void commit(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+      }}
+      onBlur={() => {
+        if (cancelledRef.current) { cancelledRef.current = false; return; }
+        void commit();
+      }}
+    />
   );
 }

@@ -26,6 +26,7 @@ export const esMessages: UiKitMessages = {
   'table.expandRow': 'Expandir detalle de {label}',
   'table.expandColumn': 'Detalle',
   'table.columns': 'Columnas',
+  'editable.commitError': 'No se pudo guardar. Intenta de nuevo o presiona Esc para descartar.',
 
   // AppShell
   'appshell.mainNav': 'Navegación principal',

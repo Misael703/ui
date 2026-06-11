@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.50.0] — 2026-06-11
+
+**Minor. `EditableCell` — click-to-edit primitive for inline editing.**
+Fourth of the audit's P2 batch. The kit deliberately ships the CELL, not
+an editable-table subsystem: commit orchestration (optimistic update,
+refetch, toast) stays in the consumer, where the data layer lives.
+
+### Added
+
+- **`<EditableCell>`** (exported from the Editing family) —
+  Airtable/Notion semantics: click or Enter edits, Enter/blur commits,
+  Escape cancels (the Escape-then-blur sequence does NOT double-commit).
+  Unchanged value exits without calling `onCommit`.
+  - **Async-aware `onCommit`**: may return a promise — pending disables
+    the input; on rejection the cell STAYS in edit mode with the draft
+    intact and the invalid style (a failed PATCH never eats the typing).
+    New locale key `editable.commitError`.
+  - **`formatDisplay`** formats the resting presentation only (pair with
+    `formatCurrency`); editing always works on the raw value.
+  - **`validate`** blocks the commit synchronously with a message before
+    any network call. **`type="number"`** for numeric cells.
+  - At rest it reads as plain cell text — the pencil affordance only
+    surfaces on hover/focus, so a table of editable cells doesn't shout
+    40 icons. Composes inside `DataTable` via `accessor`.
+
 ## [1.49.0] — 2026-06-11
 
 **Minor. Column visibility — `DataTable.hiddenColumnKeys` + the
