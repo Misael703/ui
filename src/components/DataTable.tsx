@@ -132,6 +132,18 @@ export interface Column<T> {
    * (monospace + tabular alignment) and right-align by default.
    */
   numeric?: boolean;
+  /**
+   * Aggregate cell for this column (a total, a count, a "Total" label).
+   * When ANY column sets it, the table renders a `<tfoot>` row styled like
+   * the header band; in bounded (`maxHeight`) mode it stays pinned to the
+   * bottom of the scroll box, so totals remain visible while rows scroll.
+   * Aggregating is the consumer's job (the kit never sums for you — rows
+   * may be a server page, and the page total ≠ the dataset total).
+   * Only rendered with actual rows: the error / loading / empty states
+   * have nothing meaningful to total. Hidden in `mobileLayout="cards"`
+   * (cells lose their column geometry there, like the header does).
+   */
+  footer?: React.ReactNode;
 }
 
 export interface DataTableProps<T> {
@@ -447,6 +459,28 @@ export function DataTable<T>({
             })
           )}
         </tbody>
+        {columns.some((c) => c.footer != null) && !error && !loading && rows.length > 0 && (
+          <tfoot>
+            <tr>
+              {selectable && <td />}
+              {columns.map((c) => {
+                const align = c.align ?? (c.numeric ? 'right' : 'left');
+                return (
+                  <td
+                    key={c.key}
+                    className={cx(
+                      c.numeric && 'table__num',
+                      align !== 'left' && `table__align-${align}`,
+                    )}
+                    style={{ textAlign: align }}
+                  >
+                    {c.footer}
+                  </td>
+                );
+              })}
+            </tr>
+          </tfoot>
+        )}
       </table>
   );
   // Bounded mode (`maxHeight`): the table lives in an inner scroll
