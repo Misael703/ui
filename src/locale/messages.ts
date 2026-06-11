@@ -28,6 +28,10 @@ export interface UiKitMessages {
   'table.selectRow': string;
   /** Template: "Ver {label}" — accessible name of an interactive row. */
   'table.rowAction': string;
+  /** Template: "Expandir detalle de {label}" — accessible name of the row-expansion toggle. */
+  'table.expandRow': string;
+  /** Accessible name of the (visually empty) expansion-toggle column header. */
+  'table.expandColumn': string;
 
   // AppShell
   'appshell.mainNav': string;

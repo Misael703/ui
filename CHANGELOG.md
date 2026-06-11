@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.48.0] — 2026-06-11
+
+**Minor. `DataTable` row expansion — `renderExpanded` adds a per-row detail
+panel.** Second of the audit's P2 batch: line items, audit trails, or any
+drill-down under a row without leaving the table.
+
+### Added
+
+- **`DataTable.renderExpanded?: (row: T) => React.ReactNode`** — setting it
+  adds a chevron toggle column; the open panel is an extra `<tr>` spanning
+  every column, recessed on the header's grey band with an inset top line.
+  Controlled like selection: **`expandedKeys?: Set<string>`** +
+  **`onExpandedChange?: (keys) => void`** (multiple rows can be open at
+  once; the consumer decides accordion-vs-multi semantics).
+- A11y: the toggle is a real `<button>` with `aria-expanded`,
+  `aria-controls` (only while the panel exists in the DOM), and a
+  per-row accessible name (`table.expandRow`, template
+  `"Expandir detalle de {label}"`). The visually-empty toggle column
+  header carries `table.expandColumn` (`"Detalle"`). On interactive rows
+  (`rowHref`/`onRowClick`) the toggle stays clickable above the stretched
+  row link. New locale keys: `table.expandRow`, `table.expandColumn`.
+- Plays with the rest of the table: footer/skeleton/error/empty colSpans
+  account for the extra column; the chevron rotates →/↓; in
+  `mobileLayout="cards"` the detail renders as its own card.
+
 ## [1.47.0] — 2026-06-10
 
 **Minor. `DataTable` totals row — `Column.footer` renders a `<tfoot>`

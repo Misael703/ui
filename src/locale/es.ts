@@ -23,6 +23,8 @@ export const esMessages: UiKitMessages = {
   'table.selectAll': 'Seleccionar todo',
   'table.selectRow': 'Seleccionar {label}',
   'table.rowAction': 'Ver {label}',
+  'table.expandRow': 'Expandir detalle de {label}',
+  'table.expandColumn': 'Detalle',
 
   // AppShell
   'appshell.mainNav': 'Navegación principal',

@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronUp, ChevronDown, MoreVertical } from './Icons';
+import { ChevronUp, ChevronDown, ChevronRight, MoreVertical } from './Icons';
 import { Checkbox } from './Form';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
@@ -30,11 +30,18 @@ interface DataTableRowProps<T> {
     cells: React.ReactNode;
     rowKey: string;
   }) => React.ReactNode;
+  /** Row expansion (resolved from `DataTableProps.renderExpanded`). */
+  expandable?: boolean;
+  expanded?: boolean;
+  onToggleExpand?: (k: string) => void;
+  expandLabel?: string;
+  detailId?: string;
 }
 
 function DataTableRowImpl<T>({
   row, rowK, selected, selectable, selectAriaLabel, columns, onToggle,
   href, onActivate, actionLabel, renderRow,
+  expandable, expanded, onToggleExpand, expandLabel, detailId,
 }: DataTableRowProps<T>) {
   const interactive = !renderRow && (!!href || !!onActivate);
 
@@ -47,6 +54,22 @@ function DataTableRowImpl<T>({
             onChange={() => onToggle(rowK)}
             aria-label={selectAriaLabel}
           />
+        </td>
+      )}
+      {expandable && (
+        <td className={cx(interactive && 'data-table__cell--above')}>
+          <button
+            type="button"
+            className="data-table__expand-btn"
+            aria-expanded={expanded}
+            // Only reference the panel while it exists in the DOM — a
+            // collapsed row's aria-controls would point at a missing id.
+            aria-controls={expanded ? detailId : undefined}
+            aria-label={expandLabel}
+            onClick={() => onToggleExpand?.(rowK)}
+          >
+            <ChevronRight size={16} />
+          </button>
         </td>
       )}
       {columns.map((c, ci) => {
@@ -247,6 +270,20 @@ export interface DataTableProps<T> {
     rowKey: string;
   }) => React.ReactNode;
   /**
+   * Row expansion: renders a detail panel under the row (an order's line
+   * items, an audit trail). Setting it adds a chevron toggle column; the
+   * open panel is an extra `<tr>` spanning every column, recessed on the
+   * header's grey band. Controlled like selection: pair with
+   * `expandedKeys`/`onExpandedChange`. The toggle is a real `<button>`
+   * (`aria-expanded` + `aria-controls` while open) and stays clickable on
+   * interactive rows (above the stretched row link). In
+   * `mobileLayout="cards"` the detail renders as its own card under the
+   * row's card.
+   */
+  renderExpanded?: (row: T) => React.ReactNode;
+  expandedKeys?: Set<string>;
+  onExpandedChange?: (keys: Set<string>) => void;
+  /**
    * Toolbar / filter zone that shares the table's rounded surface. When
    * set, the DataTable renders it INSIDE its own border+radius+overflow
    * surface (`.table-surface`): the toolbar is clipped to the radius,
@@ -287,6 +324,7 @@ export function DataTable<T>({
   empty, error, loading, stickyHeader, maxHeight, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
+  renderExpanded, expandedKeys, onExpandedChange,
   surface = 'card',
 }: DataTableProps<T>) {
   const t = useLocale();
@@ -324,8 +362,8 @@ export function DataTable<T>({
   // Latest-props ref so toggleRow stays referentially stable across selection
   // changes. Without this, every selection update would create a new
   // toggleRow, defeating React.memo on DataTableRow.
-  const propsRef = React.useRef({ rows, rowKey, selectedKeys, onSelectionChange });
-  propsRef.current = { rows, rowKey, selectedKeys, onSelectionChange };
+  const propsRef = React.useRef({ rows, rowKey, selectedKeys, onSelectionChange, expandedKeys, onExpandedChange });
+  propsRef.current = { rows, rowKey, selectedKeys, onSelectionChange, expandedKeys, onExpandedChange };
 
   const toggleAll = React.useCallback(() => {
     const { rows, rowKey, selectedKeys, onSelectionChange } = propsRef.current;
@@ -344,6 +382,19 @@ export function DataTable<T>({
     if (next.has(k)) next.delete(k); else next.add(k);
     onSelectionChange(next);
   }, []);
+
+  const toggleExpand = React.useCallback((k: string) => {
+    const { expandedKeys, onExpandedChange } = propsRef.current;
+    if (!onExpandedChange) return;
+    const next = new Set(expandedKeys);
+    if (next.has(k)) next.delete(k); else next.add(k);
+    onExpandedChange(next);
+  }, []);
+
+  const expandable = renderExpanded != null;
+  // Stable per-table id base for the detail panels' aria-controls wiring.
+  const tableId = React.useId();
+  const totalCols = columns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0);
 
   const onSort = (col: Column<T>) => {
     if (!col.sortable || !onSortChange) return;
@@ -372,6 +423,10 @@ export function DataTable<T>({
                 />
               </th>
             )}
+            {/* Visually empty but properly named: it IS the column header
+                of the toggle column (a `td` here would lose the thead band
+                and sticky CSS, which target `thead th`). */}
+            {expandable && <th scope="col" style={{ width: 36 }} aria-label={t['table.expandColumn']} />}
             {columns.map((c) => {
               const active = sort?.key === c.key;
               const align = c.align ?? (c.numeric ? 'right' : 'left');
@@ -413,7 +468,7 @@ export function DataTable<T>({
           {error ? (
             <tr>
               <td
-                colSpan={columns.length + (selectable ? 1 : 0)}
+                colSpan={totalCols}
                 className="data-table__error"
                 role="alert"
                 style={{ padding: 32, textAlign: 'center' }}
@@ -425,12 +480,13 @@ export function DataTable<T>({
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={`s${i}`}>
                 {selectable && <td><div className="skel" style={{ height: 14 }} /></td>}
+                {expandable && <td aria-hidden="true" />}
                 {columns.map((c) => <td key={c.key}><div className="skel" style={{ height: 12, width: '70%' }} /></td>)}
               </tr>
             ))
           ) : rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: 32 }}>
+              <td colSpan={totalCols} style={{ padding: 32 }}>
                 {empty ?? <div style={{ textAlign: 'center', color: 'var(--fg-muted)' }}>{t['table.empty']}</div>}
               </td>
             </tr>
@@ -440,21 +496,36 @@ export function DataTable<T>({
               const label = rowLabel ? rowLabel(r) : k;
               const href = rowHref?.(r);
               const onActivate = onRowClick ? () => onRowClick(r) : undefined;
+              const expanded = expandable && !!expandedKeys?.has(k);
+              const detailId = `${tableId}-detail-${k}`;
               return (
-                <DataTableRow
-                  key={k}
-                  row={r}
-                  rowK={k}
-                  selected={!!selectedKeys?.has(k)}
-                  selectable={!!selectable}
-                  selectAriaLabel={format(t['table.selectRow'], { label })}
-                  columns={columns}
-                  onToggle={toggleRow}
-                  href={href}
-                  onActivate={onActivate}
-                  actionLabel={format(t['table.rowAction'], { label })}
-                  renderRow={renderRow}
-                />
+                <React.Fragment key={k}>
+                  <DataTableRow
+                    row={r}
+                    rowK={k}
+                    selected={!!selectedKeys?.has(k)}
+                    selectable={!!selectable}
+                    selectAriaLabel={format(t['table.selectRow'], { label })}
+                    columns={columns}
+                    onToggle={toggleRow}
+                    href={href}
+                    onActivate={onActivate}
+                    actionLabel={format(t['table.rowAction'], { label })}
+                    renderRow={renderRow}
+                    expandable={expandable}
+                    expanded={expanded}
+                    onToggleExpand={toggleExpand}
+                    expandLabel={format(t['table.expandRow'], { label })}
+                    detailId={detailId}
+                  />
+                  {expanded && (
+                    <tr className="data-table__detail">
+                      <td colSpan={totalCols} id={detailId}>
+                        {renderExpanded(r)}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })
           )}
@@ -463,6 +534,7 @@ export function DataTable<T>({
           <tfoot>
             <tr>
               {selectable && <td />}
+              {expandable && <td aria-hidden="true" />}
               {columns.map((c) => {
                 const align = c.align ?? (c.numeric ? 'right' : 'left');
                 return (
