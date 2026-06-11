@@ -32,6 +32,8 @@ export interface UiKitMessages {
   'table.expandRow': string;
   /** Accessible name of the (visually empty) expansion-toggle column header. */
   'table.expandColumn': string;
+  /** ColumnToggle trigger label / menu name ("Columnas"). */
+  'table.columns': string;
 
   // AppShell
   'appshell.mainNav': string;

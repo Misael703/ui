@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.49.0] — 2026-06-11
+
+**Minor. Column visibility — `DataTable.hiddenColumnKeys` + the
+`<ColumnToggle>` toolbar menu.** Third of the audit's P2 batch: wide ERP
+tables let the user trim columns to what they're working with.
+
+### Added
+
+- **`DataTable.hiddenColumnKeys?: Set<string>`** — hides columns by key
+  without mutating the canonical `columns` array: the consumer keeps ONE
+  column definition and toggles a `Set`. Header, cells, totals footer,
+  colSpans and mobile cards all follow (hiding is a pure pre-filter, so
+  everything downstream stays in sync for free).
+- **`<ColumnToggle>`** — ready-made visibility menu for the toolbar: a
+  secondary button (locale `table.columns`, "Columnas") opening a
+  checkbox-list popover. Stays open across toggles (multi-adjust without
+  reopening). The last visible column's checkbox is disabled — a
+  zero-column table is a broken state the menu can't reach. Each item is
+  the kit `Checkbox`'s own label (children = column header) — no nested
+  labels. New locale key: `table.columns`.
+
 ## [1.48.0] — 2026-06-11
 
 **Minor. `DataTable` row expansion — `renderExpanded` adds a per-row detail

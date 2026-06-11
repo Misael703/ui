@@ -3,6 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronUp, ChevronDown, ChevronRight, MoreVertical } from './Icons';
 import { Checkbox } from './Form';
+import { Popover } from './Popover';
+import { Button } from './Button';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -284,6 +286,15 @@ export interface DataTableProps<T> {
   expandedKeys?: Set<string>;
   onExpandedChange?: (keys: Set<string>) => void;
   /**
+   * Hides columns by key without mutating the canonical `columns` array —
+   * the consumer keeps ONE column definition and toggles a `Set`. Header,
+   * cells, totals footer, colSpans and mobile cards all follow. Pair with
+   * `<ColumnToggle>` in the toolbar for the ready-made visibility menu.
+   * Hiding every column is the consumer's foot-gun to avoid
+   * (`ColumnToggle` already prevents it by disabling the last one).
+   */
+  hiddenColumnKeys?: Set<string>;
+  /**
    * Toolbar / filter zone that shares the table's rounded surface. When
    * set, the DataTable renders it INSIDE its own border+radius+overflow
    * surface (`.table-surface`): the toolbar is clipped to the radius,
@@ -318,16 +329,23 @@ export interface DataTableProps<T> {
  *   in react-window/tanstack-virtual around the body rows.
  */
 export function DataTable<T>({
-  columns, rows, rowKey,
+  columns: allColumns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
   empty, error, loading, stickyHeader, maxHeight, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
   renderExpanded, expandedKeys, onExpandedChange,
+  hiddenColumnKeys,
   surface = 'card',
 }: DataTableProps<T>) {
   const t = useLocale();
+  // Everything below sees only the visible columns; hiding is a pure
+  // pre-filter so header/cells/footer/colSpans stay in sync for free.
+  const columns = React.useMemo(
+    () => (hiddenColumnKeys?.size ? allColumns.filter((c) => !hiddenColumnKeys.has(c.key)) : allColumns),
+    [allColumns, hiddenColumnKeys]
+  );
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));
   const headerCbRef = React.useRef<HTMLInputElement>(null);
@@ -751,3 +769,64 @@ export const TableToolbar = React.forwardRef<HTMLDivElement, React.HTMLAttribute
     return <div ref={ref} className={cx('table-toolbar', className)} {...rest} />;
   }
 );
+
+// ---------- ColumnToggle ---------------------------------------------------
+export interface ColumnToggleProps {
+  /**
+   * The CANONICAL column list (pass the same array the table gets, or a
+   * `{key, header}` subset) — the menu lists every column regardless of
+   * current visibility. Non-string headers render as-is in the menu.
+   */
+  columns: Array<{ key: string; header: React.ReactNode }>;
+  hiddenKeys: Set<string>;
+  onChange: (keys: Set<string>) => void;
+  /** Trigger label. Defaults to the `table.columns` locale string. */
+  label?: React.ReactNode;
+  className?: string;
+}
+
+/**
+ * Ready-made column-visibility menu for the table toolbar: a button that
+ * opens a checkbox list, driving `DataTable.hiddenColumnKeys`. The popover
+ * stays open across toggles (multi-adjust without reopening). The last
+ * visible column's checkbox is disabled — a table with zero columns is a
+ * broken state no menu should be able to reach.
+ */
+export function ColumnToggle({ columns, hiddenKeys, onChange, label, className }: ColumnToggleProps) {
+  const t = useLocale();
+  const visibleCount = columns.length - columns.filter((c) => hiddenKeys.has(c.key)).length;
+  const toggle = (key: string) => {
+    const next = new Set(hiddenKeys);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    onChange(next);
+  };
+  return (
+    <Popover
+      className={className}
+      placement="bottom"
+      align="end"
+      ariaLabel={t['table.columns']}
+      trigger={<Button type="button" variant="secondary" size="sm">{label ?? t['table.columns']}</Button>}
+    >
+      <div className="column-toggle" role="group" aria-label={t['table.columns']}>
+        {columns.map((c) => {
+          const visible = !hiddenKeys.has(c.key);
+          // Checkbox already renders a <label> wrapper with `children` as
+          // the label text — wrapping it in another label would nest labels
+          // (invalid HTML). Compose via children instead.
+          return (
+            <Checkbox
+              key={c.key}
+              className="column-toggle__item"
+              checked={visible}
+              disabled={visible && visibleCount === 1}
+              onChange={() => toggle(c.key)}
+            >
+              {c.header}
+            </Checkbox>
+          );
+        })}
+      </div>
+    </Popover>
+  );
+}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination } from './DataTable';
+import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle } from './DataTable';
 import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
@@ -36,6 +36,39 @@ export const DataTableBasica: StoryObj = {
           },
           { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
         ]}
+      />
+    );
+  },
+};
+
+/**
+ * **Visibilidad de columnas** (v1.49.0): `hiddenColumnKeys` filtra columnas
+ * sin mutar el array canónico — header, celdas, footer y colSpans siguen
+ * solos. `<ColumnToggle>` en el toolbar es el menú listo: popover con
+ * checkboxes que queda abierto entre toggles; la última columna visible se
+ * deshabilita (cero columnas es un estado roto inalcanzable).
+ */
+export const ConVisibilidadDeColumnas: StoryObj = {
+  render: () => {
+    const [hidden, setHidden] = React.useState<Set<string>>(new Set(['sku']));
+    const cols = [
+      { key: 'name', header: 'Producto' },
+      { key: 'sku', header: 'SKU' },
+      { key: 'stock', header: 'Stock', numeric: true },
+      { key: 'price', header: 'Precio', numeric: true, accessor: (r: typeof rows[number]) => `$${r.price.toLocaleString('es-CL')}` },
+    ];
+    return (
+      <DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        hiddenColumnKeys={hidden}
+        columns={cols}
+        toolbar={
+          <TableToolbar>
+            <span className="grow" />
+            <ColumnToggle columns={cols} hiddenKeys={hidden} onChange={setHidden} />
+          </TableToolbar>
+        }
       />
     );
   },
