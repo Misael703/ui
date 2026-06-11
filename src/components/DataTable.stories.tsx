@@ -41,6 +41,45 @@ export const DataTableBasica: StoryObj = {
   },
 };
 
+/**
+ * **Fila de totales** (v1.47.0): `Column.footer` renderiza un `<tfoot>` con
+ * la banda gris del header pero registro de dato (peso 600) — los totales
+ * son datos, no labels. Con `maxHeight` el footer queda fijo al fondo del
+ * scroll box (sticky bottom), espejo del sticky header: los totales siguen
+ * visibles mientras las filas scrollean. El kit NO suma por ti: las rows
+ * pueden ser una página del server y el total de página ≠ total del
+ * dataset — el agregado lo trae el consumer.
+ */
+export const ConTotales: StoryObj = {
+  render: () => {
+    const many = Array.from({ length: 20 }, (_, i) => ({
+      id: String(i + 1),
+      name: `Producto ${i + 1}`,
+      sku: `SKU-${100 + i}`,
+      stock: (i * 7) % 30,
+      price: 9990 + i * 5000,
+    }));
+    const totalStock = many.reduce((s, r) => s + r.stock, 0);
+    const totalPrice = many.reduce((s, r) => s + r.price, 0);
+    return (
+      <DataTable
+        rows={many}
+        rowKey={(r) => r.id}
+        stickyHeader
+        maxHeight={320}
+        columns={[
+          { key: 'name', header: 'Producto', footer: 'Total (20 productos)' },
+          { key: 'sku', header: 'SKU' },
+          { key: 'stock', header: 'Stock', numeric: true, footer: totalStock },
+          { key: 'price', header: 'Precio', numeric: true,
+            accessor: (r) => `$${r.price.toLocaleString('es-CL')}`,
+            footer: `$${totalPrice.toLocaleString('es-CL')}` },
+        ]}
+      />
+    );
+  },
+};
+
 /** Estado vacío: pasa `rows={[]}`. Muestra el mensaje por defecto o el `empty` slot. */
 export const SinDatos: StoryObj = {
   render: () => (

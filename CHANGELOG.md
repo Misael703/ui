@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.47.0] — 2026-06-10
+
+**Minor. `DataTable` totals row — `Column.footer` renders a `<tfoot>`
+aggregate band.** First of the audit's P2 batch: every money table can now
+show totals without hand-rolling table markup.
+
+### Added
+
+- **`Column.footer?: React.ReactNode`** — when any column sets it, the
+  table renders a `<tfoot>` row: the header's grey band, but data register
+  (weight 600, not muted all-caps) — totals are data, not labels. Numeric/
+  aligned columns keep their cell classes (`table__num`,
+  `table__align-*`), and `selectable` adds the leading empty cell so the
+  footer tracks column geometry. In bounded (`maxHeight`) mode the footer
+  pins to the bottom of the scroll box (sticky, mirroring the sticky
+  header) so totals stay visible while rows scroll. The separator is an
+  inset shadow, not `border-top` — with `border-collapse`, a sticky cell's
+  border scrolls away with the row above it.
+- The kit never aggregates for you: rows may be one server page, and the
+  page total ≠ the dataset total. Pass the aggregate in.
+- Not rendered in error / loading / empty states (nothing meaningful to
+  total) nor in `mobileLayout="cards"` (footer cells lose their column
+  geometry there, like the header).
+
 ## [1.46.0] — 2026-06-10
 
 **Minor. `Combobox` async mode — server-driven options for large catalogs.**

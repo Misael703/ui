@@ -1097,12 +1097,36 @@ button, input, select, textarea { box-sizing: border-box; }
     0 6px 8px -6px rgba(12, 18, 32, 0.18);
 }
 
+/* Totals band (`Column.footer`). Reads as the header's counterpart: same
+   grey band, but the VALUES keep the body register (weight 600, not the
+   header's muted all-caps) — totals are data, not labels. The separator is
+   an inset shadow, not border-top: with border-collapse a sticky cell's
+   border scrolls away with the row above (same reason the sticky thead
+   paints its bottom line as a shadow). */
+.data-table tfoot td {
+  background: var(--bg-subtle);
+  font-weight: 600;
+  padding: 8px 12px;
+  box-shadow: inset 0 1px 0 var(--border-default);
+}
+/* Bounded mode: pin totals to the bottom of the scroll box, mirroring the
+   sticky thead. Unconditional within --scroll — when the table is shorter
+   than the box, sticky bottom:0 simply has no effect. */
+.table-wrap--scroll .data-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
 /* Mobile card layout: below 600px, each row becomes a stacked card.
    The thead is hidden because each cell carries its column label via
    data-label, which the ::before pseudo-element surfaces inline. */
 @media (max-width: 600px) {
   .table-wrap--cards .table { border: 0; }
   .table-wrap--cards .table thead { display: none; }
+  /* Footer cells lose their column geometry in card layout (no thead to
+     align with) — hide them like the thead. */
+  .table-wrap--cards .table tfoot { display: none; }
   .table-wrap--cards .table tr {
     display: block;
     margin-bottom: var(--space-3);
