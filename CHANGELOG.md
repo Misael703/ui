@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.45.0] — 2026-06-10
+
+**Minor. Number formatters in core + a new country-specific entry point
+`@misael703/ui/cl` with Chilean RUT helpers.** First deliverable of the
+ERP-readiness audit: every money cell in a table no longer needs a
+hand-rolled `Intl.NumberFormat` in the consumer.
+
+### Added
+
+- **`formatCurrency(value, opts?)` / `formatNumber(value, opts?)`** (core
+  barrel, `utils/format`). Thin wrappers over `Intl.NumberFormat` that read
+  their defaults from `getBrand()` (`currency`/`locale`), same contract as
+  `MoneyInput`. Currency uses the currency's own minor units (CLP → 0
+  decimals, USD → 2) unless overridden via
+  `minimumFractionDigits`/`maximumFractionDigits`. Formatter instances are
+  cached per resolved option combo — constructing `Intl.NumberFormat` is
+  ~100x the cost of `.format()`, and the typical call site is one cell per
+  row in a large table.
+- **`@misael703/ui/cl`** — new subpath export with Chile-specific helpers,
+  keeping the core country-neutral (same pattern as `date-fns/locale`):
+  - `cleanRut(rut)` — canonical form: digits + check digit, no dots/dash,
+    uppercase K.
+  - `validateRut(rut)` — modulo-11 check; accepts any input format.
+  - `formatRut(rut)` — `"123456785"` → `"12.345.678-5"` visual format;
+    does not validate, so it works as a live mask while typing.
+  Ships as its own tsup entry (`dist/cl/`) with dual ESM/CJS + types;
+  importing the core barrel pulls in none of it.
+
 ## [1.44.0] — 2026-06-08
 
 **Minor. `DatePicker` now looks like the other form fields — one seamless

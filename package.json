@@ -1,6 +1,6 @@
 {
   "name": "@misael703/ui",
-  "version": "1.44.0",
+  "version": "1.45.0",
   "description": "Generic React + TypeScript UI kit, optimized for Next.js. Tokens, accessible components, runtime-configurable theming via presets.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",
@@ -35,6 +35,16 @@
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      }
+    },
+    "./cl": {
+      "import": {
+        "types": "./dist/cl/index.d.mts",
+        "default": "./dist/cl/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cl/index.d.ts",
+        "default": "./dist/cl/index.js"
       }
     },
     "./styles.css": "./dist/styles.css",
