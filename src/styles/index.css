@@ -4332,6 +4332,30 @@ button, input, select, textarea { box-sizing: border-box; }
 .toggle-group--segmented { display: flex; }
 .toggle-group--segmented .toggle-group__item { flex: 1 1 0; }
 
+/* Sliding indicator: a single pill that animates between segments. The active
+   item gives up its own background/shadow (the pill provides it); the indicator
+   sits behind the items (z-index) so the text stays on top. Position/width are
+   set inline from measured geometry; `.is-ready` enables the slide only after
+   the first measurement so it never animates in from 0 on mount. */
+.toggle-group--has-indicator { position: relative; }
+.toggle-group__indicator {
+  position: absolute; top: 2px; bottom: 2px; left: 0;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: var(--bg-surface); box-shadow: var(--shadow-sm);
+  pointer-events: none; z-index: 0;
+}
+.toggle-group__indicator.is-ready {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toggle-group--has-indicator .toggle-group__item { position: relative; z-index: 1; }
+.toggle-group--has-indicator .toggle-group__item.is-pressed,
+.toggle-group--has-indicator .toggle-group__item[aria-pressed="true"] {
+  background: transparent; box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle-group__indicator.is-ready { transition: none; }
+}
+
 /* ---------- InputOTP -------------------------------------------------- */
 .input-otp { display: inline-flex; gap: var(--space-2); }
 .input-otp__slot {
