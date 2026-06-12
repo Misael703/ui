@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.52.0] — 2026-06-12
+
+**Minor. `SegmentedControl` sliding indicator — one pill that glides
+between segments.** The active segment used to light up in place; now a
+single absolutely-positioned pill carries the surface + shadow and
+translates to the active item's measured geometry (the iOS-style
+segmented affordance).
+
+### Added
+
+- **`ToggleGroup.indicator?: boolean`** — opt-in sliding pill for
+  `type="single"`; ignored for `type="multiple"` (one pill can't be two).
+  **On by default in `SegmentedControl`** (`indicator={false}` restores
+  the previous light-up-in-place behaviour). The pill is `aria-hidden`
+  and sits behind the items (`z-index`); the active item drops its own
+  background/shadow so the pill provides them.
+- Measured with a layout effect + ResizeObserver (typeof-guarded for
+  SSR/jsdom, same pattern as the DataTable elevation): position/width are
+  set inline from real geometry, so it follows content-sized segments and
+  container resizes. The slide transition only enables AFTER the first
+  measurement — the pill appears in place on mount, never animating in
+  from x=0. `prefers-reduced-motion` disables the slide.
+
 ## [1.51.0] — 2026-06-11
 
 **Minor. Row virtualization — `useVirtualRows` + `DataTable.virtualizeRows`.**
