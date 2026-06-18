@@ -323,7 +323,11 @@ export function DateRangePicker({
   };
 
   const clear = () => {
-    if (applyMode) setDraft(EMPTY_RANGE);
+    // "Limpiar" resetea el FILTRO, no solo el draft: en apply mode commitea el
+    // rango vacío (dispara onApply + cierra). Antes solo reseteaba el draft y,
+    // como "Aplicar" exige from+to, el estado limpio nunca se podía aplicar →
+    // no se podía volver a "sin filtro".
+    if (applyMode) commit(EMPTY_RANGE);
     else onChange?.(EMPTY_RANGE);
   };
 

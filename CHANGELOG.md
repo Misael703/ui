@@ -5,6 +5,19 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.52.1] — 2026-06-18
+
+**Patch. Fix: `DateRangePicker` in apply mode could not be cleared.** In
+apply mode (`onApply`), "Limpiar" only reset the internal draft without
+committing. Since "Aplicar" requires a full `from`+`to` range, the empty
+state could never be applied — the filter got stuck on its last range
+forever. "Limpiar" now commits the empty range: it fires
+`onApply({ from: null, to: null })` and closes the popover, so the
+consumer resets its filter (the standard filter-clear pattern). Legacy
+mode (`onChange`, no `onApply`) is unchanged — it already propagated the
+empty range. The "Aplicar" enable condition is untouched (still requires
+`from`+`to` to confirm a range).
+
 ## [1.52.0] — 2026-06-12
 
 **Minor. `SegmentedControl` sliding indicator — one pill that glides
