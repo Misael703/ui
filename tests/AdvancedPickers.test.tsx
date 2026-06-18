@@ -78,22 +78,37 @@ describe('DateRangePicker', () => {
       expect(arg.to).toBeInstanceOf(Date);
     });
 
-    it('Clear empties the draft without firing onApply', () => {
+    it('Clear commits the empty range (fires onApply) and closes — the filter can be reset', () => {
+      // Regression: Clear used to only reset the draft, never firing onApply.
+      // Since Apply requires from+to, the empty state could never be applied —
+      // an apply-mode filter got stuck forever. Clear must reset the filter.
       const onApply = vi.fn();
+      const onOpenChange = vi.fn();
       render(
         <DateRangePicker
-          defaultValue={{ from: null, to: null }}
+          defaultValue={{ from: new Date(2026, 0, 1), to: new Date(2026, 0, 10) }}
           onApply={onApply}
+          onOpenChange={onOpenChange}
         />
       );
-      fireEvent.click(screen.getByRole('button', { name: /Seleccionar rango/i }));
-      const dialog = screen.getByRole('dialog');
-      pickTwoDays(dialog);
+      fireEvent.click(screen.getByRole('button', { name: /2026/ }));
       fireEvent.click(screen.getByText('Limpiar'));
-      expect(onApply).not.toHaveBeenCalled();
-      // Apply button is disabled when draft is empty
-      const applyBtn = screen.getByText('Aplicar') as HTMLButtonElement;
-      expect(applyBtn.disabled).toBe(true);
+      // onApply fired with the empty range → consumer clears its filter.
+      expect(onApply).toHaveBeenCalledTimes(1);
+      expect(onApply.mock.calls[0][0]).toEqual({ from: null, to: null });
+      // Popover closed (standard filter-clear pattern).
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(onOpenChange).toHaveBeenLastCalledWith(false);
+      // Trigger label fell back to the empty placeholder.
+      expect(screen.getByRole('button', { name: /Seleccionar rango/i })).toBeInTheDocument();
+    });
+
+    it('Clear in legacy mode (onChange, no onApply) propagates the empty range', () => {
+      const onChange = vi.fn();
+      render(<DateRangePicker value={{ from: new Date(2026, 0, 1), to: new Date(2026, 0, 10) }} onChange={onChange} />);
+      fireEvent.click(screen.getByRole('button', { name: /2026/ }));
+      fireEvent.click(screen.getByText('Limpiar'));
+      expect(onChange).toHaveBeenLastCalledWith({ from: null, to: null });
     });
 
     it('Escape dismisses without firing onApply and reverts the draft', () => {
