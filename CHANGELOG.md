@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.54.0] — 2026-06-19
+
+**Minor. `TimePicker` is now a custom on-brand popover, not the native
+browser control.** Same API and value contract — only the rendered UI
+changed.
+
+### Changed
+
+- **`TimePicker` renders a styled popover with spinner columns** instead of
+  wrapping native `<input type="time">` (whose dropdown is unstyleable OS
+  chrome that clashed with the kit). It now matches the rest of the picker
+  family (`DatePicker`, `YearPicker`, `MonthPicker`), reusing the same
+  popover primitive (`Portal` + `usePopoverPosition` + `useDismiss`):
+  - `granularity` drives the columns: `'hour'` → 1 column; `'minute'` →
+    hour + minute; `'second'` → hour + minute + second.
+  - `step` thins the finest column (e.g. `granularity='minute'` +
+    `step={15}` → `00 15 30 45`); coarser columns step by 1.
+  - Each column is a listbox with roving `aria-activedescendant`
+    (Arrow/Home/End move + commit, one tab stop per column); the active
+    cell is centered on open.
+  - The `value` contract is unchanged: `'HH:mm'` / `'HH:mm:ss'` / `'HH:00'`
+    by granularity. Props are unchanged. **Non-breaking** unless a consumer
+    targeted the internal native `<input>`/`<select>` directly.
+- New locale keys: `picker.selectTime`, `picker.hours`, `picker.minutes`,
+  `picker.seconds`.
+
 ## [1.53.0] — 2026-06-19
 
 **Minor. `TimePicker` gains a `granularity` prop (hour / minute / second).**

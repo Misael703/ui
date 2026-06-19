@@ -152,6 +152,10 @@ export interface UiKitMessages {
   'picker.nextDecade': string;
   'picker.selectYear': string;
   'picker.selectMonth': string;
+  'picker.selectTime': string;
+  'picker.hours': string;
+  'picker.minutes': string;
+  'picker.seconds': string;
   /**
    * Single-letter weekday initials used by compact calendar grids (DatePicker,
    * DateRangePicker). Mon-first to match the kit's calendars.

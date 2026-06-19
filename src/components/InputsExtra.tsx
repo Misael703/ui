@@ -1,10 +1,13 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { X } from './Icons';
+import { X, Clock } from './Icons';
 import { getBrand } from '../brand';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
+import { Portal } from './Portal';
+import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { useDismiss } from '../hooks/useDismiss';
 
 // ---------- Slider ------------------------------------------------------
 export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type'> {
@@ -245,10 +248,20 @@ export function PhoneInput({ value, onChange, prefix, invalid, disabled, classNa
   );
 }
 
-// ---------- TimePicker (HH:mm[:ss] / hour) ------------------------------
+// ---------- TimePicker (custom popover, HH:mm[:ss] / hour) --------------
 export type TimeGranularity = 'hour' | 'minute' | 'second';
-// The native <input type="time"> step is in SECONDS; one unit of each granularity.
-const TIME_UNIT_SECONDS: Record<TimeGranularity, number> = { hour: 3600, minute: 60, second: 1 };
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+const rangeBy = (end: number, step: number): number[] => {
+  const out: number[] = [];
+  for (let i = 0; i < end; i += step) out.push(i);
+  return out;
+};
+// Parse 'HH', 'HH:mm' or 'HH:mm:ss' into a [h, m, s] tuple; missing parts → 0.
+const parseTime = (v: string): [number, number, number] => {
+  const [h, m, s] = v.split(':');
+  return [Number(h) || 0, Number(m) || 0, Number(s) || 0];
+};
 
 export interface TimePickerProps {
   /**
@@ -260,17 +273,16 @@ export interface TimePickerProps {
   onChange: (v: string) => void;
   /**
    * Precision of the control. Default `'minute'`.
-   * - `'minute'`: any minute is selectable (`HH:mm`).
-   * - `'second'`: a seconds field appears (`HH:mm:ss`).
-   * - `'hour'`: hours only — minutes are hidden (rendered as a `<select>`); value `HH:00`.
+   * - `'minute'`: hour + minute columns; value `HH:mm`.
+   * - `'second'`: hour + minute + second columns; value `HH:mm:ss`.
+   * - `'hour'`: a single hour column; value `HH:00`.
    */
   granularity?: TimeGranularity;
   /**
-   * Spinner increment, in units of `granularity` (minutes / seconds / hours).
-   * Omit for the natural step — every value of the unit (e.g. any minute). A
-   * `step > 1` restricts the VALID values to its multiples, per native
-   * `<input type="time">` semantics. (Before v1.53 the default was `15`, which
-   * silently rejected off-grid minutes like `14:37`; it is now `1`.)
+   * Increment of the finest column, in units of `granularity` (minutes /
+   * seconds / hours). Omit for `1` (every value of the unit — e.g. any minute).
+   * `step` thins that column: `granularity='minute'` + `step={15}` → minutes
+   * `00 15 30 45`. Coarser columns always step by 1.
    */
   step?: number;
   invalid?: boolean;
@@ -279,38 +291,124 @@ export interface TimePickerProps {
   id?: string;
 }
 
-export function TimePicker({ value, onChange, granularity = 'minute', step, invalid, disabled, className, id }: TimePickerProps) {
-  const unitStep = step && step > 0 ? step : 1;
-  // A native time input always shows minutes, so 'hour' uses a select to truly
-  // hide them; it emits 'HH:00' to stay parseable as a time and consistent with
-  // the colon-delimited family.
-  if (granularity === 'hour') {
-    const hours: string[] = [];
-    for (let h = 0; h < 24; h += unitStep) hours.push(`${String(h).padStart(2, '0')}:00`);
-    return (
-      <select
-        id={id}
-        className={cx('select', invalid && 'is-invalid', className)}
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={invalid || undefined}
-      >
-        {hours.map((h) => <option key={h} value={h}>{h}</option>)}
-      </select>
-    );
-  }
+// One scrollable column of the picker. A listbox with roving `aria-activedescendant`
+// (the container is the single tab stop) so a 60-item column adds one focus stop,
+// not sixty; Arrow/Home/End move + commit, and the active cell is centered.
+function TimeColumn({ label, values, selected, idBase, onSelect }: {
+  label: string;
+  values: number[];
+  selected: number;
+  idBase: string;
+  onSelect: (v: number) => void;
+}) {
+  const listRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const list = listRef.current;
+    const active = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (list && active) list.scrollTop = active.offsetTop - list.clientHeight / 2 + active.offsetHeight / 2;
+  }, [selected]);
+  const idx = Math.max(0, values.indexOf(selected));
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    let next = idx;
+    if (e.key === 'ArrowDown') next = (idx + 1) % values.length;
+    else if (e.key === 'ArrowUp') next = (idx - 1 + values.length) % values.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = values.length - 1;
+    else return;
+    e.preventDefault();
+    onSelect(values[next]);
+  };
   return (
-    <input
-      id={id}
-      type="time"
-      step={unitStep * TIME_UNIT_SECONDS[granularity]}
-      className={cx('input', invalid && 'is-invalid', className)}
-      value={value}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}
-      aria-invalid={invalid || undefined}
-    />
+    <div
+      ref={listRef}
+      className="timepicker__col kit-scrollbar"
+      role="listbox"
+      aria-label={label}
+      tabIndex={0}
+      aria-activedescendant={`${idBase}-${selected}`}
+      onKeyDown={onKeyDown}
+    >
+      {values.map((v) => (
+        <div
+          key={v}
+          id={`${idBase}-${v}`}
+          role="option"
+          aria-selected={v === selected}
+          className={cx('timepicker__cell', v === selected && 'is-selected')}
+          onClick={() => onSelect(v)}
+        >{pad2(v)}</div>
+      ))}
+    </div>
+  );
+}
+
+export function TimePicker({ value, onChange, granularity = 'minute', step, invalid, disabled, className, id }: TimePickerProps) {
+  const t = useLocale();
+  const reactId = React.useId();
+  const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const popoverRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  const [h, m, s] = parseTime(value);
+  const unitStep = step && step > 0 ? step : 1;
+  const showMinutes = granularity !== 'hour';
+  const showSeconds = granularity === 'second';
+  // `step` thins the finest column for the chosen granularity; coarser ones step by 1.
+  const hours = rangeBy(24, granularity === 'hour' ? unitStep : 1);
+  const minutes = rangeBy(60, granularity === 'minute' ? unitStep : 1);
+  const seconds = rangeBy(60, unitStep);
+
+  const compose = (hh: number, mm: number, ss: number): string =>
+    granularity === 'hour' ? `${pad2(hh)}:00`
+      : granularity === 'minute' ? `${pad2(hh)}:${pad2(mm)}`
+      : `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+
+  const pos = usePopoverPosition(wrapRef, popoverRef, { open, side: 'bottom', align: 'start', offset: 4 });
+  useDismiss({ open, onDismiss: () => setOpen(false), refs: [wrapRef, popoverRef], returnFocusRef: triggerRef });
+
+  const label = value ? compose(h, m, s) : t['picker.selectTime'];
+
+  return (
+    <div ref={wrapRef} className={cx('timepicker', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
+      <button
+        ref={triggerRef}
+        id={id}
+        type="button"
+        className="timepicker__trigger"
+        disabled={disabled}
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <span>{label}</span>
+        <span className="timepicker__icon" aria-hidden="true"><Clock size={16} /></span>
+      </button>
+      {open && (
+        <Portal>
+        <div
+          ref={popoverRef}
+          className={cx('timepicker__popover', 'is-floating')}
+          role="dialog"
+          aria-label={t['picker.selectTime']}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, visibility: pos.ready ? 'visible' : 'hidden' }}
+        >
+          <div className="timepicker__cols">
+            <TimeColumn label={t['picker.hours']} idBase={`${reactId}-h`} values={hours} selected={h}
+              onSelect={(hh) => onChange(compose(hh, m, s))} />
+            {showMinutes && (
+              <TimeColumn label={t['picker.minutes']} idBase={`${reactId}-m`} values={minutes} selected={m}
+                onSelect={(mm) => onChange(compose(h, mm, s))} />
+            )}
+            {showSeconds && (
+              <TimeColumn label={t['picker.seconds']} idBase={`${reactId}-s`} values={seconds} selected={s}
+                onSelect={(ss) => onChange(compose(h, m, ss))} />
+            )}
+          </div>
+        </div>
+        </Portal>
+      )}
+    </div>
   );
 }
 
