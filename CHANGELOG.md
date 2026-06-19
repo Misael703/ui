@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.53.0] — 2026-06-19
+
+**Minor. `TimePicker` gains a `granularity` prop (hour / minute / second).**
+Additive and non-breaking.
+
+### Added
+
+- **`TimePicker.granularity?: 'hour' | 'minute' | 'second'`** (default
+  `'minute'`):
+  - `'minute'` — any minute is selectable; value `'HH:mm'`.
+  - `'second'` — a seconds field appears; value `'HH:mm:ss'`.
+  - `'hour'` — hours only; minutes are hidden (rendered as a `<select>`);
+    value `'HH:00'`.
+- Exported `TimeGranularity` type.
+
+### Changed
+
+- **`TimePicker` now accepts any minute by default.** Previously `step`
+  defaulted to `15` minutes, which made native `<input type="time">`
+  silently reject off-grid values like `14:37`. `step` is now the increment
+  **in the unit of `granularity`** (minutes / seconds / hours) and defaults
+  to `1`, so the natural step is every value of the unit. Consumers that
+  pass `step` explicitly are unaffected: with the default `granularity`,
+  `step={15}` still restricts to 15-minute multiples exactly as before.
+
 ## [1.52.1] — 2026-06-18
 
 **Patch. Fix: `DateRangePicker` in apply mode could not be cleared.** In

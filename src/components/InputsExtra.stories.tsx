@@ -71,6 +71,36 @@ export const TimePickerDemo: StoryObj = {
   },
 };
 
+/**
+ * `granularity` parametriza la precisión sin romper el default. `'minute'`
+ * (default) acepta cualquier minuto (p. ej. 14:37); `'second'` agrega el campo
+ * de segundos (HH:mm:ss); `'hour'` oculta los minutos (select de horas, value
+ * HH:00). `step` es el incremento en la unidad de la granularity.
+ */
+export const TimePickerGranularity: StoryObj = {
+  render: () => {
+    const [minute, setMinute] = React.useState('14:37');
+    const [second, setSecond] = React.useState('14:37:09');
+    const [hour, setHour] = React.useState('14:00');
+    return (
+      <div style={{ display: 'grid', gap: 16, maxWidth: 280 }}>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span>Minuto (cualquiera) — {minute}</span>
+          <TimePicker value={minute} onChange={setMinute} granularity="minute" />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span>Segundo — {second}</span>
+          <TimePicker value={second} onChange={setSecond} granularity="second" />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span>Solo hora — {hour}</span>
+          <TimePicker value={hour} onChange={setHour} granularity="hour" />
+        </label>
+      </div>
+    );
+  },
+};
+
 export const RadioGroupDemo: StoryObj = {
   render: () => {
     const [v, setV] = React.useState('retiro');

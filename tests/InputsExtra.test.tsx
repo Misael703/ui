@@ -75,6 +75,58 @@ describe('TimePicker', () => {
     fireEvent.change(input, { target: { value: '14:30' } });
     expect(onChange).toHaveBeenCalledWith('14:30');
   });
+
+  describe('granularity', () => {
+    it("default 'minute' allows any minute (native step 60, not the old 900)", () => {
+      const onChange = vi.fn();
+      const { container } = render(<TimePicker value="09:00" onChange={onChange} />);
+      const input = container.querySelector('input') as HTMLInputElement;
+      // step=60s → 1-minute increments → an off-grid minute like 14:37 is valid.
+      expect(input.getAttribute('step')).toBe('60');
+      fireEvent.change(input, { target: { value: '14:37' } });
+      expect(onChange).toHaveBeenCalledWith('14:37');
+    });
+
+    it("explicit step is preserved for back-compat (step=15 → native 900)", () => {
+      const { container } = render(<TimePicker value="09:00" onChange={() => {}} step={15} />);
+      expect((container.querySelector('input') as HTMLInputElement).getAttribute('step')).toBe('900');
+    });
+
+    it("'second' shows seconds (native step 1) and emits HH:mm:ss", () => {
+      const onChange = vi.fn();
+      const { container } = render(<TimePicker value="14:37:09" onChange={onChange} granularity="second" />);
+      const input = container.querySelector('input') as HTMLInputElement;
+      expect(input.getAttribute('step')).toBe('1');
+      fireEvent.change(input, { target: { value: '14:37:42' } });
+      expect(onChange).toHaveBeenCalledWith('14:37:42');
+    });
+
+    it("'second' with step in seconds multiplies through (step=5 → native 5)", () => {
+      const { container } = render(<TimePicker value="14:00:00" onChange={() => {}} granularity="second" step={5} />);
+      expect((container.querySelector('input') as HTMLInputElement).getAttribute('step')).toBe('5');
+    });
+
+    it("'hour' renders a minute-less select and emits HH:00", () => {
+      const onChange = vi.fn();
+      render(<TimePicker value="14:00" onChange={onChange} granularity="hour" />);
+      // No time input — minutes are genuinely hidden.
+      expect(document.querySelector('input[type="time"]')).toBeNull();
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+      expect(select.options).toHaveLength(24);
+      expect(select.options[0].value).toBe('00:00');
+      fireEvent.change(select, { target: { value: '15:00' } });
+      expect(onChange).toHaveBeenCalledWith('15:00');
+    });
+
+    it("'hour' with step thins the option list (step=2 → 12 hours)", () => {
+      render(<TimePicker value="00:00" onChange={() => {}} granularity="hour" step={2} />);
+      const select = screen.getByRole('combobox') as HTMLSelectElement;
+      expect(select.options).toHaveLength(12);
+      expect(Array.from(select.options).map((o) => o.value)).toEqual(
+        ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00']
+      );
+    });
+  });
 });
 
 describe('RadioGroup', () => {

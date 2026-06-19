@@ -245,23 +245,66 @@ export function PhoneInput({ value, onChange, prefix, invalid, disabled, classNa
   );
 }
 
-// ---------- TimePicker (HH:mm) ------------------------------------------
+// ---------- TimePicker (HH:mm[:ss] / hour) ------------------------------
+export type TimeGranularity = 'hour' | 'minute' | 'second';
+// The native <input type="time"> step is in SECONDS; one unit of each granularity.
+const TIME_UNIT_SECONDS: Record<TimeGranularity, number> = { hour: 3600, minute: 60, second: 1 };
+
 export interface TimePickerProps {
-  value: string;            // 'HH:mm'
+  /**
+   * Time of day. String format follows `granularity`: `'minute'` → `'HH:mm'`
+   * (e.g. `'14:37'`), `'second'` → `'HH:mm:ss'` (e.g. `'14:37:09'`),
+   * `'hour'` → `'HH:00'` (e.g. `'14:00'`).
+   */
+  value: string;
   onChange: (v: string) => void;
-  step?: number;            // minutes
+  /**
+   * Precision of the control. Default `'minute'`.
+   * - `'minute'`: any minute is selectable (`HH:mm`).
+   * - `'second'`: a seconds field appears (`HH:mm:ss`).
+   * - `'hour'`: hours only — minutes are hidden (rendered as a `<select>`); value `HH:00`.
+   */
+  granularity?: TimeGranularity;
+  /**
+   * Spinner increment, in units of `granularity` (minutes / seconds / hours).
+   * Omit for the natural step — every value of the unit (e.g. any minute). A
+   * `step > 1` restricts the VALID values to its multiples, per native
+   * `<input type="time">` semantics. (Before v1.53 the default was `15`, which
+   * silently rejected off-grid minutes like `14:37`; it is now `1`.)
+   */
+  step?: number;
   invalid?: boolean;
   disabled?: boolean;
   className?: string;
   id?: string;
 }
 
-export function TimePicker({ value, onChange, step = 15, invalid, disabled, className, id }: TimePickerProps) {
+export function TimePicker({ value, onChange, granularity = 'minute', step, invalid, disabled, className, id }: TimePickerProps) {
+  const unitStep = step && step > 0 ? step : 1;
+  // A native time input always shows minutes, so 'hour' uses a select to truly
+  // hide them; it emits 'HH:00' to stay parseable as a time and consistent with
+  // the colon-delimited family.
+  if (granularity === 'hour') {
+    const hours: string[] = [];
+    for (let h = 0; h < 24; h += unitStep) hours.push(`${String(h).padStart(2, '0')}:00`);
+    return (
+      <select
+        id={id}
+        className={cx('select', invalid && 'is-invalid', className)}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={invalid || undefined}
+      >
+        {hours.map((h) => <option key={h} value={h}>{h}</option>)}
+      </select>
+    );
+  }
   return (
     <input
       id={id}
       type="time"
-      step={step * 60}
+      step={unitStep * TIME_UNIT_SECONDS[granularity]}
       className={cx('input', invalid && 'is-invalid', className)}
       value={value}
       disabled={disabled}
