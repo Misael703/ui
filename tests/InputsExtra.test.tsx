@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import {
   Slider, Progress, ProgressCircle, TagInput, MoneyInput, PhoneInput,
   TimePicker, RadioGroup, CheckboxGroup,
@@ -67,65 +67,85 @@ describe('PhoneInput', () => {
   });
 });
 
-describe('TimePicker', () => {
-  it('emits time string', () => {
-    const onChange = vi.fn();
-    render(<TimePicker value="09:00" onChange={onChange} />);
-    const input = screen.getByDisplayValue('09:00') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: '14:30' } });
-    expect(onChange).toHaveBeenCalledWith('14:30');
+describe('TimePicker (custom popover)', () => {
+  it('trigger shows the composed value and toggles the popover', () => {
+    render(<TimePicker value="09:30" onChange={() => {}} />);
+    const trigger = screen.getByRole('button', { name: /09:30/ });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(document.querySelector('input[type="time"]')).toBeNull(); // no native control
+    fireEvent.click(trigger);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 
   describe('granularity', () => {
-    it("default 'minute' allows any minute (native step 60, not the old 900)", () => {
+    it("default 'minute' shows hour + minute columns; any minute is selectable", () => {
       const onChange = vi.fn();
-      const { container } = render(<TimePicker value="09:00" onChange={onChange} />);
-      const input = container.querySelector('input') as HTMLInputElement;
-      // step=60s → 1-minute increments → an off-grid minute like 14:37 is valid.
-      expect(input.getAttribute('step')).toBe('60');
-      fireEvent.change(input, { target: { value: '14:37' } });
-      expect(onChange).toHaveBeenCalledWith('14:37');
+      render(<TimePicker value="09:00" onChange={onChange} />);
+      fireEvent.click(screen.getByRole('button', { name: /09:00/ }));
+      expect(screen.getAllByRole('listbox')).toHaveLength(2);
+      const minutes = screen.getByRole('listbox', { name: 'Minutos' });
+      // 60 options → an off-grid minute like 37 is present and selectable.
+      expect(within(minutes).getAllByRole('option')).toHaveLength(60);
+      fireEvent.click(within(minutes).getByText('37'));
+      expect(onChange).toHaveBeenCalledWith('09:37');
     });
 
-    it("explicit step is preserved for back-compat (step=15 → native 900)", () => {
-      const { container } = render(<TimePicker value="09:00" onChange={() => {}} step={15} />);
-      expect((container.querySelector('input') as HTMLInputElement).getAttribute('step')).toBe('900');
+    it('step thins the minute column (step=15 → 00 15 30 45)', () => {
+      render(<TimePicker value="09:00" onChange={() => {}} step={15} />);
+      fireEvent.click(screen.getByRole('button'));
+      const minutes = screen.getByRole('listbox', { name: 'Minutos' });
+      expect(within(minutes).getAllByRole('option').map((o) => o.textContent)).toEqual(['00', '15', '30', '45']);
     });
 
-    it("'second' shows seconds (native step 1) and emits HH:mm:ss", () => {
+    it("'second' adds a third column and emits HH:mm:ss", () => {
       const onChange = vi.fn();
-      const { container } = render(<TimePicker value="14:37:09" onChange={onChange} granularity="second" />);
-      const input = container.querySelector('input') as HTMLInputElement;
-      expect(input.getAttribute('step')).toBe('1');
-      fireEvent.change(input, { target: { value: '14:37:42' } });
-      expect(onChange).toHaveBeenCalledWith('14:37:42');
+      render(<TimePicker value="09:30:00" onChange={onChange} granularity="second" />);
+      fireEvent.click(screen.getByRole('button', { name: /09:30:00/ }));
+      expect(screen.getAllByRole('listbox')).toHaveLength(3);
+      const seconds = screen.getByRole('listbox', { name: 'Segundos' });
+      fireEvent.click(within(seconds).getByText('09'));
+      expect(onChange).toHaveBeenCalledWith('09:30:09');
     });
 
-    it("'second' with step in seconds multiplies through (step=5 → native 5)", () => {
-      const { container } = render(<TimePicker value="14:00:00" onChange={() => {}} granularity="second" step={5} />);
-      expect((container.querySelector('input') as HTMLInputElement).getAttribute('step')).toBe('5');
+    it("'second' step thins the second column (step=5 → 12 options)", () => {
+      render(<TimePicker value="09:00:00" onChange={() => {}} granularity="second" step={5} />);
+      fireEvent.click(screen.getByRole('button'));
+      expect(within(screen.getByRole('listbox', { name: 'Segundos' })).getAllByRole('option')).toHaveLength(12);
     });
 
-    it("'hour' renders a minute-less select and emits HH:00", () => {
+    it("'hour' shows a single minute-less column and emits HH:00", () => {
       const onChange = vi.fn();
       render(<TimePicker value="14:00" onChange={onChange} granularity="hour" />);
-      // No time input — minutes are genuinely hidden.
-      expect(document.querySelector('input[type="time"]')).toBeNull();
-      const select = screen.getByRole('combobox') as HTMLSelectElement;
-      expect(select.options).toHaveLength(24);
-      expect(select.options[0].value).toBe('00:00');
-      fireEvent.change(select, { target: { value: '15:00' } });
-      expect(onChange).toHaveBeenCalledWith('15:00');
+      fireEvent.click(screen.getByRole('button', { name: /14:00/ }));
+      expect(screen.getAllByRole('listbox')).toHaveLength(1);
+      const hours = screen.getByRole('listbox', { name: 'Horas' });
+      expect(within(hours).getAllByRole('option')).toHaveLength(24);
+      fireEvent.click(within(hours).getByText('06'));
+      expect(onChange).toHaveBeenCalledWith('06:00');
     });
 
-    it("'hour' with step thins the option list (step=2 → 12 hours)", () => {
+    it("'hour' step thins the column (step=2 → 12 hours)", () => {
       render(<TimePicker value="00:00" onChange={() => {}} granularity="hour" step={2} />);
-      const select = screen.getByRole('combobox') as HTMLSelectElement;
-      expect(select.options).toHaveLength(12);
-      expect(Array.from(select.options).map((o) => o.value)).toEqual(
-        ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00']
-      );
+      fireEvent.click(screen.getByRole('button'));
+      expect(within(screen.getByRole('listbox', { name: 'Horas' })).getAllByRole('option')).toHaveLength(12);
     });
+  });
+
+  it('keyboard: ArrowDown on a column commits the next value', () => {
+    const onChange = vi.fn();
+    render(<TimePicker value="09:30" onChange={onChange} />);
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.keyDown(screen.getByRole('listbox', { name: 'Horas' }), { key: 'ArrowDown' });
+    expect(onChange).toHaveBeenCalledWith('10:30');
+  });
+
+  it('keyboard: ArrowUp wraps from the first option to the last', () => {
+    const onChange = vi.fn();
+    render(<TimePicker value="00:30" onChange={onChange} />);
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.keyDown(screen.getByRole('listbox', { name: 'Horas' }), { key: 'ArrowUp' });
+    expect(onChange).toHaveBeenCalledWith('23:30');
   });
 });
 

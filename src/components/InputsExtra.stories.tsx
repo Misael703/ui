@@ -72,10 +72,11 @@ export const TimePickerDemo: StoryObj = {
 };
 
 /**
- * `granularity` parametriza la precisión sin romper el default. `'minute'`
- * (default) acepta cualquier minuto (p. ej. 14:37); `'second'` agrega el campo
- * de segundos (HH:mm:ss); `'hour'` oculta los minutos (select de horas, value
- * HH:00). `step` es el incremento en la unidad de la granularity.
+ * `granularity` parametriza la precisión. El control es un popover custom on-brand
+ * (columnas spinner), no el control nativo del navegador. `'minute'` (default)
+ * muestra columnas hora + minuto y acepta cualquier minuto (p. ej. 14:37);
+ * `'second'` agrega columna de segundos (HH:mm:ss); `'hour'` es una sola columna
+ * (value HH:00). `step` adelgaza la columna más fina de la granularity.
  */
 export const TimePickerGranularity: StoryObj = {
   render: () => {

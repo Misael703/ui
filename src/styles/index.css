@@ -2072,6 +2072,45 @@ button, input, select, textarea { box-sizing: border-box; }
 .datepicker__day.is-selected { background: var(--color-primary); color: var(--color-white); }
 .datepicker__day.is-disabled, .datepicker__day:disabled { opacity: 0.3; cursor: not-allowed; }
 
+/* ---------- TimePicker (custom popover, spinner columns) --------------- */
+/* Trigger mirrors the .datepicker field (border-strong, radius-md, field
+   height, brand focus ring) so the time field lines up with the rest. */
+.timepicker { position: relative; display: inline-flex; width: fit-content; }
+.timepicker__trigger {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-width: 132px; min-height: var(--field-min-h, 44px);
+  padding: 0 var(--field-pad-x, 14px);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  color: var(--fg-default);
+  font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.timepicker__trigger:focus-visible { outline: none; border-color: var(--color-primary); box-shadow: var(--focus-ring-brand); }
+.timepicker.is-invalid .timepicker__trigger { border-color: var(--color-danger); }
+.timepicker.is-disabled .timepicker__trigger { background: var(--bg-subtle); color: var(--fg-subtle); cursor: not-allowed; }
+.timepicker__icon { display: inline-flex; flex-shrink: 0; color: var(--fg-subtle); }
+.timepicker__popover {
+  position: absolute; top: calc(100% + 4px); left: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md); padding: 6px; z-index: var(--z-tooltip);
+}
+.timepicker__cols { display: flex; gap: 4px; }
+.timepicker__col {
+  display: flex; flex-direction: column; gap: 2px;
+  max-height: 216px; overflow-y: auto; outline: none;
+}
+.timepicker__col:focus-visible { box-shadow: var(--focus-ring-brand); border-radius: var(--radius-sm); }
+.timepicker__cell {
+  min-width: 48px; padding: 6px 12px; text-align: center;
+  border-radius: var(--radius-sm); cursor: pointer; user-select: none;
+  font-family: var(--font-body); font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums; color: var(--fg-default);
+}
+.timepicker__cell:hover { background: var(--bg-subtle); }
+.timepicker__cell.is-selected { background: var(--color-primary); color: var(--color-white); }
+
 /* ---------- Grid pickers (YearPicker / MonthPicker) -------------------- */
 .gridpicker {
   position: relative; display: inline-flex; align-items: stretch;
