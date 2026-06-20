@@ -891,6 +891,18 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Tables ------------------------------------------------------- */
 .table-wrap {
   overflow-x: auto;
+  /* Contain vertical layout-overflow at the source. With `overflow-x: auto`
+     and the default `overflow-y: visible`, CSS computes `overflow-y` to
+     `auto` (the axis-mixing rule) — a 2-axis scroll container with no height
+     cap whose overflow can leak into a scroll-delegating ancestor and raise a
+     spurious page-level scrollbar. `clip` (computed to `hidden` next to the
+     `auto` x-axis) contains it: the wrap still grows to the table's height
+     (nothing to clip in the normal case), horizontal scroll is untouched, and
+     no consumer needs to wrap the table to stop the leak. The bounded
+     (`--scroll`) and ancestor-stick (`--sticky:not(--scroll)`) modes override
+     `overflow` below by higher specificity / source order, so this does not
+     touch them. */
+  overflow-y: clip;
   /* Scroll shadows pattern (Lea Verou, 2012). Hints "more content on this
      side" when the table overflows horizontally — useful on mobile / iOS
      Safari where scrollbars are invisible. Four background layers stack
@@ -2961,6 +2973,19 @@ button, input, select, textarea { box-sizing: border-box; }
      same area the body occupies — no vertical extension past the body's
      bottom edge. */
   position: relative;
+  /* Hard scroll boundary. `.appshell__content` is the single designated
+     scroll container; the body must CONTAIN it so a descendant's
+     scrollable/layout overflow (e.g. a `.table-wrap` with `overflow-x: auto`
+     taller than the viewport) can never leak past the shell to the document
+     and raise a second, page-level scrollbar. The shell is `height: 100dvh`,
+     so there is nothing here to scroll — `hidden` only clips the leak.
+     Safe with the mobile drawer / desktop hide-mode sidebar: both are
+     absolute children sized to (or translated off) the body's exact bounds,
+     so the open state stays inside and only the off-screen (closed) state is
+     clipped — which is already hidden. Header dropdowns live in row 1
+     (outside the body) and the kit's overlays portal to <body>, so neither
+     is clipped. */
+  overflow: hidden;
 }
 /* Top hide-mode + rail body grid — desktop-only. In mobile the body is
    single-column (`1fr`) regardless of `collapsed` / `collapsedRail`; the

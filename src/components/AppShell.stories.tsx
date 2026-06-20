@@ -6,6 +6,7 @@ import { Avatar } from './Display2';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, ChevronDown } from './Icons';
 import { Popover } from './Popover';
+import { DataTable, type Column } from './DataTable';
 
 export default {
   title: 'Layout/AppShell',
@@ -442,5 +443,52 @@ export const TopbarUserMenu: StoryObj = {
       </AppShell>
     </div>
   ),
+};
+
+/**
+ * **Topbar · tall DataTable (scroll containment)** — regression guard for the
+ * double-scrollbar leak. A `.table-wrap` (`overflow-x: auto`) taller than the
+ * viewport used to leak its vertical layout-overflow past `.appshell__content`
+ * to the document, producing a SECOND scrollbar at the page level. The shell
+ * now contains its scroll boundary, so only `.appshell__content` scrolls. View
+ * at a low viewport height: the page itself must not scroll.
+ */
+export const TopbarTallTable: StoryObj = {
+  name: 'Topbar · tall DataTable (scroll containment)',
+  render: () => {
+    interface Row { id: string; sku: string; name: string; stock: number }
+    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i + 1),
+      sku: `SKU-${1000 + i}`,
+      name: `Producto ${i + 1}`,
+      stock: (i * 7) % 50,
+    }));
+    const columns: Column<Row>[] = [
+      { key: 'sku', header: 'SKU' },
+      { key: 'name', header: 'Producto' },
+      { key: 'stock', header: 'Stock', numeric: true },
+    ];
+    return (
+      <div style={{ height: '100vh' }}>
+        <AppShell
+          sections={sections}
+          header={{
+            left: ({ collapsed, toggle }) => (
+              <button type="button" aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'} aria-expanded={!collapsed} onClick={toggle}
+                style={{ width: 40, height: 40, borderRadius: 999, border: '1px solid var(--border-default)', background: 'transparent', color: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              ><MenuIcon size={18} /></button>
+            ),
+            center: <Logo variant="horizontal" bg="light" height={28} />,
+            right: <Avatar name="Misael Ocas" size={32} />,
+          }}
+        >
+          <div style={{ padding: 24, display: 'grid', gap: 16 }}>
+            <PageHeader title="Inventario" description="Tabla más alta que el viewport: el scroll vive en el contenido, no en el documento" />
+            <DataTable ariaLabel="Inventario" rows={rows} rowKey={(r) => r.id} columns={columns} />
+          </div>
+        </AppShell>
+      </div>
+    );
+  },
 };
 
