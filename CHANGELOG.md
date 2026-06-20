@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.55.0] — 2026-06-20
+
+**Minor. `Tabs` gains a `variant` and an animated sliding indicator.**
+Additive; the default looks the same at rest.
+
+### Added
+
+- **`Tabs.variant?: 'underline' | 'plain'`** (default `'underline'`):
+  `'underline'` keeps the full-width gray baseline under the tab row;
+  `'plain'` drops it (keeping the row height identical) — for tabs on open
+  canvas where the baseline floats.
+
+### Changed
+
+- **The active indicator now slides between tabs** instead of cross-fading a
+  per-tab `border-bottom`. `TabList` renders one shared `.tabs__indicator`
+  bar, measured from the active tab's geometry (`offsetLeft`/`offsetWidth`)
+  and animated via a CSS `transform`/`width` transition. Recalculated on tab
+  change, container resize (`ResizeObserver`), and web-font swap
+  (`document.fonts.ready`); measured in `useLayoutEffect` to avoid a
+  first-paint flash; the slide enables only after the first measurement (no
+  animate-in from x=0) and is disabled under `prefers-reduced-motion`. The
+  per-tab `border-bottom` indicator was removed (the slider replaces it);
+  the active tab keeps its `--color-primary` text. Same `Tab` API and a11y
+  (`role="tab"` / `aria-selected`).
+
 ## [1.54.1] — 2026-06-20
 
 **Patch. Fix: AppShell (header-top) could raise a second, page-level

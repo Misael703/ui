@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   Tabs, TabList, Tab, TabPanel,
   Tooltip, Stepper,
@@ -7,6 +9,9 @@ import {
   KeyValue, KeyValueRow,
   ListGroup, ListGroupItem,
 } from '../src/components/Layout';
+
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '');
 
 describe('Tabs', () => {
   it('shows the active panel', () => {
@@ -37,6 +42,65 @@ describe('Tabs', () => {
     );
     fireEvent.click(screen.getByText('B'));
     expect(screen.getByText('Panel B')).toBeInTheDocument();
+  });
+
+  const tabs = (variant?: 'underline' | 'plain') => render(
+    <Tabs defaultValue="a" variant={variant}>
+      <TabList>
+        <Tab value="a">A</Tab>
+        <Tab value="b">B</Tab>
+      </TabList>
+      <TabPanel value="a">Panel A</TabPanel>
+    </Tabs>
+  );
+
+  it('renders ONE shared sliding indicator (aria-hidden), not a per-tab one', () => {
+    const { container } = tabs();
+    const indicators = container.querySelectorAll('.tabs__indicator');
+    expect(indicators).toHaveLength(1);
+    expect(indicators[0]).toHaveAttribute('aria-hidden', 'true');
+    // It lives inside the tablist, as a sibling of the tabs.
+    expect(container.querySelector('.tabs__list > .tabs__indicator')).not.toBeNull();
+  });
+
+  it("default variant has no plain modifier; variant='plain' adds it", () => {
+    const { container: def } = tabs();
+    expect(def.querySelector('.tabs')!.className).not.toContain('tabs--plain');
+    const { container: plain } = tabs('plain');
+    expect(plain.querySelector('.tabs')!.className).toContain('tabs--plain');
+  });
+
+  it('moves aria-selected to the clicked tab (indicator remeasures off it)', () => {
+    const { container } = tabs();
+    const [a, b] = container.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    expect(a).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(b);
+    expect(b).toHaveAttribute('aria-selected', 'true');
+    expect(a).toHaveAttribute('aria-selected', 'false');
+  });
+
+  describe('CSS', () => {
+    it('per-tab border-bottom indicator is gone (replaced by the slider)', () => {
+      const tab = css.match(/\.tabs__tab\s*\{([^}]*)\}/)?.[1] ?? '';
+      expect(tab).not.toMatch(/border-bottom/);
+      const active = css.match(/\.tabs__tab\.is-active\s*\{([^}]*)\}/)?.[1] ?? '';
+      expect(active).not.toMatch(/border-bottom/);
+      expect(active).toMatch(/color:\s*var\(--color-primary\)/);
+    });
+
+    it('the list is a positioned containing block for the indicator', () => {
+      const list = css.match(/\.tabs__list\s*\{([^}]*)\}/)?.[1] ?? '';
+      expect(list).toMatch(/position:\s*relative/);
+    });
+
+    it("plain variant zeroes the baseline color (keeps the box → no shift)", () => {
+      expect(css).toMatch(/\.tabs--plain \.tabs__list\s*\{\s*border-bottom-color:\s*transparent/);
+    });
+
+    it('the indicator transitions only when ready and respects reduced motion', () => {
+      expect(css).toMatch(/\.tabs__indicator\.is-ready\s*\{[\s\S]*?transition:/);
+      expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.tabs__indicator\.is-ready\s*\{\s*transition:\s*none/);
+    });
   });
 });
 

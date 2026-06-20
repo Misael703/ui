@@ -25,6 +25,46 @@ export const TabsBasicos: StoryObj = {
   ),
 };
 
+/**
+ * **Variantes + indicador deslizante.** El indicador activo es UN elemento que
+ * se desliza entre tabs (no un cross-fade por-tab) — cambia de tab para verlo.
+ * `variant="underline"` (default) mantiene el baseline gris a todo el ancho;
+ * `variant="plain"` lo omite (solo el indicador), para canvas abierto donde el
+ * baseline flota. El deslizamiento respeta `prefers-reduced-motion`.
+ */
+export const TabsVariantes: StoryObj = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 40 }}>
+      <div>
+        <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>variant=&quot;underline&quot; (default · con baseline)</div>
+        <Tabs defaultValue="general">
+          <TabList>
+            <Tab value="general">General</Tab>
+            <Tab value="inventario">Inventario</Tab>
+            <Tab value="pagos">Historial de pagos</Tab>
+          </TabList>
+          <TabPanel value="general">Datos del producto.</TabPanel>
+          <TabPanel value="inventario">Stock por sucursal.</TabPanel>
+          <TabPanel value="pagos">Historial de pagos.</TabPanel>
+        </Tabs>
+      </div>
+      <div>
+        <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>variant=&quot;plain&quot; (sin baseline · canvas abierto)</div>
+        <Tabs defaultValue="general" variant="plain">
+          <TabList>
+            <Tab value="general">General</Tab>
+            <Tab value="inventario">Inventario</Tab>
+            <Tab value="pagos">Historial de pagos</Tab>
+          </TabList>
+          <TabPanel value="general">Datos del producto.</TabPanel>
+          <TabPanel value="inventario">Stock por sucursal.</TabPanel>
+          <TabPanel value="pagos">Historial de pagos.</TabPanel>
+        </Tabs>
+      </div>
+    </div>
+  ),
+};
+
 export const TooltipBasico: StoryObj = {
   render: () => (
     <Tooltip label="Esto es un tooltip">
