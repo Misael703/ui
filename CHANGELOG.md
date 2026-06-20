@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.54.1] — 2026-06-20
+
+**Patch. Fix: AppShell (header-top) could raise a second, page-level
+scrollbar.** A `.table-wrap` (e.g. a `DataTable`, `overflow-x: auto`) taller
+than the viewport could leak its vertical layout-overflow past
+`.appshell__content` to the document, producing a double scrollbar in
+consumer environments where the shell's height constraint wasn't airtight.
+Contained at two layers:
+
+- **`.appshell--header-top .appshell__body` is now `overflow: hidden`** — the
+  shell owns its single scroll boundary (`.appshell__content`), so a
+  descendant's scrollable/layout overflow can never escape to the page.
+  Verified safe: header dropdowns live in the header row (outside the body)
+  and the kit's overlays portal to `<body>`; the mobile drawer and desktop
+  hide-mode sidebar are absolute children sized to (or translated off) the
+  body's exact bounds, so the open state stays inside and only the
+  already-hidden closed/off-screen state is clipped.
+- **`.table-wrap` is now `overflow-y: clip`** (computed `hidden` next to the
+  `overflow-x: auto`) — contains the table's vertical overflow at the source,
+  so any consumer is protected, not only inside the AppShell. The bounded
+  (`--scroll`) and ancestor-stick (`--sticky`) table modes override `overflow`
+  and are unaffected; horizontal scroll is preserved.
+
 ## [1.54.0] — 2026-06-19
 
 **Minor. `TimePicker` is now a custom on-brand popover, not the native
