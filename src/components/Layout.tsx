@@ -13,15 +13,25 @@ interface TabsContextValue {
 }
 const TabsContext = React.createContext<TabsContextValue | null>(null);
 
+// useLayoutEffect on the client, useEffect on the server — measures the
+// indicator before paint without the SSR "useLayoutEffect does nothing" warning.
+const useIsoLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+
 export interface TabsProps {
   value?: string;
   defaultValue?: string;
   onChange?: (v: string) => void;
+  /**
+   * Visual style. `'underline'` (default) keeps the full-width baseline under
+   * the tab row; `'plain'` drops it — for tabs sitting on open canvas where
+   * the gray baseline floats. Both animate the active indicator between tabs.
+   */
+  variant?: 'underline' | 'plain';
   children: React.ReactNode;
   className?: string;
 }
 
-export function Tabs({ value, defaultValue, onChange, children, className }: TabsProps) {
+export function Tabs({ value, defaultValue, onChange, variant = 'underline', children, className }: TabsProps) {
   const [internal, setInternal] = React.useState(defaultValue ?? '');
   const v = value ?? internal;
   const setV = (next: string) => {
@@ -30,13 +40,55 @@ export function Tabs({ value, defaultValue, onChange, children, className }: Tab
   };
   return (
     <TabsContext.Provider value={{ value: v, setValue: setV }}>
-      <div className={cx('tabs', className)}>{children}</div>
+      <div className={cx('tabs', variant === 'plain' && 'tabs--plain', className)}>{children}</div>
     </TabsContext.Provider>
   );
 }
 
 export function TabList({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div role="tablist" className={cx('tabs__list', className)}>{children}</div>;
+  const ctx = React.useContext(TabsContext);
+  const active = ctx?.value;
+  const listRef = React.useRef<HTMLDivElement>(null);
+  // Shared sliding indicator: a single bar that translates to the active tab's
+  // measured geometry, so switching tabs animates one element instead of
+  // cross-fading a per-tab border.
+  const [ind, setInd] = React.useState<{ left: number; width: number; ready: boolean } | null>(null);
+  useIsoLayoutEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => {
+      const tab = el.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+      // No active tab → collapse the bar (hidden via opacity below).
+      if (!tab) { setInd((p) => (p ? { ...p, width: 0 } : null)); return; }
+      setInd((p) => ({ left: tab.offsetLeft, width: tab.offsetWidth, ready: p?.ready ?? false }));
+    };
+    measure();
+    // Recalc on container resize and on web-font swap — both change tab widths.
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    let cancelled = false;
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts.ready.then(() => { if (!cancelled) measure(); });
+    }
+    return () => { cancelled = true; ro?.disconnect(); };
+  }, [active, children]);
+  // Enable the slide only AFTER the first measurement, so the bar appears in
+  // place on mount rather than animating in from x=0.
+  React.useEffect(() => {
+    if (ind && !ind.ready) setInd((p) => (p ? { ...p, ready: true } : p));
+  }, [ind]);
+  return (
+    <div ref={listRef} role="tablist" className={cx('tabs__list', className)}>
+      {children}
+      {ind && (
+        <span
+          aria-hidden="true"
+          className={cx('tabs__indicator', ind.ready && 'is-ready')}
+          style={{ transform: `translateX(${ind.left}px)`, width: ind.width, opacity: ind.width > 0 ? 1 : 0 }}
+        />
+      )}
+    </div>
+  );
 }
 
 export interface TabProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

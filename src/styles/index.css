@@ -808,26 +808,49 @@ button, input, select, textarea { box-sizing: border-box; }
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--border-default);
+  /* Containing block for the absolutely-positioned sliding indicator. */
+  position: relative;
 }
+/* `variant="plain"`: drop the full-width baseline. Keeps the 1px border as
+   transparent so the row height matches `underline` exactly (no shift) — for
+   tabs on open canvas where the gray baseline floats. */
+.tabs--plain .tabs__list { border-bottom-color: transparent; }
 .tabs__tab {
   background: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
   padding: 12px 18px;
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--fg-default);
   cursor: pointer;
-  transition: color var(--duration-fast), border-color var(--duration-fast);
-  margin-bottom: -1px;
+  transition: color var(--duration-fast);
 }
 .tabs__tab:hover { color: var(--color-primary); }
-.tabs__tab.is-active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-secondary);
-}
+.tabs__tab.is-active { color: var(--color-primary); }
 .tabs__tab:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); border-radius: var(--radius-sm); }
+/* Shared active indicator (replaces the per-tab border-bottom). One bar
+   positioned + sized from the active tab's measured geometry (left/width set
+   inline). `bottom: -1px` aligns it over the 1px baseline so the colored line
+   covers the gray one at the active tab. The slide is enabled only after the
+   first measurement (`.is-ready`), so it never animates in from x=0. */
+.tabs__indicator {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--color-secondary);
+  border-radius: 1px;
+  pointer-events: none;
+}
+.tabs__indicator.is-ready {
+  transition:
+    transform var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabs__indicator.is-ready { transition: none; }
+}
 .tabs__panel { padding: 16px 0; }
 
 /* pill tabs */
