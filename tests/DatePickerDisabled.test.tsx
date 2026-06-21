@@ -30,6 +30,32 @@ describe('DatePicker field consistency (matches .input/.select)', () => {
     expect(input).toMatch(/border:\s*none/);
     expect(input).toMatch(/background:\s*transparent/);
   });
+
+  // The date-input family fills its container (like .input/.select width:100%)
+  // so it composes in grids/forms instead of leaving a fit-content gap. With a
+  // wrapper border, border-box keeps width:100% from overflowing by the border.
+  it('the picker family fills its container (width:100%, no fit-content)', () => {
+    const datepicker = css.match(/\.datepicker\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(datepicker).toMatch(/width:\s*100%/);
+    expect(datepicker).toMatch(/box-sizing:\s*border-box/);
+    expect(datepicker).not.toMatch(/width:\s*fit-content/);
+
+    const timepicker = css.match(/\.timepicker\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(timepicker).toMatch(/width:\s*100%/);
+
+    const gridpicker = css.match(/\.gridpicker\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(gridpicker).toMatch(/width:\s*100%/);
+    expect(gridpicker).not.toMatch(/width:\s*fit-content/);
+
+    // DateRangePicker fills via a block wrapper + a full-width trigger.
+    const daterange = css.match(/\.daterange\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(daterange).toMatch(/display:\s*block/);
+    const drTrigger = css.match(/\.daterange__trigger\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(drTrigger).toMatch(/width:\s*100%/);
+
+    // No fit-content left anywhere in the picker family.
+    expect(css).not.toMatch(/\.(datepicker|timepicker|gridpicker)\s*\{[^}]*fit-content/);
+  });
 });
 
 /**

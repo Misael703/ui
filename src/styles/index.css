@@ -2033,11 +2033,11 @@ button, input, select, textarea { box-sizing: border-box; }
    affordance (like the `.select` chevron), NOT a separate grey segment.
    The wrapper IS the field (border/radius/height/focus on it, same tokens
    as `.input`/`.select`); the input and toggle are borderless/transparent
-   inside it. `width: fit-content` keeps the focus ring hugging the field
-   rather than spanning a flex/grid parent. */
+   inside it. `width: 100%` fills the container like `.input`/`.select` so the
+   field composes in grids/forms; constrain via the layout for a narrow one. */
 .datepicker {
   position: relative; display: inline-flex; align-items: stretch;
-  width: fit-content;
+  width: 100%; box-sizing: border-box;
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
@@ -2110,10 +2110,11 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- TimePicker (custom popover, spinner columns) --------------- */
 /* Trigger mirrors the .datepicker field (border-strong, radius-md, field
    height, brand focus ring) so the time field lines up with the rest. */
-.timepicker { position: relative; display: inline-flex; width: fit-content; }
+.timepicker { position: relative; display: inline-flex; width: 100%; box-sizing: border-box; }
 .timepicker__trigger {
+  flex: 1; min-width: 0; box-sizing: border-box;
   display: inline-flex; align-items: center; justify-content: space-between; gap: 8px;
-  min-width: 132px; min-height: var(--field-min-h, 44px);
+  min-height: var(--field-min-h, 44px);
   padding: 0 var(--field-pad-x, 14px);
   background: var(--bg-surface);
   border: 1px solid var(--border-strong); border-radius: var(--radius-md);
@@ -2149,10 +2150,11 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Grid pickers (YearPicker / MonthPicker) -------------------- */
 .gridpicker {
   position: relative; display: inline-flex; align-items: stretch;
-  border-radius: var(--radius-sm); width: fit-content;
+  border-radius: var(--radius-sm); width: 100%;
 }
 .gridpicker:focus-within { outline: none; box-shadow: var(--focus-ring-accent); }
 .gridpicker__input {
+  flex: 1;
   height: 40px; padding: 0 12px; min-width: 160px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
@@ -2627,8 +2629,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo__empty { padding: 12px; color: var(--fg-muted); font-size: var(--text-sm); text-align: center; }
 
 /* ---------- DateRangePicker ---------- */
-.daterange { position: relative; display: inline-block; }
+/* `display: block` + full-width trigger so the field fills its container like
+   `.input`/`.select` (composes in grids/forms); constrain via the layout. */
+.daterange { position: relative; display: block; }
 .daterange__trigger {
+  width: 100%;
   display: inline-flex; align-items: center; gap: 8px;
   height: 44px; padding: 0 14px;
   border: 1px solid var(--border-strong);
