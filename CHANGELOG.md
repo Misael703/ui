@@ -5,6 +5,25 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.56.0] — 2026-06-21
+
+**Minor. The date/time picker family now fills its container (`width: 100%`),
+like `.input`/`.select`.** Previously `DatePicker`, `DateRangePicker`,
+`TimePicker`, `YearPicker` and `MonthPicker` were `width: fit-content`, so in
+a filter grid or form row — where inputs and selects stretch to fill their
+cell — the picker left a blank gap at the end of its cell. They now fill
+their container by default and compose predictably; constrain the width via
+the layout (the grid cell / a wrapper) for a narrow field, exactly like a
+native `<input>`.
+
+### Changed
+
+- **`.datepicker` / `.timepicker` / `.gridpicker` (Year/Month) / `.daterange`:
+  `width: 100%`** (was `fit-content` / `inline-block`); the inner input or
+  trigger flexes to fill. `.datepicker` also gained `box-sizing: border-box`
+  so its wrapper's 1px border doesn't push the field 2px past the container
+  (the inputs/selects were already border-box). No API change.
+
 ## [1.55.0] — 2026-06-20
 
 **Minor. `Tabs` gains a `variant` and an animated sliding indicator.**
