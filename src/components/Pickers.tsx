@@ -374,6 +374,11 @@ export function DatePicker({
         type="text"
         className="datepicker__input"
         placeholder={ph}
+        // Cap the input's intrinsic width to the format length (+1) so a
+        // content-sized field (`width: fit-content`, an `auto` grid track)
+        // hugs the calendar icon to the value instead of ballooning to the
+        // native ~20-char default. `flex: 1` still fills a wider cell.
+        size={ph.length + 1}
         disabled={disabled}
         value={value ? formatDate(value, fmt) : ''}
         onChange={(e) => {

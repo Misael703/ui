@@ -56,6 +56,36 @@ describe('DatePicker field consistency (matches .input/.select)', () => {
     // No fit-content left anywhere in the picker family.
     expect(css).not.toMatch(/\.(datepicker|timepicker|gridpicker)\s*\{[^}]*fit-content/);
   });
+
+  // The input floors are tight to the value so a content-sized field hugs the
+  // trailing icon to the value (instead of the old generous 132/160 floor that
+  // left a gap); `flex: 1` still fills a wider cell.
+  it('the input min-width floors are tight to the format, not generous', () => {
+    const input = css.match(/\.datepicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(input).toMatch(/min-width:\s*min\(108px,\s*100%\)/);
+    expect(input).not.toMatch(/min-width:\s*132px/);
+
+    const gridInput = css.match(/\.gridpicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(gridInput).toMatch(/min-width:\s*min\(144px,\s*100%\)/);
+    expect(gridInput).not.toMatch(/min-width:\s*160px/);
+
+    const tpTrigger = css.match(/\.timepicker__trigger\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(tpTrigger).toMatch(/min-width:\s*min\(88px,\s*100%\)/);
+
+    // The taller mobile override (min(160px,100%)) is gone — the base floor
+    // (already shrink-safe) applies on every breakpoint.
+    expect(css).not.toMatch(/\.datepicker__input\s*\{\s*min-width:\s*min\(160px/);
+  });
+
+  // The native <input> default intrinsic width (~20ch) would balloon a
+  // content-sized field; `size` caps it to the format length so the icon hugs.
+  it('the DatePicker input caps its intrinsic width via the size attribute', () => {
+    const { container } = render(<DatePicker value={null} onChange={() => {}} />);
+    const input = container.querySelector('.datepicker__input') as HTMLInputElement;
+    // size = format placeholder length + 1 buffer (e.g. 'dd-mm-aaaa' → 11).
+    expect(input.getAttribute('size')).toBe(String((input.placeholder?.length ?? 0) + 1));
+    expect(Number(input.getAttribute('size'))).toBeGreaterThan(8);
+  });
 });
 
 /**

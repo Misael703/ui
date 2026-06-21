@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.57.1] — 2026-06-21
+
+**Patch. The date/time picker's trailing icon now hugs the value in compact
+fields.** The picker inputs had a generous min-width (132px DatePicker, 160px
+Year/MonthPicker) plus the native `<input>` ~20-char intrinsic width, so a
+content-sized or narrow field left a wide gap between the value
+(`dd-mm-aaaa` ≈ 88px) and the right-pinned calendar icon.
+
+### Changed
+
+- Tightened the input floors to the format width: `.datepicker__input`
+  `132px → min(108px, 100%)`, `.gridpicker__input` `160px → min(144px, 100%)`,
+  `.timepicker__trigger` `→ min(88px, 100%)` (`HH:mm` is shorter still). The
+  taller `≤768px` override (`min(160px, 100%)`) is removed — the base floor is
+  already shrink-safe.
+- **`DatePicker`'s input gets a `size`** (format-placeholder length + 1) so a
+  content-sized field (`width: fit-content`, an `auto` grid track) hugs the
+  icon instead of ballooning to the native 20-char default.
+- `flex: 1` is unchanged, so full-width cells (filter grids) still fill — there
+  the icon at the right edge is correct, like a `<select>` chevron.
+
 ## [1.57.0] — 2026-06-21
 
 **Minor. `Collapsible` now animates open/close (pure-CSS height slide).**
