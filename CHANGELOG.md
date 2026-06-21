@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.57.0] — 2026-06-21
+
+**Minor. `Collapsible` now animates open/close (pure-CSS height slide).**
+Previously `CollapsibleContent` rendered with the `hidden` attribute
+(`display: none`), so the body snapped in/out and consumers couldn't animate
+it (`display: none` kills CSS transitions). It now slides smoothly.
+
+### Changed
+
+- **`CollapsibleContent` animates its height** via the CSS grid-rows trick: an
+  outer "viewport" transitions `grid-template-rows` from `0fr` (closed) to
+  `1fr` (open) while the content child clips (`overflow: hidden; min-height: 0`)
+  so it slides instead of jumping — no JS height measurement. Driven by
+  `data-state`; disabled under `prefers-reduced-motion`.
+- The content **stays mounted** (no more `hidden`); **`inert`** keeps it out of
+  the tab order and the a11y tree while closed (its visual height is already
+  0). The `data-state` contract on root / trigger / content is unchanged, so a
+  consumer rotating a chevron off `data-state` keeps working and the body
+  inherits the slide for free. Padding/styling on `.collapsible__content`
+  animates with it (it is the clipped child).
+
 ## [1.56.0] — 2026-06-21
 
 **Minor. The date/time picker family now fills its container (`width: 100%`),

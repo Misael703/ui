@@ -4680,8 +4680,22 @@ button, input, select, textarea { box-sizing: border-box; }
   box-shadow: var(--focus-ring-accent);
   border-radius: var(--radius-sm);
 }
-.collapsible__content {
-  /* Consumers can layer their own animation/padding via className. */
+/* Animated height — pure CSS, no measurement. The grid "viewport" transitions
+   its single row from 0fr (closed) to 1fr (open); the content child clips with
+   `min-height: 0` + `overflow: hidden` so it slides rather than jumping.
+   `display: none` (the old `hidden` attribute) would have killed the
+   transition, so the content stays mounted and `inert` (in JS) gates focus
+   while closed. Consumers layer padding/styling on `.collapsible__content`
+   (the clipped child) — it animates with the rest. */
+.collapsible__viewport {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+.collapsible__viewport[data-state="open"] { grid-template-rows: 1fr; }
+.collapsible__content { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .collapsible__viewport { transition: none; }
 }
 
 /* ---------- Scroll Area ------------------------------------------------- */
