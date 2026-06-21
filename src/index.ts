@@ -18,6 +18,7 @@ export * from './components/Display2';
 export * from './components/AdvancedPickers';
 export * from './components/AppShell';
 export * from './components/Charts';
+export * from './components/Metrics';
 export * from './components/Icons';
 export * from './components/Logo';
 export * from './components/Display3';

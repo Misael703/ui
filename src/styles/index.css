@@ -4730,3 +4730,119 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .scroll-area::-webkit-scrollbar-thumb:hover { background-color: var(--fg-muted); }
 .scroll-area::-webkit-scrollbar-corner { background: transparent; }
+
+/* ===== Metrics / dashboard data-viz (CSS-only) ===== */
+
+/* ---------- DeltaBadge ---------- */
+.delta-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700;
+  line-height: 1; padding: 3px 8px 3px 6px; border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.delta-badge--sm { font-size: 11px; padding: 2px 6px 2px 4px; gap: 2px; }
+.delta-badge--pos { color: var(--color-success); background: var(--cat-2-bg); }
+.delta-badge--neg { color: var(--color-danger); background: var(--cat-5-bg); }
+.delta-badge--flat { color: var(--fg-muted); background: var(--bg-subtle); }
+.delta-badge svg { flex: none; }
+
+/* ---------- StatCard ---------- */
+.metric-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px; background: var(--bg-surface);
+  border: 1px solid var(--border-default); border-radius: var(--radius-lg);
+}
+.metric-card[data-accent] { border-left: 3px solid var(--metric-accent, var(--color-primary)); }
+.metric-card--cat-1 { --metric-accent: var(--cat-1); }
+.metric-card--cat-2 { --metric-accent: var(--cat-2); }
+.metric-card--cat-3 { --metric-accent: var(--cat-3); }
+.metric-card--cat-4 { --metric-accent: var(--cat-4); }
+.metric-card--cat-5 { --metric-accent: var(--cat-5); }
+.metric-card--cat-6 { --metric-accent: var(--cat-6); }
+.metric-card__head { display: inline-flex; align-items: center; gap: 8px; }
+.metric-card__icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: var(--radius-md);
+  background: var(--bg-subtle); color: var(--fg-muted); flex: none;
+}
+.metric-card__label {
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700;
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
+  color: var(--fg-muted);
+}
+.metric-card__value {
+  font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl);
+  line-height: 1.05; color: var(--fg-default); font-variant-numeric: tabular-nums;
+}
+.metric-card__foot { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.metric-card__caption { font-size: var(--text-xs); color: var(--fg-muted); }
+.metric-card__chart { margin-top: 4px; }
+
+/* ---------- Meter ---------- */
+.meter { display: flex; flex-direction: column; gap: 6px; }
+.meter__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.meter__label {
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700;
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider); color: var(--fg-muted);
+}
+.meter__value { font-size: var(--text-xs); font-weight: 700; color: var(--fg-default); font-variant-numeric: tabular-nums; }
+.meter__track {
+  position: relative; height: 10px; border-radius: var(--radius-pill);
+  background: var(--bg-muted); overflow: hidden;
+}
+.meter--sm .meter__track { height: 6px; }
+.meter__fill { height: 100%; border-radius: var(--radius-pill); transition: width var(--duration-base, 200ms) var(--ease-standard, ease); }
+.meter__fill--primary { background: var(--color-primary); }
+.meter__fill--pos { background: var(--color-success); }
+.meter__fill--warn { background: var(--color-warning); }
+.meter__fill--neg { background: var(--color-danger); }
+@media (prefers-reduced-motion: reduce) { .meter__fill { transition: none; } }
+
+/* ---------- Sparkbar ---------- */
+.sparkbar { display: inline-flex; align-items: flex-end; width: 100%; }
+.sparkbar__bar { flex: 1 1 0; min-width: 2px; border-radius: 2px 2px 0 0; opacity: 0.85; }
+.sparkbar__bar--last { opacity: 1; }
+
+/* ---------- ProportionBar ---------- */
+.proportion { display: flex; flex-direction: column; gap: 8px; }
+.proportion__track {
+  display: flex; width: 100%; border-radius: var(--radius-pill); overflow: hidden;
+  background: var(--bg-muted);
+}
+.proportion__seg { display: block; height: 100%; }
+.proportion__seg:not(:last-child) { border-right: 1.5px solid var(--bg-surface); }
+.proportion__legend { display: flex; flex-wrap: wrap; gap: 6px 16px; list-style: none; margin: 0; padding: 0; }
+.proportion__legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--fg-muted); }
+.proportion__swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.proportion__legend-label { color: var(--fg-default); }
+.proportion__legend-pct { color: var(--fg-muted); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+/* ---------- BulletChart ---------- */
+.bullet { display: flex; flex-direction: column; gap: 6px; }
+.bullet__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.bullet__label {
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700;
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wider); color: var(--fg-muted);
+}
+.bullet__value { font-size: var(--text-xs); font-weight: 700; color: var(--fg-default); font-variant-numeric: tabular-nums; }
+.bullet__track {
+  position: relative; width: 100%; border-radius: var(--radius-sm);
+  background: var(--bg-subtle); overflow: hidden;
+}
+.bullet__band { position: absolute; top: 0; bottom: 0; background: var(--fg-default); }
+.bullet__measure {
+  position: absolute; top: 25%; bottom: 25%; left: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.bullet__measure--primary { background: var(--color-primary); }
+.bullet__measure--success { background: var(--color-success); }
+.bullet__measure--warning { background: var(--color-warning); }
+.bullet__measure--danger { background: var(--color-danger); }
+.bullet__target { position: absolute; top: 10%; bottom: 10%; width: 2.5px; transform: translateX(-50%); background: var(--fg-default); border-radius: 2px; }
+
+/* ---------- CalendarHeatmap ---------- */
+.heatmap { display: inline-flex; flex-direction: column; gap: 8px; }
+.heatmap__grid { display: grid; grid-auto-flow: column; width: max-content; }
+.heatmap__cell { display: block; width: 100%; height: 100%; }
+.heatmap__legend { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--fg-muted); }
+.heatmap__legend-cell { width: 12px; height: 12px; flex: none; }
+.heatmap__legend-text { margin: 0 2px; }
