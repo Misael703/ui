@@ -59,18 +59,63 @@ export const Barras: StoryObj = {
   ),
 };
 
+// Horizontal bars: the value end (right) is rounded, not the top.
+export const BarrasHorizontal: StoryObj = {
+  render: () => (
+    <div style={{ width: 600 }}>
+      <BarChart
+        recharts={Recharts as any}
+        data={monthlyData}
+        categoryKey="mes"
+        series={[{ key: 'ventas', label: 'Ventas' }]}
+        layout="horizontal"
+        valueFormatter={(n) => `$${n.toLocaleString('es-CL')}`}
+      />
+    </div>
+  ),
+};
+
+// Dense daily series with long ISO labels: thinned + rotated + formatted ticks,
+// and an honest `linear` curve (no phantom humps over the zeros).
+const dailyData = Array.from({ length: 31 }, (_, i) => {
+  const day = i + 1;
+  // deterministic-ish counts with some zeros
+  const v = [0, 3, 0, 7, 12, 5, 0, 9][i % 8] + (i % 5);
+  return { fecha: `2026-05-${String(day).padStart(2, '0')}`, ventas: v };
+});
+
+export const LineaDensa: StoryObj = {
+  render: () => (
+    <div style={{ width: 700 }}>
+      <LineChart
+        recharts={Recharts as any}
+        data={dailyData}
+        categoryKey="fecha"
+        series={[{ key: 'ventas', label: 'Ventas diarias' }]}
+        curve="linear"
+        xTickFormatter={(v) => v.slice(8)}
+        xTickAngle={-45}
+        xTickInterval="preserveStartEnd"
+        showLegend={false}
+      />
+    </div>
+  ),
+};
+
 export const Donut: StoryObj = {
   render: () => (
     <div style={{ width: 280 }}>
       <DonutChart
         recharts={Recharts as any}
         data={[
-          { name: 'Eléctrico', value: 42 },
-          { name: 'Plomería', value: 28 },
-          { name: 'Pintura', value: 18 },
-          { name: 'Construcción', value: 12 },
+          { name: 'V_REGION', value: 42 },
+          { name: 'RM_METROPOLITANA', value: 28 },
+          { name: 'VIII_BIOBIO', value: 18 },
+          { name: 'IV_COQUIMBO', value: 12 },
         ]}
-        centerLabel="Categorías"
+        centerLabel="Regiones"
+        nameFormatter={(n) => n.replace(/_/g, ' ')}
+        valueFormatter={(v) => `${v}%`}
       />
     </div>
   ),

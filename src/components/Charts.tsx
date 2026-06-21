@@ -60,33 +60,88 @@ export interface BaseChartProps<D = any> {
   ariaLabel?: string;
 }
 
-// ---------- LineChart ---------------------------------------------------
-export interface LineChartProps<D = any> extends BaseChartProps<D> {
+// Mirror of Recharts' AxisInterval. Controls how category ticks thin on
+// collision so dense series (e.g. daily points) don't crowd the axis.
+export type AxisInterval =
+  | number
+  | 'preserveStart'
+  | 'preserveEnd'
+  | 'preserveStartEnd'
+  | 'equidistantPreserveStart'
+  | 'equidistantPreserveEnd';
+
+// Shared cartesian controls (Line/Area/Bar). DonutChart/Sparkline don't have a
+// category axis, so they keep BaseChartProps.
+export interface CartesianChartProps<D = any> extends BaseChartProps<D> {
   categoryKey: keyof D & string;
   series: Array<{ key: keyof D & string; label?: string; color?: string }>;
   showGrid?: boolean;
   showLegend?: boolean;
+  /** Format each category-axis tick label, e.g. shorten `2026-05-23`. → XAxis.tickFormatter */
+  xTickFormatter?: (value: string) => string;
+  /** Thin out category ticks on collision. → XAxis.interval. Default `preserveStartEnd`. */
+  xTickInterval?: AxisInterval;
+  /** Rotate category-axis labels N degrees (anchors end + reserves height so they don't clip). */
+  xTickAngle?: number;
+  /** Format numeric values (value-axis ticks + tooltip). */
+  valueFormatter?: (value: number) => string;
+}
+
+const DEFAULT_X_INTERVAL: AxisInterval = 'preserveStartEnd';
+
+// Recharts XAxis/YAxis are `any`-typed (structural mirror), so tick controls go
+// in as a spread. `rotate` is off when the category axis is the Y axis
+// (horizontal bars: those labels are already horizontal).
+function categoryTickProps(
+  opts: Pick<CartesianChartProps, 'xTickFormatter' | 'xTickInterval' | 'xTickAngle'>,
+  rotate = true,
+): Record<string, unknown> {
+  const props: Record<string, unknown> = { interval: opts.xTickInterval ?? DEFAULT_X_INTERVAL };
+  if (opts.xTickFormatter) props.tickFormatter = opts.xTickFormatter;
+  if (rotate && opts.xTickAngle) {
+    props.angle = opts.xTickAngle;
+    props.textAnchor = 'end';
+    props.height = 56; // reserve room so the rotated label isn't clipped
+  }
+  return props;
+}
+
+function valueTickProps(valueFormatter?: (v: number) => string): Record<string, unknown> {
+  return valueFormatter ? { tickFormatter: (v: number) => valueFormatter(Number(v)) } : {};
+}
+
+function tooltipValueProps(valueFormatter?: (v: number) => string): Record<string, unknown> {
+  return valueFormatter ? { formatter: (v: unknown) => valueFormatter(Number(v)) } : {};
+}
+
+// ---------- LineChart ---------------------------------------------------
+export interface LineChartProps<D = any> extends CartesianChartProps<D> {
   smooth?: boolean;
+  /** Interpolation. `monotone` smooths (default, back-compat); `linear` draws honest
+   *  straight segments — recommended for counts/stepped series (no phantom humps over zeros). */
+  curve?: 'linear' | 'monotone';
 }
 
 export function LineChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
-  showGrid = true, showLegend = true, smooth = true,
+  showGrid = true, showLegend = true, smooth = true, curve,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
 }: LineChartProps<D>) {
+  const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
         <R.LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
-          <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />
+          <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
+          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipValueProps(valueFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Line
               key={s.key}
-              type={smooth ? 'monotone' : 'linear'}
+              type={lineType}
               dataKey={s.key}
               name={s.label ?? s.key}
               stroke={s.color ?? PALETTE[i % PALETTE.length]}
@@ -109,21 +164,23 @@ export interface AreaChartProps<D = any> extends LineChartProps<D> {
 export function AreaChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
-  showGrid = true, showLegend = true, smooth = true, stacked,
+  showGrid = true, showLegend = true, smooth = true, curve, stacked,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
 }: AreaChartProps<D>) {
+  const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
         <R.AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
-          <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />
+          <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
+          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipValueProps(valueFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Area
               key={s.key}
-              type={smooth ? 'monotone' : 'linear'}
+              type={lineType}
               dataKey={s.key}
               name={s.label ?? s.key}
               stackId={stacked ? '1' : undefined}
@@ -140,21 +197,27 @@ export function AreaChart<D = any>({
 }
 
 // ---------- BarChart ----------------------------------------------------
-export interface BarChartProps<D = any> extends BaseChartProps<D> {
-  categoryKey: keyof D & string;
-  series: Array<{ key: keyof D & string; label?: string; color?: string }>;
+export interface BarChartProps<D = any> extends CartesianChartProps<D> {
   layout?: 'vertical' | 'horizontal';
   stacked?: boolean;
-  showGrid?: boolean;
-  showLegend?: boolean;
 }
+
+const BAR_RADIUS = 4;
 
 export function BarChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
 }: BarChartProps<D>) {
   const isHorizontal = layout === 'horizontal';
+  // Radius must round the VALUE end: top for columns ([tl,tr,br,bl] → [R,R,0,0]),
+  // right for horizontal bars ([0,R,R,0]). The old hardcoded [4,4,0,0] left
+  // horizontal bars rounded-top / pointed-bottom.
+  const endRadius = isHorizontal ? [0, BAR_RADIUS, BAR_RADIUS, 0] : [BAR_RADIUS, BAR_RADIUS, 0, 0];
+  const lastIdx = series.length - 1;
+  const catTicks = categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle });
+  const catTicksNoRotate = categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle }, false);
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
@@ -162,28 +225,33 @@ export function BarChart<D = any>({
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={isHorizontal} horizontal={!isHorizontal} />}
           {isHorizontal ? (
             <>
-              <R.XAxis type="number" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-              <R.YAxis dataKey={categoryKey} type="category" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} width={96} />
+              <R.XAxis type="number" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
+              <R.YAxis dataKey={categoryKey} type="category" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} width={96} {...catTicksNoRotate} />
             </>
           ) : (
             <>
-              <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
-              <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} />
+              <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...catTicks} />
+              <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
             </>
           )}
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} cursor={{ fill: 'var(--bg-subtle)' }} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipValueProps(valueFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
-          {series.map((s, i) => (
-            <R.Bar
-              key={s.key}
-              dataKey={s.key}
-              name={s.label ?? s.key}
-              stackId={stacked ? '1' : undefined}
-              fill={s.color ?? PALETTE[i % PALETTE.length]}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={48}
-            />
-          ))}
+          {series.map((s, i) => {
+            // Stacked: only the outermost (last) segment carries the end radius;
+            // inner segments stay square so the stack reads as one bar.
+            const barRadius = stacked ? (i === lastIdx ? endRadius : [0, 0, 0, 0]) : endRadius;
+            return (
+              <R.Bar
+                key={s.key}
+                dataKey={s.key}
+                name={s.label ?? s.key}
+                stackId={stacked ? '1' : undefined}
+                fill={s.color ?? PALETTE[i % PALETTE.length]}
+                radius={barRadius}
+                maxBarSize={48}
+              />
+            );
+          })}
         </R.BarChart>
       </R.ResponsiveContainer>
     </div>
@@ -197,18 +265,27 @@ export interface DonutChartProps extends Omit<BaseChartProps, 'data'> {
   showLegend?: boolean;
   innerRadius?: number;
   outerRadius?: number;
+  /** Format slice names in tooltip + legend, e.g. `V_REGION` → `V Región` (no need to pre-map the data). */
+  nameFormatter?: (name: string) => string;
+  /** Format slice values in the tooltip. */
+  valueFormatter?: (value: number) => string;
 }
 
 export function DonutChart({
   recharts: R, data, height = 240, className, ariaLabel,
   centerLabel, showLegend = true, innerRadius = 60, outerRadius = 88,
+  nameFormatter, valueFormatter,
 }: DonutChartProps) {
+  // Recharts Tooltip formatter returns [formattedValue, formattedName].
+  const tooltipProps = (nameFormatter || valueFormatter)
+    ? { formatter: (v: unknown, n: unknown) => [valueFormatter ? valueFormatter(Number(v)) : v, nameFormatter ? nameFormatter(String(n)) : n] }
+    : {};
   return (
     <div className={cx('chart chart--donut', className)} role="img" aria-label={ariaLabel}>
       <div className="chart__donut-area" style={{ height }}>
         <R.ResponsiveContainer width="100%" height="100%">
           <R.PieChart>
-            <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />
+            <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps} />
             <R.Pie
               data={data}
               dataKey="value"
@@ -232,7 +309,7 @@ export function DonutChart({
                 className="chart__legend-swatch"
                 style={{ background: d.color ?? PALETTE[i % PALETTE.length] }}
               />
-              <span className="chart__legend-label">{d.name}</span>
+              <span className="chart__legend-label">{nameFormatter ? nameFormatter(d.name) : d.name}</span>
             </li>
           ))}
         </ul>
