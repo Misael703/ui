@@ -5,6 +5,43 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.59.0] — 2026-06-21
+
+**Minor. Chart controls for dense time series + a horizontal-bar radius fix.**
+Surfaced using the charts in a real dashboard (daily series, horizontal bars).
+All new props are optional and don't change existing usages — except the two
+fixes noted below, which only affect the cases they fix.
+
+### Fixed
+
+- **`BarChart` radius is now orientation-aware.** It was hardcoded to
+  `[4,4,0,0]` (rounds the top), so `layout="horizontal"` bars came out rounded-
+  top / pointed-bottom. Horizontal bars now round the **value end** (right):
+  `[0,4,4,0]`; vertical bars (columns) are unchanged. For `stacked`, only the
+  outermost segment carries the end radius; inner segments stay square so the
+  stack reads as one bar.
+
+### Added
+
+- **`LineChart` / `AreaChart` / `BarChart` category-axis tick controls** (passthrough
+  to `<XAxis>`, or the category `<YAxis>` on horizontal bars):
+  - `xTickFormatter?: (value: string) => string` — format each tick (e.g. shorten
+    `2026-05-23`).
+  - `xTickInterval?: AxisInterval` — thin ticks on collision. **Defaults to
+    `'preserveStartEnd'`** so dense axes auto-thin without the consumer doing
+    anything (recharts otherwise crowds every category tick).
+  - `xTickAngle?: number` — rotate labels (anchors `end` + reserves height so the
+    rotated label isn't clipped).
+- **`valueFormatter?: (value: number) => string`** on Line/Area/Bar — formats the
+  numeric value axis ticks and the tooltip.
+- **`LineChart` / `AreaChart` `curve?: 'linear' | 'monotone'`** — interpolation.
+  Defaults to `monotone` (smooth, back-compat); `linear` draws honest straight
+  segments, recommended for counts/stepped series (no phantom humps over zeros).
+  Takes precedence over the existing `smooth` prop.
+- **`DonutChart` `nameFormatter` / `valueFormatter`** — format slice names
+  (`V_REGION` → `V Región`) and values in the tooltip + legend, so enum-like data
+  doesn't need pre-mapping.
+
 ## [1.58.0] — 2026-06-21
 
 **Minor. Seven CSS-only dashboard data-viz primitives.** The kit had `Stat`,
