@@ -5,6 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.58.0] — 2026-06-21
+
+**Minor. Seven CSS-only dashboard data-viz primitives.** The kit had `Stat`,
+the recharts-backed `Charts`, and `Progress` — but not the dense "read-at-a-
+glance" atoms a dashboard needs. This batch adds them, all CSS-only (no recharts
+dependency, so they drop into cards and table cells for free) and themed on the
+existing tokens.
+
+### Added
+
+- **`DeltaBadge`** — a sign-driven variation pill (`▲ +12,4%` success / `▼ −3,1%`
+  danger / `– 0%` flat). Pulls the trend logic that lived inside `Stat` into a
+  reusable atom. `invert` flips the tone (not the arrow) for higher-is-worse
+  metrics (error rate, cost). Default format is a signed percent via
+  `formatNumber`; pass `format` to override.
+- **`StatCard`** — the flagship KPI atom: leading icon chip + label, a large
+  tabular value, a `DeltaBadge` + comparison caption, and an optional `chart`
+  slot (Sparkline / Sparkbar). Standalone surface; `accent` (`cat-1`…`cat-6`)
+  tints the left edge.
+- **`Meter`** — a value within a range with optional thresholds (`low`/`high`/
+  `optimum`) that drive the fill tone. `role="meter"` — a static measurement
+  (stock, budget, capacity), semantically distinct from `Progress`
+  (`role="progressbar"`, a task advancing to 100%).
+- **`Sparkbar`** — inline mini bars, CSS-only; the bar counterpart to
+  `Sparkline`. `highlightLast` emphasizes the most recent datum.
+- **`ProportionBar`** — a single 100%-stacked bar for an inline category
+  breakdown (paid / pending / overdue) with a legend. The lightweight
+  alternative to a donut when you only need shares.
+- **`BulletChart`** — Stephen Few's bullet graph: a compact actual-vs-target bar
+  over graduated qualitative ranges. More data per pixel than a gauge.
+- **`CalendarHeatmap`** — a GitHub-contributions-style intensity grid; cells
+  tinted by value into discrete buckets, with a less→more legend.
+
 ## [1.57.1] — 2026-06-21
 
 **Patch. The date/time picker's trailing icon now hugs the value in compact
