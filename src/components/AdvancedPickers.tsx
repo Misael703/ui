@@ -223,15 +223,82 @@ export interface DateRangePickerProps {
   monthDropdown?: boolean;
   /** Number of month panels. Default `2`; `1` is the compact single-month layout. */
   months?: 1 | 2;
+  /**
+   * Start with a preset active (by its label, e.g. `"Este mes"`). Must match a
+   * `presets` entry — the picker initializes the range to that preset and shows
+   * its name on the trigger. Uncontrolled init only (when controlled, drive
+   * `value` yourself; this still sets the initial trigger name). Ignored if it
+   * doesn't match any preset.
+   */
+  defaultPreset?: string;
 }
 
 const EMPTY_RANGE: DateRange = { from: null, to: null };
+
+// ---------- Common date-range presets -----------------------------------
+export type DateRangePresetKey =
+  | 'today' | 'yesterday' | 'thisWeek' | 'lastWeek'
+  | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear';
+
+export interface DateRangePresetItem {
+  key: DateRangePresetKey;
+  label: string;
+  range: () => DateRange;
+}
+
+const DEFAULT_PRESET_LABELS: Record<DateRangePresetKey, string> = {
+  today: 'Hoy', yesterday: 'Ayer', thisWeek: 'Esta semana', lastWeek: 'Semana anterior',
+  thisMonth: 'Este mes', lastMonth: 'Mes anterior', thisYear: 'Este año', lastYear: 'Año anterior',
+};
+
+const PRESET_ORDER: DateRangePresetKey[] = [
+  'today', 'yesterday', 'thisWeek', 'lastWeek', 'thisMonth', 'lastMonth', 'thisYear', 'lastYear',
+];
+
+// Local-midnight helpers so the ranges are date-only (no time component).
+const midnight = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const shiftDays = (d: Date, days: number): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate() + days);
+const mondayOf = (d: Date): Date => shiftDays(d, -((d.getDay() + 6) % 7)); // Monday = week start
+
+// "This …" spans from the start of the period to today; "… anterior" is the full
+// previous period. Evaluated lazily (on click) so they're always relative to now.
+const PRESET_RANGES: Record<DateRangePresetKey, () => DateRange> = {
+  today: () => { const t = midnight(new Date()); return { from: t, to: t }; },
+  yesterday: () => { const y = shiftDays(midnight(new Date()), -1); return { from: y, to: y }; },
+  thisWeek: () => { const t = midnight(new Date()); return { from: mondayOf(t), to: t }; },
+  lastWeek: () => { const m = mondayOf(midnight(new Date())); return { from: shiftDays(m, -7), to: shiftDays(m, -1) }; },
+  thisMonth: () => { const t = midnight(new Date()); return { from: new Date(t.getFullYear(), t.getMonth(), 1), to: t }; },
+  lastMonth: () => { const t = new Date(); return { from: new Date(t.getFullYear(), t.getMonth() - 1, 1), to: new Date(t.getFullYear(), t.getMonth(), 0) }; },
+  thisYear: () => { const t = midnight(new Date()); return { from: new Date(t.getFullYear(), 0, 1), to: t }; },
+  lastYear: () => { const t = new Date(); return { from: new Date(t.getFullYear() - 1, 0, 1), to: new Date(t.getFullYear() - 1, 11, 31) }; },
+};
+
+export interface DateRangePresetsOptions {
+  /** Pick a subset and order. Default: all eight in a sensible order. */
+  include?: DateRangePresetKey[];
+  /** Override labels (e.g. for i18n). Defaults are Spanish. */
+  labels?: Partial<Record<DateRangePresetKey, string>>;
+}
+
+/**
+ * The common analytics date-range presets (Bsale-style): today, yesterday,
+ * this/last week, this/last month, this/last year. Pass straight to
+ * `<DateRangePicker presets={dateRangePresets()} />` so consumers don't
+ * re-derive the (fiddly) "previous week/month" boundaries each time.
+ */
+export function dateRangePresets(opts: DateRangePresetsOptions = {}): DateRangePresetItem[] {
+  return (opts.include ?? PRESET_ORDER).map((key) => ({
+    key,
+    label: opts.labels?.[key] ?? DEFAULT_PRESET_LABELS[key],
+    range: PRESET_RANGES[key],
+  }));
+}
 
 export function DateRangePicker({
   value, onChange, defaultValue, onApply, onOpenChange,
   minDate, maxDate, isDateDisabled, presets,
   invalid, disabled, className, id, format = 'auto',
-  showInputs = false, monthDropdown = false, months = 2,
+  showInputs = false, monthDropdown = false, months = 2, defaultPreset,
 }: DateRangePickerProps) {
   const locale = useLocale();
   const weekdays = locale['picker.weekdaysShort'];
@@ -239,7 +306,13 @@ export function DateRangePicker({
   const fmt = resolveDateFormat(format);
   const isControlled = value !== undefined;
   const applyMode = !!onApply;
-  const initial = isControlled ? (value as DateRange) : (defaultValue ?? EMPTY_RANGE);
+  // `defaultPreset` (by label) seeds the initial range + the trigger name. For an
+  // uncontrolled picker it also sets the initial dates; controlled callers drive
+  // `value` and this only sets the initial name.
+  const matchedPreset = defaultPreset ? presets?.find((p) => p.label === defaultPreset) : undefined;
+  const initial = isControlled
+    ? (value as DateRange)
+    : (matchedPreset ? matchedPreset.range() : (defaultValue ?? EMPTY_RANGE));
   const [draft, setDraft] = React.useState<DateRange>(initial);
   const [lastApplied, setLastApplied] = React.useState<DateRange>(initial);
   // Resync draft/lastApplied when controlled `value` changes externally.
@@ -265,6 +338,10 @@ export function DateRangePicker({
   const [toText, setToText] = React.useState('');
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [menuYear, setMenuYear] = React.useState(() => view.getFullYear());
+  // The label of the preset that produced the current value (so the trigger can
+  // show "Este mes" instead of the date range). Seeded from `defaultPreset`;
+  // cleared on any manual change.
+  const [appliedPreset, setAppliedPreset] = React.useState<string | null>(matchedPreset?.label ?? null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -328,7 +405,7 @@ export function DateRangePicker({
   // Apply a new range honoring apply/legacy mode (same split as a day click).
   const setRange = (next: DateRange) => {
     if (applyMode) setDraft(next);
-    else onChange?.(next);
+    else { onChange?.(next); setAppliedPreset(null); }
   };
 
   // Keep the editable inputs in sync with the current range.
@@ -367,14 +444,18 @@ export function DateRangePicker({
       const from = current.from;
       next = d < from ? { from: d, to: from } : { from, to: d };
     }
+    // A manual day click in legacy mode commits immediately → drop any preset
+    // name. In apply mode it only mutates the draft; the applied preset (shown on
+    // the trigger) changes only when the user actually applies.
     if (applyMode) setDraft(next);
-    else onChange?.(next);
+    else { onChange?.(next); setAppliedPreset(null); }
   };
 
   // Commits a range and closes. In apply mode this fires `onApply` (and `onChange`
   // when controlled, to keep `value` in sync). In legacy mode, only preset commits
   // propagate via `onChange`; the bare "Apply" button stays close-only as before.
-  const commit = (next: DateRange, fromPreset = false) => {
+  const commit = (next: DateRange, fromPreset = false, presetLabel: string | null = null) => {
+    setAppliedPreset(fromPreset ? presetLabel : null);
     if (applyMode) {
       onApply!(next);
       setLastApplied(next);
@@ -393,7 +474,7 @@ export function DateRangePicker({
     // como "Aplicar" exige from+to, el estado limpio nunca se podía aplicar →
     // no se podía volver a "sin filtro".
     if (applyMode) commit(EMPTY_RANGE);
-    else onChange?.(EMPTY_RANGE);
+    else { onChange?.(EMPTY_RANGE); setAppliedPreset(null); }
   };
 
   const toggleOpen = () => {
@@ -401,11 +482,15 @@ export function DateRangePicker({
     else { setOpen(true); onOpenChange?.(true); }
   };
 
-  const label = displayed.from
-    ? displayed.to
-      ? `${formatDate(displayed.from, fmt)} → ${formatDate(displayed.to, fmt)}`
-      : `${formatDate(displayed.from, fmt)} → …`
-    : locale['picker.selectRange'];
+  // Show the active preset's name (like Bsale) when one is applied; otherwise the
+  // date range, or the placeholder when empty.
+  const label = appliedPreset && displayed.from
+    ? appliedPreset
+    : displayed.from
+      ? displayed.to
+        ? `${formatDate(displayed.from, fmt)} → ${formatDate(displayed.to, fmt)}`
+        : `${formatDate(displayed.from, fmt)} → …`
+      : locale['picker.selectRange'];
 
   const renderMonth = (offset: number) => {
     const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
@@ -430,12 +515,12 @@ export function DateRangePicker({
             const col = i % 7;
             const leftEnd = band && !!bounds && isSameDay(d, bounds.a);
             const rightEnd = band && !!bounds && isSameDay(d, bounds.b);
-            // The band emerges from an endpoint *circle* as a half-cell (so it
-            // meets the circle at its center, not with a stray cap on the outer
-            // side); a hover end (no circle) caps full. Interior cells bridge the
-            // gap and round only at row edges.
-            const bl = !band ? null : leftEnd ? (sel ? 'mid' : 'cap') : (col === 0 ? 'cap' : 'join');
-            const br = !band ? null : rightEnd ? (sel ? 'mid' : 'cap') : (col === 6 ? 'cap' : 'join');
+            // Square model: round the outer corners only at the range ends and the
+            // row edges (everything radius-sm); interior cells stay square and
+            // bridge the gap. A lone selected day (no multi-day band) rounds all
+            // four. is-rl/is-rr round both the band and the endpoint block.
+            const roundL = band ? (col === 0 || leftEnd) : !!sel;
+            const roundR = band ? (col === 6 || rightEnd) : !!sel;
             const today = isSameDay(d, new Date());
             const off = isDisabled(d);
             return (
@@ -446,8 +531,8 @@ export function DateRangePicker({
                   'daterange__day',
                   sel && 'is-selected',
                   band && 'is-band',
-                  bl && `is-bl-${bl}`,
-                  br && `is-br-${br}`,
+                  roundL && 'is-rl',
+                  roundR && 'is-rr',
                   today && 'is-today',
                   off && 'is-disabled',
                 )}
@@ -517,7 +602,7 @@ export function DateRangePicker({
             <ul className="daterange__presets">
               {presets.map((p, i) => (
                 <li key={i}>
-                  <button type="button" onClick={() => commit(p.range(), true)}>{p.label}</button>
+                  <button type="button" onClick={() => commit(p.range(), true, p.label)}>{p.label}</button>
                 </li>
               ))}
             </ul>
@@ -530,6 +615,10 @@ export function DateRangePicker({
                   <input
                     type="text"
                     className="daterange__field-input"
+                    // Cap the input's intrinsic width to the format length so the
+                    // inputs row doesn't balloon wider than the calendar (the
+                    // panes then hugs the calendar into a tight square).
+                    size={dateFormatPlaceholder(fmt).length + 1}
                     value={fromText}
                     placeholder={dateFormatPlaceholder(fmt)}
                     onChange={(e) => setFromText(e.target.value)}
@@ -542,6 +631,7 @@ export function DateRangePicker({
                   <input
                     type="text"
                     className="daterange__field-input"
+                    size={dateFormatPlaceholder(fmt).length + 1}
                     value={toText}
                     placeholder={dateFormatPlaceholder(fmt)}
                     onChange={(e) => setToText(e.target.value)}

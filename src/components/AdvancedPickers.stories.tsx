@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { MultiCombobox, DateRangePicker, CommandPalette } from './AdvancedPickers';
+import { MultiCombobox, DateRangePicker, CommandPalette, dateRangePresets } from './AdvancedPickers';
 import { Button } from './Button';
 import type { DateRange } from './AdvancedPickers';
 
@@ -51,6 +51,8 @@ export const RangoReporte: StoryObj = {
   name: 'Rango de fechas · Reportes (showInputs + monthDropdown)',
   render: () => {
     const [r, setR] = React.useState<DateRange>({ from: startOfMonth(new Date()), to: new Date() });
+    // The full Bsale-style preset set; the trigger shows the preset name when one
+    // is active (and falls back to the date range for a custom selection).
     return (
       <DateRangePicker
         value={r}
@@ -58,12 +60,8 @@ export const RangoReporte: StoryObj = {
         showInputs
         monthDropdown
         months={1}
-        presets={[
-          { label: 'Hoy', range: () => ({ from: new Date(), to: new Date() }) },
-          { label: 'Esta semana', range: () => ({ from: addDays(-6), to: new Date() }) },
-          { label: 'Este mes', range: () => ({ from: startOfMonth(new Date()), to: new Date() }) },
-          { label: 'Este año', range: () => ({ from: new Date(new Date().getFullYear(), 0, 1), to: new Date() }) },
-        ]}
+        defaultPreset="Este mes"
+        presets={dateRangePresets()}
       />
     );
   },

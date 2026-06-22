@@ -2688,6 +2688,10 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .daterange__presets button:hover { background: var(--bg-subtle); }
 .daterange__panes { padding: 12px; flex: 1; }
+/* Report popover (compact/single month): the panes hugs the calendar width so
+   the inputs row, nav and actions all line up to the same square — no dead space
+   beside a left-aligned calendar. */
+.daterange__popover--compact .daterange__panes { flex: 0 0 auto; width: max-content; }
 .daterange__nav {
   display: grid; grid-template-columns: auto 1fr auto;
   align-items: center; margin-bottom: 8px;
@@ -2698,7 +2702,10 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default); font-size: var(--text-lg);
 }
 .daterange__nav > button:hover { background: var(--bg-subtle); }
-.daterange__months { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; position: relative; }
+/* `width: max-content` so the container hugs the two fixed-width months — the
+   inter-month divider (::before at left:50%) then lands exactly in the gap, and
+   the calendar doesn't stretch to a wide popover. */
+.daterange__months { display: grid; grid-template-columns: auto auto; gap: 24px; position: relative; width: max-content; }
 /* Accent rule between the two month panels (brand secondary; orange in El Alba).
    Centered in the gap via left:50% so it's independent of the gap width. Hidden
    when the panels stack to a single column (≤600px). */
@@ -2715,7 +2722,10 @@ button, input, select, textarea { box-sizing: border-box; }
   text-align: center; margin-bottom: 8px;
 }
 .daterange__grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+  /* Fixed 40px columns (not 1fr) so the calendar stays tight regardless of the
+     popover width — a wide container must not stretch the days into loose,
+     far-apart cells (the numbers should hug, like a compact month view). */
+  display: grid; grid-template-columns: repeat(7, 40px); gap: 2px;
 }
 .daterange__dow {
   font-family: var(--font-body); font-weight: 700; font-size: 0.625rem;
@@ -2731,32 +2741,30 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .daterange__day:hover:not(:disabled):not(.is-band) { background: var(--bg-subtle); }
 .daterange__day.is-today { font-weight: 700; color: var(--color-primary); }
-/* Continuous range band: a per-row pill behind the days. The ::before edges are
-   set per cell (is-bl-* / is-br-*): `mid` emerges from the endpoint circle (half
-   cell, so the band meets the circle at center — no stray cap on the outer
-   side), `cap` rounds at a row start/end or a hover end, `join` bridges the 2px
-   column gap to the neighbour. Each week-row is its own pill. */
+/* Continuous range band behind the days. Everything is SQUARE (radius-sm) for one
+   consistent shape across hover / selected / band — no circles or pills. The band
+   ::before fills each cell and bridges the 2px column gap (left/right: -1px); the
+   outer corners round only at the range ends + row edges, toggled by is-rl/is-rr
+   (which round both the band and the endpoint block to the same radius). */
 .daterange__day.is-band { color: var(--color-primary-800); }
 .daterange__day.is-band::before {
-  content: ''; position: absolute; top: 0; bottom: 0;
+  content: ''; position: absolute; top: 0; bottom: 0; left: -1px; right: -1px;
   z-index: -2; background: var(--color-primary-100);
 }
-.daterange__day.is-bl-mid::before { left: 50%; }
-.daterange__day.is-bl-cap::before { left: 0; border-top-left-radius: var(--radius-pill); border-bottom-left-radius: var(--radius-pill); }
-.daterange__day.is-bl-join::before { left: -1px; }
-.daterange__day.is-br-mid::before { right: 50%; }
-.daterange__day.is-br-cap::before { right: 0; border-top-right-radius: var(--radius-pill); border-bottom-right-radius: var(--radius-pill); }
-.daterange__day.is-br-join::before { right: -1px; }
+.daterange__day.is-rl::before { left: 0; }
+.daterange__day.is-rr::before { right: 0; }
+.daterange__day.is-rl::before, .daterange__day.is-rl::after { border-top-left-radius: var(--radius-sm); border-bottom-left-radius: var(--radius-sm); }
+.daterange__day.is-rr::before, .daterange__day.is-rr::after { border-top-right-radius: var(--radius-sm); border-bottom-right-radius: var(--radius-sm); }
 /* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
 .daterange__day.is-outside {
   display: flex; align-items: center; justify-content: center;
   color: var(--fg-subtle); opacity: 0.4; pointer-events: none;
 }
-/* Endpoints (from/to): a solid circle on top of the band. */
+/* Endpoints (from/to): a solid square block filling the cell (rounds on its outer
+   side via is-rl/is-rr above), so it merges seamlessly with the band — no circle. */
 .daterange__day.is-selected { color: var(--color-white); font-weight: 700; }
 .daterange__day.is-selected::after {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 32px; height: 32px; border-radius: var(--radius-pill);
+  content: ''; position: absolute; inset: 0;
   z-index: -1; background: var(--color-primary);
 }
 .daterange__day.is-disabled { opacity: 0.3; pointer-events: none; }
@@ -2764,7 +2772,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Compact single-month layout (months={1}): narrower popover, one panel, no
    inter-month divider. */
 .daterange__popover--compact { min-width: 0; }
-.daterange__months--single { grid-template-columns: minmax(248px, 1fr); }
+.daterange__months--single { grid-template-columns: auto; }
 .daterange__months--single::before { display: none; }
 
 /* Editable Desde/Hasta inputs (showInputs). */
@@ -2786,7 +2794,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 /* Month/year jump (monthDropdown). */
-.daterange__monthjump { position: relative; }
+.daterange__monthjump { position: relative; justify-self: center; }
 .daterange__monthjump-trigger {
   display: inline-flex; align-items: center; gap: 4px;
   background: transparent; border: 0; cursor: pointer; padding: 4px 6px;
@@ -2797,7 +2805,9 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .daterange__monthjump-trigger:hover { background: var(--bg-subtle); }
 .daterange__menu {
-  position: absolute; top: calc(100% + 4px); left: 0; z-index: 5;
+  /* Centered under the (now centered) trigger so the 220px menu stays inside
+     the compact calendar instead of overflowing to the right. */
+  position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 5;
   background: var(--bg-surface); border: 1px solid var(--border-default);
   border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   padding: 8px; width: 220px;

@@ -29,3 +29,25 @@ describe('DateRangePicker month divider', () => {
     expect(css).toMatch(/@media\s*\(max-width:\s*600px\)\s*\{[\s\S]*?\.daterange__months\s*\{\s*grid-template-columns:\s*1fr/);
   });
 });
+
+// The day cells are a fixed 40px (not `1fr`) so a wide popover can't stretch the
+// numbers into loose, far-apart cells — the calendar stays compact. The months
+// container hugs its content (`max-content`) so the divider stays centred.
+describe('DateRangePicker compact calendar', () => {
+  it('the day grid uses fixed 40px columns, not stretchy 1fr', () => {
+    const grid = css.match(/\.daterange__grid\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(grid).toMatch(/grid-template-columns:\s*repeat\(7,\s*40px\)/);
+    expect(grid).not.toMatch(/repeat\(7,\s*1fr\)/);
+  });
+
+  it('the months container hugs its content so it never stretches wide', () => {
+    const months = css.match(/\.daterange__months\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(months).toMatch(/width:\s*max-content/);
+  });
+
+  it('the compact (report) panes hugs the calendar so it forms a tight square', () => {
+    const panes = css.match(/\.daterange__popover--compact\s+\.daterange__panes\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(panes).toMatch(/width:\s*max-content/);
+    expect(panes).toMatch(/flex:\s*0 0 auto/);
+  });
+});

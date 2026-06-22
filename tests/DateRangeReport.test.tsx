@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { DateRangePicker } from '../src/components/AdvancedPickers';
+import { DateRangePicker, dateRangePresets } from '../src/components/AdvancedPickers';
 import { DatePicker } from '../src/components/Pickers';
 import { buildMonthGrid6 } from '../src/utils/dateFormat';
+
+const DAY = 86_400_000;
 
 // June 2026 starts on a Monday, so the first week is 1(Mon)..7(Sun).
 const RANGE = { from: new Date(2026, 5, 1), to: new Date(2026, 5, 10) };
@@ -19,31 +22,34 @@ const day = (n: number) =>
 beforeEach(() => { document.body.innerHTML = ''; });
 
 describe('DateRangePicker — continuous band (always-on)', () => {
-  it('endpoints emerge from the circle (half-cell), row edges round, mid-row bridges', () => {
+  it('rounds (square radius) only at the range ends + row edges; mid-row stays square', () => {
     openWith({ value: RANGE, onChange: () => {}, months: 1 });
-    // Endpoint with circle: band is a half-cell that meets the circle at center
-    // (is-bl-mid / is-br-mid), not a full rounded cap on the outer side.
+    // Range start (1) rounds left only; range end (10) rounds right only.
     expect(day(1).className).toContain('is-selected');
     expect(day(1).className).toContain('is-band');
-    expect(day(1).className).toContain('is-bl-mid');
-    expect(day(1).className).not.toContain('is-bl-cap');
+    expect(day(1).className).toContain('is-rl');
+    expect(day(1).className).not.toContain('is-rr');
     expect(day(10).className).toContain('is-selected');
-    expect(day(10).className).toContain('is-br-mid');
-    // Row edges: Sunday (7, col 6) caps the row band on the right; Monday (8,
-    // col 0) caps the next row on the left.
-    expect(day(7).className).toContain('is-br-cap');
+    expect(day(10).className).toContain('is-rr');
+    expect(day(10).className).not.toContain('is-rl');
+    // Row edges: Sunday (7, col 6) rounds right; Monday (8, col 0) rounds left.
+    expect(day(7).className).toContain('is-rr');
     expect(day(7).className).not.toContain('is-selected');
-    expect(day(8).className).toContain('is-bl-cap');
-    // Mid-row day bridges both sides (no cap, no circle).
+    expect(day(7).className).not.toContain('is-rl');
+    expect(day(8).className).toContain('is-rl');
+    // Mid-row day: square on both sides (bridges into the band).
     expect(day(5).className).toContain('is-band');
-    expect(day(5).className).toContain('is-bl-join');
-    expect(day(5).className).toContain('is-br-join');
+    expect(day(5).className).not.toContain('is-rl');
+    expect(day(5).className).not.toContain('is-rr');
   });
 
-  it('a lone endpoint (no range yet) shows no band', () => {
+  it('a lone endpoint (no range yet) shows no band but a fully-rounded square', () => {
     openWith({ value: { from: new Date(2026, 5, 15), to: null }, onChange: () => {}, months: 1 });
     expect(day(15).className).toContain('is-selected');
     expect(day(15).className).not.toContain('is-band');
+    // Lone selection rounds all four corners (square block).
+    expect(day(15).className).toContain('is-rl');
+    expect(day(15).className).toContain('is-rr');
   });
 });
 
@@ -137,6 +143,86 @@ describe('Date pickers — stable height (adjacent days rendered, not selectable
     fireEvent.focus(container.querySelector('.datepicker__input') as HTMLElement);
     expect(document.querySelectorAll('.datepicker__day').length).toBe(42);
     expect(document.querySelectorAll('.datepicker__day.is-outside').length).toBeGreaterThan(0);
+  });
+});
+
+describe('dateRangePresets — common analytics presets', () => {
+  const get = (k: string) => dateRangePresets().find((p) => p.key === k)!.range();
+
+  it('returns the 8 presets in order with Spanish labels by default', () => {
+    const p = dateRangePresets();
+    expect(p.map((x) => x.key)).toEqual(['today', 'yesterday', 'thisWeek', 'lastWeek', 'thisMonth', 'lastMonth', 'thisYear', 'lastYear']);
+    expect(p.find((x) => x.key === 'lastMonth')!.label).toBe('Mes anterior');
+    expect(p.find((x) => x.key === 'thisWeek')!.label).toBe('Esta semana');
+  });
+
+  it('today is a single day; yesterday is exactly the day before', () => {
+    const today = get('today');
+    expect(today.from!.getTime()).toBe(today.to!.getTime());
+    const y = get('yesterday');
+    expect(y.from!.getTime()).toBe(y.to!.getTime());
+    expect(Math.round((today.from!.getTime() - y.from!.getTime()) / DAY)).toBe(1);
+  });
+
+  it('thisWeek / lastWeek are Monday-anchored; lastWeek is a full Mon–Sun', () => {
+    expect(get('thisWeek').from!.getDay()).toBe(1); // Monday
+    const lw = get('lastWeek');
+    expect(lw.from!.getDay()).toBe(1);
+    expect(lw.to!.getDay()).toBe(0); // Sunday
+    expect(Math.round((lw.to!.getTime() - lw.from!.getTime()) / DAY)).toBe(6);
+  });
+
+  it('thisMonth starts on the 1st; lastMonth is the full previous month', () => {
+    expect(get('thisMonth').from!.getDate()).toBe(1);
+    const lm = get('lastMonth');
+    expect(lm.from!.getDate()).toBe(1);
+    expect(lm.from!.getMonth()).toBe(lm.to!.getMonth());
+    // the day after `to` rolls into the next month → `to` was the last day
+    expect(new Date(lm.to!.getFullYear(), lm.to!.getMonth(), lm.to!.getDate() + 1).getDate()).toBe(1);
+  });
+
+  it('include picks a subset/order and labels can be overridden', () => {
+    const p = dateRangePresets({ include: ['thisYear', 'today'], labels: { today: 'Hoy!' } });
+    expect(p.map((x) => x.key)).toEqual(['thisYear', 'today']);
+    expect(p[1].label).toBe('Hoy!');
+  });
+});
+
+function ControlledRange({ presets }: { presets: { label: string; range: () => { from: Date | null; to: Date | null } }[] }) {
+  const [r, setR] = React.useState<{ from: Date | null; to: Date | null }>({ from: null, to: null });
+  return <DateRangePicker value={r} onChange={setR} format="dmy" presets={presets} />;
+}
+
+describe('DateRangePicker — active preset name on the trigger (Bsale-style)', () => {
+  it('shows the preset label while it is active, the range after a manual change', () => {
+    const presets = [{ label: 'Este mes', range: () => ({ from: new Date(2026, 5, 1), to: new Date(2026, 5, 30) }) }];
+    render(<ControlledRange presets={presets} />);
+    const trigger = () => document.querySelector('.daterange__trigger') as HTMLElement;
+    fireEvent.click(trigger());
+    fireEvent.click([...document.querySelectorAll('.daterange__presets button')].find((b) => b.textContent === 'Este mes') as HTMLElement);
+    expect(trigger().textContent).toContain('Este mes');
+    // Reopen and pick a day manually → the trigger drops the preset name for the range.
+    fireEvent.click(trigger());
+    fireEvent.click([...document.querySelectorAll('button.daterange__day')].find((b) => b.textContent === '15') as HTMLElement);
+    expect(trigger().textContent).not.toContain('Este mes');
+    expect(trigger().textContent).toContain('→');
+  });
+
+  it('defaultPreset starts active: name on the trigger + range applied', () => {
+    const presets = [{ label: 'Este mes', range: () => ({ from: new Date(2026, 5, 1), to: new Date(2026, 5, 30) }) }];
+    const { container } = render(<DateRangePicker defaultPreset="Este mes" presets={presets} format="dmy" />);
+    const trigger = container.querySelector('.daterange__trigger') as HTMLElement;
+    expect(trigger.textContent).toContain('Este mes');
+    // The range was seeded too: opening shows day 1 selected.
+    fireEvent.click(trigger);
+    const d1 = [...document.querySelectorAll('button.daterange__day')].find((b) => b.textContent === '1') as HTMLElement;
+    expect(d1.className).toContain('is-selected');
+  });
+
+  it('an unmatched defaultPreset is ignored', () => {
+    const presets = [{ label: 'Este mes', range: () => ({ from: new Date(2026, 5, 1), to: new Date(2026, 5, 30) }) }];
+    const { container } = render(<DateRangePicker defaultPreset="No existe" presets={presets} />);
+    expect((container.querySelector('.daterange__trigger') as HTMLElement).textContent).not.toContain('No existe');
   });
 });
 
