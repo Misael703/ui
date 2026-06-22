@@ -3354,6 +3354,14 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Charts ---------- */
 .chart { width: 100%; position: relative; }
+/* The chart svg is keyboard-navigable (recharts accessibilityLayer). Show its
+   focus ring only with the keyboard (:focus-visible), never on a mouse click. */
+.chart .recharts-surface:focus,
+.sparkline .recharts-surface:focus { outline: none; }
+.chart .recharts-surface:focus-visible,
+.sparkline .recharts-surface:focus-visible {
+  outline: 2px solid var(--border-focus); outline-offset: 2px; border-radius: var(--radius-sm);
+}
 .chart--donut { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-3); }
 .chart__donut-area { position: relative; width: 100%; }
 .chart__center {

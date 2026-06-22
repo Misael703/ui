@@ -280,3 +280,34 @@ describe('Tooltip sizing/positioning', () => {
     expect(find(cap, 'Tooltip')[0].props.contentStyle.whiteSpace).toBe('normal');
   });
 });
+
+describe('accessibilityLayer (Tab stop / keyboard nav) passthrough', () => {
+  it('defaults to true on Line/Bar/Donut', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} />);
+    expect(find(cap, 'LineChart')[0].props.accessibilityLayer).toBe(true);
+    const cap2: Captured[] = [];
+    render(<DonutChart recharts={makeRecharts(cap2)} data={[{ name: 'A', value: 5 }]} />);
+    expect(find(cap2, 'PieChart')[0].props.accessibilityLayer).toBe(true);
+  });
+
+  it('accessibilityLayer={false} opts the chart out of the tab order', () => {
+    const cap: Captured[] = [];
+    render(<BarChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} accessibilityLayer={false} />);
+    expect(find(cap, 'BarChart')[0].props.accessibilityLayer).toBe(false);
+  });
+
+  it('Sparkline ties accessibilityLayer to interactive (off by default)', () => {
+    const cap: Captured[] = [];
+    render(<Sparkline recharts={makeRecharts(cap)} data={data} dataKey="ventas" />);
+    expect(find(cap, 'AreaChart')[0].props.accessibilityLayer).toBe(false);
+    const cap2: Captured[] = [];
+    render(<Sparkline recharts={makeRecharts(cap2)} data={data} dataKey="ventas" interactive />);
+    expect(find(cap2, 'AreaChart')[0].props.accessibilityLayer).toBe(true);
+  });
+
+  it('CSS: the chart svg focus ring is keyboard-only (:focus-visible)', () => {
+    expect(indexCss).toMatch(/\.recharts-surface:focus,[\s\S]{0,80}?outline:\s*none/);
+    expect(indexCss).toMatch(/\.recharts-surface:focus-visible[\s\S]{0,120}?outline:\s*2px solid var\(--border-focus\)/);
+  });
+});

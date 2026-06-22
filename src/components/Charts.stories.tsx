@@ -59,6 +59,22 @@ export const Barras: StoryObj = {
   ),
 };
 
+// Non-actionable chart (no drill-down): opt out of recharts' keyboard layer so the
+// svg isn't a Tab stop. The keyboard focus ring (when enabled) is :focus-visible only.
+export const BarrasSinTabStop: StoryObj = {
+  render: () => (
+    <div style={{ width: 600 }}>
+      <BarChart
+        recharts={Recharts as any}
+        data={monthlyData}
+        categoryKey="mes"
+        series={[{ key: 'ventas', label: 'Ventas' }]}
+        accessibilityLayer={false}
+      />
+    </div>
+  ),
+};
+
 // Horizontal bars: the value end (right) is rounded, not the top.
 export const BarrasHorizontal: StoryObj = {
   render: () => (
