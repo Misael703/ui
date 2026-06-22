@@ -144,6 +144,9 @@ export interface UiKitMessages {
   'picker.openCalendar': string;
   'picker.clearSelection': string;
   'picker.selectRange': string;
+  'daterange.from': string;
+  'daterange.to': string;
+  'daterange.jumpMonth': string;
   'picker.searchCommands': string;
   'picker.commandPalette': string;
   'picker.prevYear': string;

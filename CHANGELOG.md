@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.60.0] — 2026-06-22
+
+**Minor. `DateRangePicker` goes report-grade — opt-in — and the range highlight
+is now a continuous band.** The two affordances reports need (typed inputs,
+month/year jump) are opt-in props on the same component, so a simple filter
+stays lean while a report turns on what it needs.
+
+### Changed
+
+- **Continuous range band (always-on).** The in-range highlight was flat cells
+  with a 2px gap (it broke between days). It's now a connected per-row pill with
+  rounded ends; the `from`/`to` endpoints render as a solid circle on top. Covers
+  the hover preview. Pure visual upgrade — no API change.
+
+### Added
+
+- **`showInputs?: boolean`** — editable "Desde"/"Hasta" text fields above the
+  calendar that parse a typed date (tolerant of `-`/`/`/`.` separators) and jump
+  the view. Off by default.
+- **`monthDropdown?: boolean`** — replaces the static month title with a
+  "MMMM YYYY ▾" button that opens a year‹ ›+ 12-month grid to jump months without
+  clicking the arrows N times.
+- **`months?: 1 | 2`** (default `2`) — `1` is the compact single-month layout
+  (narrower popover, no inter-month divider).
+- Locale keys `daterange.from`, `daterange.to`, `daterange.jumpMonth`.
+
 ## [1.59.1] — 2026-06-21
 
 **Patch. A divider between the two month panels of `DateRangePicker`.** The dual

@@ -45,6 +45,30 @@ export const RangoDeFechas: StoryObj = {
   },
 };
 
+// Report-grade config: editable inputs + month/year jump + compact single month.
+// Opt-in — a simple filter (above) stays lean with just presets.
+export const RangoReporte: StoryObj = {
+  name: 'Rango de fechas · Reportes (showInputs + monthDropdown)',
+  render: () => {
+    const [r, setR] = React.useState<DateRange>({ from: startOfMonth(new Date()), to: new Date() });
+    return (
+      <DateRangePicker
+        value={r}
+        onChange={setR}
+        showInputs
+        monthDropdown
+        months={1}
+        presets={[
+          { label: 'Hoy', range: () => ({ from: new Date(), to: new Date() }) },
+          { label: 'Esta semana', range: () => ({ from: addDays(-6), to: new Date() }) },
+          { label: 'Este mes', range: () => ({ from: startOfMonth(new Date()), to: new Date() }) },
+          { label: 'Este año', range: () => ({ from: new Date(new Date().getFullYear(), 0, 1), to: new Date() }) },
+        ]}
+      />
+    );
+  },
+};
+
 export const RangoDeFechasModoAplicar: StoryObj = {
   name: 'Rango de fechas · Modo Aplicar (uncontrolled)',
   render: () => {
