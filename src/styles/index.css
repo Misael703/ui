@@ -2687,6 +2687,10 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
 }
 .daterange__presets button:hover { background: var(--bg-subtle); }
+/* The active preset stays highlighted in blue (persists while it drives the value). */
+.daterange__presets button.is-active {
+  background: var(--color-primary-50); color: var(--color-primary); font-weight: 700;
+}
 .daterange__panes { padding: 12px; flex: 1; }
 /* Report popover (compact/single month): the panes hugs the calendar width so
    the inputs row, nav and actions all line up to the same square — no dead space

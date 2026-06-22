@@ -219,6 +219,18 @@ describe('DateRangePicker — active preset name on the trigger (Bsale-style)', 
     expect(d1.className).toContain('is-selected');
   });
 
+  it('the active preset stays highlighted in the list (is-active)', () => {
+    const presets = [
+      { label: 'Hoy', range: () => ({ from: new Date(2026, 5, 22), to: new Date(2026, 5, 22) }) },
+      { label: 'Este mes', range: () => ({ from: new Date(2026, 5, 1), to: new Date(2026, 5, 30) }) },
+    ];
+    const { container } = render(<DateRangePicker defaultPreset="Hoy" presets={presets} />);
+    fireEvent.click(container.querySelector('.daterange__trigger') as HTMLElement);
+    const btns = [...document.querySelectorAll('.daterange__presets button')];
+    expect(btns.find((b) => b.textContent === 'Hoy')!.className).toContain('is-active');
+    expect(btns.find((b) => b.textContent === 'Este mes')!.className).not.toContain('is-active');
+  });
+
   it('an unmatched defaultPreset is ignored', () => {
     const presets = [{ label: 'Este mes', range: () => ({ from: new Date(2026, 5, 1), to: new Date(2026, 5, 30) }) }];
     const { container } = render(<DateRangePicker defaultPreset="No existe" presets={presets} />);

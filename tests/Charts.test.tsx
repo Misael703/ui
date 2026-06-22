@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as React from 'react';
 import { render } from '@testing-library/react';
-import { LineChart, AreaChart, BarChart, DonutChart } from '../src/components/Charts';
+import { LineChart, AreaChart, BarChart, DonutChart, Sparkline } from '../src/components/Charts';
 
 /**
  * The chart wrappers inject recharts via the `recharts` prop. We pass a MOCK
@@ -209,5 +209,22 @@ describe('Tooltip category-label formatting', () => {
     const cap: Captured[] = [];
     render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} />);
     expect(find(cap, 'Tooltip')[0].props.labelFormatter).toBeUndefined();
+  });
+});
+
+describe('Sparkline hover dot', () => {
+  it('disables the active dot by default (glanceable; nothing to clip)', () => {
+    const cap: Captured[] = [];
+    render(<Sparkline recharts={makeRecharts(cap)} data={data} dataKey="ventas" />);
+    expect(find(cap, 'Area')[0].props.activeDot).toBe(false);
+    expect(find(cap, 'Tooltip').length).toBe(0);
+  });
+
+  it('interactive enables a dot with widened margins + a tooltip', () => {
+    const cap: Captured[] = [];
+    render(<Sparkline recharts={makeRecharts(cap)} data={data} dataKey="ventas" interactive />);
+    expect(find(cap, 'Area')[0].props.activeDot).toMatchObject({ r: 2.5 });
+    expect(find(cap, 'AreaChart')[0].props.margin).toMatchObject({ top: 4, right: 4, bottom: 4, left: 4 });
+    expect(find(cap, 'Tooltip').length).toBe(1);
   });
 });

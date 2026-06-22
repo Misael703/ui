@@ -370,6 +370,12 @@ export interface SparklineProps<D = any> {
   height?: number;
   color?: string;
   fill?: boolean;
+  /**
+   * Show a hover dot. Default `false` — a sparkline is glanceable/non-interactive
+   * (the fine detail lives in the big LineChart). When off there's no active dot
+   * to clip at the edges/base; when on, the margins are widened so it isn't cut.
+   */
+  interactive?: boolean;
   className?: string;
   ariaLabel?: string;
 }
@@ -377,12 +383,16 @@ export interface SparklineProps<D = any> {
 export function Sparkline<D = any>({
   recharts: R, data, dataKey,
   width = 120, height = 32, color = 'var(--color-primary)',
-  fill = true, className, ariaLabel,
+  fill = true, interactive = false, className, ariaLabel,
 }: SparklineProps<D>) {
+  // No hover dot by default (it clips against the tiny margins at the first/last
+  // point and the baseline). When interactive, leave room so it can't be cut off.
+  const margin = interactive ? { top: 4, right: 4, bottom: 4, left: 4 } : { top: 2, right: 0, bottom: 2, left: 0 };
   return (
     <div className={cx('sparkline', className)} role="img" aria-label={ariaLabel} style={{ width, height }}>
       <R.ResponsiveContainer width="100%" height="100%">
-        <R.AreaChart data={data} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
+        <R.AreaChart data={data} margin={margin}>
+          {interactive && <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />}
           <R.Area
             type="monotone"
             dataKey={dataKey}
@@ -391,6 +401,7 @@ export function Sparkline<D = any>({
             fill={fill ? color : 'none'}
             fillOpacity={fill ? 0.18 : 0}
             isAnimationActive={false}
+            activeDot={interactive ? { r: 2.5, strokeWidth: 0, fill: color } : false}
           />
         </R.AreaChart>
       </R.ResponsiveContainer>
