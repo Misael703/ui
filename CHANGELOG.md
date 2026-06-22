@@ -5,6 +5,24 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.62.1] — 2026-06-22
+
+**Patch. Two `DateRangePicker`/`Sparkline` fixes.**
+
+### Fixed
+
+- **`DateRangePicker`: the active preset stays highlighted** in the list (light
+  primary background + bold primary text), so a selected preset reads as selected
+  and persists while it drives the value. Clears on a manual change.
+- **`Sparkline`: the hover dot no longer clips** at the edges/baseline. A
+  sparkline is glanceable, so the active dot is now off by default (`activeDot=
+  false`) — nothing to cut off.
+
+### Added
+
+- **`Sparkline` `interactive`** (default `false`) — opt into the hover dot +
+  tooltip; margins are widened so the dot can't be clipped.
+
 ## [1.62.0] — 2026-06-22
 
 **Minor. `DateRangePicker` polish (presets, square shapes, compact layout) +

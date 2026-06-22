@@ -602,7 +602,7 @@ export function DateRangePicker({
             <ul className="daterange__presets">
               {presets.map((p, i) => (
                 <li key={i}>
-                  <button type="button" onClick={() => commit(p.range(), true, p.label)}>{p.label}</button>
+                  <button type="button" className={cx(appliedPreset === p.label && 'is-active')} onClick={() => commit(p.range(), true, p.label)}>{p.label}</button>
                 </li>
               ))}
             </ul>
