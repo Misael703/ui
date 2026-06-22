@@ -55,12 +55,25 @@ const PALETTE = [
   '#d4a574',
 ];
 
+/** Tooltip chrome shared by every chart. */
+export interface ChartTooltipConfig {
+  /**
+   * Cap the tooltip width so long content wraps instead of overflowing a narrow
+   * (mobile) chart. Default `min(220px, 90vw)`. Number = px; or any CSS length.
+   */
+  maxWidth?: number | string;
+  /** Let the tooltip escape the chart's plotting box. Default: recharts (stays inside). */
+  allowEscapeViewBox?: { x?: boolean; y?: boolean };
+}
+
 export interface BaseChartProps<D = any> {
   recharts: RechartsLike;
   data: D[];
   height?: number;
   className?: string;
   ariaLabel?: string;
+  /** Tooltip sizing/positioning. By default the tooltip caps its width and wraps. */
+  tooltip?: ChartTooltipConfig;
 }
 
 // Mirror of Recharts' AxisInterval. Controls how category ticks thin on
@@ -128,6 +141,19 @@ function valueAxisProps(valueFormatter: ((v: number) => string) | undefined, all
   return props;
 }
 
+// Tooltip box style: the kit chrome + a width cap with wrapping so long content
+// (long labels / many series) doesn't overflow a narrow chart. `min(220px, 90vw)`
+// stays inside on mobile and caps to 220px on desktop.
+const TOOLTIP_BASE_STYLE = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 } as const;
+
+function tooltipContentStyle(tooltip?: ChartTooltipConfig): Record<string, unknown> {
+  return { ...TOOLTIP_BASE_STYLE, maxWidth: tooltip?.maxWidth ?? 'min(220px, 90vw)', whiteSpace: 'normal' };
+}
+
+function tooltipChrome(tooltip?: ChartTooltipConfig): Record<string, unknown> {
+  return tooltip?.allowEscapeViewBox ? { allowEscapeViewBox: tooltip.allowEscapeViewBox } : {};
+}
+
 // Tooltip: value formatter + a category-label formatter that defaults to the
 // axis tick formatter (so the hovered label matches the axis).
 function tooltipProps(
@@ -166,7 +192,7 @@ export function LineChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
 }: LineChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
@@ -177,7 +203,7 @@ export function LineChart<D = any>({
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
+          <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Line
@@ -206,7 +232,7 @@ export function AreaChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve, stacked,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
 }: AreaChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
@@ -217,7 +243,7 @@ export function AreaChart<D = any>({
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
+          <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Area
@@ -250,7 +276,7 @@ export function BarChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
 }: BarChartProps<D>) {
   const isHorizontal = layout === 'horizontal';
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
@@ -277,7 +303,7 @@ export function BarChart<D = any>({
               <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
             </>
           )}
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
+          <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => {
             // Stacked: only the outermost (last) segment carries the end radius;
@@ -317,7 +343,7 @@ export interface DonutChartProps extends Omit<BaseChartProps, 'data'> {
 export function DonutChart({
   recharts: R, data, height = 240, className, ariaLabel,
   centerLabel, showLegend = true, innerRadius = 60, outerRadius = 88,
-  nameFormatter, valueFormatter,
+  nameFormatter, valueFormatter, tooltip,
 }: DonutChartProps) {
   // Recharts Tooltip formatter returns [formattedValue, formattedName].
   const tooltipProps = (nameFormatter || valueFormatter)
@@ -328,7 +354,7 @@ export function DonutChart({
       <div className="chart__donut-area" style={{ height }}>
         <R.ResponsiveContainer width="100%" height="100%">
           <R.PieChart>
-            <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps} />
+            <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps} />
             <R.Pie
               data={data}
               dataKey="value"
@@ -376,6 +402,8 @@ export interface SparklineProps<D = any> {
    * to clip at the edges/base; when on, the margins are widened so it isn't cut.
    */
   interactive?: boolean;
+  /** Tooltip sizing/positioning (only used when `interactive`). */
+  tooltip?: ChartTooltipConfig;
   className?: string;
   ariaLabel?: string;
 }
@@ -383,7 +411,7 @@ export interface SparklineProps<D = any> {
 export function Sparkline<D = any>({
   recharts: R, data, dataKey,
   width = 120, height = 32, color = 'var(--color-primary)',
-  fill = true, interactive = false, className, ariaLabel,
+  fill = true, interactive = false, tooltip, className, ariaLabel,
 }: SparklineProps<D>) {
   // No hover dot by default (it clips against the tiny margins at the first/last
   // point and the baseline). When interactive, leave room so it can't be cut off.
@@ -392,7 +420,7 @@ export function Sparkline<D = any>({
     <div className={cx('sparkline', interactive && 'sparkline--interactive', className)} role="img" aria-label={ariaLabel} style={{ width, height }}>
       <R.ResponsiveContainer width="100%" height="100%">
         <R.AreaChart data={data} margin={margin}>
-          {interactive && <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />}
+          {interactive && <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} />}
           <R.Area
             type="monotone"
             dataKey={dataKey}

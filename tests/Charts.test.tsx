@@ -251,3 +251,32 @@ describe('Sparkline is inert when non-interactive', () => {
     expect(indexCss).toMatch(/\.sparkline--interactive\s*\{[^}]*pointer-events:\s*auto/);
   });
 });
+
+describe('Tooltip sizing/positioning', () => {
+  it('caps the tooltip width and wraps by default (no overflow on narrow charts)', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} />);
+    const cs = find(cap, 'Tooltip')[0].props.contentStyle;
+    expect(cs.maxWidth).toBe('min(220px, 90vw)');
+    expect(cs.whiteSpace).toBe('normal');
+    expect(find(cap, 'Tooltip')[0].props.allowEscapeViewBox).toBeUndefined();
+  });
+
+  it('tooltip.maxWidth overrides the default', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} tooltip={{ maxWidth: 160 }} />);
+    expect(find(cap, 'Tooltip')[0].props.contentStyle.maxWidth).toBe(160);
+  });
+
+  it('tooltip.allowEscapeViewBox is passed through (Bar)', () => {
+    const cap: Captured[] = [];
+    render(<BarChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} tooltip={{ allowEscapeViewBox: { x: true } }} />);
+    expect(find(cap, 'Tooltip')[0].props.allowEscapeViewBox).toEqual({ x: true });
+  });
+
+  it('DonutChart also caps + wraps its tooltip', () => {
+    const cap: Captured[] = [];
+    render(<DonutChart recharts={makeRecharts(cap)} data={[{ name: 'A', value: 5 }]} />);
+    expect(find(cap, 'Tooltip')[0].props.contentStyle.whiteSpace).toBe('normal');
+  });
+});
