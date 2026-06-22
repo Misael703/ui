@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check } from './Icons';
 import { Spinner } from './Display';
-import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
@@ -358,7 +358,7 @@ export function DatePicker({
     if (value) setView(startOfMonth(value));
   }, [value]);
 
-  const { cells } = buildMonthGrid(view, 0);
+  const { cells } = buildMonthGrid6(view, 0);
 
   const isDisabled = (d: Date) =>
     !!(
@@ -415,8 +415,10 @@ export function DatePicker({
           </div>
           <div className="datepicker__grid">
             {weekdays.map((w, i) => <span key={i} className="datepicker__dow">{w}</span>)}
-            {cells.map((d, i) => {
-              if (!d) return <span key={`b${i}`} />;
+            {cells.map(({ date: d, outside }, i) => {
+              // Adjacent-month days are shown greyed for context (so the grid is
+              // always 6 rows and the height never jumps) but are not selectable.
+              if (outside) return <span key={i} className="datepicker__day is-outside" aria-hidden="true">{d.getDate()}</span>;
               const sel = value && isSameDay(d, value);
               const today = isSameDay(d, new Date());
               const off = isDisabled(d);

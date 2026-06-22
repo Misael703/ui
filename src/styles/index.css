@@ -2111,6 +2111,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .datepicker__day.is-today { font-weight: 700; color: var(--color-primary); }
 .datepicker__day.is-selected { background: var(--color-primary); color: var(--color-white); }
 .datepicker__day.is-disabled, .datepicker__day:disabled { opacity: 0.3; cursor: not-allowed; }
+/* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
+.datepicker__day.is-outside {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-subtle); opacity: 0.4; pointer-events: none;
+}
 
 /* ---------- TimePicker (custom popover, spinner columns) --------------- */
 /* Trigger mirrors the .datepicker field (border-strong, radius-md, field
@@ -2726,17 +2731,27 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .daterange__day:hover:not(:disabled):not(.is-band) { background: var(--bg-subtle); }
 .daterange__day.is-today { font-weight: 700; color: var(--color-primary); }
-/* Continuous range band: a per-row pill behind the days. ::before bridges the
-   2px column gap (inset 0 -1px) so adjacent in-band cells connect; the rounded
-   ends are toggled by is-band-start / is-band-end. Each week-row is its own
-   pill (vertical gap stays). */
+/* Continuous range band: a per-row pill behind the days. The ::before edges are
+   set per cell (is-bl-* / is-br-*): `mid` emerges from the endpoint circle (half
+   cell, so the band meets the circle at center — no stray cap on the outer
+   side), `cap` rounds at a row start/end or a hover end, `join` bridges the 2px
+   column gap to the neighbour. Each week-row is its own pill. */
 .daterange__day.is-band { color: var(--color-primary-800); }
 .daterange__day.is-band::before {
-  content: ''; position: absolute; top: 0; bottom: 0; left: -1px; right: -1px;
+  content: ''; position: absolute; top: 0; bottom: 0;
   z-index: -2; background: var(--color-primary-100);
 }
-.daterange__day.is-band-start::before { left: 0; border-top-left-radius: var(--radius-pill); border-bottom-left-radius: var(--radius-pill); }
-.daterange__day.is-band-end::before { right: 0; border-top-right-radius: var(--radius-pill); border-bottom-right-radius: var(--radius-pill); }
+.daterange__day.is-bl-mid::before { left: 50%; }
+.daterange__day.is-bl-cap::before { left: 0; border-top-left-radius: var(--radius-pill); border-bottom-left-radius: var(--radius-pill); }
+.daterange__day.is-bl-join::before { left: -1px; }
+.daterange__day.is-br-mid::before { right: 50%; }
+.daterange__day.is-br-cap::before { right: 0; border-top-right-radius: var(--radius-pill); border-bottom-right-radius: var(--radius-pill); }
+.daterange__day.is-br-join::before { right: -1px; }
+/* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
+.daterange__day.is-outside {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-subtle); opacity: 0.4; pointer-events: none;
+}
 /* Endpoints (from/to): a solid circle on top of the band. */
 .daterange__day.is-selected { color: var(--color-white); font-weight: 700; }
 .daterange__day.is-selected::after {
