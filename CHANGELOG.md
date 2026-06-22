@@ -5,6 +5,24 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.64.0] — 2026-06-22
+
+**Minor. Charts can opt out of recharts' keyboard layer; focus ring is now
+keyboard-only.**
+
+### Added
+
+- **`accessibilityLayer` prop** (Line/Area/Bar/Donut, default `true`) — passthrough
+  to recharts. recharts 3 puts `tabindex=0` on the chart svg by default (a Tab stop
+  with arrow-key navigation). Set `false` on a non-actionable chart (no drill-down)
+  so it's not a Tab stop / not focusable. `Sparkline` ties its layer to
+  `interactive`, so a non-interactive sparkline is never a Tab stop.
+
+### Changed
+
+- The chart svg's focus ring is now **`:focus-visible` only** — it shows on
+  keyboard focus, not on a mouse click, and uses the kit's focus token.
+
 ## [1.63.0] — 2026-06-22
 
 **Minor. Chart tooltips no longer overflow narrow charts.**

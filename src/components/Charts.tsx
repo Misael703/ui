@@ -74,6 +74,12 @@ export interface BaseChartProps<D = any> {
   ariaLabel?: string;
   /** Tooltip sizing/positioning. By default the tooltip caps its width and wraps. */
   tooltip?: ChartTooltipConfig;
+  /**
+   * recharts' keyboard-navigation layer (puts `tabindex=0` on the svg + arrow-key
+   * navigation). Default `true`. Set `false` for a non-actionable chart so it's
+   * not a Tab stop / not focusable (no drill-down → nothing to navigate to).
+   */
+  accessibilityLayer?: boolean;
 }
 
 // Mirror of Recharts' AxisInterval. Controls how category ticks thin on
@@ -192,14 +198,14 @@ export function LineChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
 }: LineChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
-        <R.LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+        <R.LineChart data={data} accessibilityLayer={accessibilityLayer} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
@@ -232,14 +238,14 @@ export function AreaChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve, stacked,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
 }: AreaChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
-        <R.AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+        <R.AreaChart data={data} accessibilityLayer={accessibilityLayer} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
@@ -276,7 +282,7 @@ export function BarChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
 }: BarChartProps<D>) {
   const isHorizontal = layout === 'horizontal';
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
@@ -290,7 +296,7 @@ export function BarChart<D = any>({
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
-        <R.BarChart data={data} layout={isHorizontal ? 'vertical' : 'horizontal'} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+        <R.BarChart data={data} accessibilityLayer={accessibilityLayer} layout={isHorizontal ? 'vertical' : 'horizontal'} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={isHorizontal} horizontal={!isHorizontal} />}
           {isHorizontal ? (
             <>
@@ -343,7 +349,7 @@ export interface DonutChartProps extends Omit<BaseChartProps, 'data'> {
 export function DonutChart({
   recharts: R, data, height = 240, className, ariaLabel,
   centerLabel, showLegend = true, innerRadius = 60, outerRadius = 88,
-  nameFormatter, valueFormatter, tooltip,
+  nameFormatter, valueFormatter, tooltip, accessibilityLayer = true,
 }: DonutChartProps) {
   // Recharts Tooltip formatter returns [formattedValue, formattedName].
   const tooltipProps = (nameFormatter || valueFormatter)
@@ -353,7 +359,7 @@ export function DonutChart({
     <div className={cx('chart chart--donut', className)} role="img" aria-label={ariaLabel}>
       <div className="chart__donut-area" style={{ height }}>
         <R.ResponsiveContainer width="100%" height="100%">
-          <R.PieChart>
+          <R.PieChart accessibilityLayer={accessibilityLayer}>
             <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps} />
             <R.Pie
               data={data}
@@ -419,7 +425,7 @@ export function Sparkline<D = any>({
   return (
     <div className={cx('sparkline', interactive && 'sparkline--interactive', className)} role="img" aria-label={ariaLabel} style={{ width, height }}>
       <R.ResponsiveContainer width="100%" height="100%">
-        <R.AreaChart data={data} margin={margin}>
+        <R.AreaChart data={data} accessibilityLayer={interactive} margin={margin}>
           {interactive && <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} />}
           <R.Area
             type="monotone"
