@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.63.0] — 2026-06-22
+
+**Minor. Chart tooltips no longer overflow narrow charts.**
+
+### Changed
+
+- Every chart tooltip now caps its width and wraps by default
+  (`max-width: min(220px, 90vw)` + `white-space: normal`), so long labels / many
+  series don't overflow a narrow (mobile) chart. Positioning is unchanged
+  (recharts keeps it inside the chart's viewBox).
+
+### Added
+
+- **`tooltip` config** (Line/Area/Bar/Donut/Sparkline) + the `ChartTooltipConfig`
+  type: `maxWidth` (override the cap) and `allowEscapeViewBox` (let the tooltip
+  leave the plotting box). `<LineChart tooltip={{ maxWidth: 160 }} />`.
+
 ## [1.62.2] — 2026-06-22
 
 **Patch.** **`Sparkline`: a non-interactive sparkline is now inert.** With
