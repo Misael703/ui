@@ -7,7 +7,10 @@ import { cx } from '../utils/cx';
  * and passes the modules in via the `recharts` prop so consumers only pay for what they use.
  *
  * Recharts is treated as an implicit peer dependency: install it in the host
- * app if you use any chart component.
+ * app if you use any chart component. Use **recharts ≥ 3** — earlier versions use
+ * `defaultProps` on function components, which logs a deprecation warning under
+ * React 19. recharts 3 removed them; these wrappers use default parameters, so on
+ * recharts 3.8+ the console stays clean (verified).
  *
  * Usage in a Next.js client component:
  *
@@ -85,6 +88,17 @@ export interface CartesianChartProps<D = any> extends BaseChartProps<D> {
   xTickAngle?: number;
   /** Format numeric values (value-axis ticks + tooltip). */
   valueFormatter?: (value: number) => string;
+  /**
+   * Allow fractional value-axis ticks. Default: auto — `false` when every series
+   * value is an integer (count data → no `0.25` ticks), `true` otherwise. Pass
+   * explicitly to override the auto-detection.
+   */
+  allowDecimals?: boolean;
+  /**
+   * Format the category label in the tooltip. Defaults to `xTickFormatter` so the
+   * tooltip matches the axis (e.g. both show `18 jun`, not the raw `2026-06-18`).
+   */
+  tooltipLabelFormatter?: (value: string) => string;
 }
 
 const DEFAULT_X_INTERVAL: AxisInterval = 'preserveStartEnd';
@@ -106,12 +120,38 @@ function categoryTickProps(
   return props;
 }
 
-function valueTickProps(valueFormatter?: (v: number) => string): Record<string, unknown> {
-  return valueFormatter ? { tickFormatter: (v: number) => valueFormatter(Number(v)) } : {};
+// Value axis: `allowDecimals` (count data → integer-only ticks) + optional
+// numeric tick formatter.
+function valueAxisProps(valueFormatter: ((v: number) => string) | undefined, allowDecimals: boolean): Record<string, unknown> {
+  const props: Record<string, unknown> = { allowDecimals };
+  if (valueFormatter) props.tickFormatter = (v: number) => valueFormatter(Number(v));
+  return props;
 }
 
-function tooltipValueProps(valueFormatter?: (v: number) => string): Record<string, unknown> {
-  return valueFormatter ? { formatter: (v: unknown) => valueFormatter(Number(v)) } : {};
+// Tooltip: value formatter + a category-label formatter that defaults to the
+// axis tick formatter (so the hovered label matches the axis).
+function tooltipProps(
+  valueFormatter: ((v: number) => string) | undefined,
+  tooltipLabelFormatter: ((v: string) => string) | undefined,
+  xTickFormatter: ((v: string) => string) | undefined,
+): Record<string, unknown> {
+  const props: Record<string, unknown> = {};
+  if (valueFormatter) props.formatter = (v: unknown) => valueFormatter(Number(v));
+  const labelFormatter = tooltipLabelFormatter ?? xTickFormatter;
+  if (labelFormatter) props.labelFormatter = (v: unknown) => labelFormatter(String(v));
+  return props;
+}
+
+// True when every plotted value is an integer → drives the `allowDecimals` auto-
+// detection (count series shouldn't get `0.25`-style ticks).
+function allIntegerValues<D>(data: D[], keys: string[]): boolean {
+  for (const row of data) {
+    for (const k of keys) {
+      const v = (row as Record<string, unknown>)[k];
+      if (typeof v === 'number' && Number.isFinite(v) && !Number.isInteger(v)) return false;
+    }
+  }
+  return true;
 }
 
 // ---------- LineChart ---------------------------------------------------
@@ -126,17 +166,18 @@ export function LineChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
 }: LineChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
+  const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
         <R.LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
-          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipValueProps(valueFormatter)} />
+          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Line
@@ -165,17 +206,18 @@ export function AreaChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve, stacked,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
 }: AreaChartProps<D>) {
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
+  const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
         <R.AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={false} />}
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
-          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipValueProps(valueFormatter)} />
+          <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => (
             <R.Area
@@ -208,9 +250,10 @@ export function BarChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter,
 }: BarChartProps<D>) {
   const isHorizontal = layout === 'horizontal';
+  const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
   // Radius must round the VALUE end: top for columns ([tl,tr,br,bl] → [R,R,0,0]),
   // right for horizontal bars ([0,R,R,0]). The old hardcoded [4,4,0,0] left
   // horizontal bars rounded-top / pointed-bottom.
@@ -225,16 +268,16 @@ export function BarChart<D = any>({
           {showGrid && <R.CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" vertical={isHorizontal} horizontal={!isHorizontal} />}
           {isHorizontal ? (
             <>
-              <R.XAxis type="number" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
+              <R.XAxis type="number" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
               <R.YAxis dataKey={categoryKey} type="category" stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} width={96} {...catTicksNoRotate} />
             </>
           ) : (
             <>
               <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...catTicks} />
-              <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueTickProps(valueFormatter)} />
+              <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
             </>
           )}
-          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipValueProps(valueFormatter)} />
+          <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
           {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
           {series.map((s, i) => {
             // Stacked: only the outermost (last) segment carries the end radius;

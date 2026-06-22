@@ -160,3 +160,54 @@ describe('DonutChart formatters', () => {
     expect(f(5, 'A')).toEqual(['$5', 'name:A']);
   });
 });
+
+const decimalData = [{ d: 'a', ventas: 1.5 }, { d: 'b', ventas: 2 }];
+
+describe('Value axis allowDecimals (count data → integer ticks)', () => {
+  it('auto: an all-integer series sets allowDecimals=false on the value axis', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} />);
+    expect(find(cap, 'YAxis')[0].props.allowDecimals).toBe(false);
+  });
+
+  it('auto: any fractional value keeps allowDecimals=true', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={decimalData} categoryKey="d" series={series} />);
+    expect(find(cap, 'YAxis')[0].props.allowDecimals).toBe(true);
+  });
+
+  it('an explicit allowDecimals overrides the auto-detection', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} allowDecimals />);
+    expect(find(cap, 'YAxis')[0].props.allowDecimals).toBe(true);
+  });
+
+  it('BarChart horizontal: the numeric value axis (XAxis) carries allowDecimals', () => {
+    const cap: Captured[] = [];
+    render(<BarChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} layout="horizontal" />);
+    const valueX = find(cap, 'XAxis').find((c) => c.props.type === 'number')!;
+    expect(valueX.props.allowDecimals).toBe(false);
+  });
+});
+
+describe('Tooltip category-label formatting', () => {
+  it('defaults the tooltip labelFormatter to xTickFormatter (axis ↔ tooltip match)', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} xTickFormatter={(v) => `D${v}`} />);
+    const lf = find(cap, 'Tooltip')[0].props.labelFormatter;
+    expect(typeof lf).toBe('function');
+    expect(lf('2026-05-01')).toBe('D2026-05-01');
+  });
+
+  it('tooltipLabelFormatter overrides the axis formatter', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} xTickFormatter={(v) => `X${v}`} tooltipLabelFormatter={(v) => `T${v}`} />);
+    expect(find(cap, 'Tooltip')[0].props.labelFormatter('a')).toBe('Ta');
+  });
+
+  it('no labelFormatter when neither is provided (raw category, back-compat)', () => {
+    const cap: Captured[] = [];
+    render(<LineChart recharts={makeRecharts(cap)} data={data} categoryKey="d" series={series} />);
+    expect(find(cap, 'Tooltip')[0].props.labelFormatter).toBeUndefined();
+  });
+});

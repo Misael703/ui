@@ -5,6 +5,48 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.62.0] — 2026-06-22
+
+**Minor. `DateRangePicker` polish (presets, square shapes, compact layout) +
+chart value-axis/tooltip fixes.** Surfaced refining the report-grade range picker
+and using the charts in a real counts dashboard.
+
+### Added
+
+- **`dateRangePresets(opts?)`** — the common analytics presets (Bsale-style):
+  today, yesterday, this/last week, this/last month, this/last year, with correct
+  "previous period" boundaries. `include` picks a subset/order; `labels` overrides
+  the (Spanish) labels. `<DateRangePicker presets={dateRangePresets()} />`.
+- **`DateRangePicker` shows the active preset's name on the trigger** (Bsale-style)
+  — "Este mes" instead of the date range while a preset is active; falls back to
+  the range after any manual change.
+- **`DateRangePicker` `defaultPreset`** — start with a preset active (by label):
+  seeds the range and shows its name on the trigger from the first render.
+- **Chart `allowDecimals`** (Line/Area/Bar) — value-axis decimals. **Auto-detects:**
+  `false` when every series value is an integer (count data → no `0.25` ticks),
+  `true` otherwise; pass explicitly to override.
+- **Chart `tooltipLabelFormatter`** (Line/Area/Bar) — formats the category label in
+  the tooltip; **defaults to `xTickFormatter`** so the tooltip matches the axis
+  (e.g. both show `18 jun`, not the raw `2026-06-18`).
+
+### Changed
+
+- **`DateRangePicker` day shapes standardized to square** (`radius-sm`). The
+  selected endpoint was a circle and the range band a pill — now both, plus hover,
+  are one consistent square (matching the single `DatePicker`). Fixes the awkward
+  shape when a range endpoint landed at a row edge.
+- **Compact calendar.** The day cells are a fixed 40px (not stretchy `1fr`), so a
+  wide popover no longer spreads the numbers far apart. In the report layout the
+  inputs/nav hug the calendar into a tight square (input `size` + `max-content`
+  panes). The month-jump label is centered in the nav.
+
+### Docs
+
+- `Charts` recommends **recharts ≥ 3** — older recharts uses `defaultProps` on
+  function components (a React 19 deprecation warning); recharts 3 removed them and
+  these wrappers use default parameters, so the console stays clean (verified on
+  3.8.x). Not a kit-fixable issue: recharts is brought by the host app.
+
 ## [1.61.0] — 2026-06-22
 
 **Minor. Date pickers get a stable height (adjacent-month days) and the range

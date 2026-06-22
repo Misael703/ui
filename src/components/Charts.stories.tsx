@@ -75,8 +75,49 @@ export const BarrasHorizontal: StoryObj = {
   ),
 };
 
+// Count data with a small max (1): the value axis auto-detects integers and shows
+// only whole ticks (0, 1) — no 0.25/0.5/0.75.
+export const BarrasConteo: StoryObj = {
+  render: () => (
+    <div style={{ width: 480 }}>
+      <BarChart
+        recharts={Recharts as any}
+        data={[
+          { estado: 'Anuladas', n: 1 },
+          { estado: 'Reembolsadas', n: 0 },
+          { estado: 'Rechazadas', n: 1 },
+        ]}
+        categoryKey="estado"
+        series={[{ key: 'n', label: 'Pedidos' }]}
+        showLegend={false}
+      />
+    </div>
+  ),
+};
+
+// Decimal data: auto-detection leaves allowDecimals=true, so fractional ticks show.
+export const Decimales: StoryObj = {
+  render: () => (
+    <div style={{ width: 560 }}>
+      <LineChart
+        recharts={Recharts as any}
+        data={[
+          { mes: 'Ene', ticket: 12.4 },
+          { mes: 'Feb', ticket: 13.7 },
+          { mes: 'Mar', ticket: 12.9 },
+          { mes: 'Abr', ticket: 14.2 },
+        ]}
+        categoryKey="mes"
+        series={[{ key: 'ticket', label: 'Ticket promedio (UF)' }]}
+        showLegend={false}
+      />
+    </div>
+  ),
+};
+
 // Dense daily series with long ISO labels: thinned + rotated + formatted ticks,
-// and an honest `linear` curve (no phantom humps over the zeros).
+// an honest `linear` curve, AND a formatted tooltip label (shows `18 may`, not the
+// raw ISO — the tooltip reuses xTickFormatter by default).
 const dailyData = Array.from({ length: 31 }, (_, i) => {
   const day = i + 1;
   // deterministic-ish counts with some zeros
