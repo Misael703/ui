@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.59.1] — 2026-06-21
+
+**Patch. A divider between the two month panels of `DateRangePicker`.** The dual
+month view had only whitespace between the panels; a thin accent rule now
+separates them so the split reads at a glance.
+
+### Changed
+
+- `.daterange__months` draws a 2px vertical rule centered between the two months
+  in the brand secondary token (`--color-secondary` — orange in the El Alba
+  preset, sand in the core theme). Centered via `left: 50%` so it's independent
+  of the gap; it collapses with the panels into a single column (and hides)
+  below 600px. CSS-only — no API change.
+
 ## [1.59.0] — 2026-06-21
 
 **Minor. Chart controls for dense time series + a horizontal-bar radius fix.**

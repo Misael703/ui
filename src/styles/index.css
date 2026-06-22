@@ -2693,7 +2693,15 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default); font-size: var(--text-lg);
 }
 .daterange__nav button:hover { background: var(--bg-subtle); }
-.daterange__months { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.daterange__months { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; position: relative; }
+/* Accent rule between the two month panels (brand secondary; orange in El Alba).
+   Centered in the gap via left:50% so it's independent of the gap width. Hidden
+   when the panels stack to a single column (≤600px). */
+.daterange__months::before {
+  content: ''; position: absolute; top: 2px; bottom: 2px; left: 50%;
+  width: 2px; transform: translateX(-50%);
+  background: var(--color-secondary); border-radius: var(--radius-pill);
+}
 .daterange__month { font-family: var(--font-body); }
 .daterange__title {
   font-family: var(--font-display); font-weight: 700;
@@ -3212,6 +3220,7 @@ button, input, select, textarea { box-sizing: border-box; }
 @media (max-width: 600px) {
   .daterange__popover { min-width: 0; flex-direction: column; }
   .daterange__months { grid-template-columns: 1fr; }
+  .daterange__months::before { display: none; }
   .daterange__presets { display: none; }
   .toast-stack { right: 0; left: 0; padding: 0 12px; }
   .toast { min-width: 0; width: 100%; max-width: none; }
