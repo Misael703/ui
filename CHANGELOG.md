@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.61.0] — 2026-06-22
+
+**Minor. Date pickers get a stable height (adjacent-month days) and the range
+band meets its endpoints cleanly.**
+
+### Changed
+
+- **Fixed 6-row calendar grid across `DatePicker` and `DateRangePicker`.** The
+  grids now render the leading/trailing days of the adjacent months (greyed,
+  non-interactive) so every month is 6 weeks tall — the popover height no longer
+  jumps between months with 4, 5 or 6 weeks. The full-month `Calendar` already
+  had a fixed grid and is unchanged.
+- **`DateRangePicker` band endpoints.** The continuous range band now emerges
+  from the `from`/`to` circle as a half-cell (meeting the circle at its center)
+  instead of drawing a full rounded cap on the outer side — the previous look
+  left a stray light nub beside the endpoint circle. A hover end still caps full.
+
+### Added
+
+- **`buildMonthGrid6(view, offset?)`** util + `MonthGridCell` type — the fixed
+  42-cell month model (each cell tagged `outside`). The legacy ragged
+  `buildMonthGrid` stays for back-compat.
+
 ## [1.60.0] — 2026-06-22
 
 **Minor. `DateRangePicker` goes report-grade — opt-in — and the range highlight

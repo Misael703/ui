@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, ChevronDown, X, Check, Search } from './Icons';
-import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
 import { Portal } from './Portal';
@@ -295,8 +295,8 @@ export function DateRangePicker({
   // Each panel renders ~42 Date cells. Without memoization, every
   // setHover() triggered a full rebuild of both panels' grids on every
   // mouse movement over the calendar. Memo keyed on `view` only.
-  const monthGrid0 = React.useMemo(() => buildMonthGrid(view, 0), [view]);
-  const monthGrid1 = React.useMemo(() => buildMonthGrid(view, 1), [view]);
+  const monthGrid0 = React.useMemo(() => buildMonthGrid6(view, 0), [view]);
+  const monthGrid1 = React.useMemo(() => buildMonthGrid6(view, 1), [view]);
 
   const isDisabled = (d: Date) =>
     !!(
@@ -419,15 +419,23 @@ export function DateRangePicker({
         {!monthDropdown && <div className="daterange__title">{monthNames[m.getMonth()]} {m.getFullYear()}</div>}
         <div className="daterange__grid">
           {weekdays.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
-          {cells.map((d, i) => {
-            if (!d) return <span key={`b${i}`} />;
+          {cells.map(({ date: d, outside }, i) => {
+            // Adjacent-month days: greyed, non-interactive context (keeps the grid
+            // at a fixed 6 rows so the height never jumps).
+            if (outside) return <span key={i} className="daterange__day is-outside" aria-hidden="true">{d.getDate()}</span>;
             const sel = (current.from && isSameDay(d, current.from)) || (current.to && isSameDay(d, current.to));
             const band = inRange(d) && isMultiDay;
-            // Column 0 = first weekday (Mon), 6 = last (Sun): the header row is 7
-            // cells, so `i % 7` is the cell's column.
+            // Column 0 = Monday, 6 = Sunday (the 7 weekday headers offset by a
+            // multiple of 7, so `i % 7` is the column).
             const col = i % 7;
-            const bandStart = band && !!bounds && (isSameDay(d, bounds.a) || col === 0);
-            const bandEnd = band && !!bounds && (isSameDay(d, bounds.b) || col === 6);
+            const leftEnd = band && !!bounds && isSameDay(d, bounds.a);
+            const rightEnd = band && !!bounds && isSameDay(d, bounds.b);
+            // The band emerges from an endpoint *circle* as a half-cell (so it
+            // meets the circle at its center, not with a stray cap on the outer
+            // side); a hover end (no circle) caps full. Interior cells bridge the
+            // gap and round only at row edges.
+            const bl = !band ? null : leftEnd ? (sel ? 'mid' : 'cap') : (col === 0 ? 'cap' : 'join');
+            const br = !band ? null : rightEnd ? (sel ? 'mid' : 'cap') : (col === 6 ? 'cap' : 'join');
             const today = isSameDay(d, new Date());
             const off = isDisabled(d);
             return (
@@ -438,8 +446,8 @@ export function DateRangePicker({
                   'daterange__day',
                   sel && 'is-selected',
                   band && 'is-band',
-                  bandStart && 'is-band-start',
-                  bandEnd && 'is-band-end',
+                  bl && `is-bl-${bl}`,
+                  br && `is-br-${br}`,
                   today && 'is-today',
                   off && 'is-disabled',
                 )}

@@ -161,6 +161,35 @@ export function buildMonthGrid(
   return { month, cells };
 }
 
+export interface MonthGridCell {
+  date: Date;
+  /** True for the leading/trailing days that belong to the adjacent month. */
+  outside: boolean;
+}
+
+/**
+ * Fixed 6-row (42-cell) month grid: leading days from the previous month and
+ * trailing days from the next month fill every cell, each tagged `outside`. The
+ * row count is constant, so the picker's height never jumps between months with
+ * 4, 5 or 6 weeks. Monday-first. Used by the DatePicker/DateRangePicker; the
+ * legacy `buildMonthGrid` (ragged, `null`-padded) stays for back-compat.
+ */
+export function buildMonthGrid6(view: Date, offset = 0): { month: Date; cells: MonthGridCell[] } {
+  const month = addMonths(view, offset);
+  const y = month.getFullYear();
+  const mo = month.getMonth();
+  const startDow = (new Date(y, mo, 1).getDay() + 6) % 7; // Monday = 0
+  const daysInMonth = new Date(y, mo + 1, 0).getDate();
+  const cells: MonthGridCell[] = [];
+  // Leading days from the previous month (ascending).
+  for (let i = startDow; i > 0; i--) cells.push({ date: new Date(y, mo, 1 - i), outside: true });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(y, mo, d), outside: false });
+  // Trailing days from the next month until the grid is 6 full weeks.
+  let next = 1;
+  while (cells.length < 42) cells.push({ date: new Date(y, mo + 1, next++), outside: true });
+  return { month, cells };
+}
+
 // ---------- Relative day helpers ----------------------------------------
 
 /**
