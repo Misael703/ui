@@ -5,6 +5,13 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.62.2] — 2026-06-22
+
+**Patch.** **`Sparkline`: a non-interactive sparkline is now inert.** With
+`interactive=false` (the default) the container is `pointer-events: none`, so the
+recharts SVG can no longer be hovered/clicked/focused (no stray focus-ring on
+click). `interactive` restores `pointer-events: auto`.
+
 ## [1.62.1] — 2026-06-22
 
 **Patch. Two `DateRangePicker`/`Sparkline` fixes.**

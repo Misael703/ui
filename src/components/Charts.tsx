@@ -389,7 +389,7 @@ export function Sparkline<D = any>({
   // point and the baseline). When interactive, leave room so it can't be cut off.
   const margin = interactive ? { top: 4, right: 4, bottom: 4, left: 4 } : { top: 2, right: 0, bottom: 2, left: 0 };
   return (
-    <div className={cx('sparkline', className)} role="img" aria-label={ariaLabel} style={{ width, height }}>
+    <div className={cx('sparkline', interactive && 'sparkline--interactive', className)} role="img" aria-label={ariaLabel} style={{ width, height }}>
       <R.ResponsiveContainer width="100%" height="100%">
         <R.AreaChart data={data} margin={margin}>
           {interactive && <R.Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }} />}

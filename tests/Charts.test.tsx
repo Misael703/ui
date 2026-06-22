@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import * as React from 'react';
 import { render } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { LineChart, AreaChart, BarChart, DonutChart, Sparkline } from '../src/components/Charts';
+
+const indexCss = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
 /**
  * The chart wrappers inject recharts via the `recharts` prop. We pass a MOCK
@@ -226,5 +230,24 @@ describe('Sparkline hover dot', () => {
     expect(find(cap, 'Area')[0].props.activeDot).toMatchObject({ r: 2.5 });
     expect(find(cap, 'AreaChart')[0].props.margin).toMatchObject({ top: 4, right: 4, bottom: 4, left: 4 });
     expect(find(cap, 'Tooltip').length).toBe(1);
+  });
+});
+
+describe('Sparkline is inert when non-interactive', () => {
+  it('the non-interactive sparkline has no --interactive class', () => {
+    const cap: Captured[] = [];
+    const { container } = render(<Sparkline recharts={makeRecharts(cap)} data={data} dataKey="ventas" />);
+    expect(container.querySelector('.sparkline')!.classList.contains('sparkline--interactive')).toBe(false);
+  });
+
+  it('interactive adds the class that re-enables interaction', () => {
+    const cap: Captured[] = [];
+    const { container } = render(<Sparkline recharts={makeRecharts(cap)} data={data} dataKey="ventas" interactive />);
+    expect(container.querySelector('.sparkline')!.classList.contains('sparkline--interactive')).toBe(true);
+  });
+
+  it('CSS: base sparkline is pointer-events:none, --interactive restores auto', () => {
+    expect(indexCss).toMatch(/\.sparkline\s*\{[^}]*pointer-events:\s*none/);
+    expect(indexCss).toMatch(/\.sparkline--interactive\s*\{[^}]*pointer-events:\s*auto/);
   });
 });

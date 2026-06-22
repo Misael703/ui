@@ -3371,7 +3371,10 @@ button, input, select, textarea { box-sizing: border-box; }
 .chart__legend-item { display: inline-flex; align-items: center; gap: var(--space-2); }
 .chart__legend-swatch { width: 10px; height: 10px; border-radius: var(--radius-xs); flex: none; }
 .chart__legend-label { font-weight: 500; }
-.sparkline { display: inline-block; vertical-align: middle; }
+/* A non-interactive sparkline is inert: pointer-events:none so the recharts SVG
+   can't be hovered/clicked/focused (no stray focus-ring). `interactive` re-enables it. */
+.sparkline { display: inline-block; vertical-align: middle; pointer-events: none; }
+.sparkline--interactive { pointer-events: auto; }
 
 /* ==========================================================================
    ERP / E-commerce — componentes adicionales
