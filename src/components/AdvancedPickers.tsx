@@ -1,8 +1,8 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { CalendarIcon, ChevronLeft, ChevronRight, X, Check, Search } from './Icons';
-import { resolveDateFormat, formatDate, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
+import { CalendarIcon, ChevronLeft, ChevronRight, ChevronDown, X, Check, Search } from './Icons';
+import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
 import { Portal } from './Portal';
@@ -210,6 +210,19 @@ export interface DateRangePickerProps {
    * Display format. Default `'auto'` derives from `configureBrand().locale`.
    */
   format?: DateFormat;
+  /**
+   * Report-grade: show editable "Desde"/"Hasta" text inputs above the calendar
+   * so the user can type an exact range. Off by default — a simple filter is
+   * usually fine with presets + clicking.
+   */
+  showInputs?: boolean;
+  /**
+   * Report-grade: replace the static month title with a "MMMM de YYYY ▾" button
+   * that opens a month/year jump menu (instead of clicking the arrows N times).
+   */
+  monthDropdown?: boolean;
+  /** Number of month panels. Default `2`; `1` is the compact single-month layout. */
+  months?: 1 | 2;
 }
 
 const EMPTY_RANGE: DateRange = { from: null, to: null };
@@ -218,10 +231,11 @@ export function DateRangePicker({
   value, onChange, defaultValue, onApply, onOpenChange,
   minDate, maxDate, isDateDisabled, presets,
   invalid, disabled, className, id, format = 'auto',
+  showInputs = false, monthDropdown = false, months = 2,
 }: DateRangePickerProps) {
   const locale = useLocale();
   const weekdays = locale['picker.weekdaysShort'];
-  const months = locale['calendar.months'];
+  const monthNames = locale['calendar.months'];
   const fmt = resolveDateFormat(format);
   const isControlled = value !== undefined;
   const applyMode = !!onApply;
@@ -245,6 +259,12 @@ export function DateRangePicker({
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(initial.from ?? new Date()));
   const [hover, setHover] = React.useState<Date | null>(null);
+  // Editable-inputs (showInputs) mirror the current range; the month-jump menu
+  // (monthDropdown) tracks a year while the user browses it.
+  const [fromText, setFromText] = React.useState('');
+  const [toText, setToText] = React.useState('');
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuYear, setMenuYear] = React.useState(() => view.getFullYear());
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -293,6 +313,51 @@ export function DateRangePicker({
     const b = current.from < end ? end : current.from;
     return d >= new Date(a.getFullYear(), a.getMonth(), a.getDate()) &&
            d <= new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  };
+
+  // Ordered span ends (handles hover-preview when `to` is still null). Drives the
+  // continuous-band rounding: a cell rounds left at `a`/week-start, right at
+  // `b`/week-end.
+  const spanBounds = (): { a: Date; b: Date } | null => {
+    if (!current.from) return null;
+    const end = current.to ?? hover;
+    if (!end) return { a: current.from, b: current.from };
+    return current.from <= end ? { a: current.from, b: end } : { a: end, b: current.from };
+  };
+
+  // Apply a new range honoring apply/legacy mode (same split as a day click).
+  const setRange = (next: DateRange) => {
+    if (applyMode) setDraft(next);
+    else onChange?.(next);
+  };
+
+  // Keep the editable inputs in sync with the current range.
+  const curFrom = current.from?.getTime() ?? 0;
+  const curTo = current.to?.getTime() ?? 0;
+  React.useEffect(() => {
+    setFromText(current.from ? formatDate(current.from, fmt) : '');
+    setToText(current.to ? formatDate(current.to, fmt) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [curFrom, curTo, fmt]);
+
+  const commitInput = (which: 'from' | 'to', text: string) => {
+    const parsed = parseDate(text, fmt);
+    if (!parsed || isDisabled(parsed)) {
+      // Revert the field to the current value's formatted form.
+      if (which === 'from') setFromText(current.from ? formatDate(current.from, fmt) : '');
+      else setToText(current.to ? formatDate(current.to, fmt) : '');
+      return;
+    }
+    const next: DateRange = which === 'from'
+      ? (current.to && current.to < parsed ? { from: current.to, to: parsed } : { from: parsed, to: current.to })
+      : (current.from && parsed < current.from ? { from: parsed, to: current.from } : { from: current.from, to: parsed });
+    setRange(next);
+    setView(startOfMonth(parsed));
+  };
+
+  const jumpToMonth = (monthIndex: number) => {
+    setView(new Date(menuYear, monthIndex, 1));
+    setMenuOpen(false);
   };
 
   const click = (d: Date) => {
@@ -344,22 +409,40 @@ export function DateRangePicker({
 
   const renderMonth = (offset: number) => {
     const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
+    const bounds = spanBounds();
+    // Only paint the band for a real (multi-day) span; a lone endpoint shows
+    // just its circle.
+    const isMultiDay = !!bounds && !isSameDay(bounds.a, bounds.b);
     return (
       <div className="daterange__month">
-        <div className="daterange__title">{months[m.getMonth()]} {m.getFullYear()}</div>
+        {/* The dropdown owns the month label when enabled; otherwise a static title. */}
+        {!monthDropdown && <div className="daterange__title">{monthNames[m.getMonth()]} {m.getFullYear()}</div>}
         <div className="daterange__grid">
           {weekdays.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
           {cells.map((d, i) => {
             if (!d) return <span key={`b${i}`} />;
             const sel = (current.from && isSameDay(d, current.from)) || (current.to && isSameDay(d, current.to));
-            const ir = inRange(d);
+            const band = inRange(d) && isMultiDay;
+            // Column 0 = first weekday (Mon), 6 = last (Sun): the header row is 7
+            // cells, so `i % 7` is the cell's column.
+            const col = i % 7;
+            const bandStart = band && !!bounds && (isSameDay(d, bounds.a) || col === 0);
+            const bandEnd = band && !!bounds && (isSameDay(d, bounds.b) || col === 6);
             const today = isSameDay(d, new Date());
             const off = isDisabled(d);
             return (
               <button
                 key={i}
                 type="button"
-                className={cx('daterange__day', sel && 'is-selected', ir && !sel && 'is-range', today && 'is-today', off && 'is-disabled')}
+                className={cx(
+                  'daterange__day',
+                  sel && 'is-selected',
+                  band && 'is-band',
+                  bandStart && 'is-band-start',
+                  bandEnd && 'is-band-end',
+                  today && 'is-today',
+                  off && 'is-disabled',
+                )}
                 disabled={!!off}
                 onMouseEnter={() => setHover(d)}
                 onClick={() => click(d)}
@@ -370,6 +453,28 @@ export function DateRangePicker({
       </div>
     );
   };
+
+  // Month/year jump menu (monthDropdown). Inline (not a Portal) — it lives inside
+  // the already-portaled popover and is dismissed by selecting a month.
+  const renderMonthMenu = () => (
+    <div className="daterange__menu" role="dialog" aria-label={locale['daterange.jumpMonth']}>
+      <div className="daterange__menu-year">
+        <button type="button" onClick={() => setMenuYear((y) => y - 1)} aria-label={locale['picker.prevYear']}><ChevronLeft size={16} /></button>
+        <span>{menuYear}</span>
+        <button type="button" onClick={() => setMenuYear((y) => y + 1)} aria-label={locale['picker.nextYear']}><ChevronRight size={16} /></button>
+      </div>
+      <div className="daterange__menu-grid">
+        {monthNames.map((name, idx) => (
+          <button
+            type="button"
+            key={name}
+            className={cx('daterange__menu-month', view.getMonth() === idx && view.getFullYear() === menuYear && 'is-current')}
+            onClick={() => jumpToMonth(idx)}
+          >{name.slice(0, 3)}</button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div ref={wrapRef} className={cx('daterange', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
@@ -390,7 +495,7 @@ export function DateRangePicker({
         <Portal>
         <div
           ref={popoverRef}
-          className={cx('daterange__popover', 'is-floating')}
+          className={cx('daterange__popover', 'is-floating', months === 1 && 'daterange__popover--compact')}
           role="dialog"
           onMouseLeave={() => setHover(null)}
           style={{
@@ -410,14 +515,58 @@ export function DateRangePicker({
             </ul>
           )}
           <div className="daterange__panes">
+            {showInputs && (
+              <div className="daterange__inputs">
+                <label className="daterange__field">
+                  <span className="daterange__field-label">{locale['daterange.from']}</span>
+                  <input
+                    type="text"
+                    className="daterange__field-input"
+                    value={fromText}
+                    placeholder={dateFormatPlaceholder(fmt)}
+                    onChange={(e) => setFromText(e.target.value)}
+                    onBlur={(e) => commitInput('from', e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitInput('from', (e.target as HTMLInputElement).value); }}
+                  />
+                </label>
+                <label className="daterange__field">
+                  <span className="daterange__field-label">{locale['daterange.to']}</span>
+                  <input
+                    type="text"
+                    className="daterange__field-input"
+                    value={toText}
+                    placeholder={dateFormatPlaceholder(fmt)}
+                    onChange={(e) => setToText(e.target.value)}
+                    onBlur={(e) => commitInput('to', e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitInput('to', (e.target as HTMLInputElement).value); }}
+                  />
+                </label>
+              </div>
+            )}
             <div className="daterange__nav">
               <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
-              <span />
+              {monthDropdown ? (
+                <div className="daterange__monthjump">
+                  <button
+                    type="button"
+                    className="daterange__monthjump-trigger"
+                    onClick={() => { setMenuYear(view.getFullYear()); setMenuOpen((o) => !o); }}
+                    aria-haspopup="dialog"
+                    aria-expanded={menuOpen}
+                  >
+                    <span>{monthNames[view.getMonth()]} {view.getFullYear()}</span>
+                    <ChevronDown size={16} aria-hidden />
+                  </button>
+                  {menuOpen && renderMonthMenu()}
+                </div>
+              ) : (
+                <span />
+              )}
               <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label={locale['calendar.nextMonth']}><ChevronRight size={16} /></button>
             </div>
-            <div className="daterange__months">
+            <div className={cx('daterange__months', months === 1 && 'daterange__months--single')}>
               {renderMonth(0)}
-              {renderMonth(1)}
+              {months === 2 && renderMonth(1)}
             </div>
             <div className="daterange__actions">
               <button type="button" className="daterange__clear" onClick={clear}>{locale['common.clear']}</button>
