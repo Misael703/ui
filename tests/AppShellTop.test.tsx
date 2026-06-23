@@ -275,7 +275,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
      is DWIM by viewport (desktop ⇒ collapse, mobile ⇒ open/close drawer).
      These CSS guards pin the rules a refactor would silently drop. */
   it('CSS: --appshell-header-height is exposed as a public var (so sticky sub-headers can anchor)', () => {
-    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*--appshell-header-height:\s*56px/);
+    expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*--appshell-header-height:\s*64px/);
   });
 
   it('CSS: top shell heights use 100vh + 100dvh fallback (iOS Safari URL-bar safe)', () => {

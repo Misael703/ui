@@ -3061,10 +3061,11 @@ button, input, select, textarea { box-sizing: border-box; }
      fall back to default `auto` if they don't recognise the unit. */
   height: 100vh;
   height: 100dvh;
-  /* Public var so consumers can anchor sticky sub-headers/drawers to the
-     header's bottom edge without hardcoding the 56. Kept in sync with the
-     header `min-height` rule below; if you bump one, bump both. */
-  --appshell-header-height: 56px;
+  /* Public var: the floor of the header band (it's a `min-height`, so taller
+     slot content still grows it) and the anchor consumers use for sticky sub-
+     headers/drawers. The header `min-height` rule below reads this var, so
+     changing it here is enough. */
+  --appshell-header-height: 64px;
   /* Public vars for the header band's inner padding. Defaults preserve the
      prior hardcoded values (8px vertical / 16px horizontal). Override
      `--appshell-header-pad-x` to align the header's edge controls with the
@@ -3286,7 +3287,7 @@ button, input, select, textarea { box-sizing: border-box; }
        rendered header height. The previous `position: fixed; top: var(
        --appshell-header-height); height: calc(100dvh - header)` overshot
        the body's bottom whenever consumer chrome made the rendered header
-       taller than the 56px var (e.g. via padding around a logo). */
+       taller than the header var (e.g. via padding around a logo). */
     position: absolute;
     inset: 0;
     background: var(--backdrop);
