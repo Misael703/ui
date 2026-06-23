@@ -655,3 +655,13 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     });
   });
 });
+
+describe('AppShell collapsed/rail nav item centering', () => {
+  // When collapsed the nav label is width 0, so the item must center the icon and
+  // drop the row gap — otherwise the leftover gap + padding pushes it off-centre.
+  it('the collapsed nav item centers its content with no gap', () => {
+    const rule = css.match(/\.appshell\.is-collapsed \.appshell__navitem\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/justify-content:\s*center/);
+    expect(rule).toMatch(/gap:\s*0/);
+  });
+});

@@ -5,6 +5,16 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.65.3] — 2026-06-23
+
+**Patch. `AppShell` collapsed/rail nav icons are now centered.**
+
+### Fixed
+
+- In the collapsed (rail) sidebar, the nav label collapses to width 0 but the row
+  `gap` + padding remained, so the icon sat slightly off-centre in each nav item.
+  Collapsed items now `justify-content: center; gap: 0`, so the icon is centered.
+
 ## [1.65.2] — 2026-06-23
 
 **Patch. `AppShell` menu toggle: bare by default, fills on hover.**
