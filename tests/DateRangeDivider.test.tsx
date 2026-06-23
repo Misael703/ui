@@ -50,4 +50,10 @@ describe('DateRangePicker compact calendar', () => {
     expect(panes).toMatch(/width:\s*max-content/);
     expect(panes).toMatch(/flex:\s*0 0 auto/);
   });
+
+  it('the trigger calendar icon is inline-flex (collapses to 16px, stays centered)', () => {
+    const icon = css.match(/\.daterange__icon\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(icon).toMatch(/display:\s*inline-flex/);
+    expect(icon).toMatch(/align-items:\s*center/);
+  });
 });

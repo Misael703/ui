@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.64.1] — 2026-06-23
+
+**Patch. Two `DateRangePicker`/field consistency fixes.**
+
+### Fixed
+
+- **Field text size unified.** The picker + combobox inputs (`DatePicker`,
+  `DateRangePicker`, Year/`MonthPicker`, `TimePicker`, `Combobox`, `MultiCombobox`)
+  used `--text-sm` (14px) while the base `.input`/`.select`/`.textarea` are
+  `--text-md` (16px) — so a DatePicker looked smaller than a sibling field in a
+  filter row. They're now 16px to match. `.fields--dense` still drops to the
+  compact 14px (higher specificity).
+- **`DateRangePicker` trigger icon centering.** The calendar-icon `span` was
+  inline, so it took the ~20px line-box height instead of the 16px icon and the
+  glyph sat baseline-shifted. It's now `inline-flex` (collapses to 16×16, centered
+  with the label).
+
 ## [1.64.0] — 2026-06-22
 
 **Minor. Charts can opt out of recharts' keyboard layer; focus ring is now
