@@ -3102,20 +3102,19 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Built-in menu toggle (opt-in via `showMenuToggle`). Square icon button
    that inherits the header band's color, so it works in both default
    and brand headers without extra rules. */
-/* The standard menu toggle: a soft filled rounded-square (not a bare icon), so it
-   reads as a button. On a brand (dark) header the light grey would clash, so it
-   switches to a white-α fill. */
+/* The standard menu toggle: a bare icon by default (no fill), with a soft filled
+   rounded-square appearing on hover (40px, --radius-md). On a brand (dark) header
+   the hover fill is white-α instead of the light grey. */
 .appshell__menu-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   width: 40px; height: 40px;
   padding: 0; border: 0; border-radius: var(--radius-md);
-  background: var(--bg-subtle); color: inherit; cursor: pointer;
+  background: transparent; color: inherit; cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
-.appshell__menu-toggle:hover { background: var(--bg-muted); }
+.appshell__menu-toggle:hover { background: var(--bg-subtle); }
 .appshell__menu-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.appshell--header-brand .appshell__menu-toggle { background: rgba(255, 255, 255, 0.12); }
-.appshell--header-brand .appshell__menu-toggle:hover { background: rgba(255, 255, 255, 0.2); }
+.appshell--header-brand .appshell__menu-toggle:hover { background: rgba(255, 255, 255, 0.12); }
 .appshell--header-top .appshell__body {
   display: grid;
   grid-template-columns: 240px 1fr;
