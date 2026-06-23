@@ -5,6 +5,14 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.65.1] — 2026-06-23
+
+**Patch. The standard `AppShell` menu toggle (`showMenuToggle`) is now a filled
+button.** It was a bare transparent icon; it's now a soft filled rounded-square
+(40×40, `--bg-subtle` + `--radius-md`) so it reads as a button. On a brand (dark)
+header it uses a white-α fill instead of the light grey. The render-prop trigger
+in `header.left` is unaffected (you still own that look).
+
 ## [1.65.0] — 2026-06-23
 
 **Minor. AppShell header height default 56px → 64px.**
