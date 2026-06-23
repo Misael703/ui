@@ -404,8 +404,8 @@ export function AppShell({
             bounds via `position: absolute; inset: 0` — not a sibling of
             the body using viewport-relative math, which couldn't keep up
             when the actual header height drifted from the
-            `--appshell-header-height` var (e.g., 73 rendered vs 56 in the
-            var). Click-anywhere-out closes. */}
+            `--appshell-header-height` var (e.g., 73 rendered vs the 64 floor).
+            Click-anywhere-out closes. */}
         {mobileOpen && (
           <div
             className="appshell__scrim"

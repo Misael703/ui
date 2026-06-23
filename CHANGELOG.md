@@ -5,6 +5,19 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.65.0] — 2026-06-23
+
+**Minor. AppShell header height default 56px → 64px.**
+
+### Changed
+
+- The `AppShell` header floor (`--appshell-header-height`) defaults to **64px**
+  (was 56px) — comfortable room for a 40–48px control on the 8pt grid, and a
+  consistent height across apps. It's still a `min-height`, so taller slot content
+  grows it; override the var (`.appshell { --appshell-header-height: … }`) to
+  change the floor. The mobile drawer/scrim anchor to the body (`inset: 0`), so
+  they follow the rendered height automatically.
+
 ## [1.64.1] — 2026-06-23
 
 **Patch. Two `DateRangePicker`/field consistency fixes.**
