@@ -175,3 +175,28 @@ describe('DateRangePicker isDateDisabled', () => {
     expect(apply.disabled).toBe(true);
   });
 });
+
+// The picker + combobox field text was --text-sm (14px) while the base
+// .input/.select/.textarea are --text-md (16px), so a DatePicker looked smaller
+// than a sibling field in a filter row. A single-class override unifies them to
+// 16px; the higher-specificity .fields--dense variant keeps the compact 14px.
+describe('field text size: pickers/combobox match the base .input (16px)', () => {
+  it('the unification rule lifts the picker + combobox inputs to --text-md', () => {
+    const rule = css.match(/\.datepicker__input,\s*\.gridpicker__input,[\s\S]*?\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/font-size:\s*var\(--text-md\)/);
+    // covers the whole field family
+    const head = css.match(/(\.datepicker__input,\s*\.gridpicker__input,[\s\S]*?)\{/)?.[1] ?? '';
+    for (const sel of ['datepicker__input', 'gridpicker__input', 'timepicker__trigger', 'combobox__input', 'multicombo__input', 'daterange__trigger', 'daterange__field-input']) {
+      expect(head).toContain(`.${sel}`);
+    }
+  });
+
+  it('the base .input/.select/.textarea are --text-md (the size being matched)', () => {
+    const base = css.match(/\.input,\s*\.select,\s*\.textarea\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(base).toMatch(/font-size:\s*var\(--text-md\)/);
+  });
+
+  it('.fields--dense keeps the combobox compact (text-sm) via higher specificity', () => {
+    expect(css).toMatch(/\.fields--dense \.combobox__input \{[^}]*font-size:\s*var\(--text-sm\)/);
+  });
+});
