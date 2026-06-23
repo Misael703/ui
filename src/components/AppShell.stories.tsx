@@ -33,10 +33,10 @@ const sections = [
   },
 ];
 
-/* Single shell used by the Playground + all named stories. Mirrors the
-   recommended pattern: brand in `header.center`, render-prop trigger in
-   `header.left` (so the shell owns collapse state), avatar in
-   `header.right`. Internal-scroll model — wrap in a 100vh container. */
+/* Single shell used by the Playground + the rail story. Mirrors the recommended
+   pattern: the kit's `showMenuToggle` (standard filled trigger) at the start of
+   `header.left`, brand Logo in `header.center`, avatar in `header.right`.
+   Internal-scroll model — wrap in a 100vh container. */
 function ConfigurableShell({
   theme = 'default',
   headerTheme,
@@ -53,24 +53,10 @@ function ConfigurableShell({
         headerTheme={headerTheme}
         collapsedRail={rail}
         sections={sections}
+        showMenuToggle
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
         header={{
-          left: (
-            <button
-              type="button"
-              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-              aria-expanded={!collapsed}
-              onClick={() => setCollapsed((c) => !c)}
-              style={{
-                width: 40, height: 40, borderRadius: 999,
-                border: `1px solid ${sepColor}`,
-                background: 'transparent', color: 'inherit',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-            ><MenuIcon size={18} /></button>
-          ),
           center: <Logo variant="horizontal" bg={brand ? 'dark' : 'light'} height={28} />,
           right: (
             <>
@@ -215,6 +201,9 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
         collapsedRail
         sections={sections}
         header={{
+          // A custom render-prop trigger, styled like the kit's standard toggle
+          // (bare 40px icon, --radius-md) — showing you own the markup. (Use
+          // `showMenuToggle` to get it + the hover fill for free.)
           left: ({ collapsed, toggle }) => (
             <button
               type="button"
@@ -222,9 +211,8 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
               aria-expanded={!collapsed}
               onClick={toggle}
               style={{
-                width: 40, height: 40, borderRadius: 999,
-                border: '1px solid var(--border-default)', background: 'transparent',
-                color: 'inherit', cursor: 'pointer',
+                width: 40, height: 40, borderRadius: 8, border: 0,
+                background: 'transparent', color: 'inherit', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}
             ><MenuIcon size={18} /></button>
@@ -268,10 +256,9 @@ export const TopbarOnlyNoNav: StoryObj = {
 
 /**
  * **Topbar · Mobile drawer** (v1.31.0). Under 900px the sidebar becomes an
- * overlay anchored beneath the header. The same `header.left` render-prop
- * trigger that toggles `collapsed` on desktop now opens/closes the drawer
- * on mobile — one control, DWIM by viewport. ESC and a tap on the scrim
- * also close it.
+ * overlay anchored beneath the header. The kit's `showMenuToggle` toggles
+ * `collapsed` on desktop and opens/closes the drawer on mobile — one control,
+ * DWIM by viewport. ESC and a tap on the scrim also close it.
  */
 export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
@@ -280,21 +267,8 @@ export const TopbarMobileDrawer: StoryObj = {
     <div style={{ height: '100vh' }}>
       <AppShell
         sections={sections}
+        showMenuToggle
         header={{
-          left: ({ collapsed, toggle }) => (
-            <button
-              type="button"
-              aria-label={collapsed ? 'Abrir menú' : 'Cerrar menú'}
-              aria-expanded={!collapsed}
-              onClick={toggle}
-              style={{
-                width: 40, height: 40, borderRadius: 999,
-                border: '1px solid var(--border-default)', background: 'transparent',
-                color: 'inherit', cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            ><MenuIcon size={18} /></button>
-          ),
           center: <Logo variant="horizontal" bg="light" height={26} />,
           right: <Avatar name="Misael Ocas" size={32} />,
         }}
@@ -364,21 +338,8 @@ export const TopbarUserMenu: StoryObj = {
       <AppShell
         theme="brand"
         sections={sections}
+        showMenuToggle
         header={{
-          left: ({ collapsed, toggle }) => (
-            <button
-              type="button"
-              aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-              aria-expanded={!collapsed}
-              onClick={toggle}
-              style={{
-                width: 40, height: 40, borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.24)', background: 'transparent',
-                color: 'inherit', cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            ><MenuIcon size={18} /></button>
-          ),
           center: <Logo variant="horizontal" bg="dark" height={28} />,
           right: (
             <Popover
@@ -472,12 +433,8 @@ export const TopbarTallTable: StoryObj = {
       <div style={{ height: '100vh' }}>
         <AppShell
           sections={sections}
+          showMenuToggle
           header={{
-            left: ({ collapsed, toggle }) => (
-              <button type="button" aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'} aria-expanded={!collapsed} onClick={toggle}
-                style={{ width: 40, height: 40, borderRadius: 999, border: '1px solid var(--border-default)', background: 'transparent', color: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-              ><MenuIcon size={18} /></button>
-            ),
             center: <Logo variant="horizontal" bg="light" height={28} />,
             right: <Avatar name="Misael Ocas" size={32} />,
           }}

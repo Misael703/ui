@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.65.2] — 2026-06-23
+
+**Patch. `AppShell` menu toggle: bare by default, fills on hover.**
+
+### Fixed
+
+- The standard menu toggle (`showMenuToggle`) is **transparent by default** (a bare
+  icon) and shows the soft filled rounded-square only **on hover** — 1.65.1
+  mistakenly made the fill permanent. Size/shape kept (40px, `--radius-md`); brand
+  header uses a white-α hover fill.
+
+### Changed (stories only — not published)
+
+- AppShell stories now use `showMenuToggle` for the collapse trigger (was a custom
+  circled render-prop), so the Storybook reflects the kit's standard. The
+  render-prop demo story keeps a render-prop trigger, styled to match.
+
 ## [1.65.1] — 2026-06-23
 
 **Patch. The standard `AppShell` menu toggle (`showMenuToggle`) is now a filled
