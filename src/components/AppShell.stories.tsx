@@ -201,21 +201,17 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
         collapsedRail
         sections={sections}
         header={{
-          // A custom render-prop trigger, styled like the kit's standard toggle
-          // (bare 40px icon, --radius-md) — showing you own the markup. (Use
-          // `showMenuToggle` to get it + the hover fill for free.)
+          // A custom render-prop trigger that reuses the kit's `appshell__menu-toggle`
+          // class, so it looks identical to the standard toggle (bare icon + hover
+          // fill) while you still own the markup. (Use `showMenuToggle` to skip it.)
           left: ({ collapsed, toggle }) => (
             <button
               type="button"
+              className="appshell__menu-toggle"
               aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
               aria-expanded={!collapsed}
               onClick={toggle}
-              style={{
-                width: 40, height: 40, borderRadius: 8, border: 0,
-                background: 'transparent', color: 'inherit', cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            ><MenuIcon size={18} /></button>
+            ><MenuIcon size={20} /></button>
           ),
           center: <Logo variant="horizontal" bg="light" height={28} />,
           right: <Avatar name="Misael Ocas" size={32} />,
