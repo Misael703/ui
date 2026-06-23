@@ -2979,6 +2979,9 @@ button, input, select, textarea { box-sizing: border-box; }
   pointer-events: none;
 }
 .appshell.is-collapsed .appshell__navchildren { display: none; }
+/* Collapsed/rail: the label collapses to width 0, so center the icon and drop the
+   gap — otherwise the leftover gap + padding leave the icon off-centre. */
+.appshell.is-collapsed .appshell__navitem { justify-content: center; gap: 0; }
 .appshell__navlabel-section {
   transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear 0s;
 }
