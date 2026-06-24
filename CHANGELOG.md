@@ -5,6 +5,25 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.66.1] — 2026-06-24
+
+**Patch. `AppShell` no longer animates the collapse when it starts collapsed.**
+
+### Fixed
+- A shell configured to start collapsed could **animate the collapse on load**
+  (sidebar slide + nav-label fade) instead of just painting collapsed. Root
+  cause: the collapse transitions are always-on, so any time the shell painted
+  expanded and then settled to collapsed *after* the first paint, it animated.
+  That happens with SSR hydration (server sends expanded HTML, the client then
+  collapses), `persistKey` (collapsed state read from `localStorage` in an
+  effect), or a controlled consumer whose initial `collapsed` resolves async.
+  The shell now ships a one-frame **first-paint transition guard**
+  (`appshell--no-anim`, removed via `requestAnimationFrame` after mount) that
+  suppresses its own collapse transitions until after the initial settle —
+  SSR-safe (the class is in the server HTML, no hydration mismatch) and scoped
+  to the shell so consumer content is untouched. User-initiated toggles (which
+  can't fire within the first frame) still animate.
+
 ## [1.66.0] — 2026-06-23
 
 **Minor. New `UserMenu` component — topbar avatar menu that collapses to the

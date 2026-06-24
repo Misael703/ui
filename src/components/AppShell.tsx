@@ -292,6 +292,26 @@ export function AppShell({
     return () => mql.removeEventListener('change', onChange);
   }, []);
 
+  // First-paint transition guard. The collapse animations (sidebar slide,
+  // body grid, nav-label fade) are always-on, so any time the shell paints
+  // EXPANDED and then settles to COLLAPSED post-paint, the collapse animates
+  // when it shouldn't. That happens whenever the collapsed state arrives after
+  // the first paint: SSR hydration (server sends expanded HTML, then the
+  // client collapses), `persistKey` (localStorage read in an effect), or a
+  // controlled consumer whose initial state resolves async. We suppress the
+  // shell's transitions until one frame after mount so that settle is instant;
+  // user-initiated toggles (which can't happen within the first frame) still
+  // animate. `false` on the server + first client render → no hydration
+  // mismatch; the class ships in the SSR HTML and is removed post-mount.
+  const [animReady, setAnimReady] = React.useState(false);
+  React.useEffect(() => {
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setAnimReady(true));
+    });
+    return () => { cancelAnimationFrame(outer); cancelAnimationFrame(inner); };
+  }, []);
+
   // Mirror `collapsed` to `mobileOpen` in mobile: any flip of `collapsed`
   // (e.g. a controlled consumer's static hamburger that calls setCollapsed
   // directly instead of going through `headerApi.toggle()`) opens/closes
@@ -349,6 +369,7 @@ export function AppShell({
       !hasSidebar && 'appshell--no-nav',
       collapsed && 'is-collapsed',
       mobileOpen && 'is-mobile-open',
+      !animReady && 'appshell--no-anim',
       className,
     )}>
       {/* On a brand header the band is dark, so re-scope foreground tokens

@@ -3118,6 +3118,17 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__menu-toggle:hover { background: var(--bg-subtle); }
 .appshell__menu-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .appshell--header-brand .appshell__menu-toggle:hover { background: rgba(255, 255, 255, 0.12); }
+/* First-paint transition guard (set by the component for one frame after
+   mount). Kills the collapse animations so a shell that settles to collapsed
+   post-paint (SSR hydration, persistKey, async-controlled state) snaps into
+   place instead of animating the collapse on load. Scoped to the shell's own
+   animated parts so consumer content inside .appshell__content is untouched.
+   Removed after the first frame, so user-initiated toggles still animate. */
+.appshell--no-anim .appshell__body,
+.appshell--no-anim .appshell__sidebar,
+.appshell--no-anim .appshell__navlabel,
+.appshell--no-anim .appshell__navbadge,
+.appshell--no-anim .appshell__navlabel-section { transition: none !important; }
 .appshell--header-top .appshell__body {
   display: grid;
   grid-template-columns: 240px 1fr;
