@@ -1,37 +1,53 @@
-# UserMenu component (consumer-driven: despachos mobile overflow) — 2026-06-23
+# MoneyInput: live formatting while typing (2026-06-24)
 
-## Root cause
-El patrón "user pill → avatar en mobile" vivía en CSS local de la story
-(`@media (max-width:900px) .user-pill__text{display:none}`). Despachos copió
-el trigger pero no la media query → nombre+rol+chevron desbordan en mobile.
-Footgun repetido → baja al kit como componente.
+## Problema
+Hoy `MoneyInput` muestra `String(value)` mientras está enfocado y solo aplica
+`Intl.NumberFormat(currency)` en blur → al tipear se ve el número crudo (123123)
+y agrupa recién al salir (salto de reformateo).
 
-## Tasks
-- [ ] `src/components/UserMenu.tsx` — Popover + Avatar + ChevronDown
-- [ ] `src/styles/index.css` — clases `.usermenu__*` + media query 900px
-- [ ] `src/index.ts` — export barrel
-- [ ] `smoke/gallery/registry.tsx` — ENTRIES (gate anti-rot)
-- [ ] story `TopbarUserMenu` → usar `<UserMenu>` (borra CSS inline)
-- [ ] `tests/UserMenu.test.tsx`
-- [ ] build + test + smoke
+## Objetivo
+Mostrar SIEMPRE formateado (agrupado por miles del locale + símbolo), idéntico
+enfocado y en blur. API pública SIN cambios. Núcleo = manejo del caret.
 
-## API
-UserMenuItem { label, icon?, onSelect?, href?, danger? }
-UserMenuProps { name, role?, items: (UserMenuItem|'separator')[], avatar?,
-  align='end', placement='bottom', linkAs?, className?, contentClassName?, ariaLabel? }
-Breakpoint 900px fijo (= mobile drawer del AppShell). open manejado interno.
+## Diseño
+- `liveFormat?: boolean` default `true` (nuevo, opt-out al comportamiento legacy
+  focus-raw/blur-formatted como escape hatch backward-compat).
+- Helpers: `countDigits(s)`, `caretPosAfterDigits(formatted, n)`.
+- Ref merge (forwardRef + innerRef) para `setSelectionRange`.
+- `caretRef` (dígitos a la izq del caret) + layout effect ([value], guard
+  activeElement + SSR-safe) que reposiciona tras el re-render controlado.
+- `onKeyDown` Backspace/Delete (path live): opera sobre el string de DÍGITOS,
+  así backspace SIEMPRE borra un dígito (no se traba en el separador). Maneja
+  selección (select-all + delete → null).
+- `onChange` (path live): lee selectionStart, cuenta dígitos a la izq, extrae
+  raw (`/\d/` + signo), `onChange(Number(raw)|null)`, agenda caret.
+- `type="text" inputMode="numeric"`, `maximumFractionDigits: 0`, separadores
+  derivados del Intl resuelto (no hardcode).
+
+## Checklist
+- [ ] `MoneyInputProps.liveFormat?: boolean`
+- [ ] Helpers countDigits / caretPosAfterDigits
+- [ ] Ref merge + caretRef + isomorphic layout effect
+- [ ] onChange (live) + onKeyDown (live Backspace/Delete + selección)
+- [ ] Legacy path detrás de `liveFormat={false}` (focus state)
+- [ ] Story InputsExtra: demo de tipeo en vivo
+- [ ] smoke registry MoneyInput sigue cubierto (gate)
+- [ ] Tests unit: tipear→agrupa, insertar al medio (caret), backspace tras
+      separador, pegar 1.234.567 y 1234567, borrar todo→null
+- [ ] .d.ts/barrel: liveFormat aparece (export * ya lo trae)
+- [ ] full test + build + smoke
+- [ ] CHANGELOG + bump MINOR; release solo vía GitHub Release
 
 ## Review
-Shipeado v1.66.0. `src/components/UserMenu.tsx` (Popover + Avatar + ChevronDown),
-clases `.usermenu__*` + media query 900px en index.css, export en barrel, ENTRIES
-en registry, story reescrita a `<UserMenu>` (borró CSS inline + imports muertos
-Popover/ChevronDown). 6 tests nuevos (incl. guard de la media query), suite 795
-verde, build OK (UserMenu + tipos en dist), publint hard-gate verde, smoke real
-Next consumer 64 e2e verde (incl. gate anti-rot + no-overflow @375px). Visual
-headless: desktop pill 173px, mobile colapsa a avatar 32px (texto+chevron hidden),
-popover con header + Perfil + Salir(danger).
+Shipeado v1.67.0. `MoneyInput` formatea en vivo (agrupado + símbolo) mientras se
+escribe, idéntico focus/blur. `liveFormat?: boolean` default true (legacy detrás
+de false). Caret manejado vía countDigits + caretPosAfterDigits + isomorphic
+layout effect ([value], guard activeElement). Backspace/Delete por onKeyDown
+operan sobre el string de dígitos → no se traban en separadores; selección →
+borra rango; onChange para typing/paste. 8 tests unit nuevos (suite 804 verde).
+Build OK, liveFormat en dist d.ts, smoke:ci exit 0. Headless real-keyboard:
+tipear 123123→$123.123 (caret end), mid-insert caret tras el dígito, backspace
+tras separador borra el dígito, paste 1.234.567→$1.234.567. Story con 3 demos
+(CLP live, USD en-US, legacy). API pública sin cambios.
 
-Extra: `SMOKE_PORT` env-override (default 3100) en playwright.config + start script
-→ smoke local ya no choca con infra ajena en 3100.
-
-Pendiente: release (espera OK del user, no publico sin confirmación).
+Pendiente: release vía GitHub Release (autorizado por el spec del task).

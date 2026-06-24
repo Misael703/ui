@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.67.0] — 2026-06-24
+
+**Minor. `MoneyInput` formats the amount live while typing.**
+
+### Changed
+- `MoneyInput` now keeps the amount **grouped (locale thousands separator) with
+  the currency symbol while you type** — identical focused and on blur, so there
+  is no reformat jump when the field loses focus. Previously it showed the raw
+  number (`123123`) while focused and only grouped on blur.
+- The caret is preserved as separators shift: typing in the middle keeps the
+  caret after the typed digit, **Backspace just after a separator deletes the
+  digit before it** (no getting stuck on the `.`), and pasting a grouped or
+  ungrouped string both normalize. Separators are derived from the resolved
+  `Intl.NumberFormat` (no hardcoding), so it stays locale-correct.
+
+### Added
+- `MoneyInput` `liveFormat?: boolean` (default `true`). Set `false` to opt back
+  into the legacy behaviour (raw number while focused, formatted only on blur).
+
+### Compatibility
+- Public API unchanged (`value: number | null`, `onChange`, `currency?`,
+  `locale?`, `invalid?`, …`rest`). Existing consumers (despachos/cobros `/caja`)
+  get the live formatting with no prop changes.
+
 ## [1.66.1] — 2026-06-24
 
 **Patch. `AppShell` no longer animates the collapse when it starts collapsed.**

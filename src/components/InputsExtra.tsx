@@ -180,36 +180,150 @@ export interface MoneyInputProps extends Omit<React.InputHTMLAttributes<HTMLInpu
   currency?: string;          // 'CLP' | 'USD' | 'EUR' | …
   locale?: string;            // 'es-CL' | …
   invalid?: boolean;
+  /**
+   * Format the amount live while typing (grouped thousands + currency symbol),
+   * identical focused and on blur. Default `true`. Set `false` for the legacy
+   * behaviour (raw number while focused, formatted only on blur).
+   */
+  liveFormat?: boolean;
 }
 
+// useLayoutEffect warns on the server; fall back to useEffect there. Caret
+// restoration is a browser-only concern, so the no-op server pass is fine.
+const useIsoLayoutEffect = typeof document !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+
+const countDigits = (s: string): number => {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); if (c >= 48 && c <= 57) n++; }
+  return n;
+};
+
+// Index in `formatted` right AFTER the n-th digit (skipping symbol/separators).
+// n <= 0 → just before the first digit (after a leading symbol/sign).
+const caretPosAfterDigits = (formatted: string, n: number): number => {
+  if (n <= 0) { const m = formatted.search(/\d/); return m === -1 ? formatted.length : m; }
+  let count = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    const c = formatted.charCodeAt(i);
+    if (c >= 48 && c <= 57) { count++; if (count === n) return i + 1; }
+  }
+  return formatted.length;
+};
+
 export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyInput(
-  { value, onChange, currency, locale, invalid, className, disabled, ...rest },
+  { value, onChange, currency, locale, invalid, className, disabled, liveFormat = true, ...rest },
   ref
 ) {
   const brand = getBrand();
   const resolvedCurrency = currency ?? brand.currency;
   const resolvedLocale = locale ?? brand.locale;
+  const formatter = React.useMemo(
+    () => new Intl.NumberFormat(resolvedLocale, { style: 'currency', currency: resolvedCurrency, maximumFractionDigits: 0 }),
+    [resolvedLocale, resolvedCurrency]
+  );
+
+  const innerRef = React.useRef<HTMLInputElement | null>(null);
+  const setRefs = React.useCallback((node: HTMLInputElement | null) => {
+    innerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
+  }, [ref]);
+
+  // Digit-count target for caret restoration, set on each edit, applied after
+  // the controlled re-render reformats the string.
+  const caretRef = React.useRef<number | null>(null);
   const [focus, setFocus] = React.useState(false);
-  const display = value == null
-    ? ''
-    : focus
-      ? String(value)
-      : new Intl.NumberFormat(resolvedLocale, { style: 'currency', currency: resolvedCurrency, maximumFractionDigits: 0 }).format(value);
+
+  // Sign-aware: keep a single leading '-' when negatives are typed (matches the
+  // legacy /[^\d-]/ tolerance), strip everything else to digits.
+  const toRaw = (s: string): string => {
+    const digits = s.replace(/\D/g, '');
+    if (!digits) return '';
+    return (s.trimStart().startsWith('-') ? '-' : '') + digits;
+  };
+  const commit = (raw: string, caretDigits: number) => {
+    caretRef.current = caretDigits;
+    if (!raw || raw === '-') return onChange(null);
+    const n = Number(raw);
+    onChange(Number.isFinite(n) ? n : null);
+  };
+
+  useIsoLayoutEffect(() => {
+    const node = innerRef.current;
+    const target = caretRef.current;
+    if (!liveFormat || node == null || target == null) return;
+    caretRef.current = null;
+    if (typeof document !== 'undefined' && document.activeElement !== node) return;
+    const pos = caretPosAfterDigits(node.value, target);
+    node.setSelectionRange(pos, pos);
+  }, [value, liveFormat]);
+
+  const formatted = value == null ? '' : formatter.format(value);
+
+  if (!liveFormat) {
+    const display = value == null ? '' : focus ? String(value) : formatted;
+    return (
+      <input
+        ref={setRefs}
+        type="text"
+        inputMode="numeric"
+        className={cx('input', invalid && 'is-invalid', className)}
+        value={display}
+        disabled={disabled}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        onChange={(e) => {
+          const cleaned = e.target.value.replace(/[^\d-]/g, '');
+          if (!cleaned || cleaned === '-') return onChange(null);
+          const n = Number(cleaned);
+          onChange(Number.isFinite(n) ? n : null);
+        }}
+        aria-invalid={invalid || undefined}
+        {...rest}
+      />
+    );
+  }
+
   return (
     <input
-      ref={ref}
+      ref={setRefs}
       type="text"
       inputMode="numeric"
       className={cx('input', invalid && 'is-invalid', className)}
-      value={display}
+      value={formatted}
       disabled={disabled}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
+      onKeyDown={(e) => {
+        if (e.key !== 'Backspace' && e.key !== 'Delete') return;
+        const node = e.currentTarget;
+        const s = node.value;
+        const start = node.selectionStart ?? s.length;
+        const end = node.selectionEnd ?? start;
+        const allDigits = s.replace(/\D/g, '');
+        const sign = s.trimStart().startsWith('-') ? '-' : '';
+        e.preventDefault();
+        if (start !== end) {
+          // Selection: drop the digits inside it, caret before the selection.
+          const from = countDigits(s.slice(0, start));
+          const to = countDigits(s.slice(0, end));
+          commit(sign + allDigits.slice(0, from) + allDigits.slice(to), from);
+          return;
+        }
+        const left = countDigits(s.slice(0, start));
+        if (e.key === 'Backspace') {
+          if (left === 0) { caretRef.current = 0; return; } // nothing to the left
+          const next = allDigits.slice(0, left - 1) + allDigits.slice(left);
+          commit(next ? sign + next : '', left - 1);
+        } else {
+          if (left >= allDigits.length) { caretRef.current = left; return; } // nothing to the right
+          const next = allDigits.slice(0, left) + allDigits.slice(left + 1);
+          commit(next ? sign + next : '', left);
+        }
+      }}
       onChange={(e) => {
-        const cleaned = e.target.value.replace(/[^\d-]/g, '');
-        if (!cleaned || cleaned === '-') return onChange(null);
-        const n = Number(cleaned);
-        onChange(Number.isFinite(n) ? n : null);
+        const node = e.target;
+        const start = node.selectionStart ?? node.value.length;
+        const left = countDigits(node.value.slice(0, start));
+        commit(toRaw(node.value), left);
       }}
       aria-invalid={invalid || undefined}
       {...rest}

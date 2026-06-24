@@ -50,10 +50,36 @@ export const TagInputDemo: StoryObj = {
   },
 };
 
+/**
+ * **Live formatting** — the amount stays grouped (locale separator) with the
+ * currency symbol *while you type*, identical focused and on blur (no reformat
+ * jump on blur). The caret is preserved when separators shift: type in the
+ * middle, backspace across a separator, or paste a grouped string. `liveFormat`
+ * defaults to `true`; the readout shows the raw `value` the consumer receives.
+ */
 export const MoneyInputCLP: StoryObj = {
   render: () => {
     const [v, setV] = React.useState<number | null>(125000);
-    return <MoneyInput value={v} onChange={setV} />;
+    const [usd, setUsd] = React.useState<number | null>(1999);
+    const [legacy, setLegacy] = React.useState<number | null>(125000);
+    return (
+      <div style={{ display: 'grid', gap: 16, maxWidth: 280 }}>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>CLP · escribe y mira el agrupado en vivo</span>
+          <MoneyInput value={v} onChange={setV} />
+          <span style={{ fontSize: 12 }}>value: <code>{String(v)}</code></span>
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>USD (en-US)</span>
+          <MoneyInput value={usd} onChange={setUsd} currency="USD" locale="en-US" />
+          <span style={{ fontSize: 12 }}>value: <code>{String(usd)}</code></span>
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>liveFormat={'{'}false{'}'} (legacy: crudo al enfocar)</span>
+          <MoneyInput value={legacy} onChange={setLegacy} liveFormat={false} />
+        </label>
+      </div>
+    );
   },
 };
 
