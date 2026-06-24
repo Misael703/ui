@@ -35,6 +35,7 @@ export * from './components/Gallery';
 export * from './components/Commerce';
 export * from './components/Marketing';
 export * from './components/Popover';
+export * from './components/UserMenu';
 export * from './components/HoverCard';
 export * from './components/ContextMenu';
 export * from './components/Toggle';

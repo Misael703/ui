@@ -125,6 +125,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'Drawer', node: <K.Drawer open={false} onClose={() => {}} title="D">x</K.Drawer> },
   { name: 'Tooltip', node: <K.Tooltip label="tip"><span>hover</span></K.Tooltip> },
   { name: 'Popover', node: <K.Popover trigger={<button>p</button>}>contenido</K.Popover> },
+  { name: 'UserMenu', node: <K.UserMenu name="Misael Ocas" role="Admin" items={[{ label: 'Perfil' }, 'separator', { label: 'Salir', danger: true }]} /> },
   { name: 'HoverCard', node: <K.HoverCard trigger={<span>h</span>}>card</K.HoverCard> },
   { name: 'ContextMenu', node: <K.ContextMenu items={[{ id: 'a', label: 'A', onSelect: () => {} }]}><span>right-click</span></K.ContextMenu> },
   { name: 'Menu', node: <K.Menu trigger={<button>menu</button>} items={[{ label: 'A', onSelect: () => {} }]} /> },

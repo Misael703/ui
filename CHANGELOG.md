@@ -5,6 +5,40 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.66.0] — 2026-06-23
+
+**Minor. New `UserMenu` component — topbar avatar menu that collapses to the
+avatar on mobile.**
+
+### Added
+
+- **`UserMenu`** — the Linear / Vercel / Notion topbar pattern, packaged. The
+  avatar is the only always-visible control; name + role + chevron live in the
+  trigger on desktop and **collapse to just the avatar below 900px** (same
+  breakpoint as the AppShell mobile drawer), so a narrow header never overflows.
+  Clicking opens a `Popover` with a name/role header + action items; it closes on
+  ESC, outside-click, or item select.
+  - Props: `name`, `role?`, `items` (`UserMenuItem | 'separator'`), `avatar?`
+    (override the default initials avatar), `placement?`, `align?` (default
+    `'end'`), `linkAs?` (route `href` items through a custom link, e.g. Next
+    `<Link>`), plus `className` / `contentClassName` / `ariaLabel`.
+  - `UserMenuItem`: `{ label, icon?, onSelect?, href?, danger? }`.
+  - Trigger hover shape is **hybrid**: expanded (desktop) uses the kit squared
+    `--radius-md` (matching the AppShell menu toggle); collapsed (mobile,
+    avatar-only) goes fully round so the hover hugs the circular avatar.
+  - Motivation (consumer-driven): despachos hand-rolled the user pill in
+    `header.right` but omitted the mobile-collapse media query the story relied
+    on, so name/role/chevron overflowed the header on phones. The collapse now
+    ships with the component — copy the trigger, get the behaviour.
+  - Replaces the old composition-only `Topbar · User menu` story, which now
+    dogfoods `<UserMenu>` (and drops its inline `<style>`).
+
+### Changed (smoke only — not published)
+
+- Smoke port is now overridable via `SMOKE_PORT` (default `3100`) in the
+  Playwright config + `start` script, so the local smoke run no longer collides
+  with a foreign process holding `3100`.
+
 ## [1.65.3] — 2026-06-23
 
 **Patch. `AppShell` collapsed/rail nav icons are now centered.**
