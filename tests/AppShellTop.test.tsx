@@ -45,6 +45,20 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(header!.querySelector('.appshell__header-right [data-testid="hr"]')).toBeTruthy();
   });
 
+  it('ships the first-paint transition guard so a collapsed-on-load shell does not animate', () => {
+    // The collapse animations are always-on, so a shell that settles to
+    // collapsed AFTER the first paint (SSR hydration, persistKey, async
+    // controlled state) would animate the collapse on load. The component
+    // renders `appshell--no-anim` until one frame post-mount (rAF, which does
+    // not fire in jsdom → class stays for the assertion), and the CSS kills
+    // the shell's transitions while it is present.
+    const { container } = render(
+      <AppShell defaultCollapsed header={{ center: 'brand' }} sections={sections}>x</AppShell>
+    );
+    expect(container.querySelector('.appshell')).toHaveClass('appshell--no-anim');
+    expect(css).toMatch(/\.appshell--no-anim[\s\S]*?\.appshell__sidebar[\s\S]*?transition: none !important/);
+  });
+
   it('drops the sidebar brand block and the inline topbar in top layout', () => {
     const { container } = render(
       <AppShell header={{ center: 'brand' }} sections={sections}>x</AppShell>
