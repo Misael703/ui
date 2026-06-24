@@ -1,49 +1,37 @@
-# DateRangePicker report-grade (2026-06-22)
+# UserMenu component (consumer-driven: despachos mobile overflow) — 2026-06-23
 
-## Decisión de diseño (confirmada)
+## Root cause
+El patrón "user pill → avatar en mobile" vivía en CSS local de la story
+(`@media (max-width:900px) .user-pill__text{display:none}`). Despachos copió
+el trigger pero no la media query → nombre+rol+chevron desbordan en mobile.
+Footgun repetido → baja al kit como componente.
 
-Progressive disclosure: **props opt-in en el MISMO `DateRangePicker`**, no un
-componente aparte. El band continuo es polish → **always-on** (lo ven todos).
-Inputs + dropdown → opt-in (reportes). Filtro simple queda lean.
+## Tasks
+- [ ] `src/components/UserMenu.tsx` — Popover + Avatar + ChevronDown
+- [ ] `src/styles/index.css` — clases `.usermenu__*` + media query 900px
+- [ ] `src/index.ts` — export barrel
+- [ ] `smoke/gallery/registry.tsx` — ENTRIES (gate anti-rot)
+- [ ] story `TopbarUserMenu` → usar `<UserMenu>` (borra CSS inline)
+- [ ] `tests/UserMenu.test.tsx`
+- [ ] build + test + smoke
 
-## Alcance: Completo opt-in
-
-1. **Band continuo (always-on)** — el resaltado de rango pasa de celdas planas con
-   gap (se corta) a un band conectado por fila, con extremos redondeados (pill).
-   Endpoints (`from`/`to`) = círculo sólido encima del band. Cubre hover-preview.
-2. **`showInputs` (opt-in)** — inputs "Desde"/"Hasta" tipeables arriba del
-   calendario; parseo (`parseDate`) + sync con el rango; saltan la vista al mes.
-3. **`monthDropdown` (opt-in)** — reemplaza el título estático por un botón
-   "MMMM de YYYY ▾" que abre un panel año‹ ›+ grilla de 12 meses para saltar.
-4. **`months?: 1 | 2`** (default 2) — layout mono-mes compacto (lo del screenshot).
-
-## Checklist
-
-- [ ] Locale: `daterange.from`/`daterange.to`/`daterange.jumpMonth` en messages.ts + es.ts
-- [ ] Props: `showInputs`, `monthDropdown`, `months` en la interface
-- [ ] Helpers: `setRange(next)` (split apply/legacy), `spanBounds()`, `commitInput`
-- [ ] renderMonth: flags `is-band`/`is-band-start`/`is-band-end`; título condicional
-- [ ] JSX: fila de inputs; trigger+menú del dropdown; render condicional de meses
-- [ ] CSS: band (::before bridge + ::after círculo endpoint), inputs, month menu
-- [ ] Tests: band classes por posición, input parse→rango, dropdown jump, defaults sin cambio
-- [ ] Story "report" (showInputs + monthDropdown + months=1) en Advanced Pickers
-- [ ] `npm test` + `npm run smoke:ci` verde
-- [ ] Visual headless (band continuo, inputs, dropdown abierto)
-- [ ] CHANGELOG + bump MINOR — esperar release como veníamos
+## API
+UserMenuItem { label, icon?, onSelect?, href?, danger? }
+UserMenuProps { name, role?, items: (UserMenuItem|'separator')[], avatar?,
+  align='end', placement='bottom', linkAs?, className?, contentClassName?, ariaLabel? }
+Breakpoint 900px fijo (= mobile drawer del AppShell). open manejado interno.
 
 ## Review
+Shipeado v1.66.0. `src/components/UserMenu.tsx` (Popover + Avatar + ChevronDown),
+clases `.usermenu__*` + media query 900px en index.css, export en barrel, ENTRIES
+en registry, story reescrita a `<UserMenu>` (borró CSS inline + imports muertos
+Popover/ChevronDown). 6 tests nuevos (incl. guard de la media query), suite 795
+verde, build OK (UserMenu + tipos en dist), publint hard-gate verde, smoke real
+Next consumer 64 e2e verde (incl. gate anti-rot + no-overflow @375px). Visual
+headless: desktop pill 173px, mobile colapsa a avatar 32px (texto+chevron hidden),
+popover con header + Perfil + Salir(danger).
 
-Shipeado en `Metrics.tsx`… digo, `AdvancedPickers.tsx`. v1.60.0. 13 tests nuevos
-(8 report + 5 daterange band/divider previos), suite 748 verde, smoke 64 verde,
-build/lint/tsc limpios. Visual headless confirmó: report config = réplica fiel
-del screenshot (inputs + dropdown 1-línea + band continuo), menú año/mes, y el fix
-del wrap del trigger (`.daterange__nav > button` directo, no descendiente — la
-regla width:28px aplastaba el trigger anidado).
+Extra: `SMOKE_PORT` env-override (default 3100) en playwright.config + start script
+→ smoke local ya no choca con infra ajena en 3100.
 
-## Notas técnicas
-
-- Band continuity: solo HORIZONTAL dentro de la fila (cada semana es su propia
-  pill, como el screenshot). `::before` con `inset: 0 -1px` bridgea el gap 2px.
-- Columna del cell = `i % 7` (header son 7 cells → offset múltiplo de 7).
-- band-start = endpoint `a` OR col 0 (lunes); band-end = endpoint `b` OR col 6 (dom).
-- Sin nuevos exports del barrel → no toca ICON_NAMES/ENTRIES.
+Pendiente: release (espera OK del user, no publico sin confirmación).

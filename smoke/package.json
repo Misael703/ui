@@ -5,7 +5,7 @@
   "description": "Smoke consumer: real Next.js App Router app that installs the packed kit tarball. Not shipped. Catches integration bugs Storybook can't (RSC boundaries, hydration, ESM/CJS, type exports, fonts).",
   "scripts": {
     "build": "next build",
-    "start": "next start -p 3100",
+    "start": "next start -p ${SMOKE_PORT:-3100}",
     "check:esm": "node scripts/check-esm.mjs",
     "check:cjs": "node scripts/check-cjs.cjs",
     "e2e": "playwright test"

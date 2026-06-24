@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-const PORT = 3100;
+const PORT = Number(process.env.SMOKE_PORT) || 3100;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
