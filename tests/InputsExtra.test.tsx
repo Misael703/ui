@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import {
@@ -55,6 +56,82 @@ describe('MoneyInput', () => {
     render(<MoneyInput value={null} onChange={onChange} />);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '12345' } });
     expect(onChange).toHaveBeenCalledWith(12345);
+  });
+});
+
+describe('MoneyInput — live formatting', () => {
+  function setup(initial: number | null = null) {
+    const onChange = vi.fn();
+    function Harness() {
+      const [v, setV] = React.useState<number | null>(initial);
+      return <MoneyInput value={v} onChange={(n) => { onChange(n); setV(n); }} currency="CLP" locale="es-CL" />;
+    }
+    const utils = render(<Harness />);
+    const input = within(utils.container).getByRole('textbox') as HTMLInputElement;
+    input.focus();
+    return { input, onChange };
+  }
+
+  it('shows the amount grouped + with symbol while typing (not raw)', () => {
+    const { input, onChange } = setup(null);
+    fireEvent.change(input, { target: { value: '123123', selectionStart: 6 } });
+    expect(onChange).toHaveBeenLastCalledWith(123123);
+    expect(input.value).toBe('$123.123');
+    expect(input.selectionStart).toBe(8); // caret at the end
+  });
+
+  it('keeps the caret after a digit inserted in the middle (no jump to end)', () => {
+    const { input } = setup(123123); // "$123.123"
+    expect(input.value).toBe('$123.123');
+    // type "9" right after the first group: "$123|.123" -> "$1239.123"
+    fireEvent.change(input, { target: { value: '$1239.123', selectionStart: 5 } });
+    expect(input.value).toBe('$1.239.123');
+    expect(input.selectionStart).toBe(6); // immediately after the typed "9"
+  });
+
+  it('backspace just after a separator deletes the digit before it (no trap)', () => {
+    const { input, onChange } = setup(1234); // "$1.234"
+    input.setSelectionRange(3, 3); // right after the "."
+    fireEvent.keyDown(input, { key: 'Backspace' });
+    expect(onChange).toHaveBeenLastCalledWith(234); // the "1" is gone, not stuck on "."
+    expect(input.value).toBe('$234');
+  });
+
+  it('forward delete removes the next digit', () => {
+    const { input, onChange } = setup(1234); // "$1.234"
+    input.setSelectionRange(1, 1); // right after "$", before "1"
+    fireEvent.keyDown(input, { key: 'Delete' });
+    expect(onChange).toHaveBeenLastCalledWith(234);
+  });
+
+  it('normalizes pasted grouped and ungrouped strings the same', () => {
+    const a = setup(null);
+    fireEvent.change(a.input, { target: { value: '1.234.567', selectionStart: 9 } });
+    expect(a.input.value).toBe('$1.234.567');
+
+    const b = setup(null);
+    fireEvent.change(b.input, { target: { value: '1234567', selectionStart: 7 } });
+    expect(b.input.value).toBe('$1.234.567');
+  });
+
+  it('select-all + delete clears to null and empties the field', () => {
+    const { input, onChange } = setup(1234); // "$1.234"
+    input.setSelectionRange(0, input.value.length);
+    fireEvent.keyDown(input, { key: 'Backspace' });
+    expect(onChange).toHaveBeenLastCalledWith(null);
+    expect(input.value).toBe('');
+  });
+
+  it('liveFormat={false} keeps the legacy raw-while-focused behaviour', () => {
+    function Harness() {
+      const [v, setV] = React.useState<number | null>(1234);
+      return <MoneyInput value={v} onChange={setV} currency="CLP" locale="es-CL" liveFormat={false} />;
+    }
+    const { getByRole } = render(<Harness />);
+    const input = getByRole('textbox') as HTMLInputElement;
+    expect(input.value).toBe('$1.234'); // formatted while blurred
+    fireEvent.focus(input);
+    expect(input.value).toBe('1234');    // raw while focused
   });
 });
 
