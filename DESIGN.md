@@ -4,6 +4,9 @@ Design system of `@misael703/ui`. Derived from the canonical token source
 `src/styles/_root.css` (single source of truth) and `src/styles/_typography.css`.
 Keep this in sync with that file; the CSS wins if they ever disagree.
 
+> Last synced to tokens: **v1.67.0** (2026-06-30). On a token change, re-verify
+> the values quoted here against `_root.css` / the El Alba preset.
+
 ## Theme model
 
 - **Light only.** No global dark mode. Dark zones are opt-in per container via
@@ -29,26 +32,50 @@ Two palettes ship. The generic default and the El Alba preset
   light decorative accent (eyebrows, rails), not a CTA color.
 - Neutrals: warm stone greys, `--color-ink` `#1c1917` → `--color-gray-50`
   `#fafaf9`. Brown undertone to pair with espresso.
-- Canvas `--bg-canvas` `#fef5ef` (warm cream); surface `--bg-surface` `#fff`.
-  The canvas/surface contrast is the signature of the default look.
+- Canvas `--bg-canvas` `#ede1cc` (warm-earth taupe); surface `--bg-surface`
+  `#fff`. The canvas/surface contrast is the signature of the default look.
+  Surface-tier order (v1.29.0): the **canvas is the deepest tier** (the page),
+  with `--bg-subtle` (`--color-gray-100`) and `--bg-muted` (`--color-gray-150`)
+  as *lighter* insets ON a surface — not the other way around. Pre-1.29.0 the
+  canvas (`#fef5ef`) sat between subtle and muted, an inversion the tier retune
+  fixed; pinned by `tests/SurfaceTiers.test.tsx` in both palettes.
 
 **El Alba preset:** Pantone 287 C blue (`--color-primary-700` `#002f87`) +
-Pantone 165 C orange (`--color-secondary-600` `#ff671d`), subtle cool-slate
-canvas (`--bg-canvas` `#eaeef5`) on white surfaces, cool slate-tinted
-neutrals. Tier scale (semantics preserved, `subtle`→`muted` stays the hover
-progression): canvas `#eaeef5` < subtle `#f1f4f9` < muted `#e7ebf2` <
-surface `#fff`. The cool canvas gives white Cards/DataTables figure/ground
-without the consumer touching CSS (pre-1.16 the El Alba canvas was pure
-white = no contrast).
+Pantone 165 C orange (`--color-secondary-600` `#ff671d`), cool-slate canvas
+(`--bg-canvas` `#dde3ed`) on white surfaces, cool slate-tinted neutrals. Tier
+scale (semantics preserved, `subtle`→`muted` stays the hover progression):
+**canvas `#dde3ed` is the deepest tier (the page)**, with subtle `#f1f4f9` and
+muted `#e7ebf2` as lighter insets on a surface `#fff`. The cool canvas gives
+white Cards/DataTables figure/ground without the consumer touching CSS (pre-1.16
+the El Alba canvas was pure white = no contrast; pre-1.29.0 it was `#eaeef5`,
+which sat lighter than its own insets — the v1.29.0 retune deepened it to
+`#dde3ed` so the page is unambiguously the bottom tier).
 
-**Status:** full green / yellow / red / info scales; semantics alias the
-600 step (`--color-success` = green-600, `--color-warning` = yellow-500,
-`--color-danger` = red-600, `--color-info` = info-600).
+**Status:** full green / yellow / red / info scales; all four semantics alias
+the **600** step (`--color-success` = green-600, `--color-warning` = yellow-600,
+`--color-danger` = red-600, `--color-info` = info-600), so a row of
+{success warning danger info} reads at even luminance weight. v1.29.0 re-anchored
+two scales to keep status distinct from brand: **yellow** moved from
+amber-orange to a true gold (it used to collide with the El Alba brand orange),
+which is why `--color-warning` moved from -500 to -600; **info** moved to a
+cyan-leaning sky blue (it used to collide with the El Alba brand navy).
 
-**Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse}`,
-`--fg-{default,muted,subtle,on-brand,on-secondary,link,link-hover}`,
+**Categorical palette (v1.16+).** For CATEGORY, not status: six well-separated
+hues (`--cat-1`…`--cat-6`), each a triple `--cat-N` (solid rail/dot) /
+`--cat-N-bg` (soft chip fill) / `--cat-N-fg` (ink on the bg, all ≥ 4.5:1, pinned
+in `Contrast.test`). Palette-neutral (defined in the base, inherited by every
+preset). Use for operational zones, regions, tags, teams — anything that only
+needs to be *distinguishable*, not *meaningful*.
+
+**Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
+`--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,
 `--border-{default,strong,brand,focus}`, `--accent-{primary,secondary}`.
-Components must use these, never raw scale stops or hex.
+Components must use these, never raw scale stops or hex. `--fg-meta` (= the
+lightest AA-clearing grey, currently aliased to `--fg-subtle`) is the decorative
+meta/echo role (secondary cell line, "RUT under name"), separated from the
+essential `--fg-muted` so marking text as secondary recedes on its own.
+`--border-focus` unified on `--color-primary` (v1.29.0) so a focused element's
+border and halo share one brand identity.
 
 **Contrast floor (v1.10.0).** `--fg-muted` and `--fg-subtle` are explicit,
 WCAG-AA-clearing values (not raw gray stops): the generic gray ramp shipped
@@ -75,11 +102,14 @@ alternatives).
 ## Typography
 
 - Families: display `Outfit`, body `DM Sans` (both bundled variable fonts,
-  100–900/1000, no faux synthesis), mono `ui-monospace` stack.
+  100–900/1000, no faux synthesis), mono `JetBrains Mono` → `ui-monospace`
+  stack.
 - Scale: Major Third rooted at 16px, `--text-2xs` 11px → `--text-7xl` 88px
   (fixed rem, not fluid — product register).
 - Weights `--weight-thin` 100 → `--weight-black` 900.
-- Leading 1.05 / 1.2 / 1.45 / 1.6; tracking -0.01em / 0 / 0.04em / 0.08em.
+- Leading 1.05 / 1.2 / 1.45 / 1.6; tracking -0.01em / 0 / 0.02em / 0.04em /
+  0.08em (the 0.02em `--tracking-snug` is the small positive for recessed table
+  headers).
 - Text-transform role hooks (v1.10.0 — three roles, not two; restores the
   type hierarchy that collapsed when everything shouted in caps at once):
   - `--tt-label` **`uppercase`**: TRUE micro-labels only — eyebrows, badges,
@@ -107,19 +137,26 @@ alternatives).
 
 ## Motion
 
-- Easing `--ease-standard` `cubic-bezier(0.2,0.8,0.2,1)` (ease-out, no bounce),
-  plus `--ease-in` / `--ease-out`.
+- Easing: an exponential ease-out family (confident deceleration, no bounce) —
+  `--ease-out-quart` / `--ease-out-quint` / `--ease-out-expo`. `--ease-standard`
+  and `--ease-out` both resolve to `--ease-out-quint`
+  (`cubic-bezier(0.22,1,0.36,1)`); `--ease-in` (`cubic-bezier(0.4,0,1,1)`) is the
+  accelerate curve for elements leaving the screen.
 - Durations `--duration-fast` 120ms / `--duration-base` 200ms /
-  `--duration-slow` 320ms. Motion conveys state, not decoration.
+  `--duration-slow` 320ms, plus `--duration-exit` 150ms (~75% of base — dismissals
+  feel decisive). Motion conveys state, not decoration.
 
 ## Focus & layering
 
 - Focus is `:focus-visible` + `box-shadow` ring (`--focus-ring-brand` /
-  `-accent` / `-danger`, 3px halo). Never bare `outline:none`. This is a hard
-  rule — every interactive component must show a visible focus ring.
-- Z-index scale: `--z-dropdown` 50 → `--z-overlay` 100 → `--z-toast` 200 →
-  `--z-tooltip` 1000 → `--z-popover`/`--z-floating` 1300. Portaled floating
-  panels use `--z-floating` (above Modal/Drawer).
+  `-accent` / `-danger`, 3px halo, all at **16% alpha** — aligned v1.29.0 so the
+  default brand and danger signals read at one halo weight). Never bare
+  `outline:none`. This is a hard rule — every interactive component must show a
+  visible focus ring.
+- Z-index scale: `--z-base` 1 → `--z-dropdown` 50 → `--z-sticky` 60 →
+  `--z-overlay` 100 → `--z-toast` 200 → `--z-tooltip` 1000 →
+  `--z-popover`/`--z-floating` 1300. Portaled floating panels use `--z-floating`
+  (above Modal/Drawer).
 - Overlay scrim `--backdrop` = ink at 55%.
 
 ## Component conventions
