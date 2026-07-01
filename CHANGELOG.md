@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.67.1] — 2026-06-30
+
+**Patch. `Switch` / `Checkbox` / `Radio` hidden input no longer escapes its label.**
+
+### Fixed
+- The visually-hidden native `<input>` (`position: absolute`) of `Switch`,
+  `Checkbox` and `Radio` is a sibling of the visible track/box, and its label
+  wrapper (`.switch` / `.check`) was `position: static`. So the input's
+  containing block was not its own label but the **consumer's** nearest
+  positioned ancestor (e.g. a scroll container like `.appshell__body`). In a
+  consumer this anchored every input to the bottom of that ancestor, inflating
+  it (~441px phantom overflow), collapsing the layout, and intercepting clicks.
+  The label is now the containing block (`position: relative`) and the hidden
+  input overlays its own control box, so it can never escape regardless of the
+  consumer's positioned ancestors or scroll containers. **Visuals unchanged**
+  (the input is invisible + `pointer-events: none`; the label stays the click
+  target). Guarded at the source by a generic test (`HiddenInputContainment`)
+  that fails CI if any future control's absolute input lacks a `relative`
+  wrapper, plus an e2e scenario (`/scenarios/form-escape`) asserting containment
+  under a positioned scroll container.
+
 ## [1.67.0] — 2026-06-24
 
 **Minor. `MoneyInput` formats the amount live while typing.**
