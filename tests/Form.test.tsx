@@ -1,6 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Input, FormField, Switch, Checkbox, Radio } from '../src/components/Form';
+
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+
+describe('Checkbox/Radio — containing block (hidden input cannot escape the label)', () => {
+  // Same class of bug as the switch: `.check input` is position:absolute, so its
+  // own label (.check, shared by Checkbox and Radio) must be position:relative or
+  // the input escapes to the consumer's nearest positioned ancestor.
+  it('.check establishes a positioned containing block for its absolute input', () => {
+    expect(css).toMatch(/\.check \{[^}]*position:\s*relative[^}]*\}/);
+    expect(css).toMatch(/\.check input \{[^}]*position:\s*absolute/);
+  });
+});
 
 describe('Form controls', () => {
   it('Input shows aria-invalid when invalid', () => {

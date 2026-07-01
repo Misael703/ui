@@ -489,3 +489,33 @@ export function ScenarioTimelineMilestone() {
     </div>
   );
 }
+
+// Form controls inside a POSITIONED scroll container (reproduces the consumer's
+// bug, fixed in the kit): the hidden absolute <input> of Switch/Checkbox/Radio
+// must stay contained by its OWN label, not escape to this relative ancestor.
+// Pre-fix, the inputs piled up at the bottom of the scroll container, inflating
+// its height (phantom overflow) and collapsing the layout. Asserted by
+// e2e/scenarios.spec.ts (offsetParent === label, bbox within label, no inflation).
+export function ScenarioFormControlsInScrollContainer() {
+  const [on, setOn] = React.useState<Record<number, boolean>>({});
+  return (
+    // `position: relative` + internal scroll = the same containing-block trap as
+    // `.appshell__body`. The container is intentionally short so the list scrolls.
+    <div
+      data-scenario="form-escape"
+      style={{ position: 'relative', height: 280, overflow: 'auto', border: '1px solid #ccc', padding: 16, margin: 24, maxWidth: 420 }}
+    >
+      <div style={{ display: 'grid', gap: 12 }}>
+        {Array.from({ length: 25 }).map((_, i) => (
+          <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'center' }} data-row={i}>
+            <K.Switch checked={!!on[i]} onChange={(e) => setOn((s) => ({ ...s, [i]: e.target.checked }))}>
+              fila {i}
+            </K.Switch>
+            <K.Checkbox>check {i}</K.Checkbox>
+            <K.Radio name="g">radio {i}</K.Radio>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
