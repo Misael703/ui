@@ -652,3 +652,36 @@ test.describe('Scenario · AppShell top mobile — top-bar-only variant', () => 
     expect(widths[1]).toBeGreaterThan(widths[2]);
   });
 });
+
+test.describe('Scenario · form controls inside a positioned scroll container', () => {
+  // Regression for the Switch/Checkbox/Radio "hidden input escapes its label"
+  // bug. The hidden <input> is position:absolute; if its own label isn't a
+  // containing block it anchors to this relative scroll container instead,
+  // inflating its height (phantom overflow) and breaking the layout.
+  test('every hidden input stays contained by its own label (offsetParent + bbox)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/scenarios/form-escape', { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-scenario="form-escape"]');
+
+    const result = await page.evaluate(() => {
+      const container = document.querySelector('[data-scenario="form-escape"]') as HTMLElement;
+      const inputs = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+      let escaped = 0;
+      let outOfBox = 0;
+      for (const input of inputs) {
+        const label = input.closest('.switch, .check') as HTMLElement | null;
+        // offsetParent must be the control's own label, not the scroll container.
+        if (!label || input.offsetParent !== label) { escaped++; continue; }
+        const ir = input.getBoundingClientRect();
+        const lr = label.getBoundingClientRect();
+        const within = ir.left >= lr.left - 1 && ir.right <= lr.right + 1 && ir.top >= lr.top - 1 && ir.bottom <= lr.bottom + 1;
+        if (!within) outOfBox++;
+      }
+      return { inputCount: inputs.length, escaped, outOfBox };
+    });
+
+    expect(result.inputCount, 'scenario should render 25 rows × 3 controls').toBe(75);
+    expect(result.escaped, 'no hidden input may escape its label').toBe(0);
+    expect(result.outOfBox, 'every hidden input must overlay within its label box').toBe(0);
+  });
+});

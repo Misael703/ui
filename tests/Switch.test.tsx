@@ -1,7 +1,22 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Switch } from '../src/components/Form';
+
+const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+
+describe('Switch — containing block (hidden input cannot escape the label)', () => {
+  // The hidden <input> is position:absolute. If its own label (.switch) is not
+  // a containing block (position:relative), the input escapes to the consumer's
+  // nearest positioned ancestor (e.g. a scroll container), inflating its height
+  // and stealing the layout. Guard the label-is-relative invariant at the source.
+  it('.switch establishes a positioned containing block for its absolute input', () => {
+    expect(css).toMatch(/\.switch \{[^}]*position:\s*relative[^}]*\}/);
+    expect(css).toMatch(/\.switch input \{[^}]*position:\s*absolute/);
+  });
+});
 
 describe('Switch — exactly one change per user interaction', () => {
   it('fires onChange once when the track is clicked', () => {
