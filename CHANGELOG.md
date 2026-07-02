@@ -5,6 +5,26 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.0] — 2026-07-02
+
+**Minor. `DataTable` `Column.truncate` — per-column clipping that never stretches the table.**
+
+### Added
+- **`Column<T>.truncate?: boolean | number`** — clip a cell so a long value (or a
+  string with no spaces, e.g. a mistyped address) can't stretch the column and
+  blow out the table width / trigger horizontal scroll. `true` → single line with
+  an ellipsis; `n` → clamp to `n` lines (`-webkit-line-clamp`). Unspaced tokens are
+  broken (`overflow-wrap: anywhere`). The cap is applied to an inner wrapper as a
+  `max-width` (from the column's `width`, else a 240px default overridable via the
+  `--table-cell-max` CSS var), so it is a **hard** cap even under
+  `table-layout: auto` — where a `<td>` width is only a hint. Additive and
+  backwards-compatible: columns without `truncate` are byte-identical to before.
+  - When the cell value is a primitive string, the full text is exposed via a
+    native `title` on hover. For cells returning a `ReactNode` (JSX) the kit can't
+    derive a title — pass your own on the rendered element (documented on the prop).
+  - Not applied in `mobileLayout="cards"`: cards already wrap and show the value in
+    full, so the cap is released there.
+
 ## [1.67.1] — 2026-06-30
 
 **Patch. `Switch` / `Checkbox` / `Radio` hidden input no longer escapes its label.**

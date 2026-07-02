@@ -9,6 +9,18 @@ import { useVirtualRows } from '../hooks/useVirtualRows';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
+// Truncation wrapper style: the column width is passed as a CSS variable (not
+// an inline `max-width`) so the `mobileLayout="cards"` reset can override it —
+// an inline max-width would beat the stylesheet and keep clipping on mobile.
+// The line count for the clamp variant is inline (a per-column dynamic value).
+type ClipStyle = React.CSSProperties & { '--table-cell-max'?: string };
+function clipStyle(width: number | string | undefined, clampLines: number | undefined): ClipStyle {
+  const style: ClipStyle = {};
+  if (width != null) style['--table-cell-max'] = typeof width === 'number' ? `${width}px` : width;
+  if (clampLines != null) style.WebkitLineClamp = clampLines;
+  return style;
+}
+
 // ---------- DataTableRow (memoized) -------------------------------------
 // Extracted as React.memo so unrelated parent re-renders don't churn through
 // every row in the table. Combined with a ref-stable `onToggle`, only the
@@ -86,6 +98,7 @@ function DataTableRowImpl<T>({
         // headers (e.g. JSX) can't be projected through `attr()` so we
         // omit the attribute and the cell renders without a visible label.
         const label = typeof c.header === 'string' ? c.header : undefined;
+        const clampLines = typeof c.truncate === 'number' ? c.truncate : undefined;
         return (
           <td
             key={c.key}
@@ -101,6 +114,11 @@ function DataTableRowImpl<T>({
             )}
             style={{ textAlign: align }}
             data-label={label}
+            // Full value on hover — only when it's a primitive string; a JSX
+            // cell manages its own title (the kit can't stringify an arbitrary
+            // node). Set only while truncating, so non-truncated cells are
+            // byte-identical to before.
+            title={c.truncate && typeof value === 'string' ? value : undefined}
           >
             {/* Stretched row control: a real <a>/<button> in the first
                 data cell, overlaying the whole row (the <tr> is the
@@ -126,7 +144,19 @@ function DataTableRowImpl<T>({
                 />
               )
             )}
-            {value as React.ReactNode}
+            {c.truncate ? (
+              // The cap lives on this inner wrapper, not the <td>: under
+              // table-layout:auto a <td> width is only a hint, but a child's
+              // max-width bounds the column's max-content, so this is a HARD cap.
+              <span
+                className={cx('table__cell-clip', clampLines != null ? 'table__cell-clip--clamp' : 'table__cell-clip--line')}
+                style={clipStyle(c.width, clampLines)}
+              >
+                {value as React.ReactNode}
+              </span>
+            ) : (
+              value as React.ReactNode
+            )}
           </td>
         );
       })}
@@ -170,6 +200,21 @@ export interface Column<T> {
    * (cells lose their column geometry there, like the header does).
    */
   footer?: React.ReactNode;
+  /**
+   * Clip the cell so it can NEVER stretch the column (a hard cap even under
+   * `table-layout: auto`, which the table uses — there a `<td>` width is only a
+   * hint and long content still overflows).
+   * - `true` → single line with an ellipsis.
+   * - `n` (number) → clamp to `n` lines (`-webkit-line-clamp`).
+   * Unspaced strings are broken (`overflow-wrap: anywhere`) so a long token never
+   * overflows. The cap width comes from this column's `width` (else a 240px
+   * default, overridable via the `--table-cell-max` CSS var). Not applied in
+   * `mobileLayout="cards"` — cards already wrap and show the value in full.
+   * When the cell value is a primitive string the full text is exposed via a
+   * native `title` on hover; for cells that return a `ReactNode` (JSX) the kit
+   * cannot derive a title — pass your own `title` on the rendered element.
+   */
+  truncate?: boolean | number;
 }
 
 export interface DataTableProps<T> {

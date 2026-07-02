@@ -470,3 +470,63 @@ describe('TablePagination', () => {
     expect(Array.from(sel.options).map((o) => o.value)).toEqual(['5', '15', '30']);
   });
 });
+
+describe('DataTable — column truncate (hard cap that never stretches the column)', () => {
+  const longRows = [
+    { id: '1', name: 'x'.repeat(60), note: 'una nota larga que ocupa varias líneas de texto para el clamp' },
+    { id: '2', name: 'corto', note: 'ok' },
+  ];
+
+  it('truncate:true wraps the value in a single-line clip span (no cell stretch)', () => {
+    const { container } = render(
+      <DataTable rowKey={(r) => r.id} rows={longRows}
+        columns={[{ key: 'name', header: 'Nombre', width: 160, truncate: true }]} />,
+    );
+    const clip = container.querySelector('.table__cell-clip') as HTMLElement;
+    expect(clip).toBeTruthy();
+    expect(clip.classList.contains('table__cell-clip--line')).toBe(true);
+    expect(clip.classList.contains('table__cell-clip--clamp')).toBe(false);
+    // width flows through as the CSS var that drives the max-width cap.
+    expect(clip.style.getPropertyValue('--table-cell-max')).toBe('160px');
+  });
+
+  it('truncate:n clamps to n lines via inline -webkit-line-clamp', () => {
+    const { container } = render(
+      <DataTable rowKey={(r) => r.id} rows={longRows}
+        columns={[{ key: 'note', header: 'Nota', width: 200, truncate: 2 }]} />,
+    );
+    const clip = container.querySelector('.table__cell-clip') as HTMLElement;
+    expect(clip.classList.contains('table__cell-clip--clamp')).toBe(true);
+    expect(clip.style.getPropertyValue('-webkit-line-clamp') || clip.style.WebkitLineClamp).toBe('2');
+  });
+
+  it('string cells get a native title with the full value; JSX cells do not', () => {
+    const { container } = render(
+      <DataTable rowKey={(r) => r.id} rows={longRows}
+        columns={[
+          { key: 'name', header: 'Nombre', truncate: true },
+          { key: 'jsx', header: 'JSX', truncate: true, accessor: () => <b>node</b> },
+        ]} />,
+    );
+    const cells = container.querySelectorAll('tbody tr:first-child td');
+    expect((cells[0] as HTMLElement).getAttribute('title')).toBe('x'.repeat(60));
+    expect((cells[1] as HTMLElement).hasAttribute('title')).toBe(false);
+  });
+
+  it('columns WITHOUT truncate are unchanged (no wrapper, no title)', () => {
+    const { container } = render(
+      <DataTable rowKey={(r) => r.id} rows={longRows}
+        columns={[{ key: 'name', header: 'Nombre' }]} />,
+    );
+    expect(container.querySelector('.table__cell-clip')).toBeNull();
+    const td = container.querySelector('tbody tr:first-child td') as HTMLElement;
+    expect(td.hasAttribute('title')).toBe(false);
+  });
+
+  it('CSS: the clip is a hard max-width cap, and cards mode releases it', () => {
+    expect(tableCss).toMatch(/\.table__cell-clip \{[^}]*max-width:\s*var\(--table-cell-max,\s*240px\)[^}]*overflow:\s*hidden/);
+    expect(tableCss).toMatch(/\.table__cell-clip--line[^}]*white-space:\s*nowrap[^}]*text-overflow:\s*ellipsis/);
+    expect(tableCss).toMatch(/\.table__cell-clip--clamp[^}]*-webkit-box/);
+    expect(tableCss).toMatch(/\.table-wrap--cards \.table__cell-clip \{[^}]*max-width:\s*none/);
+  });
+});
