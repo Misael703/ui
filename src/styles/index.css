@@ -1254,6 +1254,10 @@ button, input, select, textarea { box-sizing: border-box; }
     overflow: visible;
     text-overflow: clip;
   }
+  /* `truncate` columns lose their cap in card layout (cards already wrap and
+     show the value in full). Overrides the var-based max-width; also drops the
+     -webkit-box so the inline -webkit-line-clamp goes inert. */
+  .table-wrap--cards .table__cell-clip { max-width: none; display: inline; white-space: normal; }
   .table-wrap--cards .table td:not(:last-child) {
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -1309,6 +1313,16 @@ button, input, select, textarea { box-sizing: border-box; }
   text-overflow: clip;
 }
 .table__num { font-family: var(--font-mono); text-align: right; }
+/* Per-column truncation (Column.truncate). The cap is on this inner wrapper, not
+   the <td>: under table-layout:auto a <td> width is only a hint, but a child's
+   max-width bounds the column's max-content — a HARD cap. The width comes from a
+   CSS var (set inline from the column's `width`, else the 240px default) so the
+   cards reset below can override it (an inline max-width could not). overflow-wrap
+   breaks unspaced tokens so a long string never overflows. */
+.table__cell-clip { max-width: var(--table-cell-max, 240px); overflow: hidden; overflow-wrap: anywhere; }
+.table__cell-clip--line  { display: block; white-space: nowrap; text-overflow: ellipsis; }
+/* Clamp needs white-space:normal — the td's inherited nowrap would kill the wrap. */
+.table__cell-clip--clamp { display: -webkit-box; -webkit-box-orient: vertical; white-space: normal; }
 /* Column `align` honored for element children too (v1.10.0). text-align
    already handles text + inline(-flex) (e.g. a Badge); the margin rule
    adds the block/flex case (an action-column wrapper) so `align:'right'`

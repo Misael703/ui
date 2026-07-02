@@ -42,6 +42,38 @@ export const DataTableBasica: StoryObj = {
 };
 
 /**
+ * **Truncado por columna** (`Column.truncate`). En `table-layout:auto` un valor
+ * largo —peor si es un string SIN espacios— estira la columna y revienta el ancho
+ * de la tabla. `truncate: true` recorta a una línea con "…"; `truncate: n` hace
+ * clamp a `n` líneas. El cap es DURO (max-width en un wrapper interno, tomado del
+ * `width` de la columna o 240px por defecto) y rompe tokens sin espacios. En celdas
+ * string el valor completo va en el `title` (hover). En `mobileLayout="cards"` no
+ * aplica (las cards ya envuelven).
+ */
+export const TruncadoPorColumna: StoryObj = {
+  render: () => {
+    const wide = [
+      { id: '1', name: 'Taladro percutor inalámbrico 20V con maletín', address: 'Av. Libertador Bernardo O’Higgins 1234, Depto 567, Santiago Centro, Región Metropolitana', notes: 'Cliente pidió despacho en la mañana; dejar en conserjería si no hay nadie; timbre no funciona.' },
+      { id: '2', name: 'Sierra circular', address: 'askjdalksdjalksdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdj', notes: 'Sin observaciones.' },
+      { id: '3', name: 'Lijadora orbital 300W', address: 'Calle Uno 42', notes: 'Retiro en tienda.' },
+    ];
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <DataTable
+          rows={wide}
+          rowKey={(r) => r.id}
+          columns={[
+            { key: 'name', header: 'Producto', width: 160, truncate: true },
+            { key: 'address', header: 'Dirección', width: 220, truncate: true },
+            { key: 'notes', header: 'Notas', width: 200, truncate: 2 },
+          ]}
+        />
+      </div>
+    );
+  },
+};
+
+/**
  * **Virtualización** (v1.51.0): `virtualizeRows` ventanea 5.000 filas a
  * ~30 nodos DOM con spacers pixel-exactos. Requiere `maxHeight` y alturas
  * uniformes — se auto-desactiva con `renderExpanded` o `cards`. La
