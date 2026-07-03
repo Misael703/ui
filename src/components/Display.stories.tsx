@@ -63,9 +63,9 @@ const ZONES = [
  * **Categorical accents** (v1.16+). For CATEGORY, not status: six
  * well-separated hues so operational zones / regions / teams read as
  * distinct (unlike `info` vs `primary`, both blue). `accent="cat-N"` on
- * Card draws the rail; `variant="cat-N"` on Badge is the soft chip. All
- * `--cat-N-fg` on `--cat-N-bg` are AA (pinned in Contrast.test). Plus the
- * new `accent="neutral"` (grey rail).
+ * Card tints the surface + colours the border in the hue (v1.68.1, replaced the
+ * side rail); `variant="cat-N"` on Badge is the soft chip. All `--cat-N-fg` on
+ * `--cat-N-bg` are AA (pinned in Contrast.test). Plus `accent="neutral"` (grey).
  */
 export const CategoricalAccents: StoryObj = {
   render: () => (

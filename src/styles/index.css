@@ -603,11 +603,14 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .card--interactive:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
 
-/* card con accent lateral (estados / categorías).
-   Uses inset box-shadow instead of border-left so the rail survives
-   unlayered consumer border resets (e.g. Tailwind's preflight, which
-   sets `border-width: 0` on `*` outside any @layer — that would zero
-   out a layered `border-left-width: 4px` from this kit). */
+/* card con accent (estados / categorías): superficie tintada + borde en el hue.
+   Reemplazó al rail lateral de 4px `inset box-shadow` (side-stripe): el rail
+   chocaba con el radius, no soportaba RTL, y obligaba a re-declarar el box-shadow
+   en :hover para no borrarlo. El tint (6% sobre --bg-surface, AA-safe con
+   --fg-default) es la señal principal y sobrevive resets de borde del consumer
+   (es un background, no un borde); el borde en el hue lo refuerza reusando el
+   borde 1px de la base .card. Elevación = --shadow-card de la base, sin override,
+   así el :hover interactivo funciona solo. */
 .card--accent-brand,
 .card--accent-secondary,
 .card--accent-success,
@@ -621,7 +624,8 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--accent-cat-4,
 .card--accent-cat-5,
 .card--accent-cat-6 {
-  box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-card);
+  background: color-mix(in srgb, var(--card-accent-color) 6%, var(--bg-surface));
+  border-color: color-mix(in srgb, var(--card-accent-color) 38%, var(--border-default));
 }
 .card--accent-brand     { --card-accent-color: var(--color-primary); }
 .card--accent-secondary { --card-accent-color: var(--accent-secondary); }
@@ -636,25 +640,6 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--accent-cat-4     { --card-accent-color: var(--cat-4); }
 .card--accent-cat-5     { --card-accent-color: var(--cat-5); }
 .card--accent-cat-6     { --card-accent-color: var(--cat-6); }
-
-/* Preserve the accent rail when an interactive card is hovered —
-   the base `.card--interactive:hover` swaps box-shadow, which would
-   otherwise wipe the inset rail. */
-.card--interactive.card--accent-brand:hover,
-.card--interactive.card--accent-secondary:hover,
-.card--interactive.card--accent-success:hover,
-.card--interactive.card--accent-warning:hover,
-.card--interactive.card--accent-danger:hover,
-.card--interactive.card--accent-info:hover,
-.card--interactive.card--accent-neutral:hover,
-.card--interactive.card--accent-cat-1:hover,
-.card--interactive.card--accent-cat-2:hover,
-.card--interactive.card--accent-cat-3:hover,
-.card--interactive.card--accent-cat-4:hover,
-.card--interactive.card--accent-cat-5:hover,
-.card--interactive.card--accent-cat-6:hover {
-  box-shadow: inset 4px 0 0 var(--card-accent-color), var(--shadow-card-hover);
-}
 
 /* KPI card */
 .kpi-card {

@@ -36,3 +36,23 @@ describe('Card elevation (CSS)', () => {
     expect(css).toMatch(/\.card\s+\.card\s*\{[^}]*box-shadow:\s*none/);
   });
 });
+
+describe('Card accent (CSS) — tinted surface + hue border, not a side rail', () => {
+  // v1.68.1 replaced the 4px `inset box-shadow` left rail (side-stripe) with a
+  // tinted face + a border in the accent hue. Guard the shape so the rail can't
+  // come back and the now-unneeded hover-preservation block stays gone.
+  it('the shared accent rule tints the surface + colours the border', () => {
+    const m = css.match(/\.card--accent-cat-6\s*\{([^}]*)\}/);
+    expect(m, 'shared accent rule (…, .card--accent-cat-6 { … }) must exist').toBeTruthy();
+    expect(m![1]).toMatch(/background:\s*color-mix\([^)]*var\(--card-accent-color\)\s*6%/);
+    expect(m![1]).toMatch(/border-color:\s*color-mix\(/);
+  });
+
+  it('the 4px inset side rail is gone', () => {
+    expect(css).not.toContain('inset 4px 0 0 var(--card-accent-color)');
+  });
+
+  it('the special accent-hover box-shadow block is gone (base :hover just works)', () => {
+    expect(css).not.toMatch(/\.card--interactive\.card--accent-[a-z0-9-]+:hover/);
+  });
+});

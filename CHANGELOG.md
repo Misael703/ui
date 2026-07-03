@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.1] — 2026-07-02
+
+**Patch. `Card` `accent` is now a tinted surface + hue border, not a side rail.**
+
+### Changed
+- `Card accent="…"` replaced its 4px left `inset box-shadow` rail (a side-stripe:
+  clashed with the card radius, had no RTL support, and needed extra CSS to
+  survive `:hover`) with a **6% tinted surface + a border in the accent hue**.
+  The whole card now reads as belonging to its state/category instead of wearing
+  a stripe. Quieter, respects the corner radius, RTL-neutral, and the interactive
+  `:hover` (elevation lift) now works with no special-case rule.
+  - The tint is the border-reset-proof primary signal (it's a background, not a
+    border); the hue border reuses the base `.card` 1px border to reinforce it.
+  - Body text on all 13 tinted faces stays WCAG AA in both palettes, pinned in
+    `tests/Contrast.test.tsx`. The `accent` API (open enum, all 12 values) is
+    unchanged.
+
 ## [1.68.0] — 2026-07-02
 
 **Minor. `DataTable` `Column.truncate` — per-column clipping that never stretches the table.**
