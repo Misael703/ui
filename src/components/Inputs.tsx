@@ -132,6 +132,12 @@ export function EmptyState({ icon, title, description, action, className }: Empt
 }
 
 // ---------- KPI / Stat card ----------------------------------------------
+/**
+ * @deprecated Use `StatCard` (metric card with accent, delta and an optional
+ * chart) for a metric tile, or `Stat` for an inline stat without card chrome.
+ * `Kpi` overlaps `StatCard` and has no consumers; it will be removed in the next
+ * major.
+ */
 export interface KpiProps {
   label: React.ReactNode;
   value: React.ReactNode;
@@ -141,6 +147,10 @@ export interface KpiProps {
   className?: string;
 }
 
+/**
+ * @deprecated Use `StatCard` (metric card) or `Stat` (inline stat). `Kpi`
+ * overlaps `StatCard` and has no consumers; it will be removed in the next major.
+ */
 export function Kpi({ label, value, delta, hint, icon, className }: KpiProps) {
   return (
     <div className={cx('kpi', className)}>
