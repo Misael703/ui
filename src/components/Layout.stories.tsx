@@ -227,14 +227,19 @@ export const ContainerDemo: StoryObj = {
 
 export const KeyValueDemo: StoryObj = {
   render: () => (
-    <KeyValue>
-      <KeyValueRow label="Cliente">Northwind Builders</KeyValueRow>
-      <KeyValueRow label="RUT">76.123.456-7</KeyValueRow>
-      <KeyValueRow label="Pedido">#1042</KeyValueRow>
-      <KeyValueRow label="Estado"><Badge variant="success">Despachado</Badge></KeyValueRow>
-      <KeyValueRow label="Total">$1.245.000</KeyValueRow>
-      <KeyValueRow label="Fecha">2026-04-29 14:32</KeyValueRow>
-    </KeyValue>
+    <div style={{ maxWidth: 420 }}>
+      <KeyValue>
+        <KeyValueRow label="Cliente">Northwind Builders</KeyValueRow>
+        <KeyValueRow label="RUT">76.123.456-7</KeyValueRow>
+        <KeyValueRow label="Pedido">#1042</KeyValueRow>
+        <KeyValueRow label="Estado"><Badge variant="success">Despachado</Badge></KeyValueRow>
+        <KeyValueRow label="Total">$1.245.000</KeyValueRow>
+        <KeyValueRow label="Fecha">2026-04-29 14:32</KeyValueRow>
+        {/* Long value with a no-space token (a mistyped address): wraps inside
+            the cell instead of overflowing the container. */}
+        <KeyValueRow label="Dirección">loscipreses91condominiolosbosquepiedrarojaColinaRegionMetropolitana</KeyValueRow>
+      </KeyValue>
+    </div>
   ),
 };
 

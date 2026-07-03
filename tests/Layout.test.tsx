@@ -206,6 +206,12 @@ describe('KeyValue', () => {
     expect(screen.getByText('K')).toBeInTheDocument();
     expect(screen.getByText('V')).toBeInTheDocument();
   });
+
+  it('CSS: the value cell can shrink and wraps unspaced tokens (no overflow)', () => {
+    // `.kv__v` is the `1fr` grid cell — without `min-width: 0` it keeps its
+    // content's min-content width and a long no-space value overflows the card.
+    expect(css).toMatch(/\.kv__v \{[^}]*min-width:\s*0[^}]*overflow-wrap:\s*anywhere/);
+  });
 });
 
 describe('ListGroup', () => {

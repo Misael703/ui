@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.2] — 2026-07-02
+
+**Patch. `KeyValueRow` values wrap long / unspaced content instead of overflowing.**
+
+### Fixed
+- A `KeyValueRow` value (`.kv__v`) is the `1fr` grid cell, which has
+  `min-width: auto` by default, so it kept its content's min-content width and a
+  long value, worse an unspaced token (a mistyped address / URL), overflowed the
+  card and forced horizontal scroll. `.kv__v` now sets `min-width: 0` (the cell
+  can shrink) + `overflow-wrap: anywhere` (unspaced tokens break), so the value
+  wraps in full inside its cell. No clamp (a KeyValue is for reading the datum).
+  Additive: only values that already overflowed change. Same `overflow-wrap` on
+  `.kv__k` defensively.
+
 ## [1.68.1] — 2026-07-02
 
 **Patch. `Card` `accent` is now a tinted surface + hue border, not a side rail.**
