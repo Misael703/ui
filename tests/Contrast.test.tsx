@@ -101,13 +101,16 @@ function pairs(map: Record<string, string>): Pair[] {
     { label: 'cat-5 fg on cat-5 bg', fg: T('--cat-5-fg'), bg: T('--cat-5-bg'), min: 4.5 },
     { label: 'cat-6 fg on cat-6 bg', fg: T('--cat-6-fg'), bg: T('--cat-6-bg'), min: 4.5 },
 
-    // --- Card accent (v1.68.1): body text on the 6%-tinted card face stays AA ---
-    ...CARD_ACCENTS.map(([name, token]): Pair => ({
-      label: `fg-default on card--accent-${name} tint`,
-      fg: T('--fg-default'),
-      bg: mixHex(T(token), T('--bg-surface'), 0.06),
-      min: 4.5,
-    })),
+    // --- Card / StatCard accent: text on the 6%-tinted face stays AA. Both
+    // --fg-default (value, v1.68.1) and --fg-muted (the StatCard label sits on
+    // the tinted surface too, v1.68.3). ---
+    ...CARD_ACCENTS.flatMap(([name, token]): Pair[] => {
+      const bg = mixHex(T(token), T('--bg-surface'), 0.06);
+      return [
+        { label: `fg-default on ${name} tint`, fg: T('--fg-default'), bg, min: 4.5 },
+        { label: `fg-muted on ${name} tint`, fg: T('--fg-muted'), bg, min: 4.5 },
+      ];
+    }),
   ];
 }
 
