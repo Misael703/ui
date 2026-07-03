@@ -57,6 +57,21 @@ function contrast(a: string, b: string): number {
   const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
   return (hi + 0.05) / (lo + 0.05);
 }
+// Opaque mix of `ratio` of `a` over `b` — matches `color-mix(in srgb, a <ratio>%, b)`.
+function mixHex(a: string, b: string, ratio: number): string {
+  const A = rgb(a), B = rgb(b);
+  const h = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+  return `#${[0, 1, 2].map((i) => h(A[i] * ratio + B[i] * (1 - ratio))).join('')}`;
+}
+// Card accent → the color mixed 6% into --bg-surface (the tinted card face).
+const CARD_ACCENTS: [string, string][] = [
+  ['brand', '--color-primary'], ['secondary', '--accent-secondary'],
+  ['success', '--color-success'], ['warning', '--color-warning'],
+  ['danger', '--color-danger'], ['info', '--color-info'],
+  ['neutral', '--border-strong'],
+  ['cat-1', '--cat-1'], ['cat-2', '--cat-2'], ['cat-3', '--cat-3'],
+  ['cat-4', '--cat-4'], ['cat-5', '--cat-5'], ['cat-6', '--cat-6'],
+];
 
 interface Pair { label: string; fg: string; bg: string; min: number }
 
@@ -85,6 +100,14 @@ function pairs(map: Record<string, string>): Pair[] {
     { label: 'cat-4 fg on cat-4 bg', fg: T('--cat-4-fg'), bg: T('--cat-4-bg'), min: 4.5 },
     { label: 'cat-5 fg on cat-5 bg', fg: T('--cat-5-fg'), bg: T('--cat-5-bg'), min: 4.5 },
     { label: 'cat-6 fg on cat-6 bg', fg: T('--cat-6-fg'), bg: T('--cat-6-bg'), min: 4.5 },
+
+    // --- Card accent (v1.68.1): body text on the 6%-tinted card face stays AA ---
+    ...CARD_ACCENTS.map(([name, token]): Pair => ({
+      label: `fg-default on card--accent-${name} tint`,
+      fg: T('--fg-default'),
+      bg: mixHex(T(token), T('--bg-surface'), 0.06),
+      min: 4.5,
+    })),
   ];
 }
 
