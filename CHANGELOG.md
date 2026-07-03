@@ -5,6 +5,18 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.4] — 2026-07-02
+
+**Patch. Deprecate `Kpi` (overlaps `StatCard`, no consumers).**
+
+### Deprecated
+- **`Kpi`** is deprecated (`@deprecated` on the component + `KpiProps`). It
+  duplicates `StatCard` and a consumer audit found zero usages across the apps.
+  Use **`StatCard`** for a metric card (accent, delta, optional chart) or
+  **`Stat`** for an inline stat (no card chrome). `Kpi` still works and ships
+  unchanged; it will be removed in the next major. Nothing to change for
+  consumers today. Metric-surface guidance added to `DESIGN.md`.
+
 ## [1.68.3] — 2026-07-02
 
 **Patch. Card cleanup: drop dead `.kpi-card` CSS, align `StatCard` accent to the Card tint+border.**

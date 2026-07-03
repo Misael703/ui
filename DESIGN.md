@@ -163,6 +163,11 @@ alternatives).
 
 - `React.forwardRef`, explicit prop `interface`, `...rest` spread, BEM-ish
   classes (`.btn`, `.btn--primary`, `is-loading`).
+- **Metric surfaces (v1.68.4).** Two components, one job each: **`StatCard`** is
+  the metric *card* (padded surface, icon, tint accent, delta, optional chart
+  slot); **`Stat`** is the inline stat (label + value + trend, no card chrome,
+  for placing inside another surface). `Kpi` is **deprecated** (overlaps
+  `StatCard`, no consumers) and will be removed in the next major.
 - Every interactive component ships default / hover / focus-visible / active /
   disabled, plus loading/error where relevant.
 - Custom (no Radix). Accessibility is owned by the kit: semantic roles, ARIA
