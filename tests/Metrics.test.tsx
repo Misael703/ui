@@ -60,7 +60,7 @@ describe('StatCard', () => {
     expect(container.querySelector('.delta-badge--pos')).toBeTruthy();
   });
 
-  it('accent sets the category modifier + data-accent for the left edge', () => {
+  it('accent sets the category modifier + data-accent', () => {
     const { container } = render(<StatCard label="X" value="1" accent="cat-3" />);
     const card = container.querySelector('.metric-card')!;
     expect(card.className).toContain('metric-card--cat-3');
@@ -70,6 +70,17 @@ describe('StatCard', () => {
   it('omits the foot row when there is no delta nor caption', () => {
     const { container } = render(<StatCard label="X" value="1" />);
     expect(container.querySelector('.metric-card__foot')).toBeNull();
+  });
+
+  it('CSS: accent is a tinted surface + hue border, not a side rail', () => {
+    // v1.68.3: aligned to the Card accent (tint+border); the old 3px border-left
+    // side-stripe must be gone.
+    expect(css).toMatch(/\.metric-card\[data-accent\] \{[^}]*background:\s*color-mix[^}]*border-color:\s*color-mix/);
+    expect(css).not.toMatch(/\.metric-card\[data-accent\] \{[^}]*border-left/);
+  });
+
+  it('CSS: the orphaned .kpi-card block is gone (dead code)', () => {
+    expect(css).not.toContain('.kpi-card');
   });
 });
 

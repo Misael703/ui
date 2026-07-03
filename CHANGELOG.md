@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.3] — 2026-07-02
+
+**Patch. Card cleanup: drop dead `.kpi-card` CSS, align `StatCard` accent to the Card tint+border.**
+
+### Removed
+- Deleted the orphaned `.kpi-card` / `.kpi-card__*` CSS (~33 lines): no component
+  rendered it (`Kpi` uses `.kpi`), it was dead code left over from an earlier
+  metric card.
+
+### Changed
+- `StatCard` accent (`.metric-card[data-accent]`) now uses the same **tinted
+  surface + hue border** as the `Card` accent (v1.68.1) instead of a **3px
+  `border-left` side rail**. That side-stripe was the one place the old rail
+  pattern survived and it was inconsistent with the Card accent language.
+  Visual-only, no API change; `accent` still takes `cat-1…cat-6`. Label + value
+  on the tinted face stay WCAG AA in both palettes (pinned in `Contrast.test`).
+
 ## [1.68.2] — 2026-07-02
 
 **Patch. `KeyValueRow` values wrap long / unspaced content instead of overflowing.**
