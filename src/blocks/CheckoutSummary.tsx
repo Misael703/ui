@@ -34,6 +34,13 @@ const fields: AddressField[] = [
 export function CheckoutSummary(): React.ReactElement {
   const [addr, setAddr] = React.useState<Record<string, string>>({});
 
+  // Totals derived so the breakdown always reconciles: net + shipping + 19% IVA.
+  const clp = (n: number): string => `$${n.toLocaleString('es-CL')}`;
+  const subtotal = 45250;
+  const shipping = 3500;
+  const iva = Math.round(subtotal * 0.19);
+  const total = subtotal + shipping + iva;
+
   return (
     <div
       style={{
@@ -52,14 +59,14 @@ export function CheckoutSummary(): React.ReactElement {
       </section>
 
       <aside style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 24 }}>
-        <FreeShippingProgress current={42000} threshold={50000} />
+        <FreeShippingProgress current={subtotal} threshold={50000} />
         <OrderSummary
           title="Resumen del pedido"
           rows={[
-            { label: 'Subtotal (3 ítems)', value: '$45.250' },
-            { label: 'Despacho', value: '$3.500' },
-            { label: 'IVA 19%', value: '$8.408' },
-            { label: 'Total', value: '$57.158', emphasis: true },
+            { label: 'Subtotal (3 ítems)', value: clp(subtotal) },
+            { label: 'Despacho', value: clp(shipping) },
+            { label: 'IVA 19%', value: clp(iva) },
+            { label: 'Total', value: clp(total), emphasis: true },
           ]}
         />
         <PromoCodeInput

@@ -56,7 +56,6 @@ export function DataTablePage(): React.ReactElement {
   const [query, setQuery] = React.useState('');
   const [cats, setCats] = React.useState<Set<string>>(new Set());
   const [inStockOnly, setInStockOnly] = React.useState(false);
-  const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
   const [sel, setSel] = React.useState<Set<string>>(new Set());
   const [order, setOrder] = React.useState<'name' | 'price' | 'stock'>('name');
   const [page, setPage] = React.useState(1);
@@ -115,8 +114,6 @@ export function DataTablePage(): React.ReactElement {
           selectable
           selectedKeys={sel}
           onSelectionChange={setSel}
-          sort={sort}
-          onSortChange={setSort}
           toolbar={
             <TableToolbar>
               <div className="grow" style={{ flex: 1 }}>
@@ -143,7 +140,6 @@ export function DataTablePage(): React.ReactElement {
             {
               key: 'name',
               header: 'Producto',
-              sortable: true,
               accessor: (r) => (
                 <>
                   <span>{r.name}</span>

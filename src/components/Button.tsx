@@ -67,9 +67,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
         aria-busy={loading || undefined}
         aria-disabled={blocked || undefined}
         data-disabled={blocked || undefined}
+        tabIndex={blocked ? -1 : undefined}
         {...rest}
       >
-        {loading && <span className="spinner spinner--inverse" aria-hidden="true" />}
+        {loading && <span className="spinner spinner--current" aria-hidden="true" />}
         {!loading && iconLeft}
         <Slottable>{children}</Slottable>
         {!loading && iconRight}
@@ -85,7 +86,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
       aria-busy={loading || undefined}
       {...rest}
     >
-      {loading && <span className="spinner spinner--inverse" aria-hidden="true" />}
+      {loading && <span className="spinner spinner--current" aria-hidden="true" />}
       {!loading && iconLeft}
       {children}
       {!loading && iconRight}

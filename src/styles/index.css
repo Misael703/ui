@@ -94,6 +94,9 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .btn:active:not(:disabled) { transform: scale(0.98); box-shadow: var(--shadow-xs); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* asChild renders onto a non-<button> (e.g. an <a>), which :disabled can't
+   match — the blocked state rides on aria-disabled instead. */
+.btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 
 /* sizes */
 .btn--xs { padding: 6px 10px; font-size: var(--text-2xs); min-height: 28px; }
@@ -1615,6 +1618,9 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .spinner--lg { width: 32px; height: 32px; border-width: 3px; }
 .spinner--inverse { border-color: rgba(255,255,255,0.35); border-top-color: var(--color-white); width: 16px; height: 16px; border-width: 2px; }
+/* Inherits the host's text colour, so a spinner reads on ANY surface (a white
+   ring is invisible on the light-variant buttons: outline/ghost/subtle/link/warning). */
+.spinner--current { border-color: color-mix(in srgb, currentColor 25%, transparent); border-top-color: currentColor; width: 16px; height: 16px; border-width: 2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Stepper ------------------------------------------------------ */
@@ -1860,7 +1866,7 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default); font-size: var(--text-lg); font-weight: 500;
   cursor: pointer;
 }
-.number-input__btn:hover { background: var(--color-grey-200); }
+.number-input__btn:hover { background: var(--color-gray-200); }
 .number-input__field {
   border: none; outline: none; padding: 0 12px; min-width: 80px;
   background: transparent; color: var(--fg-default);

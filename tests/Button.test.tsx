@@ -34,6 +34,32 @@ describe('Button', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('loading spinner inherits currentColor so it stays visible on light variants', () => {
+    // A hardcoded white ring (spinner--inverse) was invisible on
+    // outline/ghost/subtle/link/warning. It must ride on currentColor now.
+    const { container } = render(<Button variant="outline" loading>x</Button>);
+    const spinner = container.querySelector('.spinner');
+    expect(spinner).toBeTruthy();
+    expect(spinner!.className).toContain('spinner--current');
+    expect(spinner!.className).not.toContain('spinner--inverse');
+    const spin = rule('.spinner--current');
+    expect(spin).toMatch(/border-top-color:\s*currentColor/i);
+  });
+
+  it('asChild + disabled actually blocks the slotted element', () => {
+    render(
+      <Button asChild disabled>
+        <a href="/x">Ir</a>
+      </Button>,
+    );
+    const link = screen.getByText('Ir');
+    expect(link).toHaveAttribute('aria-disabled', 'true');
+    expect(link).toHaveAttribute('tabindex', '-1');
+    // and the CSS neutralises pointer interaction on aria-disabled
+    const blocked = rule('.btn[aria-disabled="true"]');
+    expect(blocked).toMatch(/pointer-events:\s*none/);
+  });
+
   it('renders all variants without crashing', () => {
     const variants = [
       'primary', 'secondary', 'outline', 'ghost', 'subtle',
