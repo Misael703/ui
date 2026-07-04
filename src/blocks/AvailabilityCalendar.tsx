@@ -46,7 +46,7 @@ export function AvailabilityCalendar(): React.ReactElement {
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
       <PageHeader
-        title="Disponibilidad — Generador eléctrico 5kVA"
+        title="Disponibilidad · Generador eléctrico 5kVA"
         description="SKU GEN-5K · 1 unidad"
         actions={<Button>Reservar fechas libres</Button>}
       />

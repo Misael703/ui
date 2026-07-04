@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { ToastProvider, useToast } from '../src/components/Toast';
 import { LocaleProvider } from '../src/locale';
 
@@ -109,5 +111,25 @@ describe('Toast', () => {
     );
     fireEvent.click(screen.getByText('push'));
     expect(screen.getByRole('button', { name: 'Dismiss' })).toBeInTheDocument();
+  });
+});
+
+describe('Toast variant accent (CSS) — tinted border, not a side stripe', () => {
+  // The 4px coloured border-left was a banned side-stripe accent; the variant
+  // now rides on the coloured icon + a full 1px border tinted in the tone.
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('the 4px left side-stripe is gone from .toast', () => {
+    const base = css.match(/(^|\})\s*\.toast\s*\{([^}]*)\}/);
+    expect(base, '.toast rule must exist').toBeTruthy();
+    expect(base![2]).not.toMatch(/border-left-width/);
+  });
+
+  it('variants tint the full border with color-mix, no border-left-color', () => {
+    const danger = css.match(/\.toast--danger\s*\{([^}]*)\}/);
+    expect(danger, '.toast--danger rule must exist').toBeTruthy();
+    expect(danger![1]).toMatch(/border-color:\s*color-mix\(/);
+    expect(danger![1]).not.toMatch(/border-left-color/);
   });
 });

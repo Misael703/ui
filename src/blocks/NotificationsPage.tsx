@@ -29,7 +29,7 @@ const SEED: NotificationItem[] = [
   { id: '1', tone: 'success', title: 'Pedido #1042 despachado',  description: 'Cliente: Northwind Builders', timestamp: 'hace 5 min',  read: false },
   { id: '2', tone: 'warning', title: 'Stock bajo: CEM-425',      description: 'Solo quedan 8 unidades en bodega', timestamp: 'hace 22 min', read: false },
   { id: '3', tone: 'info',    title: 'Nuevo cliente registrado', description: 'Constructora del Sur · 77.456.789-K', timestamp: 'hace 1 h', read: false },
-  { id: '4', tone: 'danger',  title: 'Pago rechazado',           description: 'Pedido #1039 — tarjeta declinada', timestamp: 'hace 3 h', read: true },
+  { id: '4', tone: 'danger',  title: 'Pago rechazado',           description: 'Pedido #1039 · tarjeta declinada', timestamp: 'hace 3 h', read: true },
   { id: '5', tone: 'success', title: 'Backup completado',        description: 'Snapshot guardado en S3', timestamp: 'ayer', read: true },
   { id: '6', tone: 'info',    title: 'Resumen semanal listo',    description: '184 pedidos · $24.8M en ventas', timestamp: 'lun, 12 may', read: true },
 ];

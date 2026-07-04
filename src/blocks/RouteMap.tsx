@@ -64,7 +64,7 @@ export function RouteMap(): React.ReactElement {
   return (
     <div style={{ padding: 24, height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PageHeader
-        title="Ruta del día — Diego Salinas"
+        title="Ruta del día · Diego Salinas"
         description={`${visited} de ${ROUTE.length} paradas completadas · ${totalDistance} · ${totalTime}`}
         meta={<Badge variant="primary" appearance="solid">En ruta</Badge>}
         actions={
@@ -194,7 +194,7 @@ function MapMock({ stops }: { stops: Stop[] }) {
           }}
           className="cell-meta"
         >
-          Mock visual — conectá Mapbox/Leaflet
+          Mock visual · conecta Mapbox o Leaflet
         </div>
 
         <svg
