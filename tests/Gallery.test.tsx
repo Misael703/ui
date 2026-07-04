@@ -30,6 +30,14 @@ describe('ImageGallery', () => {
     fireEvent.click(screen.getByLabelText('Imagen anterior'));
     expect(container.querySelector('.gallery__image')?.getAttribute('src')).toBe('/a.jpg');
   });
+
+  it('main image is a real button that opens the lightbox (keyboard-accessible)', () => {
+    const { container } = render(<ImageGallery images={images} />);
+    const btn = container.querySelector('.gallery__image-btn');
+    expect(btn?.tagName).toBe('BUTTON');
+    fireEvent.click(btn!);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
 });
 
 describe('Lightbox', () => {

@@ -23,4 +23,20 @@ describe('HoverCard', () => {
     act(() => { vi.advanceTimersByTime(80); });
     expect(screen.queryByText('Card content')).not.toBeInTheDocument();
   });
+
+  it('closes on Escape without moving the pointer (WCAG 1.4.13)', () => {
+    vi.useFakeTimers();
+    render(
+      <HoverCard openDelay={100} trigger={<span>Trigger</span>}>
+        <div>Card content</div>
+      </HoverCard>
+    );
+    const trigger = screen.getByText('Trigger').parentElement!.parentElement!;
+    fireEvent.mouseEnter(trigger);
+    act(() => { vi.advanceTimersByTime(150); });
+    expect(screen.getByText('Card content')).toBeInTheDocument();
+
+    act(() => { fireEvent.keyDown(document, { key: 'Escape' }); });
+    expect(screen.queryByText('Card content')).not.toBeInTheDocument();
+  });
 });

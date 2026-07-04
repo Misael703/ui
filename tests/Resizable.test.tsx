@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ResizableGroup, ResizablePanel, ResizableHandle } from '../src/components/Resizable';
 
 describe('Resizable', () => {
@@ -19,5 +19,28 @@ describe('Resizable', () => {
     expect(screen.getByText('Left')).toBeInTheDocument();
     expect(screen.getByText('Right')).toBeInTheDocument();
     expect(container.querySelector('.resizable__handle')).toBeInTheDocument();
+  });
+
+  it('handle is keyboard-operable: aria-value* + arrow keys resize', () => {
+    const { container } = render(
+      <ResizableGroup direction="horizontal" ariaLabel="Editor">
+        <ResizablePanel id="left" defaultSize={30} minSize={10}>
+          <div>Left</div>
+        </ResizablePanel>
+        <ResizableHandle panelId="left" />
+        <ResizablePanel id="right" defaultSize={70} minSize={10}>
+          <div>Right</div>
+        </ResizablePanel>
+      </ResizableGroup>
+    );
+    const handle = container.querySelector('.resizable__handle')!;
+    expect(handle.getAttribute('aria-valuenow')).toBe('30');
+    expect(handle.getAttribute('aria-valuemin')).toBe('10');
+    expect(handle.getAttribute('aria-valuemax')).toBe('100');
+
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('32');
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('30');
   });
 });

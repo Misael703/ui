@@ -1,7 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Toggle, ToggleGroup, ToggleGroupItem, SegmentedControl, SegmentedControlItem } from '../src/components/Toggle';
 import { Rows3 } from '../src/components/Icons';
+
+describe('Toggle focus ring (CSS)', () => {
+  it('.toggle and .toggle-group__item show a focus-visible ring like every other control', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const m = css.match(/\.toggle:focus-visible[^{]*\{([^}]*)\}/);
+    expect(m, '.toggle:focus-visible rule must exist').toBeTruthy();
+    expect(m![1]).toMatch(/box-shadow:\s*var\(--focus-ring-accent\)/);
+    expect(css).toMatch(/\.toggle-group__item:focus-visible/);
+  });
+});
 
 describe('Toggle', () => {
   it('toggles pressed state', () => {

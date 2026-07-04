@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Carousel } from '../src/components/Carousel';
@@ -57,5 +57,29 @@ describe('Carousel', () => {
     );
     fireEvent.click(screen.getByRole('tab', { name: 'Ir a la diapositiva 3' }));
     expect(onChange).toHaveBeenCalledWith(2);
+  });
+
+  it('autoplay pauses while the pointer is inside (WCAG 2.2.2)', () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { container } = render(
+      <Carousel autoplay autoplayInterval={1000} loop onIndexChange={onChange}>
+        <div>A</div>
+        <div>B</div>
+        <div>C</div>
+      </Carousel>
+    );
+    const region = container.querySelector('.carousel')!;
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(onChange).toHaveBeenLastCalledWith(1);
+
+    fireEvent.mouseEnter(region);
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(onChange).toHaveBeenLastCalledWith(1); // paused: no further advance
+
+    fireEvent.mouseLeave(region);
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(onChange).toHaveBeenLastCalledWith(2);
+    vi.useRealTimers();
   });
 });
