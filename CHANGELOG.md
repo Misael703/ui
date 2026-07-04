@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.6] — 2026-07-04
+
+**Patch. Remove banned side-stripe accent and em dashes from UI copy (audit batch 2).**
+
+### Fixed
+- **Toast**: the variant accent was a 4px coloured `border-left` — a banned
+  side-stripe. Replaced with a full 1px border tinted in the variant tone
+  (`color-mix`); the already-coloured icon still carries the signal.
+
+### Blocks
+- Replaced em dashes in visible copy with the `·` separator already used
+  elsewhere: `AvailabilityCalendar` and `RouteMap` page titles, and the
+  `NotificationsPage` "Pago rechazado" description. Also fixed a `vos` slip in
+  the RouteMap map watermark (`conectá` → `conecta`).
+
 ## [1.68.5] — 2026-07-04
 
 **Patch. Confirmed-defect fixes from a full-kit audit (batch 1).**
