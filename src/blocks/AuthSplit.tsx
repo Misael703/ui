@@ -24,10 +24,10 @@ export function AuthSplit(): React.ReactElement {
 
   return (
     <div
+      className="auth-split"
       style={{
         minHeight: '100vh',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
         background: 'var(--bg-canvas)',
       }}
     >
@@ -84,8 +84,6 @@ export function AuthSplit(): React.ReactElement {
       <div
         className="auth-split__brand"
         style={{
-          display: 'grid',
-          placeItems: 'center',
           background: 'var(--color-primary)',
           color: 'var(--color-white)',
           overflow: 'hidden',
@@ -111,10 +109,14 @@ export function AuthSplit(): React.ReactElement {
         </p>
       </div>
 
-      {/* Hide the brand panel on mobile. Inline-styled because blocks own their
-          CSS — if you'd rather externalize this, move it to your app stylesheet. */}
+      {/* Columns live in CSS (not inline) so the media query can override them:
+          on mobile the brand panel hides AND the grid collapses to one track,
+          so the form reclaims the full width instead of staying at 50%. */}
       <style>{`
+        .auth-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        .auth-split__brand { display: grid; place-items: center; }
         @media (max-width: 768px) {
+          .auth-split { grid-template-columns: 1fr; }
           .auth-split__brand { display: none; }
         }
       `}</style>
