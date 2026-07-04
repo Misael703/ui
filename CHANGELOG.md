@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.68.5] — 2026-07-04
+
+**Patch. Confirmed-defect fixes from a full-kit audit (batch 1).**
+
+### Fixed
+- **NumberInput**: the stepper hover was dead — it referenced an undefined
+  `--color-grey-200` (British spelling); corrected to `--color-gray-200`.
+- **Button**: the loading spinner was hardcoded to a white ring
+  (`spinner--inverse`), invisible on the light variants (`outline`, `ghost`,
+  `subtle`, `link`, `warning`). It now inherits `currentColor`
+  (`spinner--current`), so it reads on every variant.
+- **Button** (`asChild`): `disabled`/`loading` had no effect on the slotted
+  element — no `.btn[aria-disabled]` rule existed, so a "disabled" link rendered
+  enabled and still navigated. Added the styling + `pointer-events: none` and
+  `tabIndex={-1}` when blocked.
+- **Icons**: `Tool` shipped path data byte-identical to `Wrench`; it is now an
+  explicit (`@deprecated`) alias of `Wrench`.
+
+### Blocks
+- **AuthSplit**: on mobile (≤768px) the form was pinned at 50% width with an
+  empty half — the grid columns and the brand panel's `display` were inline, so
+  the media query could not override them. Moved to CSS; the brand panel now
+  hides and the form reclaims the full width.
+- **DataTablePage**: removed a dead second sort (the column-header sort updated
+  the arrow but never reordered the data); `SortDropdown` is the single source.
+- **CheckoutSummary**: the summary totals were hardcoded and did not reconcile
+  (IVA 8.408 on a 45.250 subtotal is not 19%). They are now derived from the values.
+
 ## [1.68.4] — 2026-07-02
 
 **Patch. Deprecate `Kpi` (overlaps `StatCard`, no consumers).**
