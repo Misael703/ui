@@ -9,7 +9,7 @@ const meta: Meta<typeof Button> = {
   args: { children: 'Guardar pedido', variant: 'primary', size: 'md' },
   argTypes: {
     variant: { control: 'select', options: ['primary', 'secondary', 'outline', 'ghost', 'subtle', 'danger', 'success', 'warning', 'link'] },
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
   },
 };
 export default meta;
