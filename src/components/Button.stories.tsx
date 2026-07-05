@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button, ButtonGroup } from './Button';
-import { ArrowLeft } from './Icons';
+import { Button, ButtonGroup, IconButton } from './Button';
+import { ArrowLeft, ChevronDown, X, Search } from './Icons';
 
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button',
@@ -92,5 +92,17 @@ export const AsChildLink: S = {
     <Button asChild variant="primary">
       <a href="https://example.com" target="_blank" rel="noreferrer">Ir al catálogo</a>
     </Button>
+  ),
+};
+
+export const IconButtons: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <IconButton icon={<Search size={16} />} aria-label="Buscar" />
+      <IconButton icon={<ChevronDown size={16} />} aria-label="Más opciones" variant="outline" />
+      <IconButton icon={<X size={16} />} aria-label="Cerrar" variant="ghost" size="sm" />
+      <IconButton icon={<Search size={18} />} aria-label="Buscar" variant="primary" size="lg" />
+      <IconButton icon={<X size={16} />} aria-label="Procesando" loading />
+    </div>
   ),
 };

@@ -34,6 +34,7 @@ const rows = [{ id: '1', name: 'Cemento', sku: 'CEM-1' }, { id: '2', name: 'Fier
 export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'Button', node: <K.Button>Guardar</K.Button> },
   { name: 'ButtonGroup', node: <K.ButtonGroup><K.Button>A</K.Button><K.Button>B</K.Button></K.ButtonGroup> },
+  { name: 'IconButton', node: <K.IconButton icon={<K.ChevronDown size={16} />} aria-label="Opciones" /> },
   { name: 'Badge', node: <K.Badge variant="success" dot>Activo</K.Badge> },
   { name: 'Alert', node: <K.Alert variant="info" title="Aviso">texto</K.Alert> },
   { name: 'Spinner', node: <K.Spinner /> },

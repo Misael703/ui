@@ -100,3 +100,38 @@ export const ButtonGroup = React.forwardRef<HTMLDivElement, React.HTMLAttributes
     return <div ref={ref} role={role} className={cx('btn-group', className)} {...rest} />;
   }
 );
+
+// ---------- IconButton ---------------------------------------------------
+export interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+  /** The icon to render (the button has no text). */
+  icon: React.ReactNode;
+  /** Accessible name — required, since an icon-only button has no visible label. */
+  'aria-label': string;
+  /** Known variants autocomplete; any string is accepted (see `Button`). Default `ghost`. */
+  variant?: Extensible<ButtonVariant>;
+  /** Square sizes (36 / 44 / 52px) via `.btn--icon`. */
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+}
+
+/**
+ * Square, icon-only button — the affordance blocks used to hand-roll. Reuses the
+ * Button surface (`.btn--icon` + a variant) so padding, focus ring, hover and
+ * disabled are handled once. `aria-label` is required.
+ */
+export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
+  { icon, variant = 'ghost', size = 'md', loading = false, className, disabled, ...rest },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      className={cx('btn', 'btn--icon', `btn--${variant}`, `btn--${size}`, loading && 'is-loading', className)}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...rest}
+    >
+      {loading ? <span className="spinner spinner--current" aria-hidden="true" /> : icon}
+    </button>
+  );
+});

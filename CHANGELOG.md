@@ -5,6 +5,17 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.74.0] — 2026-07-05
+
+**Minor. New `IconButton` primitive (audit batch 5).**
+
+### Added
+- **`IconButton`** — a square, icon-only button that reuses the Button surface
+  (`.btn--icon` + a variant), so padding, focus ring, hover, disabled and the
+  loading spinner are handled once. `aria-label` is **required** (an icon-only
+  button needs an accessible name). Default variant `ghost`; sizes `sm`/`md`/`lg`
+  (36 / 44 / 52px). Replaces the ad-hoc 36×36 buttons the blocks hand-rolled.
+
 ## [1.73.1] — 2026-07-05
 
 **Patch. Route hardcoded UI strings through the locale (audit batch 4c).**
