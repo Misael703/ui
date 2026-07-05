@@ -1,6 +1,8 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 export interface InputOTPProps {
   value: string;
@@ -25,8 +27,10 @@ export function InputOTP({
   autoFocus = false,
   inputMode = 'numeric',
   className,
-  ariaLabel = 'Código de verificación',
+  ariaLabel,
 }: InputOTPProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['otp.label'];
   const refs = React.useRef<Array<HTMLInputElement | null>>([]);
 
   React.useEffect(() => {
@@ -92,7 +96,7 @@ export function InputOTP({
   return (
     <div
       role="group"
-      aria-label={ariaLabel}
+      aria-label={label}
       className={cx('input-otp', invalid && 'is-invalid', disabled && 'is-disabled', className)}
     >
       {Array.from({ length }).map((_, i) => (
@@ -107,7 +111,7 @@ export function InputOTP({
           maxLength={length}
           disabled={disabled}
           aria-invalid={invalid || undefined}
-          aria-label={`Dígito ${i + 1}`}
+          aria-label={format(t['otp.digit'], { n: i + 1 })}
           className="input-otp__slot"
           value={value[i] ?? ''}
           onChange={(e) => onInputChange(i, e)}

@@ -1,8 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CodeBlock, JsonViewer } from '../src/components/Code';
+import { LocaleProvider } from '../src/locale';
 
 describe('CodeBlock', () => {
+  it('copy label + count are localizable (no hardcoded strings)', () => {
+    render(
+      <LocaleProvider messages={{ 'code.copy': 'Copy', 'json.itemCount': '{n} items' }}>
+        <CodeBlock>x = 1</CodeBlock>
+        <JsonViewer data={[1, 2, 3]} defaultExpandDepth={0} />
+      </LocaleProvider>
+    );
+    expect(screen.getByText('Copy')).toBeInTheDocument();
+    expect(screen.getByText(/3 items/)).toBeInTheDocument();
+  });
+
   it('renders code content', () => {
     render(<CodeBlock>{'const x = 1;'}</CodeBlock>);
     expect(screen.getByText(/const x = 1;/)).toBeInTheDocument();
@@ -40,8 +52,8 @@ describe('JsonViewer', () => {
         defaultExpandDepth={1}
       />
     );
-    // El array (depth 1) está colapsado mostrando "3 items"
-    expect(screen.getByText(/3 items/)).toBeInTheDocument();
+    // El array (depth 1) está colapsado mostrando "3 elementos" (localizado)
+    expect(screen.getByText(/3 elementos/)).toBeInTheDocument();
   });
 
   it('expands node on toggle click', () => {

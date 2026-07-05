@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Check as CheckIcon } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
@@ -169,10 +170,11 @@ export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(function Lab
   { required, className, children, ...rest },
   ref
 ) {
+  const t = useLocale();
   return (
     <label ref={ref} className={cx('label', className)} {...rest}>
       {children}
-      {required && <span aria-label="requerido" style={{ color: 'var(--color-danger)' }}> *</span>}
+      {required && <span aria-label={t['form.required']} style={{ color: 'var(--color-danger)' }}> *</span>}
     </label>
   );
 });

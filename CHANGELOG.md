@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.73.1] — 2026-07-05
+
+**Patch. Route hardcoded UI strings through the locale (audit batch 4c).**
+
+### Fixed
+- **`CodeBlock` / `JsonViewer`**: the copy button (`Copiar`/`Copiado` + aria),
+  the expand/collapse aria, and the collapsed counts now come from the locale.
+  The counts also drop the English words: `{n} items` / `{n} keys` →
+  `{n} elementos` / `{n} claves`, and are overridable.
+- **`InputOTP`**: the group label and per-digit labels (`Dígito {n}`) route
+  through the locale; the `ariaLabel` prop still overrides.
+- **`Label`**: the required-marker aria (`requerido`) routes through the locale.
+
+New message keys: `code.copy`, `code.copied`, `code.copyAria`, `json.expand`,
+`json.collapse`, `json.itemCount`, `json.keyCount`, `otp.label`, `otp.digit`,
+`form.required`.
+
 ## [1.73.0] — 2026-07-05
 
 **Minor. Token hygiene + expose Button `xs`/`xl` sizes (audit batch 4b).**

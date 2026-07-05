@@ -167,4 +167,20 @@ export const esMessages: UiKitMessages = {
   // Tags input
   'tagsInput.remove': 'Quitar {tag}',
   'tagsInput.placeholder': 'Escribe y Enter…',
+
+  // Code / JSON viewer
+  'code.copy': 'Copiar',
+  'code.copied': 'Copiado',
+  'code.copyAria': 'Copiar al portapapeles',
+  'json.expand': 'Expandir',
+  'json.collapse': 'Colapsar',
+  'json.itemCount': '{n} elementos',
+  'json.keyCount': '{n} claves',
+
+  // InputOTP
+  'otp.label': 'Código de verificación',
+  'otp.digit': 'Dígito {n}',
+
+  // Form
+  'form.required': 'requerido',
 };

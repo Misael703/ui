@@ -203,6 +203,25 @@ export interface UiKitMessages {
   /** Template: "Quitar {tag}" */
   'tagsInput.remove': string;
   'tagsInput.placeholder': string;
+
+  // Code / JSON viewer
+  'code.copy': string;
+  'code.copied': string;
+  'code.copyAria': string;
+  'json.expand': string;
+  'json.collapse': string;
+  /** Template: "{n} elementos" */
+  'json.itemCount': string;
+  /** Template: "{n} claves" */
+  'json.keyCount': string;
+
+  // InputOTP
+  'otp.label': string;
+  /** Template: "Dígito {n}" */
+  'otp.digit': string;
+
+  // Form
+  'form.required': string;
 }
 
 /**
