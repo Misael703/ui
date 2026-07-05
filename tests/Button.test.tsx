@@ -60,6 +60,14 @@ describe('Button', () => {
     expect(blocked).toMatch(/pointer-events:\s*none/);
   });
 
+  it('exposes xs..xl sizes that reach the CSS (was sm|md|lg only)', () => {
+    (['xs', 'sm', 'md', 'lg', 'xl'] as const).forEach((s) => {
+      const { unmount } = render(<Button size={s}>x</Button>);
+      expect(screen.getByRole('button').className).toContain(`btn--${s}`);
+      unmount();
+    });
+  });
+
   it('renders all variants without crashing', () => {
     const variants = [
       'primary', 'secondary', 'outline', 'ghost', 'subtle',

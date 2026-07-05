@@ -51,8 +51,8 @@ const PALETTE = [
   'var(--color-success)',
   'var(--color-warning)',
   'var(--color-danger)',
-  '#6b7e95',
-  '#d4a574',
+  'var(--chart-series-7)',
+  'var(--chart-series-8)',
 ];
 
 /** Tooltip chrome shared by every chart. */

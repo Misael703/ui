@@ -14,7 +14,7 @@ export type ButtonVariant =
   | 'warning'
   | 'link';
 
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Known variants autocomplete; any string is accepted for consumer-defined
