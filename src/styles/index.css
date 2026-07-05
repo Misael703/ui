@@ -4910,6 +4910,15 @@ button, input, select, textarea { box-sizing: border-box; }
   background: color-mix(in srgb, var(--metric-accent, var(--color-primary)) 6%, var(--bg-surface));
   border-color: color-mix(in srgb, var(--metric-accent, var(--color-primary)) 38%, var(--border-default));
 }
+/* Semantic accents (mirror `.card--accent-*`) — a KPI in alarm/health state
+   (danger stock, success target hit) tints like the Card accent language. */
+.metric-card--brand     { --metric-accent: var(--color-primary); }
+.metric-card--secondary { --metric-accent: var(--accent-secondary); }
+.metric-card--success   { --metric-accent: var(--color-success); }
+.metric-card--warning   { --metric-accent: var(--color-warning); }
+.metric-card--danger    { --metric-accent: var(--color-danger); }
+.metric-card--info      { --metric-accent: var(--color-info); }
+.metric-card--neutral   { --metric-accent: var(--border-strong); }
 .metric-card--cat-1 { --metric-accent: var(--cat-1); }
 .metric-card--cat-2 { --metric-accent: var(--cat-2); }
 .metric-card--cat-3 { --metric-accent: var(--cat-3); }

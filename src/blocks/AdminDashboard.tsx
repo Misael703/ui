@@ -20,7 +20,10 @@ import * as React from 'react';
 import {
   AppShell,
   PageHeader,
-  Kpi,
+  SectionHeader,
+  StatCard,
+  Meter,
+  Grid,
   Logo,
   Avatar,
   Button,
@@ -28,7 +31,7 @@ import {
   DataTable,
   Badge,
 } from '../index';
-import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell } from '../components/Icons';
+import { Home, Package, Truck, Users, Settings, ShoppingCart, Wallet, MenuIcon, Bell } from '../components/Icons';
 
 const sections = [
   {
@@ -87,24 +90,27 @@ export function AdminDashboard(): React.ReactElement {
           description="Operación de la tienda hoy"
           actions={<Button>Nuevo pedido</Button>}
         />
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-          <Kpi label="Ventas hoy" value="$2.4M" delta={{ value: '12%', trend: 'up' }} hint="vs ayer" />
-          <Kpi label="Pedidos" value="184" delta={{ value: '3%', trend: 'down' }} />
-          <Kpi label="Ticket prom." value="$13.8K" delta={{ value: '0%', trend: 'flat' }} />
-          <Kpi label="Stock crítico" value="7 SKU" hint="bajo umbral" />
-        </div>
+        <Grid minColWidth={200} gap={4} style={{ marginBottom: 24 }}>
+          <StatCard accent="cat-2" icon={<Wallet size={16} />} label="Ventas hoy" value="$2,4M" delta={12} caption="vs. ayer" />
+          <StatCard accent="cat-1" icon={<ShoppingCart size={16} />} label="Pedidos" value="184" delta={-3} caption="vs. ayer" />
+          <StatCard label="Ticket prom." value="$13,8K" delta={0} caption="vs. ayer" />
+          {/* A threshold/health metric, not a plain number: danger accent + a Meter
+              (fewer critical SKUs is better → optimum="low"). */}
+          <StatCard
+            accent="danger"
+            icon={<Package size={16} />}
+            label="Stock crítico"
+            value="7 SKU"
+            caption="bajo umbral"
+            chart={<Meter value={7} max={20} low={5} high={12} optimum="low" showValue={false} size="sm" />}
+          />
+        </Grid>
         <section aria-labelledby="dash-recent">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 12px' }}>
-          <h3 id="dash-recent" className="h3" style={{ margin: 0 }}>Pedidos recientes</h3>
-          <a href="#" className="caption">Ver todos</a>
-        </div>
+        <SectionHeader
+          title="Pedidos recientes"
+          titleId="dash-recent"
+          actions={<a href="#" className="caption">Ver todos</a>}
+        />
         <DataTable
           rows={recent}
           rowKey={(r) => r.id}

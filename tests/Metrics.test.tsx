@@ -92,6 +92,14 @@ describe('StatCard', () => {
   it('CSS: the orphaned .kpi-card block is gone (dead code)', () => {
     expect(css).not.toContain('.kpi-card');
   });
+
+  it('semantic accent tints like the Card accent language (danger → --color-danger)', () => {
+    const { container } = render(<StatCard label="Stock crítico" value="7 SKU" accent="danger" />);
+    const card = container.querySelector('.metric-card')!;
+    expect(card.className).toContain('metric-card--danger');
+    expect(card.getAttribute('data-accent')).toBe('danger');
+    expect(css).toMatch(/\.metric-card--danger\s*\{\s*--metric-accent:\s*var\(--color-danger\)/);
+  });
 });
 
 describe('Metric value typography', () => {

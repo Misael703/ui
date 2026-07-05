@@ -4,7 +4,7 @@ import { cx } from '../utils/cx';
 import { formatNumber } from '../utils/format';
 import { ArrowUp, ArrowDown, Minus } from './Icons';
 import { Skeleton } from './Display';
-import type { CategoryAccent } from './Display';
+import type { CardAccent } from './Display';
 
 /**
  * Dashboard data-communication primitives. Everything here is CSS-only — no
@@ -81,8 +81,9 @@ export interface StatCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   caption?: React.ReactNode;
   /** Small leading glyph rendered in a tinted chip. */
   icon?: React.ReactNode;
-  /** Left-edge accent hue. */
-  accent?: CategoryAccent;
+  /** Accent tint + border. A category hue (`cat-1`…`cat-6`) for grouping, or a
+   *  semantic role (`danger`, `success`, …) for a KPI in an alarm/health state. */
+  accent?: CardAccent;
   /** Micro-viz slot (Sparkline / Sparkbar / ProportionBar). */
   chart?: React.ReactNode;
   /**
