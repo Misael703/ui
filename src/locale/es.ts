@@ -183,4 +183,8 @@ export const esMessages: UiKitMessages = {
 
   // Form
   'form.required': 'requerido',
+
+  // PasswordInput
+  'passwordInput.show': 'Mostrar contraseña',
+  'passwordInput.hide': 'Ocultar contraseña',
 };

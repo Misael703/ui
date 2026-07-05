@@ -222,6 +222,10 @@ export interface UiKitMessages {
 
   // Form
   'form.required': string;
+
+  // PasswordInput — toggle aria-label (reflects the action)
+  'passwordInput.show': string;
+  'passwordInput.hide': string;
 }
 
 /**

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { Check as CheckIcon } from './Icons';
+import { Check as CheckIcon, Eye, EyeOff } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -238,3 +238,56 @@ export const InputGroupAddon = React.forwardRef<HTMLSpanElement, React.HTMLAttri
     return <span ref={ref} className={cx('input-group__addon', className)} {...rest} />;
   }
 );
+
+// ---------- PasswordInput ------------------------------------------------
+export interface PasswordInputProps extends Omit<InputProps, 'type'> {
+  /** Initial visibility (uncontrolled). Default `false`. */
+  defaultVisible?: boolean;
+  /** Controlled visibility; when set, the component doesn't own the state. */
+  visible?: boolean;
+  onVisibleChange?: (visible: boolean) => void;
+  /** Toggle aria-label while the password is HIDDEN (action: reveal). Defaults to the locale. */
+  showLabel?: string;
+  /** Toggle aria-label while the password is VISIBLE (action: hide). Defaults to the locale. */
+  hideLabel?: string;
+}
+
+/**
+ * Password field with a built-in show/hide toggle — wraps `Input` (whose `type`
+ * it owns, password/text) in an `InputGroup` with a keyboard-operable
+ * `InputGroupAddon` (Enter/Space), so consumers stop re-implementing the
+ * Eye/EyeOff + `type` dance. `ref` forwards to the real `<input>`; every `Input`
+ * prop except `type` passes through (invalid, autoComplete, disabled, …).
+ */
+export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(function PasswordInput(
+  { defaultVisible = false, visible: controlledVisible, onVisibleChange, showLabel, hideLabel, disabled, className, ...rest },
+  ref
+) {
+  const t = useLocale();
+  const [internal, setInternal] = React.useState(defaultVisible);
+  const isControlled = controlledVisible !== undefined;
+  const visible = isControlled ? controlledVisible : internal;
+  const toggle = () => {
+    if (disabled) return;
+    const next = !visible;
+    if (!isControlled) setInternal(next);
+    onVisibleChange?.(next);
+  };
+  const label = visible ? (hideLabel ?? t['passwordInput.hide']) : (showLabel ?? t['passwordInput.show']);
+  return (
+    <InputGroup className={className}>
+      <Input ref={ref} type={visible ? 'text' : 'password'} disabled={disabled} {...rest} />
+      <InputGroupAddon
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-label={label}
+        aria-pressed={visible}
+        onClick={toggle}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } }}
+        style={{ cursor: disabled ? 'default' : 'pointer' }}
+      >
+        {visible ? <EyeOff size={16} /> : <Eye size={16} />}
+      </InputGroupAddon>
+    </InputGroup>
+  );
+});
