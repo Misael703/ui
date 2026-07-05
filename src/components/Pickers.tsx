@@ -85,6 +85,9 @@ export function Combobox<T = string>({
   // Stable per-instance listbox id so multiple Comboboxes don't collide on aria-controls.
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
+  // Stable per-option id so aria-activedescendant can point the SR cursor at the
+  // visually-highlighted row (APG combobox pattern).
+  const optionId = (i: number) => `${listboxId}-opt-${i}`;
 
   const selected = React.useMemo(
     () => options.find((o) => o.value === value) ?? null,
@@ -190,6 +193,7 @@ export function Combobox<T = string>({
           role="combobox"
           aria-expanded={open}
           aria-controls={listboxId}
+          aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
           className="combobox__input"
           placeholder={ph}
           disabled={disabled}
@@ -209,6 +213,7 @@ export function Combobox<T = string>({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listboxId}
+          aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
           className="combobox__trigger"
           disabled={disabled}
           onClick={() => setOpen((o) => !o)}
@@ -258,6 +263,7 @@ export function Combobox<T = string>({
             filtered.map((o, i) => (
               <li
                 key={String(o.value)}
+                id={optionId(i)}
                 role="option"
                 aria-selected={o.value === value}
                 aria-disabled={o.disabled}
