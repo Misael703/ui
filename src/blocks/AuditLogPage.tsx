@@ -4,8 +4,8 @@
  * an "edit" row opens a `DiffViewer` (the kit's before/after viewer) that
  * shows exactly which fields changed.
  *
- * The composition uses two underused but valuable kit pieces — `DiffViewer`
- * and Modal — wired together with a real event shape.
+ * The composition pairs `DiffViewer` with a side `Drawer` (not a modal, so the
+ * chronological log stays visible behind the diff), wired to a real event shape.
  *
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
  */
@@ -18,7 +18,7 @@ import {
   Select,
   Badge,
   Button,
-  Modal,
+  Drawer,
   DiffViewer,
   type DiffEntry,
 } from '../index';
@@ -139,9 +139,12 @@ export function AuditLogPage(): React.ReactElement {
         />
       </div>
 
-      <Modal
+      {/* Side Drawer, not a Modal: the diff opens beside the log so the
+          chronological scan stays visible behind it. */}
+      <Drawer
         open={openEvent !== null}
         onClose={() => setOpenEvent(null)}
+        side="right"
         title={openEvent ? `Cambios en ${openEvent.entity}` : ''}
         footer={<Button onClick={() => setOpenEvent(null)}>Cerrar</Button>}
         size="lg"
@@ -152,7 +155,7 @@ export function AuditLogPage(): React.ReactElement {
             {openEvent.diff && <DiffViewer entries={openEvent.diff} />}
           </>
         )}
-      </Modal>
+      </Drawer>
     </div>
   );
 }

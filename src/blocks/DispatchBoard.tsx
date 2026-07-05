@@ -19,7 +19,7 @@
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
  */
 import * as React from 'react';
-import { PageHeader, Card, CardBody, Badge, Avatar, Button } from '../index';
+import { PageHeader, Card, CardBody, Badge, Avatar, Button, IconButton } from '../index';
 import { MapPin, Clock, Package, Plus, MoreHorizontal } from '../components/Icons';
 
 type Stage = 'por-confirmar' | 'preparando' | 'listo' | 'en-ruta' | 'entregado';
@@ -138,13 +138,7 @@ export function DispatchBoard(): React.ReactElement {
                   <strong>{col.label}</strong>
                   <Badge variant="neutral">{col.orders.length}</Badge>
                 </div>
-                <button
-                  type="button"
-                  aria-label={`Más opciones en ${col.label}`}
-                  style={{ border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--fg-muted)', padding: 4 }}
-                >
-                  <MoreHorizontal size={16} />
-                </button>
+                <IconButton icon={<MoreHorizontal size={16} />} aria-label={`Más opciones en ${col.label}`} size="sm" />
               </div>
               <div className="cell-meta" style={{ marginTop: 2 }}>{col.hint}</div>
             </div>
