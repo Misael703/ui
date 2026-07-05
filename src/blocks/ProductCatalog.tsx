@@ -16,6 +16,7 @@ import {
   Checkbox,
   Button,
   Badge,
+  EmptyState,
 } from '../index';
 
 interface Product {
@@ -112,19 +113,32 @@ export function ProductCatalog(): React.ReactElement {
             </Select>
           </div>
 
-          {/* Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-            {visible.map((p) => (
-              <ProductCard
-                key={p.id}
-                sku={p.sku}
-                name={p.name}
-                price={`$${p.price.toLocaleString('es-CL')}`}
-                tag={p.isNew ? <Badge variant="primary" appearance="solid">Nuevo</Badge> : !p.inStock ? <Badge variant="danger">Agotado</Badge> : undefined}
-                footer={<Button size="sm" fullWidth disabled={!p.inStock}>{p.inStock ? 'Agregar al carrito' : 'Sin stock'}</Button>}
-              />
-            ))}
-          </div>
+          {/* Grid, or an empty state when the filters match nothing (the most
+              common filter outcome — a blank grid teaches the wrong lesson). */}
+          {visible.length === 0 ? (
+            <EmptyState
+              title="Sin resultados"
+              description="Ningún producto coincide con la búsqueda o los filtros."
+              action={
+                <Button variant="outline" onClick={() => { setQuery(''); setCats(new Set()); setInStockOnly(false); }}>
+                  Limpiar filtros
+                </Button>
+              }
+            />
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+              {visible.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  sku={p.sku}
+                  name={p.name}
+                  price={`$${p.price.toLocaleString('es-CL')}`}
+                  tag={p.isNew ? <Badge variant="primary" appearance="solid">Nuevo</Badge> : !p.inStock ? <Badge variant="danger">Agotado</Badge> : undefined}
+                  footer={<Button size="sm" fullWidth disabled={!p.inStock}>{p.inStock ? 'Agregar al carrito' : 'Sin stock'}</Button>}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
