@@ -63,10 +63,32 @@ describe('Menu', () => {
 });
 
 describe('Stat', () => {
-  it('renders label, value and trend', () => {
+  it('renders label, value and the legacy string trend (back-compat)', () => {
     render(<Stat label="Ventas" value="$1.2M" trend={{ dir: 'up', value: '+12%' }} hint="vs sem. ant." />);
     expect(screen.getByText('Ventas')).toBeInTheDocument();
     expect(screen.getByText('$1.2M')).toBeInTheDocument();
     expect(screen.getByText(/\+12%/)).toBeInTheDocument();
+  });
+
+  it('numeric `delta` renders the shared DeltaBadge (signed percent + localized aria)', () => {
+    const { container } = render(<Stat label="Ventas" value="$1.2M" delta={12.4} />);
+    // Canonical atom, not the legacy inline trend span.
+    const badge = container.querySelector('.delta-badge');
+    expect(badge).toBeInTheDocument();
+    expect(container.querySelector('.stat__trend')).toBeNull();
+    expect(badge).toHaveTextContent('+12,4%');
+    expect(badge).toHaveAttribute('aria-label', expect.stringContaining('subió'));
+  });
+
+  it('`deltaInvert` flips the tone for higher-is-worse metrics (arrow unchanged)', () => {
+    const { container } = render(<Stat label="Merma" value="3,1%" delta={3.1} deltaInvert />);
+    // Up + invert → negative tone.
+    expect(container.querySelector('.delta-badge--neg')).toBeInTheDocument();
+  });
+
+  it('`delta` wins over the deprecated `trend` when both are passed', () => {
+    const { container } = render(<Stat label="X" value="1" delta={5} trend={{ dir: 'down', value: '-9%' }} />);
+    expect(container.querySelector('.delta-badge')).toBeInTheDocument();
+    expect(container.querySelector('.stat__trend')).toBeNull();
   });
 });

@@ -1916,6 +1916,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .kpi__value {
   font-family: var(--font-display); font-weight: 700;
   font-size: var(--text-3xl); color: var(--fg-default); line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 .kpi__foot { display: flex; gap: 10px; align-items: center; font-size: var(--text-sm); }
 .kpi__delta { font-weight: 600; }
@@ -2532,6 +2533,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .stat__value {
   font-family: var(--font-display); font-weight: 700;
   font-size: var(--text-3xl); line-height: 1.1; color: var(--fg-default);
+  font-variant-numeric: tabular-nums;
 }
 .stat__foot { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-xs); }
 .stat__trend--up { color: var(--color-success); font-weight: 700; }

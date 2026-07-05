@@ -84,6 +84,19 @@ describe('StatCard', () => {
   });
 });
 
+describe('Metric value typography', () => {
+  // KPI numbers must be tabular so digits align column-to-column and don't jitter
+  // between renders. StatCard already had it; Stat and Kpi were the gap.
+  it.each(['.metric-card__value', '.stat__value', '.kpi__value'])(
+    '%s uses tabular-nums',
+    (selector) => {
+      const rule = css.match(new RegExp(`\\${selector}\\s*\\{[^}]*\\}`));
+      expect(rule).toBeTruthy();
+      expect(rule![0]).toMatch(/font-variant-numeric:\s*tabular-nums/);
+    }
+  );
+});
+
 describe('Meter', () => {
   it('exposes role=meter with aria range values (not a progressbar)', () => {
     const { container } = render(<Meter label="Stock" value={72} max={100} />);

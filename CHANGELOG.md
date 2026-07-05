@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.76.0] — 2026-07-05
+
+**Minor. Dashboard consistency: `Stat` speaks the canonical `DeltaBadge`; KPI values are tabular.**
+
+Part of the dashboard / data-communication pass. The kit had three ways to show
+a variation ("↑ 12%"): the tested, i18n, invert-aware `DeltaBadge`, plus two
+stringly-typed re-implementations in `Stat` and `Kpi`. This unifies them.
+
+### Added
+- **`Stat` now takes a numeric `delta`** (+ `deltaFormat`, `deltaInvert`), rendered
+  through the shared `DeltaBadge` — so `Stat`, `StatCard` and table cells read
+  identically (signed, localized aria "subió/bajó", tone by sign, invert for
+  higher-is-worse metrics like merma/costo). Preferred over `trend`.
+
+### Changed
+- `.stat__value` and `.kpi__value` gained `font-variant-numeric: tabular-nums`, so
+  KPI digits align column-to-column and don't jitter between renders (`StatCard`
+  already had it; `Stat`/`Kpi` were the gap). Guarded in `Metrics.test`.
+- `Kpi`'s trend arrows switched from `Chevron*` to the canonical `Arrow*` + `Minus`
+  set (flat was a bare `–` string), matching `DeltaBadge`/`Stat`.
+
+### Deprecated
+- `Stat`'s string-typed `trend` prop. Still supported for back-compat (ignored when
+  `delta` is set); use `delta` (number) instead. `Kpi` remains deprecated.
+
 ## [1.75.0] — 2026-07-05
 
 **Minor. New `PasswordInput` + TabList horizontal overflow (consumer-driven: despachos).**
