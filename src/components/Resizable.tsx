@@ -8,7 +8,9 @@ interface ResizableContextValue {
   direction: ResizableDirection;
   registerPanel: (id: string, defaultSize: number, minSize: number) => void;
   sizes: Record<string, number>;
+  mins: Record<string, number>;
   startDrag: (panelId: string, e: React.PointerEvent) => void;
+  nudge: (panelId: string, deltaPct: number) => void;
 }
 const ResizableContext = React.createContext<ResizableContextValue | null>(null);
 
@@ -61,8 +63,24 @@ export function ResizableGroup({ direction = 'horizontal', className, children, 
     window.addEventListener('pointerup', onUp);
   };
 
+  // Keyboard resize: shift `panelId` by `deltaPct`, taking the difference from
+  // its next sibling, clamped to both panels' minimums (same rule as the drag).
+  const nudge = React.useCallback((panelId: string, deltaPct: number) => {
+    const idx = orderRef.current.indexOf(panelId);
+    const nextId = orderRef.current[idx + 1];
+    if (!nextId) return;
+    setSizes((s) => {
+      const a = s[panelId] ?? 0;
+      const b = s[nextId] ?? 0;
+      const minA = minsRef.current[panelId] ?? 5;
+      const minB = minsRef.current[nextId] ?? 5;
+      const newA = Math.max(minA, Math.min(a + b - minB, a + deltaPct));
+      return { ...s, [panelId]: newA, [nextId]: a + b - newA };
+    });
+  }, []);
+
   return (
-    <ResizableContext.Provider value={{ direction, registerPanel, sizes, startDrag }}>
+    <ResizableContext.Provider value={{ direction, registerPanel, sizes, mins: minsRef.current, startDrag, nudge }}>
       <div
         ref={containerRef}
         role="group"
@@ -111,14 +129,32 @@ export interface ResizableHandleProps {
 export function ResizableHandle({ panelId, className, ariaLabel = 'Redimensionar' }: ResizableHandleProps) {
   const ctx = React.useContext(ResizableContext);
   if (!ctx) throw new Error('ResizableHandle must be inside ResizableGroup');
+  const size = ctx.sizes[panelId] ?? 0;
+  const min = ctx.mins[panelId] ?? 5;
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const horizontal = ctx.direction === 'horizontal';
+    const dec = horizontal ? 'ArrowLeft' : 'ArrowUp';
+    const inc = horizontal ? 'ArrowRight' : 'ArrowDown';
+    const step = e.shiftKey ? 10 : 2;
+    if (e.key === dec) { e.preventDefault(); ctx.nudge(panelId, -step); }
+    else if (e.key === inc) { e.preventDefault(); ctx.nudge(panelId, step); }
+    else if (e.key === 'Home') { e.preventDefault(); ctx.nudge(panelId, -100); }
+    else if (e.key === 'End') { e.preventDefault(); ctx.nudge(panelId, 100); }
+  };
+
   return (
     <div
       role="separator"
       tabIndex={0}
       aria-orientation={ctx.direction === 'horizontal' ? 'vertical' : 'horizontal'}
       aria-label={ariaLabel}
+      aria-valuenow={Math.round(size)}
+      aria-valuemin={Math.round(min)}
+      aria-valuemax={100}
       className={cx('resizable__handle', `resizable__handle--${ctx.direction}`, className)}
       onPointerDown={(e) => ctx.startDrag(panelId, e)}
+      onKeyDown={onKeyDown}
     />
   );
 }

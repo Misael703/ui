@@ -4083,6 +4083,10 @@ button, input, select, textarea { box-sizing: border-box; }
 .gallery--thumbs-left { flex-direction: row; }
 .gallery__main { position: relative; background: var(--bg-subtle); border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 1; flex: 1; }
 .gallery__image { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* The main image is a real button when the lightbox is enabled, so keyboard
+   users can open it. Bare reset + zoom cursor + a focus ring. */
+.gallery__image-btn { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: inherit; }
+.gallery__image-btn:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
 .gallery__nav {
   position: absolute; top: 50%; transform: translateY(-50%);
   background: rgba(0,0,0,0.5); color: var(--color-white);
@@ -4543,6 +4547,15 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 .toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Every other interactive control shows a focus ring; the toggle / segmented
+   item was the exception. z-index lifts the ring above the segmented indicator. */
+.toggle:focus-visible,
+.toggle-group__item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-accent);
+  position: relative;
+  z-index: 2;
+}
 
 .toggle-group {
   display: inline-flex;

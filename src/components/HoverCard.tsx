@@ -3,6 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
+import { useEscape } from '../hooks/useEscape';
 
 export type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -48,6 +49,13 @@ export function HoverCard({
   };
 
   React.useEffect(() => () => clear(), []);
+
+  // WCAG 1.4.13 (Content on Hover or Focus): dismissable without moving the
+  // pointer. Escape closes and cancels any pending open/close timer.
+  useEscape(open, () => {
+    clear();
+    setOpen(false);
+  });
 
   const pos = usePopoverPosition(triggerRef, contentRef, {
     open,

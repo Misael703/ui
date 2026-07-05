@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.69.0] — 2026-07-04
+
+**Minor. Accessibility hardening on interactive widgets (audit batch 3a).**
+
+All changes are backwards-compatible (no prop or export changes); they add
+keyboard/focus behavior that was missing.
+
+### Accessibility
+- **Toggle / SegmentedControl**: added the `:focus-visible` ring
+  (`--focus-ring-accent`) every other control already had — keyboard focus was
+  falling back to the UA outline.
+- **HoverCard**: closes on `Escape` without moving the pointer (WCAG 1.4.13,
+  Content on Hover or Focus).
+- **Carousel**: autoplay now pauses while the pointer or keyboard focus is
+  inside, and never runs under `prefers-reduced-motion` (WCAG 2.2.2).
+- **Gallery**: the main image is a real `<button>` (was an `<img onClick>`), so
+  the lightbox is keyboard-openable; the **Lightbox** now traps focus, locks
+  body scroll and restores focus on close via the shared overlay hooks, and is
+  portaled to `document.body` (was rendered inline).
+- **Resizable**: the handle is now keyboard-operable — Arrow keys resize (Shift
+  for a larger step, Home/End to the extremes) and it exposes
+  `aria-valuenow`/`valuemin`/`valuemax` (WAI-ARIA window splitter).
+
+### Deferred
+- The Display3 `Calendar` per-event `onClick` (a `<span>` nested inside the day
+  `<button>`, so it can't become a nested button) needs a small API decision and
+  is deferred to a later pass.
+
 ## [1.68.6] — 2026-07-04
 
 **Patch. Remove banned side-stripe accent and em dashes from UI copy (audit batch 2).**

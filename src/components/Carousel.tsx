@@ -29,6 +29,9 @@ export function Carousel({
   const slides = React.Children.toArray(children);
   const total = slides.length;
   const [index, setIndex] = React.useState(0);
+  // Autoplay pauses while the pointer or keyboard focus is inside (WCAG 2.2.2
+  // Pause, Stop, Hide) and never runs under prefers-reduced-motion.
+  const [paused, setPaused] = React.useState(false);
 
   // Stable handlers: use the functional setIndex form so the callbacks
   // don't have to close over `index`. They re-create only when `loop`,
@@ -60,10 +63,11 @@ export function Carousel({
   }, [loop, total, onIndexChange]);
 
   React.useEffect(() => {
-    if (!autoplay || total <= 1) return;
+    if (!autoplay || total <= 1 || paused) return;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     const id = setInterval(next, autoplayInterval);
     return () => clearInterval(id);
-  }, [autoplay, autoplayInterval, total, next]);
+  }, [autoplay, autoplayInterval, total, next, paused]);
 
   const onKey = React.useCallback(
     (e: React.KeyboardEvent) => {
@@ -81,6 +85,10 @@ export function Carousel({
       aria-label={ariaLabel}
       tabIndex={0}
       onKeyDown={onKey}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
     >
       <div className="carousel__viewport">
         <div className="carousel__track" style={{ transform: `translateX(-${index * 100}%)` }}>

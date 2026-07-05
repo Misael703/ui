@@ -2,6 +2,9 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight, X } from './Icons';
+import { Portal } from './Portal';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -38,13 +41,18 @@ export function ImageGallery({
     <>
       <div className={cx('gallery', `gallery--thumbs-${thumbnailPosition}`, className)} {...rest}>
         <div className="gallery__main">
-          <img
-            src={current.src}
-            alt={current.alt ?? ''}
-            className="gallery__image"
-            onClick={() => enableLightbox && setLightboxOpen(true)}
-            style={{ cursor: enableLightbox ? 'zoom-in' : 'default' }}
-          />
+          {enableLightbox ? (
+            <button
+              type="button"
+              className="gallery__image-btn"
+              aria-label={t['gallery.viewer']}
+              onClick={() => setLightboxOpen(true)}
+            >
+              <img src={current.src} alt={current.alt ?? ''} className="gallery__image" />
+            </button>
+          ) : (
+            <img src={current.src} alt={current.alt ?? ''} className="gallery__image" />
+          )}
           {images.length > 1 && (
             <>
               <button
@@ -109,6 +117,11 @@ export interface LightboxProps {
 
 export function Lightbox({ open, onClose, images, index, onChange }: LightboxProps) {
   const t = useLocale();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  // Match Modal/Drawer: trap focus, lock body scroll, restore focus on close
+  // (useFocusTrap restores to the trigger). Escape/arrows below.
+  useFocusTrap(dialogRef, open);
+  useScrollLock(open);
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -124,7 +137,8 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
   const current = images[Math.max(0, Math.min(index, images.length - 1))];
 
   return (
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label={t['gallery.viewer']} onClick={onClose}>
+    <Portal>
+    <div ref={dialogRef} className="lightbox" role="dialog" aria-modal="true" aria-label={t['gallery.viewer']} onClick={onClose}>
       <button
         type="button"
         className="lightbox__close"
@@ -158,5 +172,6 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
         <div className="lightbox__counter">{index + 1} / {images.length}</div>
       )}
     </div>
+    </Portal>
   );
 }
