@@ -243,6 +243,14 @@ describe('RadioGroup', () => {
     fireEvent.click(screen.getByLabelText('B'));
     expect(onChange).toHaveBeenCalledWith('b');
   });
+
+  it('renders the custom control (.check__box), not the dead native fallback', () => {
+    const { container } = render(
+      <RadioGroup name="t" value="a" onChange={() => {}} options={[{ value: 'a', label: 'A' }]} />
+    );
+    expect(container.querySelector('.check--radio .check__box')).toBeTruthy();
+    expect(container.querySelector('input.radio')).toBeNull();
+  });
 });
 
 describe('CheckboxGroup', () => {
@@ -262,5 +270,13 @@ describe('CheckboxGroup', () => {
     expect(onChange).toHaveBeenCalledWith(['a', 'b']);
     fireEvent.click(screen.getByLabelText('A'));
     expect(onChange).toHaveBeenCalledWith([]);
+  });
+
+  it('renders the custom control (.check__box), not the dead native fallback', () => {
+    const { container } = render(
+      <CheckboxGroup value={[]} onChange={() => {}} options={[{ value: 'a', label: 'A' }]} />
+    );
+    expect(container.querySelector('.check .check__box')).toBeTruthy();
+    expect(container.querySelector('input.checkbox')).toBeNull();
   });
 });

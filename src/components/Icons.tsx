@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 /**
- * Icon set para @misael703/elalba-ui — 24×24, currentColor, stroke-based.
+ * Icon set para @misael703/ui — 24×24, currentColor, stroke-based.
  *
  * Uso:
- *   import { ChevronRight, Search, Trash } from '@misael703/elalba-ui';
+ *   import { ChevronRight, Search, Trash } from '@misael703/ui';
  *   <ChevronRight size={16} strokeWidth={2} />
  *
  * Tamaño por defecto: 20px.  Color: currentColor (heredado).
