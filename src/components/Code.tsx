@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Copy, Check } from './Icons';
+import { useLocale } from '../locale/LocaleProvider';
+import { format } from '../locale/messages';
 
 // ---------- CodeBlock ---------------------------------------------------
 export interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLPreElement>, 'children'> {
@@ -12,6 +14,7 @@ export interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLPreElement
 }
 
 export function CodeBlock({ children, language, showCopy = true, filename, className, ...rest }: CodeBlockProps) {
+  const t = useLocale();
   const [copied, setCopied] = React.useState(false);
 
   const onCopy = async () => {
@@ -33,9 +36,9 @@ export function CodeBlock({ children, language, showCopy = true, filename, class
             {language && <span className="codeblock__lang">{language}</span>}
           </div>
           {showCopy && (
-            <button type="button" className="codeblock__copy" aria-label="Copiar al portapapeles" onClick={onCopy}>
+            <button type="button" className="codeblock__copy" aria-label={t['code.copyAria']} onClick={onCopy}>
               {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copied ? 'Copiado' : 'Copiar'}</span>
+              <span>{copied ? t['code.copied'] : t['code.copy']}</span>
             </button>
           )}
         </div>
@@ -70,6 +73,7 @@ interface JsonNodeProps {
 }
 
 function JsonNode({ value, depth, keyName, expandDepth }: JsonNodeProps) {
+  const t = useLocale();
   const [expanded, setExpanded] = React.useState(depth < expandDepth);
 
   const renderKey = keyName !== null ? <span className="json__key">{JSON.stringify(keyName)}: </span> : null;
@@ -84,12 +88,12 @@ function JsonNode({ value, depth, keyName, expandDepth }: JsonNodeProps) {
     return (
       <span className="json__node">
         <span className="json__line">
-          <button type="button" className="json__toggle" onClick={() => setExpanded((e) => !e)} aria-label={expanded ? 'Colapsar' : 'Expandir'}>
+          <button type="button" className="json__toggle" onClick={() => setExpanded((e) => !e)} aria-label={expanded ? t['json.collapse'] : t['json.expand']}>
             {expanded ? '▾' : '▸'}
           </button>
           {renderKey}
           <span className="json__brace">[</span>
-          {!expanded && <span className="json__count">{value.length} items</span>}
+          {!expanded && <span className="json__count">{format(t['json.itemCount'], { n: value.length })}</span>}
           {!expanded && <span className="json__brace">]</span>}
         </span>
         {expanded && (
@@ -112,12 +116,12 @@ function JsonNode({ value, depth, keyName, expandDepth }: JsonNodeProps) {
     return (
       <span className="json__node">
         <span className="json__line">
-          <button type="button" className="json__toggle" onClick={() => setExpanded((e) => !e)} aria-label={expanded ? 'Colapsar' : 'Expandir'}>
+          <button type="button" className="json__toggle" onClick={() => setExpanded((e) => !e)} aria-label={expanded ? t['json.collapse'] : t['json.expand']}>
             {expanded ? '▾' : '▸'}
           </button>
           {renderKey}
           <span className="json__brace">{'{'}</span>
-          {!expanded && <span className="json__count">{entries.length} keys</span>}
+          {!expanded && <span className="json__count">{format(t['json.keyCount'], { n: entries.length })}</span>}
           {!expanded && <span className="json__brace">{'}'}</span>}
         </span>
         {expanded && (
