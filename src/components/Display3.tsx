@@ -375,6 +375,12 @@ export interface CalendarEvent {
   date: Date;
   label: React.ReactNode;
   tone?: StatusTone;
+  /**
+   * @deprecated No-op. It rendered a mouse-only handler on a `<span>` nested
+   * inside the day `<button>` (invalid markup + keyboard-inaccessible, and its
+   * `stopPropagation` blocked the day too). Handle activation via the
+   * day-level `onDayClick` instead.
+   */
   onClick?: () => void;
 }
 
@@ -453,10 +459,13 @@ export function Calendar({ month: monthProp, events = [], onMonthChange, onDayCl
               {dayEvents.length > 0 && (
                 <div className="calendar__events">
                   {dayEvents.slice(0, 2).map((ev, idx) => (
+                    // Non-interactive label: the day <button> owns the click
+                    // (keyboard-accessible). An interactive event here would be
+                    // a <button> nested in a <button> (invalid) + the old
+                    // stopPropagation made it unreachable by keyboard entirely.
                     <span
                       key={idx}
                       className={cx('calendar__event', `calendar__event--${ev.tone ?? 'neutral'}`)}
-                      onClick={(e) => { e.stopPropagation(); ev.onClick?.(); }}
                     >
                       {ev.label}
                     </span>

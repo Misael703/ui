@@ -166,4 +166,18 @@ describe('Calendar', () => {
     );
     expect(screen.getByText('Despacho')).toBeInTheDocument();
   });
+
+  it('event labels are non-interactive; clicking one activates the day (keyboard-accessible)', () => {
+    const date = new Date(2026, 3, 15);
+    const onDayClick = vi.fn();
+    render(
+      <Calendar month={new Date(2026, 3, 1)} onDayClick={onDayClick} events={[{ date, label: 'Despacho' }]} />
+    );
+    const eventLabel = screen.getByText('Despacho');
+    // The event is a plain <span> inside the day <button> (no nested button).
+    expect(eventLabel.closest('button')).toBeTruthy();
+    fireEvent.click(eventLabel);
+    // No stopPropagation anymore → the day button owns the click.
+    expect(onDayClick).toHaveBeenCalledTimes(1);
+  });
 });

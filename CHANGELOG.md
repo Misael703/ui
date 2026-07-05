@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.74.1] — 2026-07-05
+
+**Patch. Trend-icon consistency + Calendar event a11y fix (audit batch 5b).**
+
+### Fixed
+- **`Stat`**: the trend now uses the same arrow set as `StatCard`'s `DeltaBadge`
+  (`ArrowUp` / `ArrowDown` / `Minus`) instead of `ChevronUp` / `ChevronDown` /
+  `–`, so trend iconography is single-sourced across the two metric components.
+- **`Calendar`**: per-event `onClick` is removed from the rendered `<span>` (it
+  was a mouse-only handler nested inside the day `<button>` — invalid markup,
+  keyboard-inaccessible, and its `stopPropagation` blocked the day too). Event
+  labels are now non-interactive; the day `<button>` (`onDayClick`) owns the
+  click. `CalendarEvent.onClick` is `@deprecated` (now a no-op; kept to avoid a
+  hard type break).
+
 ## [1.74.0] — 2026-07-05
 
 **Minor. New `IconButton` primitive (audit batch 5).**

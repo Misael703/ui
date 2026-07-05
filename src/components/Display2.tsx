@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronUp, ChevronDown } from './Icons';
+import { ArrowUp, ArrowDown, Minus } from './Icons';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
 import { useDismiss } from '../hooks/useDismiss';
@@ -244,7 +244,9 @@ export function Stat({ label, value, hint, trend, align = 'start', className }: 
         <span className="stat__foot">
           {trend && (
             <span className={cx('stat__trend', `stat__trend--${trend.dir}`)}>
-              {trend.dir === 'up' ? <ChevronUp size={12} /> : trend.dir === 'down' ? <ChevronDown size={12} /> : '–'} {trend.value}
+              {/* Same arrow set as DeltaBadge (Arrow*, Minus) so trend
+                  iconography is single-sourced across Stat and StatCard. */}
+              {trend.dir === 'up' ? <ArrowUp size={12} /> : trend.dir === 'down' ? <ArrowDown size={12} /> : <Minus size={12} />} {trend.value}
             </span>
           )}
           {hint && <span className="stat__hint">{hint}</span>}
