@@ -5,6 +5,26 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.70.0] — 2026-07-05
+
+**Minor. Keyboard / screen-reader accessibility on menus and comboboxes (audit batch 3b).**
+
+Backwards-compatible (no prop or export changes).
+
+### Accessibility
+- **ContextMenu**: full keyboard support (was mouse-only). Focus moves into the
+  menu on open; Arrow / Home / End rove with disabled items skipped; Enter/Space
+  selects; Escape / Tab close and restore focus to the opener; Shift+F10 and the
+  ContextMenu key open it from the focused element (WAI-ARIA menu pattern).
+- **Combobox / MultiCombobox / CommandPalette**: set `aria-activedescendant` on
+  the input, pointing at the highlighted `role="option"` (which now carries a
+  stable `id`), so screen readers announce the row the arrow keys land on (APG
+  combobox pattern).
+
+### Deferred (needs decision D1)
+- Menu-role vocabulary for `UserMenu` / `NavigationMenu` (disclosure-of-links vs.
+  real menu keyboarding).
+
 ## [1.69.0] — 2026-07-04
 
 **Minor. Accessibility hardening on interactive widgets (audit batch 3a).**

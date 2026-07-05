@@ -52,4 +52,14 @@ describe('Combobox `searchable` prop', () => {
     fireEvent.mouseDown(screen.getAllByRole('option')[2]); // Cherry
     expect(onChange).toHaveBeenCalledWith('c');
   });
+
+  it('points aria-activedescendant at the highlighted option (APG combobox)', () => {
+    render(<Combobox value={null} onChange={() => {}} options={options} searchable={false} />);
+    const trigger = screen.getByRole('combobox');
+    fireEvent.click(trigger);
+    const opts = screen.getAllByRole('option');
+    const activeOpt = opts.find((o) => o.className.includes('is-active')) ?? opts[0];
+    expect(activeOpt.id).toBeTruthy();
+    expect(trigger.getAttribute('aria-activedescendant')).toBe(activeOpt.id);
+  });
 });

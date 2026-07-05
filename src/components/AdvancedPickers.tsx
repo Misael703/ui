@@ -50,6 +50,7 @@ export function MultiCombobox<T = string>({
   const listRef = React.useRef<HTMLUListElement>(null);
   const reactId = React.useId();
   const listboxId = `${id ?? reactId}-listbox`;
+  const optionId = (i: number) => `${listboxId}-opt-${i}`;
   // Build the lookup Set once per `value` change, not on every keystroke or
   // hover-driven re-render.
   const selSet = React.useMemo(() => new Set(value), [value]);
@@ -112,6 +113,7 @@ export function MultiCombobox<T = string>({
           role="combobox"
           aria-expanded={open}
           aria-controls={listboxId}
+          aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
           className="multicombo__input"
           placeholder={selectedItems.length === 0 ? ph : ''}
           disabled={disabled}
@@ -145,6 +147,7 @@ export function MultiCombobox<T = string>({
               return (
                 <li
                   key={String(o.value)}
+                  id={optionId(i)}
                   role="option"
                   aria-selected={checked}
                   aria-disabled={o.disabled}
@@ -724,6 +727,9 @@ export function CommandPalette({
   const empty = emptyMessage ?? locale['common.noResults'];
   const [query, setQuery] = React.useState('');
   const [active, setActive] = React.useState(0);
+  const reactId = React.useId();
+  const listboxId = `${reactId}-cmdk-listbox`;
+  const optionId = (i: number) => `${listboxId}-opt-${i}`;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
 
@@ -790,13 +796,18 @@ export function CommandPalette({
           <input
             ref={inputRef}
             className="cmdk__input"
+            role="combobox"
+            aria-expanded={true}
+            aria-controls={listboxId}
+            aria-autocomplete="list"
+            aria-activedescendant={active >= 0 ? optionId(active) : undefined}
             value={query}
             placeholder={ph}
             onChange={(e) => setQuery(e.target.value)}
           />
           <kbd className="cmdk__esc">Esc</kbd>
         </div>
-        <ul ref={listRef} className="cmdk__list" role="listbox">
+        <ul ref={listRef} id={listboxId} className="cmdk__list" role="listbox">
           {flat.length === 0 && <li className="cmdk__empty">{empty}</li>}
           {grouped.order.map((g) => (
             <React.Fragment key={g || '__none'}>
@@ -807,6 +818,7 @@ export function CommandPalette({
                 return (
                   <li
                     key={it.id}
+                    id={optionId(i)}
                     role="option"
                     aria-selected={i === active}
                     data-cmd-idx={i}
