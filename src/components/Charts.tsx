@@ -15,7 +15,7 @@ import { cx } from '../utils/cx';
  * Usage in a Next.js client component:
  *
  *   import * as Recharts from 'recharts';
- *   import { LineChart } from '@misael703/elalba-ui';
+ *   import { LineChart } from '@misael703/ui';
  *   <LineChart recharts={Recharts} data={...} dataKey="value" categoryKey="month" />
  */
 

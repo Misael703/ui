@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { Avatar } from './Display2';
-import { FileText, Download, Trash, X } from './Icons';
+import { FileText, Download, Trash } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -242,4 +242,3 @@ export function AttachmentList({ attachments, emptyMessage, className, ...rest }
 }
 
 // re-export para que el bundle no tenga dead imports
-export const _internal = { X };

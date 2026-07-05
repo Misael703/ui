@@ -6,7 +6,7 @@ export default { title: 'Data Display/Code', tags: ['autodocs'] } as Meta;
 export const CodeBlockDemo: StoryObj = {
   render: () => (
     <CodeBlock language="bash" filename="install.sh">
-      {`npm install @misael703/elalba-ui
+      {`npm install @misael703/ui
 npm run storybook`}
     </CodeBlock>
   ),

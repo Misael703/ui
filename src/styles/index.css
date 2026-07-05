@@ -836,32 +836,6 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 /* ---------- Pagination --------------------------------------------------- */
-.pagination { display: inline-flex; gap: 4px; }
-.pagination__btn {
-  min-width: 36px; height: 36px;
-  border: 1px solid var(--border-default);
-  background: var(--bg-surface);
-  font-family: var(--font-body);
-  /* Lighter by default (v1.10.0): 700 made the pager compete with the
-     data; 500 keeps it present but quiet. Active page is still emphasized
-     by its filled --color-primary background. */
-  font-weight: 500;
-  font-size: var(--text-sm);
-  color: var(--fg-default);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 0 10px;
-  transition: background var(--duration-fast), border-color var(--duration-fast);
-}
-.pagination__btn:hover:not(:disabled) { background: var(--bg-subtle); }
-.pagination__btn.active {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-}
-.pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.pagination__ellipsis { color: var(--fg-subtle); padding: 0 4px; align-self: center; }
 
 /* ---------- Breadcrumbs -------------------------------------------------- */
 .breadcrumbs {
@@ -1896,7 +1870,8 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-family: var(--font-body); font-size: var(--text-sm);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500;
+  display: inline-flex; align-items: center; justify-content: center;
   transition: background var(--duration-fast);
 }
 .pagination__btn:hover:not(:disabled) { background: var(--bg-subtle); }
@@ -2437,7 +2412,6 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .option-row:hover { border-color: var(--border-strong); background: var(--bg-subtle); }
 .option-row.is-disabled { opacity: 0.55; cursor: not-allowed; }
-.option-row input { margin-top: 3px; accent-color: var(--color-primary); }
 .option-row__body { display: flex; flex-direction: column; gap: 2px; }
 .option-row__label { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; color: var(--fg-default); }
 .option-row__desc { font-size: var(--text-xs); color: var(--fg-muted); }

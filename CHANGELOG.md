@@ -5,6 +5,32 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.72.0] — 2026-07-05
+
+**Minor. Radio/checkbox groups use the custom control (decision D2), plus dead-code cleanup (audit batch 4a).**
+
+Backwards-compatible (no prop or export changes).
+
+### Changed
+- **`RadioGroup` / `CheckboxGroup`** now render the kit's custom control
+  (`.check__box`) instead of the native OS radio/checkbox, so every
+  radio/checkbox in the kit looks identical (branded box + focus ring),
+  matching the standalone `Radio` / `Checkbox`. **Visible change:** grouped
+  controls that previously fell back to the native browser control now show the
+  El Alba control.
+
+### Removed (dead code)
+- Duplicate `.pagination` / `.pagination__btn` block and the dead
+  `.pagination__btn.active` rule (the component emits `is-active`); the retained
+  block preserves the exact rendered result.
+- Dead `.option-row input` rule (styled the native control the groups no longer
+  render), and the dead `className="radio"` / `className="checkbox"`.
+- `Comments` `_internal = { X }` shim and its unused `X` import.
+
+### Docs
+- Corrected a stale package name in JSDoc / story examples
+  (`@misael703/elalba-ui` → `@misael703/ui`).
+
 ## [1.71.0] — 2026-07-05
 
 **Minor. Menu-role vocabulary: disclosure semantics for link menus (audit batch 3b-menus; decision D1 = by-semantics).**

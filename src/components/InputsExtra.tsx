@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { X, Clock } from './Icons';
+import { X, Clock, Check } from './Icons';
 import { getBrand } from '../brand';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
@@ -545,14 +545,18 @@ export function RadioGroup<T = string>({ value, onChange, options, name, orienta
     <div role="radiogroup" aria-label={label} className={cx('option-group', `option-group--${orientation}`, className)}>
       {options.map((o) => (
         <label key={String(o.value)} className={cx('option-row', o.disabled && 'is-disabled')}>
-          <input
-            type="radio"
-            className="radio"
-            name={name}
-            checked={o.value === value}
-            disabled={o.disabled}
-            onChange={() => onChange(o.value)}
-          />
+          {/* Custom control (`.check`) so every radio/checkbox in the kit looks
+              identical — the group used to fall back to the native OS control. */}
+          <span className="check check--radio">
+            <input
+              type="radio"
+              name={name}
+              checked={o.value === value}
+              disabled={o.disabled}
+              onChange={() => onChange(o.value)}
+            />
+            <span className="check__box" aria-hidden="true" />
+          </span>
           <span className="option-row__body">
             <span className="option-row__label">{o.label}</span>
             {o.description && <span className="option-row__desc">{o.description}</span>}
@@ -577,16 +581,18 @@ export function CheckboxGroup<T = string>({ value, onChange, options, orientatio
     <div role="group" className={cx('option-group', `option-group--${orientation}`, className)}>
       {options.map((o) => (
         <label key={String(o.value)} className={cx('option-row', o.disabled && 'is-disabled')}>
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={set.has(o.value)}
-            disabled={o.disabled}
-            onChange={() => {
-              if (set.has(o.value)) onChange(value.filter((v) => v !== o.value));
-              else onChange([...value, o.value]);
-            }}
-          />
+          <span className="check">
+            <input
+              type="checkbox"
+              checked={set.has(o.value)}
+              disabled={o.disabled}
+              onChange={() => {
+                if (set.has(o.value)) onChange(value.filter((v) => v !== o.value));
+                else onChange([...value, o.value]);
+              }}
+            />
+            <span className="check__box" aria-hidden="true"><Check size={14} strokeWidth={3} /></span>
+          </span>
           <span className="option-row__body">
             <span className="option-row__label">{o.label}</span>
             {o.description && <span className="option-row__desc">{o.description}</span>}
