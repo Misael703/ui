@@ -26,6 +26,7 @@ import {
   Checkbox,
   Button,
   Badge,
+  EmptyState,
 } from '../index';
 
 type Availability = 'available' | 'rented' | 'maintenance';
@@ -131,6 +132,13 @@ export function ToolCatalog(): React.ReactElement {
             </Select>
           </div>
 
+          {visible.length === 0 ? (
+            <EmptyState
+              title="Sin resultados"
+              description="Ningún equipo coincide con la búsqueda o los filtros."
+              action={<Button variant="outline" onClick={() => { setQuery(''); setCats(new Set()); setAvailableOnly(false); }}>Limpiar filtros</Button>}
+            />
+          ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
             {visible.map((t) => {
               const rentable = t.availability === 'available';
@@ -160,6 +168,7 @@ export function ToolCatalog(): React.ReactElement {
               );
             })}
           </div>
+          )}
         </div>
       </div>
     </div>

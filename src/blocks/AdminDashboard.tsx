@@ -24,6 +24,7 @@ import {
   Logo,
   Avatar,
   Button,
+  IconButton,
   DataTable,
   Badge,
 } from '../index';
@@ -65,47 +66,17 @@ export function AdminDashboard(): React.ReactElement {
         sections={sections}
         header={{
           left: (
-            <button
-              type="button"
+            <IconButton
+              icon={<MenuIcon size={20} />}
               aria-label={collapsed ? 'Mostrar menú' : 'Ocultar menú'}
               onClick={() => setCollapsed((c) => !c)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 36,
-                height: 36,
-                border: 0,
-                background: 'transparent',
-                color: 'inherit',
-                cursor: 'pointer',
-                borderRadius: 'var(--radius-md)',
-              }}
-            >
-              <MenuIcon size={20} />
-            </button>
+              size="sm"
+            />
           ),
           center: <Logo variant="horizontal" bg="light" height={28} />,
           right: (
             <>
-              <button
-                type="button"
-                aria-label="Notificaciones"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 36,
-                  height: 36,
-                  border: 0,
-                  background: 'transparent',
-                  color: 'inherit',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-md)',
-                }}
-              >
-                <Bell size={18} />
-              </button>
+              <IconButton icon={<Bell size={18} />} aria-label="Notificaciones" size="sm" />
               <Avatar name="Misael Ocas" size={32} />
             </>
           ),
