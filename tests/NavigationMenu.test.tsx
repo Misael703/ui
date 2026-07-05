@@ -24,6 +24,10 @@ describe('NavigationMenu', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('menuitem', { name: /Catálogo/ })).toBeInTheDocument();
+    // Disclosure of links, not a menu: the revealed items are real links, not
+    // role="menuitem" (site nav shouldn't emit menu semantics).
+    expect(screen.getByRole('link', { name: /Catálogo/ })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem')).toBeNull();
+    expect(trigger).toHaveAttribute('aria-controls', 'nav-menu-panel-productos');
   });
 });

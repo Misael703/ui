@@ -66,16 +66,24 @@ export function Popover({
     closeOnOutsideClick,
   });
 
+  // Forward the disclosure state onto the actual interactive trigger element
+  // (the consumer's <button>), not the non-focusable wrapper span — otherwise a
+  // screen reader never hears the expanded/collapsed state.
+  const triggerNode = React.isValidElement(trigger)
+    ? React.cloneElement(trigger as React.ReactElement<React.AriaAttributes>, {
+        'aria-haspopup': (trigger.props as React.AriaAttributes)['aria-haspopup'] ?? 'dialog',
+        'aria-expanded': open,
+      })
+    : trigger;
+
   return (
     <span className={cx('popover', className)}>
       <span
         ref={triggerRef}
         className="popover__trigger"
         onClick={() => setOpen(!open)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
       >
-        {trigger}
+        {triggerNode}
       </span>
       {/* Portaled to document.body so absolute coords (document-relative)
           match the positioning origin and overflow:hidden / transformed

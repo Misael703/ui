@@ -133,7 +133,7 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                   ref={(el) => { triggerRefs.current[item.id] = el; }}
                   className={triggerCls}
                   aria-expanded={isOpen}
-                  aria-haspopup="menu"
+                  aria-controls={isOpen ? `nav-menu-panel-${item.id}` : undefined}
                   onClick={(e) => {
                     if (isOpen) { setOpenId(null); return; }
                     anchorRef.current = e.currentTarget;
@@ -172,8 +172,8 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                 <Portal>
                   <div
                     ref={panelRef}
+                    id={`nav-menu-panel-${item.id}`}
                     className="nav-menu__panel"
-                    role="menu"
                     aria-label={typeof item.label === 'string' ? item.label : undefined}
                     onKeyDown={onPanelKeyDown}
                     style={{
@@ -202,13 +202,11 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                           </>
                         );
                         return (
-                          <li key={link.id} role="none">
+                          <li key={link.id}>
                             {linkAs ? (
                               linkAs(link, linkContent, linkCls)
                             ) : (
                               <a
-                                role="menuitem"
-                                tabIndex={-1}
                                 className={linkCls}
                                 href={link.href}
                                 onClick={(e) => {

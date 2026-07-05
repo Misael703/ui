@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { NavigationMenu } from '../src/components/NavigationMenu';
 import { Menubar } from '../src/components/Menubar';
 import { DatePicker } from '../src/components/Pickers';
@@ -33,23 +33,25 @@ describe('NavigationMenu — floating primitive + keyboard', () => {
       </div>
     );
     fireEvent.click(screen.getByRole('button', { name: /Productos/ }));
-    const panel = screen.getByRole('menu');
+    // Disclosure of links: the panel is a plain region (id'd), not role="menu".
+    const panel = document.getElementById('nav-menu-panel-prod') as HTMLElement;
     const scroller = container.querySelector('[data-testid="scroller"]') as HTMLElement;
     expect(scroller.contains(panel)).toBe(false);
     expect(document.body.contains(panel)).toBe(true);
   });
 
-  it('opens with ArrowDown and moves focus through links', () => {
+  it('opens with ArrowDown and moves focus through the links', () => {
     render(<NavigationMenu items={navItems} />);
     const trigger = screen.getByRole('button', { name: /Productos/ });
     fireEvent.keyDown(trigger, { key: 'ArrowDown' });
-    const links = screen.getAllByRole('menuitem');
+    const panel = document.getElementById('nav-menu-panel-prod') as HTMLElement;
+    const links = within(panel).getAllByRole('link');
     expect(document.activeElement).toBe(links[0]);
-    fireEvent.keyDown(screen.getByRole('menu'), { key: 'ArrowDown' });
+    fireEvent.keyDown(panel, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(links[1]);
-    fireEvent.keyDown(screen.getByRole('menu'), { key: 'End' });
+    fireEvent.keyDown(panel, { key: 'End' });
     expect(document.activeElement).toBe(links[2]);
-    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Home' });
+    fireEvent.keyDown(panel, { key: 'Home' });
     expect(document.activeElement).toBe(links[0]);
   });
 
@@ -57,8 +59,9 @@ describe('NavigationMenu — floating primitive + keyboard', () => {
     render(<NavigationMenu items={navItems} />);
     const trigger = screen.getByRole('button', { name: /Productos/ });
     fireEvent.click(trigger);
-    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    const panel = document.getElementById('nav-menu-panel-prod') as HTMLElement;
+    fireEvent.keyDown(panel, { key: 'Escape' });
+    expect(document.getElementById('nav-menu-panel-prod')).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
 });
