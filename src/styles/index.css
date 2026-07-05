@@ -546,7 +546,7 @@ button, input, select, textarea { box-sizing: border-box; }
   opacity: 0.6;
   transition: opacity var(--duration-fast), background var(--duration-fast);
 }
-.chip__close:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+.chip__close:hover { opacity: 1; background: color-mix(in srgb, var(--color-ink) 8%, transparent); }
 .chip--active .chip__close:hover { background: rgba(255,255,255,0.2); }
 .chip__close:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
 .chip__close svg { display: block; }
@@ -2310,7 +2310,7 @@ button, input, select, textarea { box-sizing: border-box; }
   width: 18px; height: 18px; border-radius: var(--radius-pill);
   background: var(--bg-surface); border: 2px solid var(--color-primary); cursor: pointer;
 }
-.slider__input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(0,47,135,0.18); }
+.slider__input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent); }
 .slider__value {
   font-family: var(--font-mono); font-size: var(--text-sm);
   min-width: 48px; text-align: right; color: var(--fg-default);
@@ -2363,7 +2363,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-pill); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.tag-input__tag button:hover { background: rgba(0,0,0,0.08); }
+.tag-input__tag button:hover { background: color-mix(in srgb, var(--color-ink) 8%, transparent); }
 .tag-input__field {
   flex: 1; min-width: 80px; border: 0; outline: none;
   font-family: var(--font-body); font-size: var(--text-sm);
@@ -2560,7 +2560,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-pill); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.multicombo__chip button:hover { background: rgba(0,0,0,0.08); }
+.multicombo__chip button:hover { background: color-mix(in srgb, var(--color-ink) 8%, transparent); }
 .multicombo__input {
   flex: 1; min-width: 80px; border: 0; outline: none;
   font-family: var(--font-body); font-size: var(--text-sm);

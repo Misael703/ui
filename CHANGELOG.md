@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.73.0] — 2026-07-05
+
+**Minor. Token hygiene + expose Button `xs`/`xl` sizes (audit batch 4b).**
+
+### Added
+- **`Button` `size`** now accepts `xs` and `xl` (was `sm` / `md` / `lg` only),
+  reaching the `.btn--xs` / `.btn--xl` CSS that already shipped.
+
+### Changed (internal, no visual change)
+- **Charts**: the 7th/8th series colours are tokens (`--chart-series-7` /
+  `--chart-series-8`) instead of raw hex, so a preset can retint them.
+- Replaced raw `rgba()` leaks with `color-mix()` on brand/ink tokens so they
+  retint per palette: the Slider focus halo (`--color-primary`) and the
+  chip / tag / multicombo remove-button hover (`--color-ink`).
+
 ## [1.72.0] — 2026-07-05
 
 **Minor. Radio/checkbox groups use the custom control (decision D2), plus dead-code cleanup (audit batch 4a).**

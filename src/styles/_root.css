@@ -215,6 +215,10 @@
   --cat-4:    #c98a00;  --cat-4-bg: #fcf0d8;  --cat-4-fg: #8a5a00;  /* amber  */
   --cat-5:    #e0457e;  --cat-5-bg: #fde4ec;  --cat-5-fg: #a52a5a;  /* rose   */
   --cat-6:    #64748b;  --cat-6-bg: #e6e9ef;  --cat-6-fg: #3f4756;  /* slate  */
+  /* 7th/8th chart-series solids (charts only; beyond the 6 the semantic palette
+     covers). Tokenized so a preset can retint them. */
+  --chart-series-7: #6b7e95;  /* muted slate-blue */
+  --chart-series-8: #d4a574;  /* warm sand        */
 
   /* -------- Breakpoints --------------------------------------------- */
   /* CSS custom properties cannot be used inside @media query conditions,
