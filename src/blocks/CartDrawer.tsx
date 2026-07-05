@@ -7,7 +7,7 @@
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
  */
 import * as React from 'react';
-import { Drawer, Button, NumberInput, OrderSummary } from '../index';
+import { Drawer, Button, IconButton, NumberInput, OrderSummary } from '../index';
 import { ShoppingCart, Trash } from '../components/Icons';
 
 interface CartLine {
@@ -106,25 +106,7 @@ export function CartDrawer(): React.ReactElement {
                   <div className="cell-meta cell-mono">${l.price.toLocaleString('es-CL')} c/u</div>
                   <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <NumberInput value={l.qty} onChange={(v) => setQty(l.id, v ?? 1)} min={1} step={1} />
-                    <button
-                      type="button"
-                      onClick={() => remove(l.id)}
-                      aria-label={`Quitar ${l.name}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 32,
-                        height: 32,
-                        border: 0,
-                        background: 'transparent',
-                        color: 'var(--fg-muted)',
-                        cursor: 'pointer',
-                        borderRadius: 'var(--radius-md)',
-                      }}
-                    >
-                      <Trash size={16} />
-                    </button>
+                    <IconButton icon={<Trash size={16} />} aria-label={`Quitar ${l.name}`} onClick={() => remove(l.id)} size="sm" />
                   </div>
                 </div>
                 <div className="cell-mono" style={{ fontWeight: 600, alignSelf: 'start' }}>

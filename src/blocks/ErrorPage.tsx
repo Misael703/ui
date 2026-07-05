@@ -8,7 +8,7 @@
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
  */
 import * as React from 'react';
-import { Button, Card, CardBody } from '../index';
+import { Button } from '../index';
 import { AlertTriangle } from '../components/Icons';
 
 export interface ErrorPageProps {
@@ -26,9 +26,8 @@ export function ErrorPage({ onRetry }: ErrorPageProps = {}): React.ReactElement 
         padding: 24,
       }}
     >
-      <Card style={{ width: '100%', maxWidth: 480 }}>
-        <CardBody>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
+      {/* Bare centered layout (no Card) — matches NotFound. */}
+      <div style={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
             <div
               aria-hidden="true"
               style={{
@@ -53,9 +52,7 @@ export function ErrorPage({ onRetry }: ErrorPageProps = {}): React.ReactElement 
               {onRetry && <Button onClick={onRetry}>Reintentar</Button>}
               <a href="mailto:soporte@empresa.cl" className="caption">Contactar soporte</a>
             </div>
-          </div>
-        </CardBody>
-      </Card>
+      </div>
     </div>
   );
 }

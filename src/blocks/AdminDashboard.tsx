@@ -100,7 +100,11 @@ export function AdminDashboard(): React.ReactElement {
           <Kpi label="Ticket prom." value="$13.8K" delta={{ value: '0%', trend: 'flat' }} />
           <Kpi label="Stock crítico" value="7 SKU" hint="bajo umbral" />
         </div>
-        <h3 className="h3" style={{ margin: '0 0 12px' }}>Pedidos recientes</h3>
+        <section aria-labelledby="dash-recent">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 12px' }}>
+          <h3 id="dash-recent" className="h3" style={{ margin: 0 }}>Pedidos recientes</h3>
+          <a href="#" className="caption">Ver todos</a>
+        </div>
         <DataTable
           rows={recent}
           rowKey={(r) => r.id}
@@ -131,6 +135,7 @@ export function AdminDashboard(): React.ReactElement {
             },
           ]}
         />
+        </section>
       </AppShell>
     </div>
   );
