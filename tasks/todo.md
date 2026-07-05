@@ -102,30 +102,38 @@ estrella usa lo deprecado, `Stat`/`Kpi` sin tabular-nums. Scope aprobado: TODO.
 - [x] build verde, DTS correcto, headless confirmó delta+invert+tabular live
 - [ ] PARAR: push/PR/release pendiente de OK
 
-## Batch D2 — `SectionHeader` (RELEASE, minor)
-- [ ] Nueva primitiva en Layout.tsx: `title` + `description?` + `actions?` (baseline, tokens)
-- [ ] Export barrel + entry en smoke/gallery registry (gate anti-rot)
-- [ ] Story + test
-- [ ] Verificar
+## Batch D2 — `SectionHeader` (RELEASE, bundled → v1.76.0) ✅ local
+- [x] Nueva primitiva en Layout.tsx: `title` + `description?` + `actions?` (baseline, tokens, `level`, `titleId`)
+- [x] Export barrel + entry en smoke/gallery registry (gate anti-rot pasa)
+- [x] Story (SectionHeaderDemo) + tests (5) + CSS guard
+- [x] Headless: H3, aria-labelledby resuelve, baseline align
 
-## Batch D3 — Loading/empty en superficies de datos (RELEASE, minor)
-- [ ] `StatCard` `loading?` → skeleton value+delta
-- [ ] Charts: estado `empty` ("sin datos") cuando `data` vacío
-- [ ] i18n key si hace falta
-- [ ] Tests + verificar
+## Batch D3 — Loading/empty en superficies de datos (RELEASE, bundled → v1.76.0) ✅ local
+- [x] `StatCard` `loading?` → skeleton value+delta, aria-busy, label queda
+- [x] Charts Line/Area/Bar/Donut: `empty` ("Sin datos") cuando `data` vacío, corta antes de recharts
+- [x] i18n key `chart.empty`
+- [x] Tests (empty ×4 + override + loading + CSS) + stories; headless confirmó ambos
 
-## Batch D4 — Refactor bloque AdminDashboard (SIN release; bloques fuera de dist)
-- [ ] `Kpi` → `StatCard` con deltas numéricos
-- [ ] Grilla inline → `Grid` con `minColWidth`
-- [ ] Section header hand-rolled → `SectionHeader`
-- [ ] "Stock crítico" → `Meter`/accent danger
-- [ ] Corregir nota `@deprecated` de `Kpi` (dice "no consumers", es falso)
-- [ ] Verificar render
+## Batch D4 — Refactor bloque AdminDashboard (SIN release; bloques fuera de dist) ✅ local
+- [x] `Kpi` → `StatCard` con deltas numéricos
+- [x] Grilla inline → `Grid` con `minColWidth`
+- [x] Section header hand-rolled → `SectionHeader`
+- [x] "Stock crítico" → `Meter` + accent `danger`
+- [x] Bonus (surgió del refactor): `StatCard.accent` ampliado a `CardAccent` (semánticos), no-breaking
+- [x] `Kpi` sin consumidores → su nota `@deprecated` ya es verdadera
+- [x] Headless: 0 nodos `.kpi`, 4 StatCards, danger+Meter, SectionHeader H3
 
 ## Reglas
-- Rama por batch → PR → smoke CI → merge+delete → GitHub Release → npm
-- PARAR antes de cada push/release para confirmación explícita
+- Bundle D1+D2+D3 en 1 release (v1.76.0); D4 es bloque (no release)
+- PARAR antes de push/PR/release: pendiente de OK
 - Sin prettier --write; nuevo export → smoke registry o el gate explota
 
-## Review (dashboard pass)
-(pendiente)
+## Review (dashboard pass) — 2026-07-05
+Todo local y verificado: 921 tests, build tsup verde, smoke:ci (coverage gate) verde,
+headless de los 4 batches. Commits (rama `feat/dashboard-data-comm-pass`):
+- D1 2a937b3 — Stat→DeltaBadge + tabular-nums + Kpi arrows
+- D2 d3bf88f — SectionHeader
+- D3 edf1a5a — StatCard loading + charts empty
+- D4 a473250 — StatCard semantic accents + AdminDashboard refactor
+CHANGELOG + package.json → v1.76.0 (bundle de D1-D3; D4 no cambia dist).
+PENDIENTE: push rama → PR → smoke → merge → GitHub Release v1.76.0 → npm (espera OK).
