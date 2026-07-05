@@ -226,3 +226,26 @@ describe('ListGroup', () => {
     expect(screen.getByText('B')).toBeInTheDocument();
   });
 });
+
+describe('TabList horizontal overflow (CSS)', () => {
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('the strip scrolls horizontally and hides the (phantom) vertical scrollbar', () => {
+    const list = css.match(/\.tabs__list\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(list).toMatch(/overflow-x:\s*auto/);
+    expect(list).toMatch(/overflow-y:\s*hidden/);
+    expect(list).toMatch(/scrollbar-width:\s*none/);
+  });
+
+  it('tabs do not shrink when the strip scrolls', () => {
+    const tab = css.match(/\.tabs__tab\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(tab).toMatch(/flex-shrink:\s*0/);
+  });
+
+  it('the active indicator sits inside the strip so overflow-y:hidden cannot clip it', () => {
+    const ind = css.match(/\.tabs__indicator\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(ind).toMatch(/bottom:\s*0/);
+    expect(ind).not.toMatch(/bottom:\s*-1px/);
+  });
+});

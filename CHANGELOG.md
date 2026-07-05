@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.75.0] — 2026-07-05
+
+**Minor. New `PasswordInput` + TabList horizontal overflow (consumer-driven: despachos).**
+
+### Added
+- **`PasswordInput`** — password field with a built-in show/hide toggle. Wraps
+  `Input` (owns its `type`, password/text) in an `InputGroup` with a
+  keyboard-operable `InputGroupAddon` (Enter/Space) carrying the Eye/EyeOff icon;
+  `ref` forwards to the real `<input>` and every `Input` prop except `type`
+  passes through (invalid, autoComplete, disabled, …). Uncontrolled
+  (`defaultVisible`) or controlled (`visible` / `onVisibleChange`); the toggle
+  `aria-label` comes from the locale (`passwordInput.show` / `passwordInput.hide`)
+  and is overridable per instance with `showLabel` / `hideLabel`.
+
+### Fixed
+- **`TabList`** now scrolls horizontally when the tabs overflow (many tabs on a
+  narrow viewport) instead of leaving the last ones unreachable. `overflow-y` is
+  pinned to `hidden` (an `overflow-x:auto` strip otherwise promotes `overflow-y`
+  to `auto` and renders a phantom vertical scrollbar over the 1px baseline), the
+  scrollbar is hidden, tabs no longer shrink (`flex-shrink:0`), and the active
+  indicator moved to `bottom:0` so `overflow-y:hidden` can't clip it. Consumers
+  can drop their own `overflow-x:auto` wrappers.
+
 ## [1.74.1] — 2026-07-05
 
 **Patch. Trend-icon consistency + Calendar event a11y fix (audit batch 5b).**

@@ -48,6 +48,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'Avatar', node: <K.AvatarGroup><K.Avatar name="Misael Ocas" /></K.AvatarGroup> },
   { name: 'ProductCard', node: <K.ProductCard sku="S1" name="Cemento" price="$5.490" /> },
   { name: 'Input', node: <K.Input placeholder="sku" /> },
+  { name: 'PasswordInput', node: <K.PasswordInput placeholder="contraseña" autoComplete="current-password" /> },
   { name: 'Textarea', node: <K.Textarea placeholder="notas" /> },
   { name: 'Select', node: <K.Select defaultValue="a"><option value="a">A</option></K.Select> },
   { name: 'Checkbox', node: <K.Checkbox defaultChecked /> },

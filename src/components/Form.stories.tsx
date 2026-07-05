@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Input, Textarea, Select, Checkbox, Radio, Switch, FormField, Label, InputGroup, InputGroupAddon } from './Form';
+import { Input, Textarea, Select, Checkbox, Radio, Switch, FormField, Label, InputGroup, InputGroupAddon, PasswordInput } from './Form';
 
 const meta: Meta = { title: 'Forms/Controls', tags: ['autodocs'] };
 export default meta;
@@ -85,4 +85,21 @@ export const InputPlayground: StoryObj<typeof Input> = {
     disabled: { control: 'boolean' },
   },
   render: (args) => <Input {...args} />,
+};
+
+export const PasswordConToggle: StoryObj = {
+  name: 'PasswordInput (show/hide)',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 320 }}>
+      <FormField label="Contraseña" htmlFor="pw-login">
+        <PasswordInput id="pw-login" autoComplete="current-password" defaultValue="secreto123" />
+      </FormField>
+      <FormField label="Nueva contraseña (visible por defecto)" htmlFor="pw-new">
+        <PasswordInput id="pw-new" autoComplete="new-password" defaultVisible />
+      </FormField>
+      <FormField label="Deshabilitado" htmlFor="pw-dis">
+        <PasswordInput id="pw-dis" disabled defaultValue="secreto" />
+      </FormField>
+    </div>
+  ),
 };

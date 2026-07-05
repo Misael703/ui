@@ -775,7 +775,16 @@ button, input, select, textarea { box-sizing: border-box; }
   border-bottom: 1px solid var(--border-default);
   /* Containing block for the absolutely-positioned sliding indicator. */
   position: relative;
+  /* Scroll horizontally when the tabs overflow (many tabs on a narrow viewport).
+     overflow-y:hidden is EXPLICIT: overflow-x:auto alone promotes overflow-y to
+     `auto` (CSS spec), and the sub-pixel content then renders a phantom vertical
+     scrollbar. The scrollbar is hidden but scrolling still works. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.tabs__list::-webkit-scrollbar { display: none; }
 /* `variant="plain"`: drop the full-width baseline. Keeps the 1px border as
    transparent so the row height matches `underline` exactly (no shift) — for
    tabs on open canvas where the gray baseline floats. */
@@ -783,6 +792,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .tabs__tab {
   background: transparent;
   border: 0;
+  /* Don't compress when the strip scrolls; keep each tab on one line. */
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: 12px 18px;
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -802,7 +814,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .tabs__indicator {
   position: absolute;
   left: 0;
-  bottom: -1px;
+  /* bottom:0 (was -1px) so the strip's overflow-y:hidden — added for horizontal
+     scroll — doesn't clip the 2px bar. Sits just above the 1px baseline. */
+  bottom: 0;
   height: 2px;
   background: var(--color-secondary);
   border-radius: 1px;
