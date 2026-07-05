@@ -3349,6 +3349,20 @@ button, input, select, textarea { box-sizing: border-box; }
 .page-header__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .page-header__meta { margin-top: 12px; }
 
+/* ---------- SectionHeader ---------- */
+.section-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.section-header__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.section-header__title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--text-xl); line-height: var(--leading-snug);
+  text-transform: var(--tt-title); color: var(--fg-default); margin: 0;
+}
+.section-header__desc { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
+.section-header__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+
 /* ---------- Charts ---------- */
 .chart { width: 100%; position: relative; }
 /* The chart svg is keyboard-navigable (recharts accessibilityLayer). Show its
