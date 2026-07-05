@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { Button } from '../src/components/Button';
+import { Button, IconButton } from '../src/components/Button';
 
 const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '');
@@ -94,5 +94,22 @@ describe('Button', () => {
       expect(linkActive).toMatch(/transform:\s*none/);
       expect(linkActive).toMatch(/box-shadow:\s*none/);
     });
+  });
+});
+
+describe('IconButton', () => {
+  it('renders an icon-only button with its required accessible name', () => {
+    render(<IconButton icon={<svg data-testid="ic" />} aria-label="Cerrar" />);
+    const btn = screen.getByRole('button', { name: 'Cerrar' });
+    expect(btn.className).toContain('btn--icon');
+    expect(btn.className).toContain('btn--ghost'); // default variant
+    expect(btn.querySelector('[data-testid="ic"]')).toBeTruthy();
+  });
+
+  it('shows the currentColor spinner and disables while loading', () => {
+    render(<IconButton icon={<svg />} aria-label="Guardar" loading />);
+    const btn = screen.getByRole('button', { name: 'Guardar' });
+    expect(btn).toBeDisabled();
+    expect(btn.querySelector('.spinner--current')).toBeTruthy();
   });
 });
