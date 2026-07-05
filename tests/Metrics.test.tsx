@@ -72,6 +72,16 @@ describe('StatCard', () => {
     expect(container.querySelector('.metric-card__foot')).toBeNull();
   });
 
+  it('loading: skeletons the value + delta, marks the card aria-busy, keeps the label', () => {
+    const { container } = render(<StatCard label="Ventas" value="$1,2M" delta={8} loading />);
+    const card = container.querySelector('.metric-card')!;
+    expect(card).toHaveAttribute('aria-busy', 'true');
+    expect(container.querySelectorAll('.skel').length).toBeGreaterThanOrEqual(2);
+    expect(container.textContent).toContain('Ventas'); // identity stays
+    expect(container.textContent).not.toContain('$1,2M'); // value withheld
+    expect(container.querySelector('.delta-badge')).toBeNull(); // delta withheld
+  });
+
   it('CSS: accent is a tinted surface + hue border, not a side rail', () => {
     // v1.68.3: aligned to the Card accent (tint+border); the old 3px border-left
     // side-stripe must be gone.

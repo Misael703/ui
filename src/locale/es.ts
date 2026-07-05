@@ -187,4 +187,7 @@ export const esMessages: UiKitMessages = {
   // PasswordInput
   'passwordInput.show': 'Mostrar contraseña',
   'passwordInput.hide': 'Ocultar contraseña',
+
+  // Charts
+  'chart.empty': 'Sin datos',
 };

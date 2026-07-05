@@ -311,3 +311,34 @@ describe('accessibilityLayer (Tab stop / keyboard nav) passthrough', () => {
     expect(indexCss).toMatch(/\.recharts-surface:focus-visible[\s\S]{0,120}?outline:\s*2px solid var\(--border-focus\)/);
   });
 });
+
+describe('Chart empty state', () => {
+  it.each([
+    ['LineChart', (r: any) => <LineChart recharts={r} data={[]} categoryKey="d" series={series} />],
+    ['AreaChart', (r: any) => <AreaChart recharts={r} data={[]} categoryKey="d" series={series} />],
+    ['BarChart', (r: any) => <BarChart recharts={r} data={[]} categoryKey="d" series={series} />],
+    ['DonutChart', (r: any) => <DonutChart recharts={r} data={[]} />],
+  ])('%s with no rows renders the "Sin datos" placeholder and never calls recharts', (_name, make) => {
+    const cap: Captured[] = [];
+    const { container } = render(make(makeRecharts(cap)));
+    expect(cap.length).toBe(0); // short-circuited before any recharts component
+    const box = container.querySelector('.chart--empty')!;
+    expect(box).toBeTruthy();
+    expect(box).toHaveTextContent('Sin datos');
+    expect(box).toHaveAttribute('role', 'img');
+    expect(box).toHaveAttribute('aria-label', 'Sin datos');
+  });
+
+  it('`empty` overrides the default placeholder', () => {
+    const cap: Captured[] = [];
+    const { container } = render(
+      <LineChart recharts={makeRecharts(cap)} data={[]} categoryKey="d" series={series} empty="Sin ventas aún" />
+    );
+    expect(container.querySelector('.chart--empty')).toHaveTextContent('Sin ventas aún');
+  });
+
+  it('CSS: the empty box keeps a dashed bordered surface', () => {
+    const rule = indexCss.match(/\.chart--empty\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/border:\s*1px dashed var\(--border-default\)/);
+  });
+});

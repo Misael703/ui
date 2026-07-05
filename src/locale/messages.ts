@@ -226,6 +226,9 @@ export interface UiKitMessages {
   // PasswordInput — toggle aria-label (reflects the action)
   'passwordInput.show': string;
   'passwordInput.hide': string;
+
+  // Charts — placeholder when a chart receives no data rows.
+  'chart.empty': string;
 }
 
 /**

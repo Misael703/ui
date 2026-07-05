@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { useLocale } from '../locale/LocaleProvider';
 
 /**
  * Lightweight chart wrappers. We do NOT bundle Recharts — the host app provides it
@@ -80,6 +81,22 @@ export interface BaseChartProps<D = any> {
    * not a Tab stop / not focusable (no drill-down → nothing to navigate to).
    */
   accessibilityLayer?: boolean;
+  /**
+   * Rendered instead of the plot when `data` is empty. Defaults to a centered
+   * "Sin datos" placeholder (locale `chart.empty`) at the chart's height, so an
+   * async chart shows a graceful zero-state rather than an empty recharts box.
+   */
+  empty?: React.ReactNode;
+}
+
+// Centered zero-state shown when a chart has no rows. Keeps the chart's height so
+// the dashboard layout doesn't jump between "loading → data" and "no data".
+function ChartEmpty({ height, className, children }: { height: number; className?: string; children: React.ReactNode }) {
+  return (
+    <div className={cx('chart', 'chart--empty', className)} style={{ height }} role="img" aria-label={typeof children === 'string' ? children : undefined}>
+      <span className="chart__empty-text">{children}</span>
+    </div>
+  );
 }
 
 // Mirror of Recharts' AxisInterval. Controls how category ticks thin on
@@ -198,10 +215,12 @@ export function LineChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true, empty,
 }: LineChartProps<D>) {
+  const t = useLocale();
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
+  if (!data || data.length === 0) return <ChartEmpty height={height} className={className}>{empty ?? t['chart.empty']}</ChartEmpty>;
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
@@ -238,10 +257,12 @@ export function AreaChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve, stacked,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true, empty,
 }: AreaChartProps<D>) {
+  const t = useLocale();
   const lineType = curve ?? (smooth ? 'monotone' : 'linear');
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
+  if (!data || data.length === 0) return <ChartEmpty height={height} className={className}>{empty ?? t['chart.empty']}</ChartEmpty>;
   return (
     <div className={cx('chart', className)} role="img" aria-label={ariaLabel}>
       <R.ResponsiveContainer width="100%" height={height}>
@@ -282,10 +303,12 @@ export function BarChart<D = any>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
-  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true,
+  xTickFormatter, xTickInterval, xTickAngle, valueFormatter, allowDecimals, tooltipLabelFormatter, tooltip, accessibilityLayer = true, empty,
 }: BarChartProps<D>) {
+  const t = useLocale();
   const isHorizontal = layout === 'horizontal';
   const allowDec = allowDecimals ?? !allIntegerValues(data, series.map((s) => s.key));
+  if (!data || data.length === 0) return <ChartEmpty height={height} className={className}>{empty ?? t['chart.empty']}</ChartEmpty>;
   // Radius must round the VALUE end: top for columns ([tl,tr,br,bl] → [R,R,0,0]),
   // right for horizontal bars ([0,R,R,0]). The old hardcoded [4,4,0,0] left
   // horizontal bars rounded-top / pointed-bottom.
@@ -349,8 +372,10 @@ export interface DonutChartProps extends Omit<BaseChartProps, 'data'> {
 export function DonutChart({
   recharts: R, data, height = 240, className, ariaLabel,
   centerLabel, showLegend = true, innerRadius = 60, outerRadius = 88,
-  nameFormatter, valueFormatter, tooltip, accessibilityLayer = true,
+  nameFormatter, valueFormatter, tooltip, accessibilityLayer = true, empty,
 }: DonutChartProps) {
+  const t = useLocale();
+  if (!data || data.length === 0) return <ChartEmpty height={height} className={className}>{empty ?? t['chart.empty']}</ChartEmpty>;
   // Recharts Tooltip formatter returns [formattedValue, formattedName].
   const tooltipProps = (nameFormatter || valueFormatter)
     ? { formatter: (v: unknown, n: unknown) => [valueFormatter ? valueFormatter(Number(v)) : v, nameFormatter ? nameFormatter(String(n)) : n] }

@@ -3365,6 +3365,12 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Charts ---------- */
 .chart { width: 100%; position: relative; }
+.chart--empty {
+  display: flex; align-items: center; justify-content: center;
+  border: 1px dashed var(--border-default); border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+}
+.chart__empty-text { color: var(--fg-muted); font-size: var(--text-sm); }
 /* The chart svg is keyboard-navigable (recharts accessibilityLayer). Show its
    focus ring only with the keyboard (:focus-visible), never on a mouse click. */
 .chart .recharts-surface:focus,
