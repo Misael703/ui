@@ -74,6 +74,18 @@ export const Cards: StoryObj = {
   ),
 };
 
+// Async loading: label/icon stay (a KPI's identity is known before its number),
+// value + delta become skeletons and the card is aria-busy.
+export const CardsLoading: StoryObj = {
+  render: () => (
+    <div style={row}>
+      <StatCard accent="cat-2" icon={<Wallet size={16} />} label="Ventas hoy" value="—" loading />
+      <StatCard accent="cat-1" icon={<ShoppingCart size={16} />} label="Pedidos" value="—" loading />
+      <StatCard accent="cat-4" icon={<Users size={16} />} label="Clientes nuevos" value="—" loading />
+    </div>
+  ),
+};
+
 export const Meters: StoryObj = {
   render: () => (
     <div style={col}>

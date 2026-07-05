@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from './Icons';
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -162,7 +162,7 @@ export function Kpi({ label, value, delta, hint, icon, className }: KpiProps) {
       <div className="kpi__foot">
         {delta && (
           <span className={cx('kpi__delta', `kpi__delta--${delta.trend}`)}>
-            {delta.trend === 'up' ? <ChevronUp size={12} /> : delta.trend === 'down' ? <ChevronDown size={12} /> : '–'} {delta.value}
+            {delta.trend === 'up' ? <ArrowUp size={12} /> : delta.trend === 'down' ? <ArrowDown size={12} /> : <Minus size={12} />} {delta.value}
           </span>
         )}
         {hint && <span className="kpi__hint">{hint}</span>}

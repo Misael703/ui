@@ -496,3 +496,39 @@ export function Stepper({ steps, current, className }: StepperProps) {
     </ol>
   );
 }
+
+// ---------- SectionHeader ------------------------------------------------
+// The in-page section title row: a heading (+ optional description) on the
+// left, an actions slot ("Ver todos" link, a Button, a Menu, filters) on the
+// right, baseline-aligned. This is the dashboard molecule every block was
+// hand-rolling as `<div flex justify-between><h3/><a/></div>`. Distinct from
+// `PageHeader` (the page-level <h1> with breadcrumbs); this sits *inside* a
+// page, above a table/chart/card grid.
+export interface SectionHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  /** Right-aligned slot: a "Ver todos" link, a Button, a Menu, filter chips. */
+  actions?: React.ReactNode;
+  /**
+   * Heading level for the title. Sections sit under the page `<h1>`, so the
+   * default is `3`. Set it to keep the document outline correct when nesting.
+   */
+  level?: 2 | 3 | 4 | 5 | 6;
+  /** `id` on the heading element, so a wrapping `<section aria-labelledby>` can point at it. */
+  titleId?: string;
+}
+
+export function SectionHeader({
+  title, description, actions, level = 3, titleId, className, ...rest
+}: SectionHeaderProps) {
+  const Heading = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  return (
+    <div className={cx('section-header', className)} {...rest}>
+      <div className="section-header__text">
+        <Heading id={titleId} className="section-header__title">{title}</Heading>
+        {description && <p className="section-header__desc">{description}</p>}
+      </div>
+      {actions && <div className="section-header__actions">{actions}</div>}
+    </div>
+  );
+}

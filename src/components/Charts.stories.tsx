@@ -13,6 +13,22 @@ const monthlyData = [
   { mes: 'Jun', ventas: 5800, devoluciones: 420 },
 ];
 
+// Zero-state: an empty `data` array renders the "Sin datos" placeholder at the
+// chart's height (locale `chart.empty`, overridable via `empty`) instead of a
+// blank recharts box, so an async dashboard doesn't jump when data arrives.
+export const SinDatos: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ width: 360 }}>
+        <LineChart recharts={Recharts as any} data={[]} categoryKey="mes" series={[{ key: 'ventas' }]} />
+      </div>
+      <div style={{ width: 220 }}>
+        <DonutChart recharts={Recharts as any} data={[]} empty="Aún sin ventas" />
+      </div>
+    </div>
+  ),
+};
+
 export const Linea: StoryObj = {
   render: () => (
     <div style={{ width: 600 }}>

@@ -8,6 +8,7 @@ import {
   Divider, Stack, HStack, VStack, Container, Grid,
   KeyValue, KeyValueRow,
   ListGroup, ListGroupItem,
+  SectionHeader,
 } from '../src/components/Layout';
 
 const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
@@ -247,5 +248,42 @@ describe('TabList horizontal overflow (CSS)', () => {
     const ind = css.match(/\.tabs__indicator\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(ind).toMatch(/bottom:\s*0/);
     expect(ind).not.toMatch(/bottom:\s*-1px/);
+  });
+});
+
+describe('SectionHeader', () => {
+  it('renders the title at the default heading level (h3) and an actions slot', () => {
+    render(<SectionHeader title="Pedidos recientes" actions={<a href="#">Ver todos</a>} />);
+    const heading = screen.getByRole('heading', { level: 3, name: 'Pedidos recientes' });
+    expect(heading).toHaveClass('section-header__title');
+    expect(screen.getByRole('link', { name: 'Ver todos' })).toBeInTheDocument();
+  });
+
+  it('honors the `level` prop for the document outline', () => {
+    render(<SectionHeader title="Sub" level={2} />);
+    expect(screen.getByRole('heading', { level: 2, name: 'Sub' })).toBeInTheDocument();
+  });
+
+  it('wires `titleId` onto the heading so a wrapping <section aria-labelledby> can point at it', () => {
+    render(
+      <section aria-labelledby="s1">
+        <SectionHeader title="Ventas" titleId="s1" />
+      </section>
+    );
+    expect(screen.getByRole('heading', { name: 'Ventas' })).toHaveAttribute('id', 's1');
+    expect(screen.getByRole('region', { name: 'Ventas' })).toBeInTheDocument();
+  });
+
+  it('omits the actions wrapper when there are no actions', () => {
+    const { container } = render(<SectionHeader title="X" />);
+    expect(container.querySelector('.section-header__actions')).toBeNull();
+  });
+
+  it('CSS: baseline-aligned row, title on the display scale', () => {
+    const root = css.match(/\.section-header\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(root).toMatch(/align-items:\s*baseline/);
+    expect(root).toMatch(/justify-content:\s*space-between/);
+    const title = css.match(/\.section-header__title\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(title).toMatch(/font-family:\s*var\(--font-display\)/);
   });
 });

@@ -5,6 +5,56 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.76.0] — 2026-07-05
+
+**Minor. Dashboard / data-communication pass: delta consistency, `SectionHeader`, async states.**
+
+The micro-viz suite was solid; the debt was consistency and missing molecules.
+This closes three things: the kit had three ways to show a variation ("↑ 12%")
+where only `DeltaBadge` was tested/i18n/invert-aware; every dashboard block
+hand-rolled its section header; and metric/chart surfaces had no loading or
+empty state despite feeding on async data.
+
+### Added
+- **`Stat` now takes a numeric `delta`** (+ `deltaFormat`, `deltaInvert`), rendered
+  through the shared `DeltaBadge` — so `Stat`, `StatCard` and table cells read
+  identically (signed, localized aria "subió/bajó", tone by sign, invert for
+  higher-is-worse metrics like merma/costo). Preferred over `trend`.
+- **`SectionHeader`** — the in-page section title row: heading (+ optional
+  `description`) on the left, an `actions` slot ("Ver todos", a Button, a Menu) on
+  the right, baseline-aligned. `level` (default 3) drives the heading element for a
+  correct outline; `titleId` wires it to a wrapping `<section aria-labelledby>`.
+  Distinct from `PageHeader` (page-level `<h1>` + breadcrumbs). Replaces the
+  `<div flex justify-between><h3/><a/></div>` every block was re-implementing.
+- **`StatCard` `loading`** — skeletons the value + delta, keeps the label/icon (a
+  KPI's identity is known before its number), marks the card `aria-busy`.
+- **Chart empty state** — `LineChart` / `AreaChart` / `BarChart` / `DonutChart`
+  render a centered "Sin datos" placeholder (locale `chart.empty`, overridable via
+  the new `empty` prop) at the chart's height when `data` is empty, short-circuiting
+  before recharts so the layout doesn't jump when data arrives.
+- New locale key `chart.empty` ("Sin datos").
+- **`StatCard.accent` now accepts semantic roles** (`danger`, `success`, `warning`,
+  `info`, `brand`, `secondary`, `neutral`), not just the `cat-1`…`cat-6` category
+  hues — so a KPI in an alarm/health state (critical stock, target hit) tints like
+  the `Card` accent language. Additive (`CategoryAccent ⊂ CardAccent`), non-breaking.
+
+### Internal
+- `AdminDashboard` block refactored off the deprecated `Kpi` onto `StatCard` +
+  `Grid` + `SectionHeader` + `Meter` (critical-stock KPI uses the new `danger`
+  accent). The kit's showcase now demonstrates the recommended primitives; `Kpi`
+  has no remaining consumers. (Block-only; not in `dist`.)
+
+### Changed
+- `.stat__value` and `.kpi__value` gained `font-variant-numeric: tabular-nums`, so
+  KPI digits align column-to-column and don't jitter between renders (`StatCard`
+  already had it; `Stat`/`Kpi` were the gap). Guarded in `Metrics.test`.
+- `Kpi`'s trend arrows switched from `Chevron*` to the canonical `Arrow*` + `Minus`
+  set (flat was a bare `–` string), matching `DeltaBadge`/`Stat`.
+
+### Deprecated
+- `Stat`'s string-typed `trend` prop. Still supported for back-compat (ignored when
+  `delta` is set); use `delta` (number) instead. `Kpi` remains deprecated.
+
 ## [1.75.0] — 2026-07-05
 
 **Minor. New `PasswordInput` + TabList horizontal overflow (consumer-driven: despachos).**

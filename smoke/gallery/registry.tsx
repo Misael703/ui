@@ -78,6 +78,7 @@ export const ENTRIES: Array<{ name: string; node: React.ReactNode }> = [
   { name: 'SortDropdown', node: <Ctrl init="a" render={(v, s) => <K.SortDropdown value={v} onChange={s} options={[{ value: 'a', label: 'A' }]} />} /> },
   { name: 'Tabs', node: <K.Tabs defaultValue="a"><K.TabList><K.Tab value="a">A</K.Tab></K.TabList><K.TabPanel value="a">x</K.TabPanel></K.Tabs> },
   { name: 'Stepper', node: <K.Stepper current={1} steps={[{ label: 'Uno' }, { label: 'Dos' }]} /> },
+  { name: 'SectionHeader', node: <K.SectionHeader title="Pedidos recientes" actions={<a href="#" className="caption">Ver todos</a>} /> },
   { name: 'Container', node: <K.Container size="md"><div>c</div></K.Container> },
   { name: 'Grid', node: <K.Grid minColWidth={80}><div>1</div><div>2</div></K.Grid> },
   { name: 'Stack', node: <K.Stack gap={2}><div>1</div></K.Stack> },

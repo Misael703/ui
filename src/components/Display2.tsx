@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ArrowUp, ArrowDown, Minus } from './Icons';
+import { DeltaBadge } from './Metrics';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
 import { useDismiss } from '../hooks/useDismiss';
@@ -230,25 +231,42 @@ export interface StatProps {
   label: React.ReactNode;
   value: React.ReactNode;
   hint?: React.ReactNode;
+  /**
+   * Signed variation. Sign drives direction + tone; rendered through the shared
+   * `DeltaBadge` atom so Stat, StatCard and table cells read identically
+   * (localized aria, invert-aware). Preferred over `trend`.
+   */
+  delta?: number;
+  /** Full-label formatter for `delta` (incl. sign). Default: signed percent. */
+  deltaFormat?: (value: number) => string;
+  /** Higher-is-worse: an increase shows ▲ but in red (cost, error rate, churn). */
+  deltaInvert?: boolean;
+  /**
+   * @deprecated Use `delta` (number). The string-typed trend is kept for
+   * back-compat only; it doesn't localize or share `DeltaBadge`'s
+   * invert/threshold logic. Ignored when `delta` is set.
+   */
   trend?: { dir: 'up' | 'down' | 'flat'; value: string };
   align?: 'start' | 'center';
   className?: string;
 }
 
-export function Stat({ label, value, hint, trend, align = 'start', className }: StatProps) {
+export function Stat({ label, value, hint, delta, deltaFormat, deltaInvert, trend, align = 'start', className }: StatProps) {
   return (
     <div className={cx('stat', `stat--${align}`, className)}>
       <span className="stat__label">{label}</span>
       <span className="stat__value">{value}</span>
-      {(hint || trend) && (
+      {(hint || delta !== undefined || trend) && (
         <span className="stat__foot">
-          {trend && (
+          {delta !== undefined ? (
+            <DeltaBadge value={delta} format={deltaFormat} invert={deltaInvert} size="sm" />
+          ) : trend ? (
             <span className={cx('stat__trend', `stat__trend--${trend.dir}`)}>
-              {/* Same arrow set as DeltaBadge (Arrow*, Minus) so trend
-                  iconography is single-sourced across Stat and StatCard. */}
+              {/* Legacy string trend. Same arrow set as DeltaBadge so the
+                  deprecated path still matches the canonical one visually. */}
               {trend.dir === 'up' ? <ArrowUp size={12} /> : trend.dir === 'down' ? <ArrowDown size={12} /> : <Minus size={12} />} {trend.value}
             </span>
-          )}
+          ) : null}
           {hint && <span className="stat__hint">{hint}</span>}
         </span>
       )}

@@ -3,7 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { formatNumber } from '../utils/format';
 import { ArrowUp, ArrowDown, Minus } from './Icons';
-import type { CategoryAccent } from './Display';
+import { Skeleton } from './Display';
+import type { CardAccent } from './Display';
 
 /**
  * Dashboard data-communication primitives. Everything here is CSS-only — no
@@ -80,19 +81,44 @@ export interface StatCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   caption?: React.ReactNode;
   /** Small leading glyph rendered in a tinted chip. */
   icon?: React.ReactNode;
-  /** Left-edge accent hue. */
-  accent?: CategoryAccent;
+  /** Accent tint + border. A category hue (`cat-1`…`cat-6`) for grouping, or a
+   *  semantic role (`danger`, `success`, …) for a KPI in an alarm/health state. */
+  accent?: CardAccent;
   /** Micro-viz slot (Sparkline / Sparkbar / ProportionBar). */
   chart?: React.ReactNode;
+  /**
+   * Skeleton the value + delta while data is loading. The label/icon stay (a
+   * KPI's identity is known before its number is), and the card is marked
+   * `aria-busy`. Metric surfaces feed on async data, so this is first-class.
+   */
+  loading?: boolean;
 }
 
 export function StatCard({
-  label, value, delta, deltaFormat, deltaInvert, deltaNode, caption, icon, accent, chart,
+  label, value, delta, deltaFormat, deltaInvert, deltaNode, caption, icon, accent, chart, loading,
   className, ...rest
 }: StatCardProps) {
   const deltaEl =
     deltaNode ??
     (delta !== undefined ? <DeltaBadge value={delta} format={deltaFormat} invert={deltaInvert} size="sm" /> : null);
+
+  if (loading) {
+    return (
+      <div
+        className={cx('metric-card', accent && `metric-card--${accent}`, className)}
+        data-accent={accent}
+        aria-busy="true"
+        {...rest}
+      >
+        <div className="metric-card__head">
+          {icon && <span className="metric-card__icon" aria-hidden>{icon}</span>}
+          <span className="metric-card__label">{label}</span>
+        </div>
+        <div className="metric-card__value"><Skeleton width="55%" height={26} /></div>
+        <div className="metric-card__foot"><Skeleton width={64} height={13} rounded /></div>
+      </div>
+    );
+  }
 
   return (
     <div

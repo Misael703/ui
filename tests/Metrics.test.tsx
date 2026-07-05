@@ -72,6 +72,16 @@ describe('StatCard', () => {
     expect(container.querySelector('.metric-card__foot')).toBeNull();
   });
 
+  it('loading: skeletons the value + delta, marks the card aria-busy, keeps the label', () => {
+    const { container } = render(<StatCard label="Ventas" value="$1,2M" delta={8} loading />);
+    const card = container.querySelector('.metric-card')!;
+    expect(card).toHaveAttribute('aria-busy', 'true');
+    expect(container.querySelectorAll('.skel').length).toBeGreaterThanOrEqual(2);
+    expect(container.textContent).toContain('Ventas'); // identity stays
+    expect(container.textContent).not.toContain('$1,2M'); // value withheld
+    expect(container.querySelector('.delta-badge')).toBeNull(); // delta withheld
+  });
+
   it('CSS: accent is a tinted surface + hue border, not a side rail', () => {
     // v1.68.3: aligned to the Card accent (tint+border); the old 3px border-left
     // side-stripe must be gone.
@@ -82,6 +92,27 @@ describe('StatCard', () => {
   it('CSS: the orphaned .kpi-card block is gone (dead code)', () => {
     expect(css).not.toContain('.kpi-card');
   });
+
+  it('semantic accent tints like the Card accent language (danger → --color-danger)', () => {
+    const { container } = render(<StatCard label="Stock crítico" value="7 SKU" accent="danger" />);
+    const card = container.querySelector('.metric-card')!;
+    expect(card.className).toContain('metric-card--danger');
+    expect(card.getAttribute('data-accent')).toBe('danger');
+    expect(css).toMatch(/\.metric-card--danger\s*\{\s*--metric-accent:\s*var\(--color-danger\)/);
+  });
+});
+
+describe('Metric value typography', () => {
+  // KPI numbers must be tabular so digits align column-to-column and don't jitter
+  // between renders. StatCard already had it; Stat and Kpi were the gap.
+  it.each(['.metric-card__value', '.stat__value', '.kpi__value'])(
+    '%s uses tabular-nums',
+    (selector) => {
+      const rule = css.match(new RegExp(`\\${selector}\\s*\\{[^}]*\\}`));
+      expect(rule).toBeTruthy();
+      expect(rule![0]).toMatch(/font-variant-numeric:\s*tabular-nums/);
+    }
+  );
 });
 
 describe('Meter', () => {

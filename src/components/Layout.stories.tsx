@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   Tabs, TabList, Tab, TabPanel, Tooltip, Stepper,
   Divider, Stack, HStack, VStack, Container, Grid, Cluster, Spacer,
-  KeyValue, KeyValueRow, ListGroup, ListGroupItem,
+  KeyValue, KeyValueRow, ListGroup, ListGroupItem, SectionHeader,
 } from './Layout';
 import { Button } from './Button';
 import { Badge } from './Display';
@@ -172,6 +172,34 @@ export const GridDemo: StoryObj = {
         </div>
       ))}
     </Grid>
+  ),
+};
+
+export const SectionHeaderDemo: StoryObj = {
+  render: () => (
+    <Stack gap={6}>
+      <section aria-labelledby="sh-1">
+        <SectionHeader
+          title="Pedidos recientes"
+          titleId="sh-1"
+          actions={<a href="#" className="caption">Ver todos</a>}
+        />
+        <Grid minColWidth={140} gap={3}>
+          {[1, 2, 3].map((n) => (
+            <div key={n} style={{ padding: 16, background: 'var(--bg-subtle)', borderRadius: 8 }}>Pedido {n}</div>
+          ))}
+        </Grid>
+      </section>
+      <section aria-labelledby="sh-2">
+        <SectionHeader
+          title="Inventario"
+          description="Stock por bodega, actualizado hoy"
+          titleId="sh-2"
+          actions={<Button variant="ghost" size="sm">Exportar</Button>}
+        />
+        <div style={{ padding: 16, background: 'var(--bg-subtle)', borderRadius: 8 }}>Tabla…</div>
+      </section>
+    </Stack>
   ),
 };
 
