@@ -14,6 +14,19 @@ describe('Popover', () => {
     expect(screen.getByText('Contenido del popover')).toBeInTheDocument();
   });
 
+  it('forwards aria-haspopup/aria-expanded onto the trigger element (not the wrapper span)', () => {
+    render(
+      <Popover trigger={<button>Abrir</button>}>
+        <div>Body</div>
+      </Popover>
+    );
+    const btn = screen.getByRole('button', { name: 'Abrir' });
+    expect(btn).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(btn).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(btn);
+    expect(btn).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('closes on Escape', () => {
     render(
       <Popover defaultOpen trigger={<button>Trigger</button>}>

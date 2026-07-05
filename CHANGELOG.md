@@ -5,6 +5,23 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.71.0] — 2026-07-05
+
+**Minor. Menu-role vocabulary: disclosure semantics for link menus (audit batch 3b-menus; decision D1 = by-semantics).**
+
+Backwards-compatible (no prop or export changes).
+
+### Accessibility
+- **NavigationMenu**: site navigation is a disclosure of links, not an
+  application menu. Dropped `role="menu"` / `role="menuitem"` (a well-known ARIA
+  misuse for nav links); the trigger keeps `aria-expanded` and now links to the
+  panel via `aria-controls`, and the revealed items are ordinary, tab-navigable
+  `<a>` links (arrow-key roving kept as a convenience).
+- **Popover**: `aria-haspopup` / `aria-expanded` are now forwarded onto the
+  actual trigger element (the consumer's `<button>`) instead of the
+  non-focusable wrapper span, so screen readers announce the expanded state.
+  This also fixes **UserMenu**, whose trigger now exposes its state.
+
 ## [1.70.0] — 2026-07-05
 
 **Minor. Keyboard / screen-reader accessibility on menus and comboboxes (audit batch 3b).**
