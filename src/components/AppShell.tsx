@@ -175,7 +175,7 @@ const NavItemNode = React.memo(function NavItemNode({
       {item.badge && <span className="appshell__navbadge">{item.badge}</span>}
     </>
   );
-  const node = item.href && linkAs
+  const rawNode = item.href && linkAs
     ? linkAs(item, inner, klass)
     : (
       <a
@@ -191,6 +191,16 @@ const NavItemNode = React.memo(function NavItemNode({
         {inner}
       </a>
     );
+  // The kit can't inject an onClick into a consumer `linkAs` node (e.g. a
+  // `next/link`), so routing through `linkAs` used to navigate WITHOUT closing
+  // the mobile drawer — the context changed but the drawer stayed in the
+  // foreground. Delegate the close on a `display:contents` wrapper: the link's
+  // activation click (mouse, or the click Enter dispatches on an <a>) bubbles
+  // here and closes the drawer. The fallback <a> already closes via its own
+  // onClick, so it's left unwrapped (single close path per branch, no double).
+  const node = item.href && linkAs
+    ? <span className="appshell__navlink-slot" onClick={onCloseMobile}>{rawNode}</span>
+    : rawNode;
   return (
     <li>
       {node}

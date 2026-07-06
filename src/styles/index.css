@@ -2916,6 +2916,10 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell.is-collapsed .appshell__navlabel-section { display: none; }
 .appshell__nav ul { list-style: none; margin: 0; padding: 0; }
+/* Layout-invisible wrapper around a `linkAs` node: it only exists to delegate
+   the mobile-drawer close (onClick) from the consumer's link, so it must not
+   introduce a box — the `.appshell__navitem` styling stays on the link itself. */
+.appshell__navlink-slot { display: contents; }
 .appshell__navitem {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 12px; margin: 1px 4px;
@@ -3181,9 +3185,14 @@ button, input, select, textarea { box-sizing: border-box; }
     inset: 0 auto 0 0;
     width: 240px;
     transform: translateX(-100%);
+    /* Same tab-order/AT concern as the mobile drawer: the hidden sidebar keeps
+       its links focusable off-screen (and here there's no `aria-hidden` either).
+       Hide after the slide-out; the expanded state (below) restores it at once. */
+    visibility: hidden;
+    transition: transform var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);
   }
   .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-    transition: transform var(--duration-base) var(--ease-standard);
+    transition: transform var(--duration-base) var(--ease-standard), visibility 0s;
   }
   /* Hide-mode collapse bug (v1.31.0): when the aside goes `position: absolute`
      it leaves the grid flow → grid auto-placement gives the next in-flow item
@@ -3252,7 +3261,13 @@ button, input, select, textarea { box-sizing: border-box; }
     left: 0;
     width: min(280px, 85vw);
     transform: translateX(-100%);
-    transition: transform var(--duration-base) var(--ease-standard);
+    /* `visibility: hidden` removes the off-screen drawer from the tab order AND
+       the a11y tree (translateX alone leaves its links focusable — a keyboard
+       user tabs into invisible content, and axe flags focusable nodes inside
+       `aria-hidden`). Delayed to the end of the slide-out so the exit animates;
+       the open state restores it immediately (see below). */
+    visibility: hidden;
+    transition: transform var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);
     z-index: 40;
     overflow: auto;
     /* `background` + `border-right` intentionally NOT restated — the base
@@ -3270,6 +3285,9 @@ button, input, select, textarea { box-sizing: border-box; }
   }
   .appshell--header-top.is-mobile-open .appshell__sidebar {
     transform: translateX(0);
+    /* Visible immediately (no delay) so the drawer is interactive as it slides in. */
+    visibility: visible;
+    transition: transform var(--duration-base) var(--ease-standard), visibility 0s;
   }
   /* Scrim covers content area below the header so the trigger remains
      interactive for close. Higher z than the desktop scrim (30) because

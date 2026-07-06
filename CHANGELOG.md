@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.76.1] — 2026-07-06
+
+**Patch. AppShell mobile drawer fixes: closes on `linkAs` navigation; hidden sidebar is untabbable.**
+
+### Fixed
+- **Mobile drawer stayed open after navigating via `linkAs`.** The drawer-close
+  handler was only wired on the kit's fallback `<a>`; when routing went through
+  a consumer `linkAs` node (e.g. `next/link`), the page changed but the drawer
+  stayed in the foreground. The kit can't inject an `onClick` into an arbitrary
+  `linkAs` node, so the close is now delegated on a `display:contents` wrapper —
+  the link's activation click (mouse, or the click `Enter` dispatches on an `<a>`)
+  bubbles up and closes the drawer. Fallback `<a>` path unchanged.
+
+### Accessibility
+- **The hidden sidebar was still in the tab order.** The closed mobile drawer and
+  the desktop hide-collapsed sidebar were only translated off-screen
+  (`translateX(-100%)`), leaving their nav links focusable — a keyboard user
+  tabbed into invisible content, and focusable nodes inside `aria-hidden` are an
+  axe violation (the desktop case had no `aria-hidden` at all). Both now apply
+  `visibility: hidden` (delayed to the end of the slide-out so the exit still
+  animates; restored immediately on open), removing the links from the tab order
+  and the accessibility tree at both breakpoints. The rail collapse is unaffected
+  (its icons stay visible and reachable, as intended).
+
 ## [1.76.0] — 2026-07-05
 
 **Minor. Dashboard / data-communication pass: delta consistency, `SectionHeader`, async states.**
