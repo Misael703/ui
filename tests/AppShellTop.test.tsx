@@ -433,6 +433,42 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     });
   });
 
+  it('mobile: activating a `linkAs` nav item closes the drawer (regression: stayed open before the fix)', () => {
+    withMatchMedia(true, () => {
+      const { container, getByTestId } = render(
+        <AppShell
+          sections={sections}
+          linkAs={(item, content, className) => (
+            <a data-testid="navlink" href={item.href} className={className}>{content}</a>
+          )}
+          header={{
+            left: ({ toggle }) => <button data-testid="trigger" onClick={toggle}>m</button>,
+            center: 'brand',
+          }}
+        >x</AppShell>
+      );
+      const root = container.querySelector('.appshell')!;
+      fireEvent.click(getByTestId('trigger'));
+      expect(root).toHaveClass('is-mobile-open');
+      // Route via the consumer's link (next/link stand-in) — the drawer must
+      // close even though the kit can't wire onClick into the linkAs node.
+      fireEvent.click(getByTestId('navlink'));
+      expect(root).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('CSS: the hidden drawer is untabbable (visibility:hidden, not just off-screen)', () => {
+    // Mobile closed drawer + desktop hide-collapse both left links focusable
+    // off-screen; visibility:hidden removes them from the tab order and AT.
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*hidden/);
+    expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*visible/);
+    expect(css).toMatch(/is-collapsed\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*hidden/);
+  });
+
+  it('CSS: the `linkAs` close-delegation wrapper is layout-invisible (display:contents)', () => {
+    expect(css).toMatch(/\.appshell__navlink-slot\s*\{[^}]*display:\s*contents/);
+  });
+
   it('mobile + controlled: flipping `collapsed` mirrors to mobileOpen (drawer opens)', () => {
     // The bug the user reported: a controlled consumer with a static
     // button (no render-prop) that calls setCollapsed directly read as

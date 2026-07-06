@@ -247,6 +247,51 @@ export const TopbarMobileDrawer: StoryObj = {
 };
 
 /**
+ * **Topbar · Mobile drawer + `linkAs` (cierra al navegar).** El caso real: con
+ * `next/link` (vía `linkAs`) el kit no puede inyectar un `onClick` en el nodo del
+ * consumidor, así que antes el drawer navegaba pero quedaba abierto sobre la
+ * página nueva. Ahora se cierra solo al activar el link. Abre el menú y toca un
+ * item: la ruta cambia y el drawer desaparece.
+ */
+export const TopbarMobileDrawerRouting: StoryObj = {
+  name: 'Topbar · Mobile drawer + linkAs (cierra al navegar)',
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  render: function Routing() {
+    const [route, setRoute] = React.useState('Inicio');
+    const routed = sections.map((s) => ({
+      ...s,
+      items: s.items.map((it) => ({ ...it, active: it.label === route })),
+    }));
+    return (
+      <div style={{ height: '100vh' }}>
+        <AppShell
+          sections={routed}
+          showMenuToggle
+          linkAs={(item, content, className) => (
+            <a
+              data-testid={`nav-${item.id}`}
+              href={item.href}
+              className={className}
+              onClick={(e) => { e.preventDefault(); setRoute(String(item.label)); }}
+            >
+              {content}
+            </a>
+          )}
+          header={{
+            center: <Logo variant="horizontal" bg="light" height={26} />,
+            right: <Avatar name="Misael Ocas" size={32} />,
+          }}
+        >
+          <div style={{ padding: 16 }}>
+            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer y toca un item: navega (linkAs) y el drawer se cierra solo." />
+          </div>
+        </AppShell>
+      </div>
+    );
+  },
+};
+
+/**
  * **Topbar · User menu (`<UserMenu>`)** — Linear / Vercel / Notion pattern,
  * empaquetado como componente (v1.66.0). Caso real: en mobile el slot
  * `header.right` con avatar + nombre + rol + chevron desbordaba (~280px de
