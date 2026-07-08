@@ -10,7 +10,12 @@
      import "@misael703/ui/styles.css";       // kit base (generic defaults)
      import "@misael703/ui/presets/elalba";   // this file — restores El Alba
 
-   Output is pixel-identical to @misael703/elalba-ui@0.7.1.
+   Originally pixel-identical to @misael703/elalba-ui@0.7.1; since then a few
+   deliberate, documented refinements have diverged from it, all AA/craft-driven
+   and all noted inline where they live: the v1.10.0 fg-subtle AA fix, and the
+   v1.77.0 palette pass (hue-corrected orange scale, tinted surface #fcfdff,
+   darkened primary-button hover). The two Pantone brand anchors (#002f87,
+   #ff671d) are unchanged.
 
    Restores everything v1.0.0's default palette changed that El Alba
    relied on:
@@ -37,17 +42,24 @@
   --color-primary-100: #e3eaf4;
   --color-primary-50:  #f2f5fb;
 
-  /* El Alba orange scale (Pantone 165 C) → secondary */
-  --color-secondary-900: #8c3000;
-  --color-secondary-800: #b84300;
-  --color-secondary-700: #e05400;
-  --color-secondary-600: #ff671d;  /* El Alba brand orange */
-  --color-secondary-500: #ff8344;
-  --color-secondary-400: #ffa06e;
-  --color-secondary-300: #ffbe98;
-  --color-secondary-200: #ffd6bb;
-  --color-secondary-100: #ffe8d7;
-  --color-secondary-50:  #fff5ee;
+  /* El Alba orange scale (Pantone 165 C) → secondary.
+     v1.77.0: hue-corrected. The ramp is regenerated in OKLCH at a LOCKED hue
+     (~41.7°) so it's perceptually uniform; the pre-1.77.0 scale drifted from
+     41° (dark stops) to 58° (the tints), so light-orange chips/badges read
+     peach/yellow instead of brand orange. 600 (#ff671d, Pantone 165 C) and 700
+     (#e05400, the button-hover stop) are byte-identical to before; only the
+     derived stops move. AA re-verified: secondary-800 on secondary-100
+     (navbadge) = 4.98. */
+  --color-secondary-900: #822e03;
+  --color-secondary-800: #af3f00;
+  --color-secondary-700: #e05400;   /* unchanged — button-hover stop */
+  --color-secondary-600: #ff671d;   /* unchanged — El Alba brand orange (Pantone 165 C) */
+  --color-secondary-500: #ff7f4c;
+  --color-secondary-400: #ff9e79;
+  --color-secondary-300: #ffbba1;
+  --color-secondary-200: #ffd3c2;
+  --color-secondary-100: #ffe6dc;
+  --color-secondary-50:  #fff3ef;
 
   /* Original cool slate-tinted neutral scale (v1.0.0 default switched
      to warm stone). Restored so muted text / borders match v0.7.1. */
@@ -73,13 +85,21 @@
      1.26.0 (subtle ≈ canvas → no figure/ground).
 
      v1.29.0 re-orders by luminance, lightest → darkest:
-       --bg-surface #ffffff  cards, tables (CONTENT — must pop)
+       --bg-surface #fcfdff  cards, tables (CONTENT — must pop)
        --bg-subtle  #f1f4f9  inset on a surface (table header, card footer)
        --bg-muted   #e7ebf2  stronger inset / hover/pressed
        --bg-canvas  #dde3ed  page background (DEEPEST tier, supports the
                              card lift on its own without the consumer
                              touching CSS or borders).
-     Pinned by tests/SurfaceTiers.test.tsx. */
+     Pinned by tests/SurfaceTiers.test.tsx.
+
+     v1.77.0: the surface is a whisper of cool slate (#fcfdff, L=0.994, C=0.003,
+     hue 265°) instead of pure #ffffff — it was the ONLY untinted value in an
+     otherwise cool-tinted system (a pure-white island on a tinted page). Now it
+     joins the slate hue per the "tint every neutral" rule. Imperceptible and
+     AA-safe (fg-muted 6.17 → 6.06), still strictly the lightest tier.
+     --color-white stays #ffffff for text-on-dark. */
+  --bg-surface: #fcfdff;
   --bg-canvas:  #dde3ed;
   --bg-subtle:  #f1f4f9;
   --bg-muted:   #e7ebf2;
@@ -121,17 +141,25 @@
      tokens are read solely by .btn--primary/.btn--secondary; links, focus
      rings and badges keep the unswapped --color-* tokens).
      PRIMARY = DELIBERATE BRAND EXCEPTION, owner-accepted 2026-05-18.
-     The exact brand orange #ff671d (--color-secondary) + white is 2.91:1
-     (hover #ff8344 = 2.44:1) — BELOW WCAG AA. The kit's "accessibility is
-     owned" guarantee is intentionally WAIVED for this single button:
-     brand fidelity chosen over AA by the kit owner, eyes open. This is
-     NOT silent debt — it is pinned and bounded in tests/Contrast.test.tsx
-     (must stay this exact sub-AA value; cannot drift) and called out in
-     CHANGELOG + DESIGN.md. Secondary stays the AA blue (#002f87 + white =
-     11.96:1; hover --color-primary-900 16.74:1). */
+     The exact brand orange #ff671d (--color-secondary) + white is 2.91:1 —
+     BELOW WCAG AA. The kit's "accessibility is owned" guarantee is
+     intentionally WAIVED for this single button: brand fidelity (white on the
+     brand orange) chosen over AA by the kit owner, eyes open. This is NOT
+     silent debt — it is pinned and bounded in tests/Contrast.test.tsx (cannot
+     drift or worsen) and called out in CHANGELOG + DESIGN.md.
+
+     v1.77.0 — DOCUMENTED AA DRIFT, still an exception: the hover moved from
+     --color-secondary-500 (#ff8344, LIGHTER than the base) to
+     --color-secondary-700 (#e05400, DARKER). This (a) fixes the direction —
+     both buttons now darken on hover, and (b) raises the hover contrast from
+     2.44:1 to 3.86:1. It is STILL below WCAG AA (4.5): the resolution that
+     reaches AA is dark text on the orange (ink ≈ 6.4:1), which the owner
+     declined in favour of the white-on-orange brand look. So the exception
+     stands, now bounded at base 2.91 / hover 3.86. Secondary stays AA
+     (#002f87 + white = 11.96:1; hover --color-primary-900 16.74:1). */
   --btn-primary-bg:        var(--color-secondary);
   --btn-primary-fg:        var(--color-white);
-  --btn-primary-bg-hover:  var(--color-secondary-500);
+  --btn-primary-bg-hover:  var(--color-secondary-700);
   --btn-secondary-bg:        var(--color-primary);
   --btn-secondary-fg:        var(--color-white);
   --btn-secondary-bg-hover:  var(--color-primary-900);
