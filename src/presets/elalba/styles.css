@@ -176,3 +176,46 @@
   --cat-1:    #0891b2;  --cat-1-bg: #e0f7fa;  --cat-1-fg: #155e75;  /* cyan       */
   --cat-4:    #65a30d;  --cat-4-bg: #ecfccb;  --cat-4-fg: #3f6212;  /* chartreuse */
 }
+
+/* ==========================================================================
+   El Alba dark theme (v1.79.0)
+   ==========================================================================
+   Overrides ONLY what a navy-anchored brand needs different from the generic
+   dark machinery in _root.css: cool navy-tinted surfaces (vs the base warm
+   espresso dark), cool off-white foregrounds, and the white-on-orange CTA the
+   brand pins. Everything else (link lift, focus ring, soft status/category
+   chips) cascades from the base dark block through El Alba's own scales. */
+:root[data-theme="dark"] {
+  /* Cool navy-tinted surfaces (Pantone 287 C undertone), additive-light tiers. */
+  --bg-canvas:  #0d1424;
+  --bg-surface: #141d31;
+  --bg-subtle:  #1c2740;
+  --bg-muted:   #26324f;
+
+  /* Cool off-white + slate foregrounds (AA on the navy surface + canvas). */
+  --fg-default: #e7ebf4;
+  --fg-muted:   #a6afc2;
+  --fg-subtle:  #8e97ab;
+
+  /* Cool hairlines. */
+  --border-default: #2a3450;
+  --border-strong:  #3a466a;
+
+  /* El Alba's secondary is the saturated brand orange → white text on it. The
+     base dark points --fg-on-secondary at the dark primary (correct only for the
+     generic light-sand secondary); restore the white-on-orange CTA. The primary
+     button stays brand orange + white — the same documented AA exception as
+     light (orange reads fine on dark); btn-secondary stays brand navy + white
+     (AA-safe 11.96:1). */
+  --fg-on-secondary: var(--color-white);
+
+  /* El Alba remaps cat-1 (cyan) and cat-4 (chartreuse) in its light :root,
+     including their soft -bg/-fg. Re-derive those two for dark HERE so the
+     preset owns its brand cats in both themes — and so the dark tint holds
+     regardless of how a consumer loads the files (if the base sheet lands in a
+     lower @layer than the preset, the base dark cat override would otherwise be
+     shadowed). The other four cats have no preset override, so they inherit the
+     base dark remap directly. */
+  --cat-1-bg: color-mix(in oklab, var(--cat-1) 22%, var(--bg-surface)); --cat-1-fg: color-mix(in oklab, var(--cat-1) 45%, var(--color-white));
+  --cat-4-bg: color-mix(in oklab, var(--cat-4) 22%, var(--bg-surface)); --cat-4-fg: color-mix(in oklab, var(--cat-4) 45%, var(--color-white));
+}

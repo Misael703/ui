@@ -897,8 +897,8 @@ button, input, select, textarea { box-sizing: border-box; }
   background:
     linear-gradient(to right, var(--bg-surface) 30%, transparent) left center,
     linear-gradient(to left,  var(--bg-surface) 30%, transparent) right center,
-    linear-gradient(to right, rgba(0, 0, 0, 0.08), transparent 24px) left center,
-    linear-gradient(to left,  rgba(0, 0, 0, 0.08), transparent 24px) right center,
+    linear-gradient(to right, var(--edge-shadow), transparent 24px) left center,
+    linear-gradient(to left,  var(--edge-shadow), transparent 24px) right center,
     var(--bg-surface);
   background-size: 30px 100%, 30px 100%, 24px 100%, 24px 100%, 100% 100%;
   background-attachment: local, local, scroll, scroll, scroll;

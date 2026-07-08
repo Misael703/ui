@@ -330,6 +330,10 @@
      step higher for interactive cards. */
   --shadow-card:       0 1px 2px rgba(12, 18, 32, 0.05), 0 8px 24px -16px rgba(12, 18, 32, 0.20);
   --shadow-card-hover: 0 2px 4px rgba(12, 18, 32, 0.06), 0 16px 32px -14px rgba(12, 18, 32, 0.26);
+  /* Edge/scroll-affordance shadow (the fade a scrollable pane paints at its
+     overflowing edge). Tokenized so dark can deepen it — the light ink at 8%
+     is invisible on a dark surface. */
+  --edge-shadow: rgba(12, 18, 32, 0.08);
 
   /* -------- Motion --------------------------------------------------- */
   /* Exponential ease-out family: confident deceleration, no bounce. UI
@@ -370,4 +374,96 @@
 
   /* -------- Overlays --------------------------------------------------*/
   --backdrop: color-mix(in srgb, var(--color-ink) 55%, transparent);
+}
+
+/* ==========================================================================
+   Dark theme — opt-in via `[data-theme="dark"]` on a root ancestor (v1.79.0)
+   ==========================================================================
+
+   Manual activation: the consumer sets `data-theme="dark"` on <html> (or any
+   subtree) and owns the toggle + persistence. No `prefers-color-scheme`
+   auto-switch in v1 — a documented follow-up can layer it on top, gated by
+   `:root:not([data-theme])`, without touching these values.
+
+   This block is the PALETTE-AGNOSTIC machinery. Dark elevation is additive
+   light: the page (canvas) is the DEEPEST tier, cards (surface) lift LIGHTER,
+   insets/hover lift lighter still — the inverse ordinal of light, where surface
+   is the lightest tier. It flips foreground + borders, lifts the brand
+   link/focus off the near-black, and re-tints the soft status/category chip
+   stops so a light chip never lands on a dark surface. Presets that only
+   override scales inherit all of it; a preset overrides only the tokens its
+   brand needs different (see the El Alba dark block in presets/elalba/styles.css).
+
+   Values are tuned for the generic warm-espresso default palette. Every
+   muted/subtle foreground clears WCAG AA on both dark surface and canvas,
+   pinned in tests/ContrastDark.test.tsx; tier ordering in SurfaceTiers.test.tsx. */
+:root[data-theme="dark"] {
+  /* Surface tiers — additive-light elevation. Warm near-blacks (espresso
+     undertone), never pure #000. */
+  --bg-canvas:         #1b1714;
+  --bg-surface:        #262019;
+  --bg-subtle:         #2f2822;
+  --bg-muted:          #3a322b;
+  /* Inverse now points LIGHT (an inverse panel on a dark UI is a light slab). */
+  --bg-inverse:        var(--color-gray-100);
+  --bg-inverse-strong: var(--color-gray-50);
+
+  /* Foreground — warm off-white + light stone greys (AA on surface + canvas). */
+  --fg-default:      #ece6df;
+  --fg-muted:        #b3a89d;
+  --fg-subtle:       #9b9084;
+  --fg-meta:         var(--fg-subtle);
+  --fg-on-brand:     var(--color-white);
+  --fg-on-secondary: var(--color-primary);
+  /* Link/hover lift the (dark) brand ink to a legible light tint on near-black. */
+  --fg-link:         var(--color-primary-300);
+  --fg-link-hover:   var(--color-primary-200);
+
+  /* Borders — low-contrast hairlines on dark. */
+  --border-default:  #362f28;
+  --border-strong:   #453d35;
+  --border-brand:    var(--color-primary-400);
+  --border-focus:    var(--color-primary-400);
+
+  /* Focus rings — the 16% light halo vanishes on dark; lift the tone and raise
+     the alpha so the ring stays a clear signal. */
+  --focus-ring-brand:   0 0 0 3px color-mix(in srgb, var(--color-primary-400) 38%, transparent);
+  --focus-ring-accent:  0 0 0 3px color-mix(in srgb, var(--color-secondary)   38%, transparent);
+  --focus-ring-danger:  0 0 0 3px color-mix(in srgb, var(--color-red-400)      38%, transparent);
+
+  /* Elevation shadows — deeper so the little that survives on dark still lifts. */
+  --shadow-card:       0 1px 2px rgba(0, 0, 0, 0.40), 0 8px 24px -16px rgba(0, 0, 0, 0.60);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 16px 32px -14px rgba(0, 0, 0, 0.66);
+  --edge-shadow:       rgba(0, 0, 0, 0.50);
+
+  /* Soft status chips. The badge/alert/calendar/diff rules read the -50/-100
+     (bg), -200 (border) and -800 (ink) stops directly. Re-tint just those four
+     per status so the SAME rules yield a dark-tinted chip with light ink — no
+     component rule rewritten. Solid stops (-500/-600/-700/-900) are untouched:
+     they stay correct as fills + button hovers on dark. */
+  --color-green-50:  color-mix(in oklab, var(--color-green-600) 15%, var(--bg-surface));
+  --color-green-100: color-mix(in oklab, var(--color-green-600) 24%, var(--bg-surface));
+  --color-green-200: color-mix(in oklab, var(--color-green-600) 42%, var(--bg-surface));
+  --color-green-800: var(--color-green-300);
+  --color-yellow-50:  color-mix(in oklab, var(--color-yellow-600) 15%, var(--bg-surface));
+  --color-yellow-100: color-mix(in oklab, var(--color-yellow-600) 24%, var(--bg-surface));
+  --color-yellow-200: color-mix(in oklab, var(--color-yellow-600) 42%, var(--bg-surface));
+  --color-yellow-800: var(--color-yellow-300);
+  --color-red-50:  color-mix(in oklab, var(--color-red-600) 15%, var(--bg-surface));
+  --color-red-100: color-mix(in oklab, var(--color-red-600) 24%, var(--bg-surface));
+  --color-red-200: color-mix(in oklab, var(--color-red-600) 42%, var(--bg-surface));
+  --color-red-800: var(--color-red-300);
+  --color-info-50:  color-mix(in oklab, var(--color-info-600) 15%, var(--bg-surface));
+  --color-info-100: color-mix(in oklab, var(--color-info-600) 24%, var(--bg-surface));
+  --color-info-200: color-mix(in oklab, var(--color-info-600) 42%, var(--bg-surface));
+  --color-info-800: var(--color-info-300);
+
+  /* Categorical chips — same idea, derived from the (preset-aware) solid so a
+     preset's remapped cats follow automatically. bg dark-tinted, fg lightened. */
+  --cat-1-bg: color-mix(in oklab, var(--cat-1) 22%, var(--bg-surface)); --cat-1-fg: color-mix(in oklab, var(--cat-1) 45%, var(--color-white));
+  --cat-2-bg: color-mix(in oklab, var(--cat-2) 22%, var(--bg-surface)); --cat-2-fg: color-mix(in oklab, var(--cat-2) 45%, var(--color-white));
+  --cat-3-bg: color-mix(in oklab, var(--cat-3) 22%, var(--bg-surface)); --cat-3-fg: color-mix(in oklab, var(--cat-3) 45%, var(--color-white));
+  --cat-4-bg: color-mix(in oklab, var(--cat-4) 22%, var(--bg-surface)); --cat-4-fg: color-mix(in oklab, var(--cat-4) 45%, var(--color-white));
+  --cat-5-bg: color-mix(in oklab, var(--cat-5) 22%, var(--bg-surface)); --cat-5-fg: color-mix(in oklab, var(--cat-5) 45%, var(--color-white));
+  --cat-6-bg: color-mix(in oklab, var(--cat-6) 22%, var(--bg-surface)); --cat-6-fg: color-mix(in oklab, var(--cat-6) 45%, var(--color-white));
 }

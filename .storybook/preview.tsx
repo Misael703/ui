@@ -15,6 +15,24 @@ import elalbaPresetCss from '../src/presets/elalba/styles.css?inline';
 
 const PRESET_STYLE_ID = 'sb-preset-elalba';
 
+// Dark theme is opt-in via `data-theme="dark"` on a root ancestor — stamp it on
+// the iframe's <html> so the story sees the exact cascade a consumer gets, and
+// tint the canvas so the surface tiers are visible.
+const withTheme = (
+  Story: React.FC,
+  context: { globals: { theme?: string } },
+) => {
+  const theme = context.globals.theme ?? 'light';
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') root.setAttribute('data-theme', 'dark');
+    else root.removeAttribute('data-theme');
+    document.body.style.background = 'var(--bg-canvas)';
+    document.body.style.color = 'var(--fg-default)';
+  }, [theme]);
+  return <Story />;
+};
+
 const withPreset = (
   Story: React.FC,
   context: { globals: { preset?: string } },
@@ -53,8 +71,21 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    theme: {
+      description: 'Color theme (data-theme on the root)',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', title: 'Claro' },
+          { value: 'dark', title: 'Oscuro' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
-  decorators: [withPreset],
+  decorators: [withPreset, withTheme],
   parameters: {
     layout: 'padded',
     backgrounds: { disable: true },

@@ -5,6 +5,41 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.79.0] — 2026-07-08
+
+**Minor. Dark theme, opt-in via `data-theme="dark"`. Additive — light is unchanged.**
+
+A first-class dark theme for the base kit and the El Alba preset. Purely additive:
+every existing light token and every light-theme test is byte-for-byte unchanged.
+
+### Added
+- **Dark theme** — set `data-theme="dark"` on a root ancestor (e.g. `<html>`) and
+  the kit repaints. Manual activation only in this release: the consumer owns the
+  toggle and its persistence. No `prefers-color-scheme` auto-switch yet — a
+  follow-up can layer it on (gated by `:root:not([data-theme])`) without touching
+  these values.
+- **Two layers, mirroring the light cascade.** `src/styles/_root.css` gains a
+  `:root[data-theme="dark"]` block with the palette-agnostic machinery (surface
+  tiers, foreground, borders, focus rings, soft status/category chips). The El
+  Alba preset adds its own dark block overriding only what a navy-anchored brand
+  needs different (cool navy-tinted surfaces + foregrounds; the white-on-orange
+  CTA it pins). A preset that only overrides scales inherits dark for free.
+- **`--edge-shadow` token** — the scroll-affordance edge fade, now tokenized so it
+  can deepen on dark (the light-ink 8% fade was invisible on a dark surface).
+
+### Design notes
+- Dark elevation is **additive light**: the page (canvas) is the deepest tier and
+  cards/insets rise *lighter* — the inverse ordinal of light. Pinned in
+  `tests/SurfaceTiers.test.tsx`.
+- Every muted/subtle/meta foreground clears **WCAG AA on both dark surface and
+  canvas**, in both presets. Soft status and categorical chips are re-tinted in
+  OKLab (dark bg + light ink) and AA-verified in the new
+  `tests/ContrastDark.test.tsx`.
+- The El Alba **primary button** keeps the same documented sub-AA brand exception
+  in dark as in light (white on brand orange `#ff671d`); orange reads fine on a
+  dark surface. `btn-secondary` (navy + white) stays AA (11.96:1).
+- Storybook gains a **Theme** toolbar toggle (Claro / Oscuro) alongside Preset.
+
 ## [1.78.0] — 2026-07-08
 
 **Minor. `onBlur` on `PhoneInput` and `Combobox` (validate-on-blur).**
