@@ -25,8 +25,12 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
+      # Pin to the 11.x line, NOT @latest: npm@12 dropped Node 20 (requires
+      # node >=22.22), so `npm@latest` on this pinned Node 20 runner fails with
+      # EBADENGINE. npm 11.x supports Node 20 and already satisfies Trusted
+      # Publishing (>=11.5.1). Bump to @latest once the runner moves to Node 22+.
       - name: Upgrade npm (Trusted Publishing requires >=11.5.1)
-        run: npm install -g npm@latest
+        run: npm install -g npm@^11
 
       - name: Install dependencies
         run: npm ci
