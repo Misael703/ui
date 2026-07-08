@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.78.0] — 2026-07-08
+
+**Minor. `onBlur` on `PhoneInput` and `Combobox` (validate-on-blur).**
+
+### Added
+- **`PhoneInput` `onBlur`** — forwarded straight to the underlying `<input>`.
+- **`Combobox` `onBlur`** — fires when focus truly leaves the widget, guarded by
+  `relatedTarget` so it does not misfire on internal focus moves (input ↔ clear
+  button). Options never take focus (mousedown `preventDefault` +
+  `aria-activedescendant` keyboard nav), so a `contains` check on the root is
+  sufficient; `relatedTarget === null` (focus left to nowhere) counts as an exit.
+
+Both enable validate-on-blur at the consumer without any change to existing
+behaviour (the prop is optional).
+
 ## [1.77.0] — 2026-07-08
 
 **Minor. El Alba palette refinement (`presets/elalba`). The two Pantone brand anchors are unchanged.**

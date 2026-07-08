@@ -341,9 +341,11 @@ export interface PhoneInputProps {
   className?: string;
   id?: string;
   placeholder?: string;
+  /** Fires when the field loses focus — enables validate-on-blur at the consumer. */
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 }
 
-export function PhoneInput({ value, onChange, prefix, invalid, disabled, className, id, placeholder = '9 1234 5678' }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, prefix, invalid, disabled, className, id, placeholder = '9 1234 5678', onBlur }: PhoneInputProps) {
   return (
     <div className={cx('phone-input', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       {prefix && <span className="phone-input__prefix">{prefix}</span>}
@@ -356,6 +358,7 @@ export function PhoneInput({ value, onChange, prefix, invalid, disabled, classNa
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value.replace(/[^\d ]/g, ''))}
+        onBlur={onBlur}
         aria-invalid={invalid || undefined}
       />
     </div>

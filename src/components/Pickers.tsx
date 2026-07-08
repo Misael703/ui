@@ -61,6 +61,14 @@ export interface ComboboxProps<T = string> {
    * visible (stale-while-revalidate).
    */
   loading?: boolean;
+  /**
+   * Fires when focus truly LEAVES the combobox, for validate-on-blur at the
+   * consumer. Guarded against internal focus moves (input ↔ clear button) via
+   * `relatedTarget`, so it does not misfire mid-interaction. Options never take
+   * focus (mousedown `preventDefault` + `aria-activedescendant` keyboard nav),
+   * so a `contains` check on the root is sufficient.
+   */
+  onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
@@ -71,7 +79,7 @@ export function Combobox<T = string>({
   emptyMessage, filter,
   className, invalid, disabled, id,
   searchable = true, renderOption,
-  onQueryChange, loading,
+  onQueryChange, loading, onBlur,
 }: ComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -184,7 +192,15 @@ export function Combobox<T = string>({
   };
 
   return (
-    <div ref={wrapRef} className={cx('combobox', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
+    <div
+      ref={wrapRef}
+      className={cx('combobox', invalid && 'is-invalid', disabled && 'is-disabled', className)}
+      onBlur={onBlur && ((e) => {
+        // Only a real exit: suppress internal moves (input ↔ clear button).
+        // relatedTarget is null when focus leaves to nowhere → treated as exit.
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onBlur(e);
+      })}
+    >
       {searchable ? (
         <input
           ref={inputRef}
