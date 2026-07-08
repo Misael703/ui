@@ -137,3 +137,90 @@ headless de los 4 batches. Commits (rama `feat/dashboard-data-comm-pass`):
 - D4 a473250 — StatCard semantic accents + AdminDashboard refactor
 CHANGELOG + package.json → v1.76.0 (bundle de D1-D3; D4 no cambia dist).
 PENDIENTE: push rama → PR → smoke → merge → GitHub Release v1.76.0 → npm (espera OK).
+
+---
+
+# Dark mode (impeccable, 2026-07-08)
+
+Gap #1 para pelear con shadcn Pro: el kit no tiene dark (0 `prefers-color-scheme`,
+0 `data-theme`, 0 `.dark` en styles/presets). Auditoría confirma cambio TOKEN-ONLY:
+3 hex hardcodeados = traffic-lights del Mac mock (se quedan); ~28 rgba = blancos
+translúcidos sobre superficies ya-oscuras (inverse/lightbox, correctos en ambos temas).
+
+## Arquitectura (resuelta): híbrido de 2 capas, simétrico a light
+- **Base** `_root.css` → bloque `:root[data-theme="dark"]` con la MAQUINARIA
+  palette-agnóstica (invertir surface tiers, fg claro, borders sutiles, status
+  remapeado, sombras). El kit genérico queda dark-capable sin preset.
+- **Preset elalba** `elalba/styles.css` → bloque `:root[data-theme="dark"]` que
+  sobreescribe SOLO lo de marca (paso de navy para acentos, tinte de superficies
+  hacia navy, botón secundario navy que sube, naranja apenas domada).
+- Cascada idéntica a hoy: preset importado después → gana por orden de fuente.
+  Semánticos dark que referencian escalas por nombre recogen la escala del preset solos.
+
+## Brief (escena física)
+Admin de back-office de noche / despachador en móvil en bodega en penumbra. Dark =
+confort, NO primario (mesón POS sigue en luz). → Dark fiel, baja fatiga, TINTADO HACIA
+NAVY de marca. NO neón de terminal, NO zinc/slate neutro (reflejo 2º orden). Naranja
+CTA preservado.
+
+## Paleta dark El Alba (borrador, verificar AA en implementación)
+- canvas (más profundo): ~#0e1524 navy-tinted near-black (ink #0c1220 es el ancla)
+- surface (cards, SUBE sobre canvas → más claro): ~#161d2e
+- subtle/muted (insets/hover, más claros aún en dark): ~#1e2739 / ~#27314a
+- fg-default ~#e8ebf2 (casi-blanco navy-tinted, no #fff); fg-muted/subtle light slates ≥4.5
+- fg-link/acento: navy LIFTED (primary-300 #9bb1dc / primary-400 #6b8aca)
+- btn-primary: naranja + blanco (excepción AA persiste, documentar en dark)
+- btn-secondary: navy sube a primary-600/500 (navy puro sobre negro = mugroso)
+- status: texto -400, chip bg = color-mix(-600 ~20% + surface) (sin añadir stops -950)
+- categorical -bg via color-mix oscuro, -fg = solid claro (puede diferir a follow-up)
+- shadows casi invisibles en dark; elevación la lleva la luminancia de surface (polish)
+
+## DECISIONES PENDIENTES (esperando OK)
+- **Activación:** v1 manual `[data-theme="dark"]` (rec.) vs manual + fallback
+  `@media (prefers-color-scheme)` ahora.
+- **Alcance:** base+elalba (rec., compite con shadcn) vs elalba-only (más rápido a las apps).
+
+## Checklist
+- [ ] Base: bloque `:root[data-theme="dark"]` (maquinaria + dark genérico)
+- [ ] Preset: bloque `:root[data-theme="dark"]` (overrides de marca)
+- [ ] Tokenizar 2-3 scroll-shadow gradients rgba(0,0,0,α) (~líneas 900-901)
+- [ ] Parser de tests: leer bloques `[data-theme="dark"]` además de `:root`
+- [ ] `tests/ContrastDark.test.tsx`: sweep AA sobre surface+canvas dark, ambos presets
+- [ ] `SurfaceTiers.test.tsx`: en dark el orden INVIERTE (surface > canvas por luminancia)
+- [ ] Storybook: globalType toggle `data-theme` en docs root; verificar visual
+- [ ] (opcional) export `useTheme` + `ThemeToggle` → si se exportan, REGISTRAR en smoke
+      gallery ENTRIES o el anti-rot test explota (pasó en PR #52)
+- [ ] CHANGELOG + DESIGN.md: dark, activación, excepción AA del botón naranja persiste
+- [ ] Headless: Storybook :6017, flip data-theme, barrer componentes clave
+
+## Riesgos
+- Additive: `:root` light intacto; tests de contraste light NO se mueven (dark = set nuevo).
+- No romper la simetría de la cascada; preset gana por orden de fuente.
+
+## Review — 2026-07-08 (local, esperando OK para push/release)
+Todo hecho salvo el opcional `useTheme`/`ThemeToggle` (DEFERIDO: el consumidor pone
+`data-theme` y su toggle; sin export nuevo → no toca el smoke gate). Token-only, light
+100% intacto.
+
+Descubrimiento clave (documentado en DESIGN.md + tests): el kit vive en `@layer elalba`
+pero el preset se importa SIN capa → el `:root` light del preset le gana al bloque dark
+del base (unlayered > layered, antes que specificity). Por eso el preset debe re-afirmar
+en su bloque dark lo que remapea en light: surfaces, fg-muted/subtle, fg-on-secondary y
+sus 2 cats remapeados (1, 4). Headless (Storybook) lo cazó; el fix es re-afirmar en el
+bloque dark de elalba (correcto, no un workaround). Los tests dark ahora modelan ese
+orden de capas en su spread.
+
+Verificación:
+- 990 unit tests verdes; 158 de token (Contrast light intacto + ContrastDark AA ambos
+  presets + SurfaceTiers light y dark-invertido).
+- build tsup + postcss verde; `data-theme=dark` shippea en dist (base + preset).
+- `smoke:ci` verde (65 e2e, real Next consumer, cascada layered+unlayered real).
+- Headless: generic dark (espresso #1b1714) y elalba dark (navy #0d1424) OK; status chips
+  y 6 cats dark-tinted con tinta clara; 0 fugas de fondo-claro/texto-negro en componentes.
+
+Archivos: _root.css (bloque dark base), presets/elalba/styles.css (bloque dark marca),
+index.css (edge-shadow token), .storybook/preview.tsx (toggle Theme), tests
+Contrast/SurfaceTiers (scoping + dark), tests/ContrastDark.test.tsx (nuevo), CHANGELOG +
+DESIGN.md + package.json → v1.79.0.
+PENDIENTE: rama feat/dark-mode → commit → PR → smoke CI → merge → GitHub Release → npm
+(espera OK explícito).

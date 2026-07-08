@@ -9,9 +9,24 @@ Keep this in sync with that file; the CSS wins if they ever disagree.
 
 ## Theme model
 
-- **Light only.** No global dark mode. Dark zones are opt-in per container via
-  `[data-tone="inverse"]` / `.surface-inverse`, which re-scopes the foreground
-  tokens. A global `.dark` theme is intentionally deferred.
+- **Light default; dark opt-in via `data-theme="dark"`** (v1.79.0). Set the
+  attribute on a root ancestor and the kit repaints. Manual activation only: the
+  consumer owns the toggle + persistence (no `prefers-color-scheme` auto-switch
+  yet). Dark lives in two layers mirroring light: `_root.css`'s
+  `:root[data-theme="dark"]` block holds the palette-agnostic machinery (surface
+  tiers, fg, borders, focus, soft status/category chips), and each preset adds a
+  dark block overriding only its brand-specific tokens. Dark elevation is
+  *additive light* (canvas deepest, surface/insets rise lighter — inverse of the
+  light ordinal). Independently, `[data-tone="inverse"]` / `.surface-inverse`
+  still re-scope a single container to the inverse band within either theme.
+  - **Cascade gotcha:** the kit's tokens sit in `@layer elalba` but a preset is
+    imported unlayered, so a preset's light `:root` value *beats* the base
+    `:root[data-theme="dark"]` block (unlayered wins over layered, before
+    specificity). Any token a preset overrides in its light `:root` AND wants
+    dark must be re-asserted in that preset's own dark block. In El Alba that's
+    the surfaces, `fg-muted`/`fg-subtle`, `fg-on-secondary`, and its two remapped
+    cats (1, 4). Pinned by `tests/ContrastDark.test.tsx` (which models the layer
+    priority in its spread order).
 - **CSS custom properties only.** No Tailwind preset, no CSS-in-JS. Every
   semantic token cascades from the brand scales, so a brand change is a token
   override (`src/presets/*`), never a component edit.

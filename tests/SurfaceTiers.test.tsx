@@ -25,6 +25,16 @@ import { resolve } from 'node:path';
 const ROOT = resolve(__dirname, '../src/styles/_root.css');
 const ELALBA = resolve(__dirname, '../src/presets/elalba/styles.css');
 
+// Extract one selector's declarations. Blocks are brace-free, so the first `}`
+// closes it. `:root` matches only the light block (the dark selector has `[`
+// right after `:root`, not `\s*{`).
+function blockFor(css: string, selector: string): string {
+  const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = noComments.match(new RegExp(esc + '\\s*\\{([^}]*)\\}'));
+  return m ? m[1] : '';
+}
+
 function parseTokens(css: string): Record<string, string> {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const map: Record<string, string> = {};
@@ -55,8 +65,23 @@ const lum = (hex: string) => {
   return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 };
 
-const baseMap = parseTokens(readFileSync(ROOT, 'utf8'));
-const elalbaMap = { ...baseMap, ...parseTokens(readFileSync(ELALBA, 'utf8')) };
+const rootCss = readFileSync(ROOT, 'utf8');
+const elalbaCss = readFileSync(ELALBA, 'utf8');
+// Light: scope to `:root` so the dark block can't clobber the tiers.
+const baseMap = parseTokens(blockFor(rootCss, ':root'));
+const elalbaMap = { ...baseMap, ...parseTokens(blockFor(elalbaCss, ':root')) };
+// Dark. El Alba models the real layer priority: base :root (layered) < base dark
+// (layered) < preset :root (unlayered) < preset dark (unlayered). The kit is
+// `@layer elalba` but the preset is unlayered, so preset light beats base dark —
+// hence base dark spreads BEFORE preset light here (see ContrastDark.test.tsx).
+const DARK = ':root[data-theme="dark"]';
+const baseDarkMap = { ...baseMap, ...parseTokens(blockFor(rootCss, DARK)) };
+const elalbaDarkMap = {
+  ...baseMap,
+  ...parseTokens(blockFor(rootCss, DARK)),
+  ...parseTokens(blockFor(elalbaCss, ':root')),
+  ...parseTokens(blockFor(elalbaCss, DARK)),
+};
 
 const tier = (map: Record<string, string>, name: string) =>
   resolveVar(map, `var(${name})`);
@@ -86,6 +111,44 @@ function check(name: string, map: Record<string, string>) {
 
 check('default palette', baseMap);
 check('El Alba preset', elalbaMap);
+
+// Dark theme (v1.79.0). Elevation is additive light: the page (canvas) is the
+// DEEPEST tier, and surface/subtle/muted rise lighter — the INVERSE ordinal of
+// light (where surface is lightest). Guard that inversion so a "just copy the
+// light ordering" regression is caught.
+function checkDark(name: string, map: Record<string, string>) {
+  describe(`surface tiers — ${name} (dark)`, () => {
+    const surface = tier(map, '--bg-surface');
+    const subtle  = tier(map, '--bg-subtle');
+    const muted   = tier(map, '--bg-muted');
+    const canvas  = tier(map, '--bg-canvas');
+
+    it('all four dark tiers resolve to a hex value', () => {
+      for (const v of [surface, subtle, muted, canvas]) {
+        expect(v, `unresolved: ${v}`).toMatch(/^#[0-9a-f]{3,8}$/i);
+      }
+    });
+
+    it('canvas is the darkest tier and cards lift above it', () => {
+      const L = { surface: lum(surface), subtle: lum(subtle), muted: lum(muted), canvas: lum(canvas) };
+      const msg = `tiers: ${JSON.stringify(L)}`;
+      // Canvas (page) strictly darkest; surface (card) lifts above it.
+      expect(L.canvas, `canvas not darkest — ${msg}`).toBeLessThan(L.surface);
+      // Additive-light elevation: muted > subtle > surface > canvas.
+      expect(L.muted,   `muted ≤ subtle — ${msg}`).toBeGreaterThan(L.subtle);
+      expect(L.subtle,  `subtle ≤ surface — ${msg}`).toBeGreaterThan(L.surface);
+      expect(L.surface, `surface ≤ canvas — ${msg}`).toBeGreaterThan(L.canvas);
+    });
+
+    it('surfaces are genuinely dark (not a mislabeled light set)', () => {
+      expect(lum(surface), `surface ${surface} too light for dark`).toBeLessThan(0.1);
+      expect(lum(canvas), `canvas ${canvas} too light for dark`).toBeLessThan(0.1);
+    });
+  });
+}
+
+checkDark('default palette', baseDarkMap);
+checkDark('El Alba preset', elalbaDarkMap);
 
 // v1.77.0: the El Alba surface is tinted off pure white. Guard both properties
 // (tinted AND still the lightest tier) so neither regresses on its own.

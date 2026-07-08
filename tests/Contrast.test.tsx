@@ -18,6 +18,18 @@ import { resolve } from 'node:path';
 const ROOT = resolve(__dirname, '../src/styles/_root.css');
 const ELALBA = resolve(__dirname, '../src/presets/elalba/styles.css');
 
+// Extract the declarations of ONE selector block. Token blocks are brace-free
+// (no nested rules), so the first `}` closes the block. `:root` matches only the
+// light block: the dark selector is `:root[data-theme="dark"]` (a `[` follows
+// `:root`, not `\s*{`), so it is never caught by the `:root` query. Comments are
+// stripped first so a selector mentioned in prose can't match.
+function blockFor(css: string, selector: string): string {
+  const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = noComments.match(new RegExp(esc + '\\s*\\{([^}]*)\\}'));
+  return m ? m[1] : '';
+}
+
 function parseTokens(css: string): Record<string, string> {
   const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const map: Record<string, string> = {};
@@ -34,10 +46,15 @@ function resolveVar(map: Record<string, string>, value: string, depth = 0): stri
   return value;
 }
 
-const baseMap = parseTokens(readFileSync(ROOT, 'utf8'));
+// Light theme only: scope to each file's `:root` block so the appended dark
+// block (`:root[data-theme="dark"]`, v1.79.0) can't clobber these via
+// last-write-wins. Dark is verified separately in ContrastDark.test.tsx.
+const rootCss = readFileSync(ROOT, 'utf8');
+const elalbaCss = readFileSync(ELALBA, 'utf8');
+const baseMap = parseTokens(blockFor(rootCss, ':root'));
 // A consumer importing the El Alba preset layers its :root AFTER the base,
 // so its declarations win — exactly an object spread of base then preset.
-const elalbaMap = { ...baseMap, ...parseTokens(readFileSync(ELALBA, 'utf8')) };
+const elalbaMap = { ...baseMap, ...parseTokens(blockFor(elalbaCss, ':root')) };
 
 const tok = (map: Record<string, string>, name: string) =>
   resolveVar(map, `var(${name})`);
