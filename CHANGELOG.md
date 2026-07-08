@@ -5,6 +5,42 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.77.0] — 2026-07-08
+
+**Minor. El Alba palette refinement (`presets/elalba`). The two Pantone brand anchors are unchanged.**
+
+A color pass on the shipping El Alba preset. All three changes are in
+`presets/elalba` only; the base/default palette is untouched. The brand anchors
+stay byte-identical: primary `#002f87` (Pantone 287 C), secondary `#ff671d`
+(Pantone 165 C).
+
+### Changed
+- **Hue-corrected orange scale.** The secondary scale is regenerated in OKLCH at
+  a locked hue (~41.7°) so the ramp is perceptually uniform; it previously
+  drifted from 41° (dark) to 58° (the tints), so light-orange chips/badges read
+  peach/yellow. Stops 50–500, 800, 900 move; **600 (`#ff671d`) and 700
+  (`#e05400`) are unchanged** (brand + button-hover). AA re-verified
+  (secondary-800 on secondary-100 = 4.98). Guarded in `Contrast.test`.
+- **Tinted content surface.** `--bg-surface` is `#fcfdff` (a whisper of the cool
+  slate, L=0.994 C=0.003) instead of pure `#ffffff` — it was the only untinted
+  value in an otherwise cool-tinted system. Imperceptible, AA-safe (fg-muted
+  6.17 → 6.06), still strictly the lightest tier (`SurfaceTiers.test`).
+  `--color-white` stays `#ffffff` for text-on-dark.
+- **Primary-button hover darkens.** `--btn-primary-bg-hover` moved from
+  `--color-secondary-500` (`#ff8344`, *lighter* than the base) to
+  `--color-secondary-700` (`#e05400`, *darker*), so both buttons darken on hover
+  consistently.
+
+### Documented AA drift (still an exception, not fixed)
+- The primary button keeps **white on the brand orange** (owner's brand choice).
+  Its contrast stays below WCAG AA: base 2.91:1 (`#ff671d`), hover now **3.86:1**
+  (`#e05400`, up from 2.44:1 — the hover darkening raised it but did not reach
+  AA). The AA-clearing resolution (dark ink on the orange, ~6.4:1) was declined
+  in favour of the white-on-orange look. The exception is re-pinned in
+  `Contrast.test` at base 2.91 / hover 3.86 and noted in `DESIGN.md`.
+  **Consumers on the El Alba preset (e.g. barritas) get this refined palette on
+  their next update.**
+
 ## [1.76.1] — 2026-07-06
 
 **Patch. AppShell mobile drawer fixes: closes on `linkAs` navigation; hidden sidebar is untabbable.**

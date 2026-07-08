@@ -89,9 +89,10 @@ muted↔subtle step; the gray scale stays the decorative ramp. Every
 **Documented AA exception — El Alba primary button (v1.12.0).** One
 deliberate, owner-accepted (2026-05-18) departure from "accessibility is
 owned": in the **El Alba preset only**, the **primary** button is the exact
-brand orange `#ff671d` + white = **2.91:1** (hover `#ff8344` = 2.44:1),
-below WCAG AA. Brand fidelity was chosen over AA for this single surface,
-eyes open. It is not silent: `tests/Contrast.test.tsx` pins the exact
+brand orange `#ff671d` + white = **2.91:1** (hover `#e05400` = 3.86:1 since
+v1.77.0, darkened from `#ff8344`/2.44:1 to fix the hover direction and raise
+contrast, but still below WCAG AA), below WCAG AA. Brand fidelity was chosen
+over AA for this single surface, eyes open. It is not silent: `tests/Contrast.test.tsx` pins the exact
 sub-AA value (cannot drift or worsen; trips if "fixed", forcing conscious
 removal) and `CHANGELOG.md` records the decision. Scope is exactly this one
 button pair (+ hover); every other button/surface, in every palette,
