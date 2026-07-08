@@ -61,6 +61,12 @@ export interface ComboboxProps<T = string> {
    * visible (stale-while-revalidate).
    */
   loading?: boolean;
+  /**
+   * Fires when focus leaves the whole combobox (React's bubbling blur on the
+   * root). The inline listbox keeps focus within the root while open, so this
+   * only fires on a real exit — enables validate-on-blur at the consumer.
+   */
+  onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const defaultFilter = <T,>(o: ComboboxOption<T>, q: string) =>
@@ -71,7 +77,7 @@ export function Combobox<T = string>({
   emptyMessage, filter,
   className, invalid, disabled, id,
   searchable = true, renderOption,
-  onQueryChange, loading,
+  onQueryChange, loading, onBlur,
 }: ComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -184,7 +190,7 @@ export function Combobox<T = string>({
   };
 
   return (
-    <div ref={wrapRef} className={cx('combobox', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
+    <div ref={wrapRef} className={cx('combobox', invalid && 'is-invalid', disabled && 'is-disabled', className)} onBlur={onBlur}>
       {searchable ? (
         <input
           ref={inputRef}
