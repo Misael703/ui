@@ -199,14 +199,36 @@ describe('El Alba button swap — preset-only, documented exception', () => {
     const pfg = tok(elalbaMap, '--btn-primary-fg');
     const base = contrast(pfg, tok(elalbaMap, '--btn-primary-bg'));
     const hover = contrast(pfg, tok(elalbaMap, '--btn-primary-bg-hover'));
-    // Acknowledged values: white/#ff671d = 2.91, white/#ff8344 = 2.44.
-    // Lower bound: cannot get WORSE than the known hover (2.44).
-    // Upper bound: stays BELOW AA — if it ever reaches 4.5 this fails on
-    // purpose, so the exception is reviewed and removed, not left stale.
+    // Acknowledged values: white/#ff671d = 2.91, white/#e05400 = 3.86.
+    // v1.77.0 moved the hover from #ff8344 (2.44, LIGHTER) to #e05400 (3.86,
+    // DARKER) — direction fixed and contrast raised, but STILL sub-AA (the
+    // white-on-orange brand exception stands; ink would reach AA but was
+    // declined). Bounds: base cannot drift; hover must stay in [2.44, 4.5).
     expect(base, `primary base = ${base.toFixed(2)}:1 (expected ~2.91, sub-AA brand exception)`).toBeCloseTo(2.91, 1);
-    expect(hover, `primary hover = ${hover.toFixed(2)}:1 (expected ~2.44, sub-AA brand exception)`).toBeCloseTo(2.44, 1);
+    expect(hover, `primary hover = ${hover.toFixed(2)}:1 (expected ~3.86, darkened but still sub-AA)`).toBeCloseTo(3.86, 1);
     expect(base).toBeLessThan(4.5);
-    expect(hover).toBeGreaterThanOrEqual(2.4);
+    expect(hover).toBeLessThan(4.5);
+    expect(hover, 'hover must not regress below the old lightened value').toBeGreaterThanOrEqual(2.44);
+  });
+
+  it('the hover darkens the primary (v1.77.0 direction fix), like the secondary button', () => {
+    const baseL = lum(rgb(tok(elalbaMap, '--btn-primary-bg')));
+    const hoverL = lum(rgb(tok(elalbaMap, '--btn-primary-bg-hover')));
+    expect(hoverL, 'primary hover fill must be darker than its base').toBeLessThan(baseL);
+  });
+
+  it('orange scale is hue-corrected: anchors held, tints regenerated, luminance monotonic', () => {
+    // 600 + 700 unchanged (brand + hover stop); the tints were regenerated.
+    expect(elalbaMap['--color-secondary-600']).toBe('#ff671d');
+    expect(elalbaMap['--color-secondary-700']).toBe('#e05400');
+    expect(elalbaMap['--color-secondary-400']).toBe('#ff9e79'); // regenerated (was #ffa06e)
+    const stops = [900, 800, 700, 600, 500, 400, 300, 200, 100, 50];
+    const Ls = stops.map((k) => lum(rgb(elalbaMap[`--color-secondary-${k}`])));
+    for (let i = 1; i < Ls.length; i++) {
+      expect(Ls[i], `secondary-${stops[i]} must be lighter than -${stops[i - 1]}`).toBeGreaterThan(Ls[i - 1]);
+    }
+    // AppShell nav badge: secondary-800 text on secondary-100 bg stays AA.
+    expect(contrast(elalbaMap['--color-secondary-800'], elalbaMap['--color-secondary-100'])).toBeGreaterThanOrEqual(4.5);
   });
 
   it('does not define --btn-* in the default palette (fallback governs)', () => {

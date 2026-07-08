@@ -86,3 +86,14 @@ function check(name: string, map: Record<string, string>) {
 
 check('default palette', baseMap);
 check('El Alba preset', elalbaMap);
+
+// v1.77.0: the El Alba surface is tinted off pure white. Guard both properties
+// (tinted AND still the lightest tier) so neither regresses on its own.
+describe('El Alba — tinted surface (v1.77.0)', () => {
+  it('surface is a whisper of tint, not pure #ffffff, and still the lightest tier', () => {
+    const surface = tier(elalbaMap, '--bg-surface');
+    expect(surface.toLowerCase()).not.toBe('#ffffff');
+    expect(surface.toLowerCase()).not.toBe('#fff');
+    expect(lum(surface)).toBeGreaterThan(lum(tier(elalbaMap, '--bg-subtle')));
+  });
+});
