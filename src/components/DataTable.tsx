@@ -60,6 +60,30 @@ function DataTableRowImpl<T>({
 }: DataTableRowProps<T>) {
   const interactive = !renderRow && (!!href || !!onActivate);
 
+  // The stretched row control is a keyboard/SR affordance ONLY, never a visual
+  // overlay. Pointer activation lives on the <tr> below. Why: WebKit/iOS does
+  // not honor `position: relative` on a <tr> as the containing block for an
+  // absolute descendant, so an `inset:0` rowlink escapes to the viewport, stacks
+  // across every row and hijacks taps (routes to the last row) plus vertical
+  // scroll. Clicks on the <tr> itself work in every browser, iOS included.
+  const rowlinkRef = React.useRef<HTMLElement>(null);
+  const handleRowClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
+    const target = e.target as HTMLElement;
+    // Nested interactive content (selection checkbox, expand button, consumer
+    // cell controls marked `data-row-interactive`) owns its own click. This
+    // selector also matches the rowlink itself, which handles keyboard
+    // activation via its native onClick — so the row never double-fires.
+    if (target.closest('[data-row-interactive], a, button, input, label, select, textarea, [role="button"]')) return;
+    if (href) {
+      // Preserve link semantics: modifier-click opens a new tab; otherwise
+      // navigate through the real <a> (carries the href + consumer intent).
+      if (e.metaKey || e.ctrlKey) window.open(href, '_blank', 'noopener');
+      else rowlinkRef.current?.click();
+    } else {
+      onActivate?.();
+    }
+  };
+
   const cells = (
     <>
       {selectable && (
@@ -120,27 +144,29 @@ function DataTableRowImpl<T>({
             // byte-identical to before.
             title={c.truncate && typeof value === 'string' ? value : undefined}
           >
-            {/* Stretched row control: a real <a>/<button> in the first
-                data cell, overlaying the whole row (the <tr> is the
-                positioned ancestor). Keyboard-operable + SR-labelled +
-                valid table markup — no role hacks, no onClick-only div.
-                Visually empty; the cells stay the visible content. Other
-                interactive cell content opts above it via
-                `data-table__cell--above` (stretched-link pattern). */}
+            {/* Stretched row control: a real <a>/<button> in the first data
+                cell — the KEYBOARD + SR affordance (Tab reaches it, Enter/Space
+                activates, `aria-label` names it). Visually hidden, NOT a
+                full-bleed overlay (see the iOS note on `handleRowClick`);
+                pointer activation is the <tr>'s onClick. `stopPropagation` keeps
+                keyboard activation from also bubbling to the row (no double
+                fire). No role hack on <tr>, no onClick-only div. */}
             {interactive && ci === 0 && (
               href ? (
                 <a
+                  ref={rowlinkRef as React.Ref<HTMLAnchorElement>}
                   href={href}
                   className="data-table__rowlink"
                   aria-label={actionLabel}
-                  onClick={onActivate}
+                  onClick={(e) => { e.stopPropagation(); onActivate?.(); }}
                 />
               ) : (
                 <button
+                  ref={rowlinkRef as React.Ref<HTMLButtonElement>}
                   type="button"
                   className="data-table__rowlink"
                   aria-label={actionLabel}
-                  onClick={onActivate}
+                  onClick={(e) => { e.stopPropagation(); onActivate?.(); }}
                 />
               )
             )}
@@ -166,7 +192,10 @@ function DataTableRowImpl<T>({
   if (renderRow) return <>{renderRow({ row, cells, rowKey: rowK })}</>;
 
   return (
-    <tr className={cx(selected && 'is-selected', interactive && 'is-clickable')}>
+    <tr
+      className={cx(selected && 'is-selected', interactive && 'is-clickable')}
+      onClick={interactive ? handleRowClick : undefined}
+    >
       {cells}
     </tr>
   );

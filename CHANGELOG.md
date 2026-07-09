@@ -5,6 +5,38 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.80.0] — 2026-07-08
+
+**Minor. Fix: DataTable interactive rows broke on iOS/WebKit (tap + scroll).**
+
+### Fixed
+- **`DataTable` `onRowClick` / `rowHref` on iOS Safari/WebKit.** Interactive rows
+  used a stretched control (`<button>`/`<a>` with `position:absolute; inset:0`)
+  that counted on the `<tr>` being its positioned containing block. WebKit/iOS
+  does not honor `position:relative` on a `<tr>` for absolute descendants, so
+  every row's control escaped to the viewport and stacked full-bleed: any tap
+  routed to the **last** row and vertical scroll was hijacked to the page.
+  Chromium/Android were unaffected (they honor `position` on `<tr>`).
+
+### Changed (behavior fix, small DOM change)
+- Pointer activation now lives on the **`<tr>` `onClick`** (works in every
+  browser, iOS included), guarded so a click on a nested control (selection
+  checkbox, expand button, or any consumer cell control matched by
+  `[data-row-interactive], a, button, input, label, select, textarea,
+  [role="button"]`) does not activate the row.
+- The stretched control (`.data-table__rowlink`) stays as the **keyboard + SR
+  affordance** (focusable, `aria-label`, Enter/Space activates) but is now
+  visually hidden (clipped, `sr-only`) instead of a full-bleed overlay. Its
+  `onClick` stops propagation so keyboard activation never double-fires via the
+  row. The focus ring still shows on the row via `:focus-within`.
+- `rowHref` rows: the row click navigates through the real `<a>`, and a
+  modifier-click (`⌘`/`Ctrl`) opens a new tab.
+- `.data-table tr.is-clickable` no longer needs `position: relative`.
+
+No API change. Verified with a touch-context smoke scenario (`/scenarios/rowclick`)
+and unit tests (`tests/DataTableRowClick.test.tsx`), including a CSS/geometry
+guard against re-introducing the overlay.
+
 ## [1.79.0] — 2026-07-08
 
 **Minor. Dark theme, opt-in via `data-theme="dark"`. Additive — light is unchanged.**
