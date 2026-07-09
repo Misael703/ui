@@ -5,6 +5,63 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.81.0] — 2026-07-09
+
+**Minor. Dark theme: brand-colored elements now adapt (they were stuck on light-mode values).**
+
+v1.79.0 remapped surfaces, foregrounds, borders and the status/category chips for
+dark, but not the two **brand** scales (navy, orange). So anything painting with a
+brand color kept its light values: soft brand tints leaked as bright bands, and
+solid navy fills sat navy-on-navy against the dark surface. Light is unchanged.
+
+### Added
+The brand color splits into three roles that are identical in light (byte-for-byte)
+but diverge in dark, because no single navy works everywhere on a dark surface:
+- **`--color-primary`** — ink/text/accent/outline. In dark lifts to a LIGHT navy so
+  it reads as text (active tabs, breadcrumbs, link buttons, selected-option text).
+- **`--fill-brand`** (new) — small SOLID FILLS (buttons, checked controls, selected
+  cells, progress). In dark lifts to a MID navy `#3a62b4` that separates from the
+  surface (~3.1:1) and keeps white text AA (5.86:1).
+- **`--chrome-brand`** (new) — LARGE brand chrome (AppShell brand header/sidebar,
+  template nav). In dark drops to a DEEP, quiet navy so a full-width band doesn't
+  dominate the dark UI; identity is carried by the logo and the header hairline,
+  not a loud fill.
+- **`Logo` `bg="auto"` (new default)** — surface-aware. Renders both asset
+  variants and shows, via CSS, the one matching the surface: the light-background
+  variant by default, the dark-background variant under an inverse band
+  (`data-tone="inverse"`) or the dark theme (`data-theme="dark"`). No JS, no
+  theme flash. Light rendering is unchanged. Fixed-tone surfaces (a white
+  document, a fixed brand panel) opt out with an explicit `bg="light"`/`"dark"`.
+
+### Fixed (dark theme)
+- **Soft brand tints no longer leak.** `--color-primary-50/-100/-200` (and the
+  `-secondary` equivalents) re-tint dark, so a selected table row, a primary/accent
+  badge, an avatar or an active nav item stops painting a near-white band on the
+  dark surface. Same recipe already used for status/category chips.
+- **Solid navy fills separate from the dark surface.** The El Alba secondary button
+  (and switches, checkboxes, selected calendar days, chips, progress bars) lift from
+  navy-700 (~1.4:1 vs the near-black surface) to a mid navy `#3a62b4` (~3.1:1
+  separation, white text 5.86:1 AA). The orange primary button is unchanged.
+- **Brand chrome stays calm in dark.** The AppShell brand header/sidebar
+  (`headerTheme="brand"`) drop to a deep quiet navy instead of the mid fill, so a
+  full-width band reads as brand chrome without dominating the dark UI.
+- **The logo no longer disappears in dark.** A header logo set for a light surface
+  showed dark marks on the dark header. The `Logo` (now `bg="auto"`) swaps to the
+  dark-surface variant automatically in dark; the AppShell demos/blocks use it.
+- **AppShell header collapses in dark.** There is no white header in dark, so
+  `headerTheme` default/brand both render as the deep brand navy with the light
+  logo — one coherent dark header. `headerTheme` still drives the light theme.
+- **Native scrollbars and form controls follow the theme.** The kit now declares
+  `color-scheme` (`light` on `:root`, `dark` under `data-theme="dark"`), so the
+  browser stops painting a bright scrollbar (and light native controls) on the
+  dark UI.
+- **Brand text reads on dark.** `--color-primary` used as text/accent (active tabs,
+  breadcrumbs, link buttons, selected-option text) lifts to a light navy instead of
+  navy-on-near-black.
+
+New dark contrast guards in `tests/ContrastDark.test.tsx` (white on `--fill-brand`,
+brand ink on surface, brand badges). Light theme and all light tests unchanged.
+
 ## [1.80.1] — 2026-07-08
 
 **Patch. Fix: mouse wheel silently changed the `NumberInput` value.**

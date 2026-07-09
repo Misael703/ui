@@ -129,13 +129,21 @@ function pairs(map: Record<string, string>): Pair[] {
   const P: Pair[] = [];
   // Foreground text on each dark surface tier.
   for (const [fgName, fgTok] of [['muted', '--fg-muted'], ['subtle', '--fg-subtle'], ['meta', '--fg-meta']] as const) {
-    for (const bg of ['--bg-surface', '--bg-canvas', '--bg-subtle']) {
+    for (const bg of ['--bg-surface', '--bg-canvas', '--bg-subtle', '--bg-muted']) {
       P.push({ label: `fg-${fgName} on ${bg.replace('--bg-', '')}`, fg: C(fgTok), bg: C(bg) });
     }
   }
   P.push({ label: 'fg-default on surface', fg: C('--fg-default'), bg: C('--bg-surface') });
   P.push({ label: 'fg-link on surface', fg: C('--fg-link'), bg: C('--bg-surface') });
   P.push({ label: 'fg-link on canvas', fg: C('--fg-link'), bg: C('--bg-canvas') });
+  // Brand roles split in dark: ink (--color-primary) must read as TEXT on the
+  // surface; the solid fill (--fill-brand) must carry white text (buttons,
+  // checked controls, selected cells). Plus the soft brand chips.
+  P.push({ label: 'brand ink (--color-primary) on surface', fg: C('--color-primary'), bg: C('--bg-surface') });
+  P.push({ label: 'white on fill-brand (solid brand button)', fg: C('--color-white'), bg: C('--fill-brand') });
+  P.push({ label: 'white on chrome-brand (AppShell brand band)', fg: C('--color-white'), bg: C('--chrome-brand') });
+  P.push({ label: 'primary badge ink on primary-100 chip', fg: C('--color-primary-800'), bg: C('--color-primary-100') });
+  P.push({ label: 'accent badge ink on secondary-100 chip', fg: C('--color-secondary-800'), bg: C('--color-secondary-100') });
   // Soft status chips: -800 ink on the -50 (badge/alert) and -100 (calendar) bg.
   for (const s of ['green', 'yellow', 'red', 'info']) {
     P.push({ label: `${s} ink on ${s}-50 chip`, fg: C(`--color-${s}-800`), bg: C(`--color-${s}-50`) });
@@ -163,6 +171,16 @@ function run(name: string, map: Record<string, string>) {
 
 run('default palette', baseDark);
 run('El Alba preset', elalbaDark);
+
+// Native widgets (scrollbars, form controls, the pre-CSS canvas) follow the theme
+// via `color-scheme` — without it the browser paints a bright light scrollbar on
+// the dark UI.
+describe('color-scheme follows the theme', () => {
+  it(':root declares light and the dark block declares dark', () => {
+    expect(blockFor(rootCss, ':root')).toMatch(/color-scheme:\s*light/);
+    expect(blockFor(rootCss, DARK)).toMatch(/color-scheme:\s*dark/);
+  });
+});
 
 // Sanity: the OKLab port round-trips a known mix close to the browser's result.
 // 50% white over black in oklab ≈ #7c7c7c (not #808080 — oklab L is perceptual).

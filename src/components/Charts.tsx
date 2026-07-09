@@ -167,7 +167,7 @@ function valueAxisProps(valueFormatter: ((v: number) => string) | undefined, all
 // Tooltip box style: the kit chrome + a width cap with wrapping so long content
 // (long labels / many series) doesn't overflow a narrow chart. `min(220px, 90vw)`
 // stays inside on mobile and caps to 220px on desktop.
-const TOOLTIP_BASE_STYLE = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 } as const;
+const TOOLTIP_BASE_STYLE = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12, color: 'var(--fg-default)' } as const;
 
 function tooltipContentStyle(tooltip?: ChartTooltipConfig): Record<string, unknown> {
   return { ...TOOLTIP_BASE_STYLE, maxWidth: tooltip?.maxWidth ?? 'min(220px, 90vw)', whiteSpace: 'normal' };
@@ -203,6 +203,14 @@ function allIntegerValues<D>(data: D[], keys: string[]): boolean {
   return true;
 }
 
+// recharts renders legend labels in its own default colour (dark), which
+// vanishes on a dark surface. Force the themed token via a formatter — the
+// reliable hook across recharts versions (a wrapperStyle colour doesn't always
+// reach the label text). The Donut uses its own tokenised legend, so it's exempt.
+const legendFormatter = (value: React.ReactNode) => (
+  <span style={{ color: 'var(--fg-muted)' }}>{value}</span>
+);
+
 // ---------- LineChart ---------------------------------------------------
 export interface LineChartProps<D = any> extends CartesianChartProps<D> {
   smooth?: boolean;
@@ -229,7 +237,7 @@ export function LineChart<D = any>({
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
           <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
-          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
+          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} formatter={legendFormatter} />}
           {series.map((s, i) => (
             <R.Line
               key={s.key}
@@ -271,7 +279,7 @@ export function AreaChart<D = any>({
           <R.XAxis dataKey={categoryKey} stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...categoryTickProps({ xTickFormatter, xTickInterval, xTickAngle })} />
           <R.YAxis stroke="var(--fg-subtle)" fontSize={12} tickLine={false} axisLine={false} {...valueAxisProps(valueFormatter, allowDec)} />
           <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
-          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
+          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} formatter={legendFormatter} />}
           {series.map((s, i) => (
             <R.Area
               key={s.key}
@@ -333,7 +341,7 @@ export function BarChart<D = any>({
             </>
           )}
           <R.Tooltip contentStyle={tooltipContentStyle(tooltip)} {...tooltipChrome(tooltip)} cursor={{ fill: 'var(--bg-subtle)' }} {...tooltipProps(valueFormatter, tooltipLabelFormatter, xTickFormatter)} />
-          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} />}
+          {showLegend && <R.Legend wrapperStyle={{ fontSize: 12 }} formatter={legendFormatter} />}
           {series.map((s, i) => {
             // Stacked: only the outermost (last) segment carries the end radius;
             // inner segments stay square so the stack reads as one bar.

@@ -133,7 +133,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-color: var(--color-primary);
 }
 .btn--outline:hover:not(:disabled) {
-  background: var(--color-primary);
+  background: var(--fill-brand);
   color: var(--color-white);
 }
 
@@ -385,7 +385,7 @@ button, input, select, textarea { box-sizing: border-box; }
   margin-top: 1px;
 }
 .check input:checked ~ .check__box {
-  background: var(--color-primary);
+  background: var(--fill-brand);
   border-color: var(--color-primary);
   color: var(--color-white);
 }
@@ -432,7 +432,7 @@ button, input, select, textarea { box-sizing: border-box; }
   box-shadow: var(--shadow-xs);
   transition: transform var(--duration-fast) var(--ease-standard);
 }
-.switch input:checked ~ .switch__track { background: var(--color-primary); }
+.switch input:checked ~ .switch__track { background: var(--fill-brand); }
 .switch input:checked ~ .switch__track::after { transform: translateX(18px); }
 .switch input:focus-visible ~ .switch__track { box-shadow: var(--focus-ring-accent); }
 .switch input:disabled ~ .switch__track { opacity: 0.5; }
@@ -501,7 +501,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .badge--app-solid { background: var(--badge-ink); color: var(--color-white); border-color: transparent; }
 .badge--app-outline { background: transparent; color: var(--badge-ink); border-color: var(--badge-ink); }
 .badge--solid {
-  background: var(--color-primary);
+  background: var(--fill-brand);
   color: var(--color-white);
   border-color: transparent;
 }
@@ -533,7 +533,7 @@ button, input, select, textarea { box-sizing: border-box; }
   transition: background var(--duration-fast), border-color var(--duration-fast);
 }
 .chip:hover { background: var(--bg-muted); }
-.chip--active { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+.chip--active { background: var(--fill-brand); color: var(--color-white); border-color: var(--color-primary); }
 .chip__close {
   width: 16px; height: 16px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1590,7 +1590,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .progress__bar {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--fill-brand);
   border-radius: inherit;
   transition: width var(--duration-base);
 }
@@ -1638,7 +1638,7 @@ button, input, select, textarea { box-sizing: border-box; }
   flex: none;
 }
 .stepper__item.is-current .stepper__circle {
-  background: var(--color-primary);
+  background: var(--fill-brand);
   border-color: var(--color-primary);
   color: var(--color-white);
 }
@@ -1715,7 +1715,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Top nav (template) ------------------------------------------ */
 .tpl-nav {
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--color-primary);
+  background: var(--chrome-brand);
   color: var(--color-white);
   padding: 12px 24px;
   gap: 16px;
@@ -1891,7 +1891,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .pagination__btn:hover:not(:disabled) { background: var(--bg-subtle); }
 .pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .pagination__btn.is-active {
-  background: var(--color-primary); color: var(--color-white);
+  background: var(--fill-brand); color: var(--color-white);
   border-color: var(--color-primary);
 }
 .pagination__ellipsis { padding: 0 4px; color: var(--fg-muted); }
@@ -2086,7 +2086,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .datepicker__day:hover:not(:disabled) { background: var(--bg-subtle); }
 .datepicker__day.is-today { font-weight: 700; color: var(--color-primary); }
-.datepicker__day.is-selected { background: var(--color-primary); color: var(--color-white); }
+.datepicker__day.is-selected { background: var(--fill-brand); color: var(--color-white); }
 .datepicker__day.is-disabled, .datepicker__day:disabled { opacity: 0.3; cursor: not-allowed; }
 /* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
 .datepicker__day.is-outside {
@@ -2136,7 +2136,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-variant-numeric: tabular-nums; color: var(--fg-default);
 }
 .timepicker__cell:hover { background: var(--bg-subtle); }
-.timepicker__cell.is-selected { background: var(--color-primary); color: var(--color-white); }
+.timepicker__cell.is-selected { background: var(--fill-brand); color: var(--color-white); }
 
 /* ---------- Grid pickers (YearPicker / MonthPicker) -------------------- */
 .gridpicker {
@@ -2198,7 +2198,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .gridpicker__cell:hover:not(:disabled) { background: var(--bg-subtle); }
 .gridpicker__cell:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
 .gridpicker__cell.is-out { color: var(--fg-subtle); }
-.gridpicker__cell.is-selected { background: var(--color-primary); color: var(--color-white); }
+.gridpicker__cell.is-selected { background: var(--fill-brand); color: var(--color-white); }
 .gridpicker__cell:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ---------- FileUpload ---------- */
@@ -2309,7 +2309,7 @@ button, input, select, textarea { box-sizing: border-box; }
   );
 }
 .slider__input::-moz-range-track { height: 6px; border-radius: var(--radius-pill); background: var(--bg-muted); }
-.slider__input::-moz-range-progress { height: 6px; border-radius: var(--radius-pill); background: var(--color-primary); }
+.slider__input::-moz-range-progress { height: 6px; border-radius: var(--radius-pill); background: var(--fill-brand); }
 .slider__input::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 18px; height: 18px;
@@ -2330,7 +2330,7 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Progress (linear) — extends .progress in components.css ---- */
 .progress--sm { height: 4px; }
-.progress__bar--blue { background: var(--color-primary); }
+.progress__bar--blue { background: var(--fill-brand); }
 .progress__bar--warning { background: var(--color-warning); }
 .progress__bar--danger { background: var(--color-danger); }
 .progress__label {
@@ -2612,7 +2612,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Two-line options need a tiny nudge so the check sits on the title baseline. */
 .multicombo__option:has(.multicombo__option-desc) .multicombo__check { margin-top: 1px; }
 .multicombo__check.is-checked {
-  background: var(--color-primary); border-color: var(--color-primary);
+  background: var(--fill-brand); border-color: var(--color-primary);
 }
 .multicombo__option-body { display: flex; flex-direction: column; gap: 2px; }
 .multicombo__option-label { font-size: var(--text-sm); color: var(--fg-default); }
@@ -2745,7 +2745,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__day.is-selected { color: var(--color-white); font-weight: 700; }
 .daterange__day.is-selected::after {
   content: ''; position: absolute; inset: 0;
-  z-index: -1; background: var(--color-primary);
+  z-index: -1; background: var(--fill-brand);
 }
 .daterange__day.is-disabled { opacity: 0.3; pointer-events: none; }
 
@@ -2806,7 +2806,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
 }
 .daterange__menu-month:hover { background: var(--bg-subtle); }
-.daterange__menu-month.is-current { background: var(--color-primary); color: var(--color-white); font-weight: 700; }
+.daterange__menu-month.is-current { background: var(--fill-brand); color: var(--color-white); font-weight: 700; }
 
 .daterange__actions {
   display: flex; justify-content: flex-end; gap: 8px;
@@ -2820,7 +2820,7 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default); cursor: pointer;
 }
 .daterange__apply {
-  background: var(--color-primary); color: var(--color-white);
+  background: var(--fill-brand); color: var(--color-white);
   border-color: var(--color-primary);
 }
 .daterange__apply:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2981,7 +2981,7 @@ button, input, select, textarea { box-sizing: border-box; }
    debe leer "marca". Ojo: texto blanco sobre fondo oscuro fatiga más en
    uso prolongado. La industria B2B moderna prefiere `default`. */
 .appshell--brand .appshell__sidebar {
-  background: var(--color-primary);
+  background: var(--chrome-brand);
   border-right-color: transparent;
   color: var(--color-white);
 }
@@ -3213,10 +3213,30 @@ button, input, select, textarea { box-sizing: border-box; }
    fires and both bands stay branded (back-compat). The sidebar tint is a
    separate concern handled by `.appshell--brand .appshell__sidebar`. */
 .appshell--header-top.appshell--header-brand .appshell__header {
-  background: var(--color-primary);
+  background: var(--chrome-brand);
   color: var(--color-white);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
+/* Dark collapses the header default/brand distinction: there is no "white
+   header" in dark, so EVERY top header becomes the deep brand navy with the
+   light logo (the auto logo follows via data-theme). headerTheme still drives
+   the light theme. */
+:root[data-theme="dark"] .appshell--header-top .appshell__header {
+  background: var(--chrome-brand);
+  color: var(--color-white);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Surface-aware logo (bg="auto"): both variants render; CSS shows the one
+   matching the surface. Dark surface = an inverse band OR the dark theme → the
+   light-marks (dark-surface) variant. Fixed-tone surfaces (a white document)
+   opt out with an explicit bg. */
+.logo-auto { display: inline-flex; line-height: 0; }
+.logo__v--dark { display: none; }
+:root[data-theme="dark"] .logo__v--light,
+[data-tone="inverse"] .logo__v--light { display: none; }
+:root[data-theme="dark"] .logo__v--dark,
+[data-tone="inverse"] .logo__v--dark { display: revert; }
 
 /* Mobile drawer for `top` (v1.31.0). The legacy mobile block (search for
    `@media (max-width: 900px)` below) was written for `side` and is a no-op
@@ -3682,7 +3702,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .calendar__day:nth-child(7n) { border-right: 0; }
 .calendar__day.is-out { color: var(--fg-subtle); background: var(--bg-canvas); }
 .calendar__day.is-today .calendar__daynum {
-  background: var(--color-primary);
+  background: var(--fill-brand);
   color: var(--color-white);
   border-radius: var(--radius-pill);
   width: 22px; height: 22px;
@@ -3850,7 +3870,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .filter-panel__title { font-weight: 700; color: var(--fg-default); display: inline-flex; align-items: center; gap: var(--space-2); }
 .filter-panel__count {
-  background: var(--color-primary); color: var(--color-white);
+  background: var(--fill-brand); color: var(--color-white);
   font-size: var(--text-2xs); font-weight: 700;
   padding: 0 var(--space-2); border-radius: var(--radius-pill); min-width: 18px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -4219,7 +4239,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-family: var(--font-body); font-size: var(--text-sm); font-weight: 700;
 }
 .variants__chip:hover:not(:disabled) { border-color: var(--color-primary); }
-.variants__chip.is-selected { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+.variants__chip.is-selected { background: var(--fill-brand); color: var(--color-white); border-color: var(--color-primary); }
 .variants__chip.is-disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
 .variants__swatch {
   width: 32px; height: 32px;
@@ -4331,7 +4351,7 @@ button, input, select, textarea { box-sizing: border-box; }
   background-size: cover; background-position: center;
   color: var(--hero-fg);
 }
-.hero--brand   { --hero-fg: var(--color-white); background: var(--color-primary); }
+.hero--brand   { --hero-fg: var(--color-white); background: var(--fill-brand); }
 .hero--inverse { --hero-fg: var(--color-white); background: var(--color-ink); }
 .hero--subtle  { --hero-fg: var(--fg-default);  background: var(--bg-subtle); }
 .hero--image   { --hero-fg: var(--color-white); }
@@ -4692,7 +4712,7 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--border-strong, var(--border-default));
   transition: background var(--duration-fast, 120ms), width var(--duration-fast, 120ms);
 }
-.carousel__dot.is-active::before { background: var(--color-primary); width: 24px; }
+.carousel__dot.is-active::before { background: var(--fill-brand); width: 24px; }
 
 /* ---------- Resizable ------------------------------------------------- */
 .resizable { display: flex; width: 100%; height: 100%; }
@@ -4705,7 +4725,7 @@ button, input, select, textarea { box-sizing: border-box; }
   position: relative;
   transition: background var(--duration-fast, 120ms);
 }
-.resizable__handle:hover, .resizable__handle:focus-visible { background: var(--color-primary); }
+.resizable__handle:hover, .resizable__handle:focus-visible { background: var(--fill-brand); }
 .resizable__handle--horizontal { width: 4px; cursor: col-resize; }
 .resizable__handle--vertical { height: 4px; cursor: row-resize; }
 
@@ -4973,7 +4993,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .meter--sm .meter__track { height: 6px; }
 .meter__fill { height: 100%; border-radius: var(--radius-pill); transition: width var(--duration-base, 200ms) var(--ease-standard, ease); }
-.meter__fill--primary { background: var(--color-primary); }
+.meter__fill--primary { background: var(--fill-brand); }
 .meter__fill--pos { background: var(--color-success); }
 .meter__fill--warn { background: var(--color-warning); }
 .meter__fill--neg { background: var(--color-danger); }
@@ -5014,7 +5034,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .bullet__measure {
   position: absolute; top: 25%; bottom: 25%; left: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
-.bullet__measure--primary { background: var(--color-primary); }
+.bullet__measure--primary { background: var(--fill-brand); }
 .bullet__measure--success { background: var(--color-success); }
 .bullet__measure--warning { background: var(--color-warning); }
 .bullet__measure--danger { background: var(--color-danger); }

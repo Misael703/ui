@@ -195,13 +195,15 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*0\s+1fr/);
   });
 
-  it('CSS: header-brand band reuses --color-primary (driven by headerTheme, not theme)', () => {
+  it('CSS: header-brand band uses --chrome-brand (driven by headerTheme, not theme)', () => {
     // The brand top-header is keyed on `.appshell--header-brand` (from the
     // `headerTheme` prop) — NOT `.appshell--brand` — so it can fire over a
-    // neutral sidebar. It shares `--color-primary` with the legacy
-    // `.appshell--brand .appshell__sidebar` so the shades match when both
-    // are branded.
-    expect(css).toMatch(/\.appshell--header-top\.appshell--header-brand\s+\.appshell__header\s*\{[^}]*background:\s*var\(--color-primary\)(?!-)/);
+    // neutral sidebar. It shares `--chrome-brand` with the legacy
+    // `.appshell--brand .appshell__sidebar` so the shades match when both are
+    // branded. `--chrome-brand` is the LARGE-brand-chrome role (v1.81.0):
+    // navy-700 in light; in dark a DEEP quiet navy (not the mid `--fill-brand`
+    // used by small controls) so a full-width band doesn't dominate the dark UI.
+    expect(css).toMatch(/\.appshell--header-top\.appshell--header-brand\s+\.appshell__header\s*\{[^}]*background:\s*var\(--chrome-brand\)/);
   });
 
   it('CSS: header-brand band keeps a visible separator from the body', () => {

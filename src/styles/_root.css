@@ -10,6 +10,13 @@
    `@font-face` declarations live in `fonts.css` (opt-in import). */
 
 :root {
+  /* Tell the UA which theme native widgets should match — scrollbars, form
+     controls, the pre-CSS canvas, spellcheck underlines. Without this the
+     browser assumes light and paints a bright scrollbar on the dark UI; the
+     dark block below flips it. Pinned so it also ignores the OS preference (our
+     theme is authoritative, driven by data-theme). */
+  color-scheme: light;
+
   /* -------- Brand colors --------------------------------------------- */
   /* Default (generic) palette: warm earth — espresso primary + sand
      secondary, sitting on a cream paper canvas. Distinct, premium,
@@ -185,6 +192,20 @@
 
   --accent-primary:    var(--color-primary);
   --accent-secondary:  var(--color-secondary);
+  /* Brand color used as a SOLID FILL (buttons, checked controls, selected
+     cells, progress). Split from `--color-primary` (the ink/text/accent role)
+     because in dark the two diverge: a fill needs a mid step that separates
+     from the dark surface and carries white text, while ink needs a light step
+     to read AS text on dark. In light both are the same brand color, so every
+     fill is byte-identical; dark remaps them apart (see the dark block). */
+  --fill-brand:        var(--color-primary);
+  /* Brand color as LARGE CHROME (AppShell brand header/sidebar, template nav).
+     Split from --fill-brand because a big band can't just "lift to separate":
+     in dark a mid-navy full-width band dominates the calm dark UI. Chrome stays
+     the brand color in light; in dark it drops to a DEEP, quiet navy (identity
+     carried by the logo + a hairline) while --fill-brand stays mid for the small
+     controls that need to pop. */
+  --chrome-brand:      var(--color-primary);
 
   --border-default:  var(--color-gray-200);
   --border-strong:   var(--color-gray-300);
@@ -398,6 +419,10 @@
    muted/subtle foreground clears WCAG AA on both dark surface and canvas,
    pinned in tests/ContrastDark.test.tsx; tier ordering in SurfaceTiers.test.tsx. */
 :root[data-theme="dark"] {
+  /* Native widgets (scrollbars, form controls, pre-CSS canvas) follow the theme
+     — otherwise a bright light scrollbar sits on the dark UI. */
+  color-scheme: dark;
+
   /* Surface tiers — additive-light elevation. Warm near-blacks (espresso
      undertone), never pure #000. */
   --bg-canvas:         #1b1714;
@@ -411,10 +436,15 @@
   /* Foreground — warm off-white + light stone greys (AA on surface + canvas). */
   --fg-default:      #ece6df;
   --fg-muted:        #b3a89d;
-  --fg-subtle:       #9b9084;
+  /* Clears AA on every dark bg tier INCLUDING muted (hover/pressed inset), where
+     the old #9b9084 dropped to ~4.0 as secondary/meta text. */
+  --fg-subtle:       #a89e91;
   --fg-meta:         var(--fg-subtle);
   --fg-on-brand:     var(--color-white);
-  --fg-on-secondary: var(--color-primary);
+  /* Generic secondary is light sand → DARK text. Pinned to a dark step because
+     the ink role (--color-primary) lightens below; El Alba's dark block re-points
+     this to white for its orange CTA. */
+  --fg-on-secondary: var(--color-primary-900);
   /* Link/hover lift the (dark) brand ink to a legible light tint on near-black. */
   --fg-link:         var(--color-primary-300);
   --fg-link-hover:   var(--color-primary-200);
@@ -457,6 +487,30 @@
   --color-info-100: color-mix(in oklab, var(--color-info-600) 24%, var(--bg-surface));
   --color-info-200: color-mix(in oklab, var(--color-info-600) 42%, var(--bg-surface));
   --color-info-800: var(--color-info-300);
+
+  /* Brand scales in dark. Soft stops (-50/-100/-200) → dark tints and the -800
+     ink → light, same as status, so brand chips / selected rows / avatars stop
+     leaking as bright bands. Then the two brand roles diverge (they can't share
+     one value on dark): the INK/accent role (`--color-primary`: text, links,
+     outline borders, tab/breadcrumb color) lifts to a LIGHT step to read on the
+     dark surface; the FILL role (`--fill-brand`: solid buttons, checked controls,
+     selected cells, progress) lifts to a MID step that separates from the surface
+     AND keeps white text AA. The alias `--color-secondary` (orange in El Alba,
+     sand in the default) is left as-is — it already works as a fill on dark. */
+  --color-primary-50:  color-mix(in oklab, var(--color-primary-600) 15%, var(--bg-surface));
+  --color-primary-100: color-mix(in oklab, var(--color-primary-600) 24%, var(--bg-surface));
+  --color-primary-200: color-mix(in oklab, var(--color-primary-600) 42%, var(--bg-surface));
+  --color-primary-800: var(--color-primary-300);
+  --color-primary:     var(--color-primary-300);
+  --fill-brand:        var(--color-primary-500);
+  /* Large brand chrome → a deep, quiet navy (not the mid fill): a full-width
+     band shouldn't dominate the dark UI. Derived from the brand mid + the canvas
+     so it's preset-aware; the header/sidebar hairline carries the edge. */
+  --chrome-brand:      color-mix(in oklab, var(--color-primary-600) 35%, var(--bg-canvas));
+  --color-secondary-50:  color-mix(in oklab, var(--color-secondary-600) 15%, var(--bg-surface));
+  --color-secondary-100: color-mix(in oklab, var(--color-secondary-600) 24%, var(--bg-surface));
+  --color-secondary-200: color-mix(in oklab, var(--color-secondary-600) 42%, var(--bg-surface));
+  --color-secondary-800: var(--color-secondary-300);
 
   /* Categorical chips — same idea, derived from the (preset-aware) solid so a
      preset's remapped cats follow automatically. bg dark-tinted, fg lightened. */
