@@ -160,7 +160,7 @@
   --btn-primary-bg:        var(--color-secondary);
   --btn-primary-fg:        var(--color-white);
   --btn-primary-bg-hover:  var(--color-secondary-700);
-  --btn-secondary-bg:        var(--color-primary);
+  --btn-secondary-bg:        var(--fill-brand);
   --btn-secondary-fg:        var(--color-white);
   --btn-secondary-bg-hover:  var(--color-primary-900);
 
@@ -205,9 +205,30 @@
      base dark points --fg-on-secondary at the dark primary (correct only for the
      generic light-sand secondary); restore the white-on-orange CTA. The primary
      button stays brand orange + white — the same documented AA exception as
-     light (orange reads fine on dark); btn-secondary stays brand navy + white
-     (AA-safe 11.96:1). */
+     light (orange reads fine on dark). */
   --fg-on-secondary: var(--color-white);
+
+  /* Brand scales — El Alba overrides the full primary/secondary scale in its
+     unlayered :root, so the base dark brand remap is shadowed; re-assert it here
+     (same reasoning as the cats below). Soft stops → dark tints + light ink so
+     brand chips / selected rows / avatars stop leaking bright. The ink role
+     (--color-primary) lifts LIGHT to read as text on dark; the fill role
+     (--fill-brand) lifts to MID navy #3a62b4 so the secondary button / checked
+     controls / selected days separate from the near-black surface instead of
+     sitting navy-on-navy — white text on it stays AA (5.86:1). The secondary
+     button's hover darkens to primary-600 (staying white-AA); the orange primary
+     button is unaffected. */
+  --color-primary-50:  color-mix(in oklab, var(--color-primary-600) 15%, var(--bg-surface));
+  --color-primary-100: color-mix(in oklab, var(--color-primary-600) 24%, var(--bg-surface));
+  --color-primary-200: color-mix(in oklab, var(--color-primary-600) 42%, var(--bg-surface));
+  --color-primary-800: var(--color-primary-300);
+  --color-primary:     var(--color-primary-300);
+  --fill-brand:        var(--color-primary-500);
+  --btn-secondary-bg-hover: var(--color-primary-600);
+  --color-secondary-50:  color-mix(in oklab, var(--color-secondary-600) 15%, var(--bg-surface));
+  --color-secondary-100: color-mix(in oklab, var(--color-secondary-600) 24%, var(--bg-surface));
+  --color-secondary-200: color-mix(in oklab, var(--color-secondary-600) 42%, var(--bg-surface));
+  --color-secondary-800: var(--color-secondary-300);
 
   /* El Alba remaps cat-1 (cyan) and cat-4 (chartreuse) in its light :root,
      including their soft -bg/-fg. Re-derive those two for dark HERE so the

@@ -136,6 +136,13 @@ function pairs(map: Record<string, string>): Pair[] {
   P.push({ label: 'fg-default on surface', fg: C('--fg-default'), bg: C('--bg-surface') });
   P.push({ label: 'fg-link on surface', fg: C('--fg-link'), bg: C('--bg-surface') });
   P.push({ label: 'fg-link on canvas', fg: C('--fg-link'), bg: C('--bg-canvas') });
+  // Brand roles split in dark: ink (--color-primary) must read as TEXT on the
+  // surface; the solid fill (--fill-brand) must carry white text (buttons,
+  // checked controls, selected cells). Plus the soft brand chips.
+  P.push({ label: 'brand ink (--color-primary) on surface', fg: C('--color-primary'), bg: C('--bg-surface') });
+  P.push({ label: 'white on fill-brand (solid brand button)', fg: C('--color-white'), bg: C('--fill-brand') });
+  P.push({ label: 'primary badge ink on primary-100 chip', fg: C('--color-primary-800'), bg: C('--color-primary-100') });
+  P.push({ label: 'accent badge ink on secondary-100 chip', fg: C('--color-secondary-800'), bg: C('--color-secondary-100') });
   // Soft status chips: -800 ink on the -50 (badge/alert) and -100 (calendar) bg.
   for (const s of ['green', 'yellow', 'red', 'info']) {
     P.push({ label: `${s} ink on ${s}-50 chip`, fg: C(`--color-${s}-800`), bg: C(`--color-${s}-50`) });

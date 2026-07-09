@@ -5,6 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.81.0] — 2026-07-09
+
+**Minor. Dark theme: brand-colored elements now adapt (they were stuck on light-mode values).**
+
+v1.79.0 remapped surfaces, foregrounds, borders and the status/category chips for
+dark, but not the two **brand** scales (navy, orange). So anything painting with a
+brand color kept its light values: soft brand tints leaked as bright bands, and
+solid navy fills sat navy-on-navy against the dark surface. Light is unchanged.
+
+### Added
+- **`--fill-brand` token** — the brand color used as a SOLID FILL (buttons, checked
+  controls, selected cells, progress, branded chrome), split from `--color-primary`
+  (the ink/text/accent role). In light both are the exact brand color (every fill
+  byte-identical); in dark they diverge: ink lifts light to read as text, fill lifts
+  to a mid step that separates from the surface and keeps white text AA.
+
+### Fixed (dark theme)
+- **Soft brand tints no longer leak.** `--color-primary-50/-100/-200` (and the
+  `-secondary` equivalents) re-tint dark, so a selected table row, a primary/accent
+  badge, an avatar or an active nav item stops painting a near-white band on the
+  dark surface. Same recipe already used for status/category chips.
+- **Solid navy fills separate from the dark surface.** The El Alba secondary button
+  (and switches, checkboxes, selected calendar days, chips, progress bars, the
+  branded sidebar/top-header) lift from navy-700 (~1.4:1 vs the near-black surface)
+  to a mid navy `#3a62b4` (~3.1:1 separation, white text 5.86:1 AA). The orange
+  primary button is unchanged (orange reads on dark).
+- **Brand text reads on dark.** `--color-primary` used as text/accent (active tabs,
+  breadcrumbs, link buttons, selected-option text) lifts to a light navy instead of
+  navy-on-near-black.
+
+New dark contrast guards in `tests/ContrastDark.test.tsx` (white on `--fill-brand`,
+brand ink on surface, brand badges). Light theme and all light tests unchanged.
+
 ## [1.80.1] — 2026-07-08
 
 **Patch. Fix: mouse wheel silently changed the `NumberInput` value.**
