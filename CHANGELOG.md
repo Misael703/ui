@@ -51,6 +51,10 @@ but diverge in dark, because no single navy works everywhere on a dark surface:
 - **AppShell header collapses in dark.** There is no white header in dark, so
   `headerTheme` default/brand both render as the deep brand navy with the light
   logo — one coherent dark header. `headerTheme` still drives the light theme.
+- **Native scrollbars and form controls follow the theme.** The kit now declares
+  `color-scheme` (`light` on `:root`, `dark` under `data-theme="dark"`), so the
+  browser stops painting a bright scrollbar (and light native controls) on the
+  dark UI.
 - **Brand text reads on dark.** `--color-primary` used as text/accent (active tabs,
   breadcrumbs, link buttons, selected-option text) lifts to a light navy instead of
   navy-on-near-black.

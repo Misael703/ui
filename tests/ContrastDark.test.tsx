@@ -172,6 +172,16 @@ function run(name: string, map: Record<string, string>) {
 run('default palette', baseDark);
 run('El Alba preset', elalbaDark);
 
+// Native widgets (scrollbars, form controls, the pre-CSS canvas) follow the theme
+// via `color-scheme` — without it the browser paints a bright light scrollbar on
+// the dark UI.
+describe('color-scheme follows the theme', () => {
+  it(':root declares light and the dark block declares dark', () => {
+    expect(blockFor(rootCss, ':root')).toMatch(/color-scheme:\s*light/);
+    expect(blockFor(rootCss, DARK)).toMatch(/color-scheme:\s*dark/);
+  });
+});
+
 // Sanity: the OKLab port round-trips a known mix close to the browser's result.
 // 50% white over black in oklab ≈ #7c7c7c (not #808080 — oklab L is perceptual).
 describe('oklab color-mix port', () => {

@@ -10,6 +10,13 @@
    `@font-face` declarations live in `fonts.css` (opt-in import). */
 
 :root {
+  /* Tell the UA which theme native widgets should match — scrollbars, form
+     controls, the pre-CSS canvas, spellcheck underlines. Without this the
+     browser assumes light and paints a bright scrollbar on the dark UI; the
+     dark block below flips it. Pinned so it also ignores the OS preference (our
+     theme is authoritative, driven by data-theme). */
+  color-scheme: light;
+
   /* -------- Brand colors --------------------------------------------- */
   /* Default (generic) palette: warm earth — espresso primary + sand
      secondary, sitting on a cream paper canvas. Distinct, premium,
@@ -412,6 +419,10 @@
    muted/subtle foreground clears WCAG AA on both dark surface and canvas,
    pinned in tests/ContrastDark.test.tsx; tier ordering in SurfaceTiers.test.tsx. */
 :root[data-theme="dark"] {
+  /* Native widgets (scrollbars, form controls, pre-CSS canvas) follow the theme
+     — otherwise a bright light scrollbar sits on the dark UI. */
+  color-scheme: dark;
+
   /* Surface tiers — additive-light elevation. Warm near-blacks (espresso
      undertone), never pure #000. */
   --bg-canvas:         #1b1714;
