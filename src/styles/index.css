@@ -1863,7 +1863,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .number-input__field::-webkit-inner-spin-button,
 .number-input__field::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.number-input__field { -moz-appearance: textfield; }
+.number-input__field { -moz-appearance: textfield; appearance: textfield; }
 .number-input__affix {
   display: inline-flex; align-items: center; padding: 0 8px;
   color: var(--fg-muted); font-size: var(--text-sm);
