@@ -192,6 +192,13 @@
      to read AS text on dark. In light both are the same brand color, so every
      fill is byte-identical; dark remaps them apart (see the dark block). */
   --fill-brand:        var(--color-primary);
+  /* Brand color as LARGE CHROME (AppShell brand header/sidebar, template nav).
+     Split from --fill-brand because a big band can't just "lift to separate":
+     in dark a mid-navy full-width band dominates the calm dark UI. Chrome stays
+     the brand color in light; in dark it drops to a DEEP, quiet navy (identity
+     carried by the logo + a hairline) while --fill-brand stays mid for the small
+     controls that need to pop. */
+  --chrome-brand:      var(--color-primary);
 
   --border-default:  var(--color-gray-200);
   --border-strong:   var(--color-gray-300);
@@ -483,6 +490,10 @@
   --color-primary-800: var(--color-primary-300);
   --color-primary:     var(--color-primary-300);
   --fill-brand:        var(--color-primary-500);
+  /* Large brand chrome → a deep, quiet navy (not the mid fill): a full-width
+     band shouldn't dominate the dark UI. Derived from the brand mid + the canvas
+     so it's preset-aware; the header/sidebar hairline carries the edge. */
+  --chrome-brand:      color-mix(in oklab, var(--color-primary-600) 35%, var(--bg-canvas));
   --color-secondary-50:  color-mix(in oklab, var(--color-secondary-600) 15%, var(--bg-surface));
   --color-secondary-100: color-mix(in oklab, var(--color-secondary-600) 24%, var(--bg-surface));
   --color-secondary-200: color-mix(in oklab, var(--color-secondary-600) 42%, var(--bg-surface));

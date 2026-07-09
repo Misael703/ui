@@ -15,11 +15,17 @@ brand color kept its light values: soft brand tints leaked as bright bands, and
 solid navy fills sat navy-on-navy against the dark surface. Light is unchanged.
 
 ### Added
-- **`--fill-brand` token** — the brand color used as a SOLID FILL (buttons, checked
-  controls, selected cells, progress, branded chrome), split from `--color-primary`
-  (the ink/text/accent role). In light both are the exact brand color (every fill
-  byte-identical); in dark they diverge: ink lifts light to read as text, fill lifts
-  to a mid step that separates from the surface and keeps white text AA.
+The brand color splits into three roles that are identical in light (byte-for-byte)
+but diverge in dark, because no single navy works everywhere on a dark surface:
+- **`--color-primary`** — ink/text/accent/outline. In dark lifts to a LIGHT navy so
+  it reads as text (active tabs, breadcrumbs, link buttons, selected-option text).
+- **`--fill-brand`** (new) — small SOLID FILLS (buttons, checked controls, selected
+  cells, progress). In dark lifts to a MID navy `#3a62b4` that separates from the
+  surface (~3.1:1) and keeps white text AA (5.86:1).
+- **`--chrome-brand`** (new) — LARGE brand chrome (AppShell brand header/sidebar,
+  template nav). In dark drops to a DEEP, quiet navy so a full-width band doesn't
+  dominate the dark UI; identity is carried by the logo and the header hairline,
+  not a loud fill.
 
 ### Fixed (dark theme)
 - **Soft brand tints no longer leak.** `--color-primary-50/-100/-200` (and the
@@ -27,10 +33,12 @@ solid navy fills sat navy-on-navy against the dark surface. Light is unchanged.
   badge, an avatar or an active nav item stops painting a near-white band on the
   dark surface. Same recipe already used for status/category chips.
 - **Solid navy fills separate from the dark surface.** The El Alba secondary button
-  (and switches, checkboxes, selected calendar days, chips, progress bars, the
-  branded sidebar/top-header) lift from navy-700 (~1.4:1 vs the near-black surface)
-  to a mid navy `#3a62b4` (~3.1:1 separation, white text 5.86:1 AA). The orange
-  primary button is unchanged (orange reads on dark).
+  (and switches, checkboxes, selected calendar days, chips, progress bars) lift from
+  navy-700 (~1.4:1 vs the near-black surface) to a mid navy `#3a62b4` (~3.1:1
+  separation, white text 5.86:1 AA). The orange primary button is unchanged.
+- **Brand chrome stays calm in dark.** The AppShell brand header/sidebar
+  (`headerTheme="brand"`) drop to a deep quiet navy instead of the mid fill, so a
+  full-width band reads as brand chrome without dominating the dark UI.
 - **Brand text reads on dark.** `--color-primary` used as text/accent (active tabs,
   breadcrumbs, link buttons, selected-option text) lifts to a light navy instead of
   navy-on-near-black.

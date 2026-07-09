@@ -141,6 +141,7 @@ function pairs(map: Record<string, string>): Pair[] {
   // checked controls, selected cells). Plus the soft brand chips.
   P.push({ label: 'brand ink (--color-primary) on surface', fg: C('--color-primary'), bg: C('--bg-surface') });
   P.push({ label: 'white on fill-brand (solid brand button)', fg: C('--color-white'), bg: C('--fill-brand') });
+  P.push({ label: 'white on chrome-brand (AppShell brand band)', fg: C('--color-white'), bg: C('--chrome-brand') });
   P.push({ label: 'primary badge ink on primary-100 chip', fg: C('--color-primary-800'), bg: C('--color-primary-100') });
   P.push({ label: 'accent badge ink on secondary-100 chip', fg: C('--color-secondary-800'), bg: C('--color-secondary-100') });
   // Soft status chips: -800 ink on the -50 (badge/alert) and -100 (calendar) bg.
