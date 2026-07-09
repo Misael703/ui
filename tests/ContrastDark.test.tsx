@@ -129,7 +129,7 @@ function pairs(map: Record<string, string>): Pair[] {
   const P: Pair[] = [];
   // Foreground text on each dark surface tier.
   for (const [fgName, fgTok] of [['muted', '--fg-muted'], ['subtle', '--fg-subtle'], ['meta', '--fg-meta']] as const) {
-    for (const bg of ['--bg-surface', '--bg-canvas', '--bg-subtle']) {
+    for (const bg of ['--bg-surface', '--bg-canvas', '--bg-subtle', '--bg-muted']) {
       P.push({ label: `fg-${fgName} on ${bg.replace('--bg-', '')}`, fg: C(fgTok), bg: C(bg) });
     }
   }

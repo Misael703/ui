@@ -192,10 +192,11 @@
   --bg-subtle:  #1c2740;
   --bg-muted:   #26324f;
 
-  /* Cool off-white + slate foregrounds (AA on the navy surface + canvas). */
+  /* Cool off-white + slate foregrounds. fg-subtle clears AA on every dark tier
+     including muted (hover/pressed), where #8e97ab dropped to ~4.3 as meta text. */
   --fg-default: #e7ebf4;
   --fg-muted:   #a6afc2;
-  --fg-subtle:  #8e97ab;
+  --fg-subtle:  #99a2b7;
 
   /* Cool hairlines. */
   --border-default: #2a3450;

@@ -436,7 +436,9 @@
   /* Foreground — warm off-white + light stone greys (AA on surface + canvas). */
   --fg-default:      #ece6df;
   --fg-muted:        #b3a89d;
-  --fg-subtle:       #9b9084;
+  /* Clears AA on every dark bg tier INCLUDING muted (hover/pressed inset), where
+     the old #9b9084 dropped to ~4.0 as secondary/meta text. */
+  --fg-subtle:       #a89e91;
   --fg-meta:         var(--fg-subtle);
   --fg-on-brand:     var(--color-white);
   /* Generic secondary is light sand → DARK text. Pinned to a dark step because
