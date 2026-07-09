@@ -57,7 +57,7 @@ function ConfigurableShell({
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
         header={{
-          center: <Logo variant="horizontal" bg={brand ? 'dark' : 'light'} height={28} />,
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
           right: (
             <>
               <button type="button" aria-label="Notificaciones" style={{
@@ -148,7 +148,7 @@ export const TopbarBuiltinMenuToggle: StoryObj = {
         showMenuToggle
         sections={sections}
         header={{
-          center: <Logo variant="horizontal" bg="light" height={28} />,
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
           right: <Avatar name="Misael Ocas" size={32} />,
         }}
       >
@@ -181,7 +181,7 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
               onClick={toggle}
             ><MenuIcon size={20} /></button>
           ),
-          center: <Logo variant="horizontal" bg="light" height={28} />,
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
           right: <Avatar name="Misael Ocas" size={32} />,
         }}
       >
@@ -205,7 +205,7 @@ export const TopbarOnlyNoNav: StoryObj = {
     <div style={{ height: '100vh' }}>
       <AppShell
         header={{
-          left: <Logo variant="horizontal" bg="light" height={26} />,
+          left: <Logo variant="horizontal" bg="auto" height={26} />,
           right: <span style={{ color: 'var(--fg-muted)', fontSize: 13 }}>Cobros Khipu · Mesón</span>,
         }}
       >
@@ -233,7 +233,7 @@ export const TopbarMobileDrawer: StoryObj = {
         sections={sections}
         showMenuToggle
         header={{
-          center: <Logo variant="horizontal" bg="light" height={26} />,
+          center: <Logo variant="horizontal" bg="auto" height={26} />,
           right: <Avatar name="Misael Ocas" size={32} />,
         }}
       >
@@ -278,7 +278,7 @@ export const TopbarMobileDrawerRouting: StoryObj = {
             </a>
           )}
           header={{
-            center: <Logo variant="horizontal" bg="light" height={26} />,
+            center: <Logo variant="horizontal" bg="auto" height={26} />,
             right: <Avatar name="Misael Ocas" size={32} />,
           }}
         >
@@ -309,7 +309,7 @@ export const TopbarUserMenu: StoryObj = {
         sections={sections}
         showMenuToggle
         header={{
-          center: <Logo variant="horizontal" bg="dark" height={28} />,
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
           right: (
             <UserMenu
               name="Administrador Admin"
@@ -365,7 +365,7 @@ export const TopbarTallTable: StoryObj = {
           sections={sections}
           showMenuToggle
           header={{
-            center: <Logo variant="horizontal" bg="light" height={28} />,
+            center: <Logo variant="horizontal" bg="auto" height={28} />,
             right: <Avatar name="Misael Ocas" size={32} />,
           }}
         >

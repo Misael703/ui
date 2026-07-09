@@ -3217,6 +3217,26 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--color-white);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
+/* Dark collapses the header default/brand distinction: there is no "white
+   header" in dark, so EVERY top header becomes the deep brand navy with the
+   light logo (the auto logo follows via data-theme). headerTheme still drives
+   the light theme. */
+:root[data-theme="dark"] .appshell--header-top .appshell__header {
+  background: var(--chrome-brand);
+  color: var(--color-white);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Surface-aware logo (bg="auto"): both variants render; CSS shows the one
+   matching the surface. Dark surface = an inverse band OR the dark theme → the
+   light-marks (dark-surface) variant. Fixed-tone surfaces (a white document)
+   opt out with an explicit bg. */
+.logo-auto { display: inline-flex; line-height: 0; }
+.logo__v--dark { display: none; }
+:root[data-theme="dark"] .logo__v--light,
+[data-tone="inverse"] .logo__v--light { display: none; }
+:root[data-theme="dark"] .logo__v--dark,
+[data-tone="inverse"] .logo__v--dark { display: revert; }
 
 /* Mobile drawer for `top` (v1.31.0). The legacy mobile block (search for
    `@media (max-width: 900px)` below) was written for `side` and is a no-op

@@ -76,7 +76,7 @@ export function AdminDashboard(): React.ReactElement {
               size="sm"
             />
           ),
-          center: <Logo variant="horizontal" bg="light" height={28} />,
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
           right: (
             <>
               <IconButton icon={<Bell size={18} />} aria-label="Notificaciones" size="sm" />
