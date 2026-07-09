@@ -5,6 +5,22 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.80.1] — 2026-07-08
+
+**Patch. Fix: mouse wheel silently changed the `NumberInput` value.**
+
+### Fixed
+- **`NumberInput` no longer steps on scroll.** A native `<input type="number">`
+  does ±`step` when the wheel turns over it while focused, so scrolling a long
+  form (a picking list) silently mutated the value of any field that stayed
+  focused after typing. The field now blurs on `wheel`, removing the accidental
+  path. The intentional ways to step are unchanged: the −/+ buttons and the ↑/↓
+  arrow keys (kept for keyboard accessibility, since the buttons are
+  `tabIndex={-1}`).
+- Native spinner buttons (`▲▼`) hiding completed with the unprefixed
+  `appearance: textfield` (they were already hidden in WebKit/Firefox; the kit
+  draws its own −/+ controls).
+
 ## [1.80.0] — 2026-07-08
 
 **Minor. Fix: DataTable interactive rows broke on iOS/WebKit (tap + scroll).**

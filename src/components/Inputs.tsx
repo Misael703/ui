@@ -36,6 +36,10 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     <div className={cx('number-input', fullWidth && 'number-input--block', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       <button type="button" className="number-input__btn" tabIndex={-1} aria-label={t['numberInput.decrement']} onClick={() => incr(-1)} disabled={disabled}>−</button>
       {prefix && <span className="number-input__affix">{prefix}</span>}
+      {/* Wheeling over a FOCUSED number input does native ±step, silently
+          mutating the value on scroll (picking lists lost 1 from rows that
+          stayed focused after typing). Blur on wheel kills that path; the ↑/↓
+          keys and the −/+ buttons stay the intentional ways to step. */}
       <input
         ref={ref}
         type="number"
@@ -46,6 +50,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         step={step}
         disabled={disabled}
         onChange={(e) => set(e.target.value === '' ? null : Number(e.target.value))}
+        onWheel={(e) => e.currentTarget.blur()}
         aria-invalid={invalid || undefined}
         {...rest}
       />

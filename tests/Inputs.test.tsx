@@ -71,6 +71,18 @@ describe('NumberInput', () => {
     const { container } = render(<NumberInput value={1} onChange={() => {}} />);
     expect(container.querySelector('.number-input--block')).toBeNull();
   });
+
+  it('blurs on wheel so scrolling over a focused field cannot native-step the value', () => {
+    const onChange = vi.fn();
+    const { container } = render(<NumberInput value={3} onChange={onChange} />);
+    const input = container.querySelector('.number-input__field') as HTMLInputElement;
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    fireEvent.wheel(input);
+    // Native ±step only fires while focused; blurring on wheel removes the path.
+    expect(document.activeElement).not.toBe(input);
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
 
 describe('EmptyState', () => {
