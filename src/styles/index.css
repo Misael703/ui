@@ -2220,39 +2220,36 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- DataTable extras ---------- */
 .data-table tr.is-selected { background: var(--color-primary-50); }
-/* Interactive row (rowHref / onRowClick): a real, stretched control owns
-   accessibility — keyboard operability, visible focus, SR name — with no
-   role hack on <tr> and no onClick-only div. */
-.data-table tr.is-clickable { position: relative; cursor: pointer; }
+/* Interactive row (rowHref / onRowClick). Pointer activation is the row's
+   onClick; a focusable, SR-named control (.data-table__rowlink) carries
+   keyboard operability + accessible name. No role hack on <tr>, no
+   onClick-only div. The control is NOT a full-bleed overlay — that pattern
+   relied on `position: relative` on the <tr> as a containing block, which
+   WebKit/iOS ignores (the overlay escaped to the viewport and hijacked taps +
+   scroll). No positioning on the <tr> is needed now. */
+.data-table tr.is-clickable { cursor: pointer; }
 .data-table tr.is-clickable:hover { background: var(--bg-subtle); }
 .data-table tr.is-clickable:focus-within {
   box-shadow: inset 0 0 0 2px var(--border-focus);
 }
+/* Visually hidden but focusable (Tab reaches it, Enter/Space activates); the
+   focus ring shows on the row via :focus-within. Clipped to 1px so it never
+   covers the row — it is purely the keyboard/SR affordance, the cells stay the
+   visible content. */
 .data-table__rowlink {
   position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* Visually empty — the row's own cells stay the visible content. */
-  font-size: 0;
-  color: transparent;
-  background: transparent;
-  border: 0;
+  width: 1px;
+  height: 1px;
   padding: 0;
-  margin: 0;
-  cursor: pointer;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
 }
-/* The focus ring is shown on the row via :focus-within, not on the
-   (invisible, full-bleed) control itself. */
 .data-table__rowlink:focus,
 .data-table__rowlink:focus-visible { outline: none; }
-/* Selection checkbox and any consumer cell content marked
-   `data-row-interactive` stay clickable above the stretched control
-   (the standard stretched-link layering caveat). */
-.data-table tr.is-clickable .data-table__cell--above,
-.data-table tr.is-clickable [data-row-interactive] {
-  position: relative;
-  z-index: 2;
-}
 .data-table__th { display: inline-flex; align-items: center; gap: 6px; }
 .data-table__sort { color: var(--fg-muted); font-size: var(--text-2xs); }
 

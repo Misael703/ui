@@ -519,3 +519,57 @@ export function ScenarioFormControlsInScrollContainer() {
     </div>
   );
 }
+
+/**
+ * Scenario — **interactive DataTable row activation on touch** (iOS fix,
+ * v1.80.0). The stretched-overlay pattern hijacked taps on iOS/WebKit (every
+ * row's `inset:0` control escaped the <tr> and stacked, so any tap routed to the
+ * LAST row and vertical scroll broke). This scenario records the activated row
+ * and the edited row so `e2e/rowclick-touch.spec.ts` (a touch context) can
+ * assert: tapping a middle row activates THAT row, and tapping the nested
+ * selection checkbox / action button does NOT activate the row.
+ */
+export function ScenarioRowClickTouch() {
+  const [activated, setActivated] = React.useState('');
+  const [edited, setEdited] = React.useState('');
+  const [sel, setSel] = React.useState<Set<string>>(new Set());
+  const rows = [
+    { id: 'a', name: 'Taladro', sku: 'TLD-1' },
+    { id: 'b', name: 'Sierra', sku: 'SRR-2' },
+    { id: 'c', name: 'Martillo', sku: 'MRT-3' },
+    { id: 'd', name: 'Llave', sku: 'LLV-4' },
+    { id: 'e', name: 'Cinta métrica', sku: 'CNT-5' },
+  ];
+  const columns = [
+    { key: 'name', header: 'Producto' },
+    { key: 'sku', header: 'SKU' },
+    {
+      key: 'act', header: 'Acción',
+      accessor: (r: typeof rows[number]) => (
+        <K.Button size="sm" variant="outline" data-row-interactive
+          data-testid={`edit-${r.id}`} onClick={() => setEdited(r.id)}>
+          Editar
+        </K.Button>
+      ),
+    },
+  ];
+  return (
+    <div style={{ padding: 24 }} data-scenario="rowclick-touch">
+      <div style={{ marginBottom: 12, display: 'flex', gap: 16 }}>
+        <span>activada: <b data-testid="activated">{activated || '—'}</b></span>
+        <span>editada: <b data-testid="edited">{edited || '—'}</b></span>
+      </div>
+      <K.DataTable
+        rows={rows}
+        rowKey={(r) => r.id}
+        columns={columns}
+        rowLabel={(r) => r.name}
+        onRowClick={(r) => setActivated(r.id)}
+        selectable
+        selectedKeys={sel}
+        onSelectionChange={setSel}
+        ariaLabel="Productos"
+      />
+    </div>
+  );
+}

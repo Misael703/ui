@@ -73,3 +73,17 @@ que tragó el error real (ternario-como-statement en una story). → Rule: antes
 de pushear CUALQUIER PR del kit, correr `npm run lint` completo y verificar
 exit code 0 — es el gate exacto del publish. Nunca filtrar la salida de un
 gate con tail/grep sin verificar también el exit code.
+
+[2026-07-08] Context: al publicar v1.79.0, publish.yml falló en "Upgrade npm"
+(`npm install -g npm@latest` → npm@12, que dropeó Node 20 con EBADENGINE; el job
+pinnea Node 20). Arreglé el step (pin `npm@^11`) y lo pusheé a main, pero el
+re-intento SIGUIÓ corriendo el workflow viejo: los eventos `release` ejecutan el
+workflow DEL COMMIT AL QUE APUNTA EL TAG, no de HEAD de main. El tag v1.79.0
+seguía en el commit pre-fix, así que recrear el release no bastaba. → Rule: (1) un
+commit de fix a un workflow disparado por `release` NO aplica hasta que el TAG lo
+incluya — mover el tag (`git tag -f vX && git push -f origin vX`, seguro si nunca
+se publicó) y recrear el release, no solo pushear a main. (2) `npm install -g
+npm@latest` en runners con Node pinneado es una bomba de tiempo: pin al major
+compatible (npm@^11 para Node 20; Trusted Publishing solo exige >=11.5.1), no
+@latest. (3) Verificar el fix leyendo el LOG del step, no solo el exit del watch:
+el run puede "completar" y aun así haber corrido el archivo viejo.
