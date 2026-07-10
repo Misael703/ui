@@ -42,6 +42,7 @@ export interface UiKitMessages {
   'appshell.breadcrumb': string;
   /** Accessible name for the kit's built-in menu toggle (opt-in via `showMenuToggle`). */
   'appshell.toggleMenu': string;
+  'appshell.skipToContent': string;
 
   // TimeAgo / smart-time helpers
   /** Sub-minute past: "ahora". */

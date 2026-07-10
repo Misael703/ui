@@ -3,7 +3,8 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { useLocale } from '../locale/LocaleProvider';
 import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
-import { MenuIcon } from './Icons';
+import { MenuIcon, ChevronRight } from './Icons';
+import { Tooltip } from './Layout';
 
 // ---------- AppShell (full-width header + sidebar + content) ------------
 // Designed to drop into a Next.js app/layout.tsx as a Client Component shell.
@@ -21,7 +22,11 @@ export interface NavItem {
   active?: boolean;
   badge?: React.ReactNode;
   onSelect?: () => void;
+  /** Sub-items. A parent WITH children becomes a collapsible group (a disclosure
+   *  button, not a link) — put the group's own destination as a first child. */
   children?: NavItem[];
+  /** Start a group expanded. Defaults to "expanded if a descendant is active". */
+  defaultOpen?: boolean;
 }
 
 export interface NavSection {
@@ -162,11 +167,60 @@ interface NavItemNodeProps {
   depth: number;
   linkAs?: AppShellProps['linkAs'];
   onCloseMobile: () => void;
+  /** Icon-only rail (collapsed desktop): wrap depth-0 items in a Tooltip so the
+   *  hidden label is recoverable on hover/focus. */
+  railTooltip: boolean;
+}
+
+// A group is "active within" when a descendant is the current page — used to
+// auto-open it and to mark the header so the user sees which group holds the
+// active item (especially once collapsed to an icon).
+function descendantActive(item: NavItem): boolean {
+  return !!item.children?.some((c) => c.active || descendantActive(c));
 }
 
 const NavItemNode = React.memo(function NavItemNode({
-  item, depth, linkAs, onCloseMobile,
+  item, depth, linkAs, onCloseMobile, railTooltip,
 }: NavItemNodeProps) {
+  const hasChildren = !!item.children && item.children.length > 0;
+  const withinActive = hasChildren && descendantActive(item);
+  const [open, setOpen] = React.useState(item.defaultOpen ?? withinActive);
+  const childrenId = React.useId();
+  // Only depth-0 items collapse to an icon on the rail, so only they need the
+  // recovery tooltip; children are hidden there entirely.
+  const tip = (node: React.ReactElement) =>
+    depth === 0 && railTooltip ? <Tooltip label={item.label} side="right">{node}</Tooltip> : node;
+
+  if (hasChildren) {
+    // A group is a disclosure BUTTON, not a link — its own destination (if any)
+    // goes as a first child. Toggling never navigates.
+    return (
+      <li>
+        {tip(
+          <button
+            type="button"
+            className={cx('appshell__navitem', 'appshell__navgroup', `appshell__navitem--depth-${depth}`, withinActive && 'is-within', open && 'is-open')}
+            aria-expanded={open}
+            aria-controls={childrenId}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {item.icon && <span className="appshell__navicon" aria-hidden="true">{item.icon}</span>}
+            <span className="appshell__navlabel">{item.label}</span>
+            {item.badge && <span className="appshell__navbadge">{item.badge}</span>}
+            <ChevronRight size={16} className="appshell__navchevron" aria-hidden="true" />
+          </button>
+        )}
+        {open && (
+          <ul id={childrenId} className="appshell__navchildren">
+            {item.children?.map((c) => (
+              <NavItemNode key={c.id} item={c} depth={depth + 1} linkAs={linkAs} onCloseMobile={onCloseMobile} railTooltip={railTooltip} />
+            ))}
+          </ul>
+        )}
+      </li>
+    );
+  }
+
   const klass = cx('appshell__navitem', item.active && 'is-active', `appshell__navitem--depth-${depth}`);
   const inner = (
     <>
@@ -201,18 +255,7 @@ const NavItemNode = React.memo(function NavItemNode({
   const node = item.href && linkAs
     ? <span className="appshell__navlink-slot" onClick={onCloseMobile}>{rawNode}</span>
     : rawNode;
-  return (
-    <li>
-      {node}
-      {item.children && item.children.length > 0 && (
-        <ul className="appshell__navchildren">
-          {item.children.map((c) => (
-            <NavItemNode key={c.id} item={c} depth={depth + 1} linkAs={linkAs} onCloseMobile={onCloseMobile} />
-          ))}
-        </ul>
-      )}
-    </li>
-  );
+  return <li>{tip(node as React.ReactElement)}</li>;
 });
 
 /**
@@ -228,6 +271,8 @@ const MOBILE_BREAKPOINT = '(max-width: 900px)';
 // host ever ships two, the duplicate id is the lesser problem vs. losing
 // SSR/CSR id stability for the toggle's aria-controls handshake.
 const SIDEBAR_ID = 'appshell-sidebar';
+// Target of the skip-to-content link; also the `<main>` id.
+const MAIN_ID = 'appshell-content';
 
 export function AppShell({
   sections = [],
@@ -371,6 +416,9 @@ export function AppShell({
   };
   const slot = (s: AppShellHeaderSlot): React.ReactNode =>
     typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
+  // Icon-only rail: the desktop-collapsed rail hides labels, so nav items get a
+  // hover/focus tooltip to recover them. Not on mobile (there it's a full drawer).
+  const railTooltip = collapsedRail && collapsed && !isMobile;
 
   return (
     <div className={cx(
@@ -382,6 +430,9 @@ export function AppShell({
       !animReady && 'appshell--no-anim',
       className,
     )}>
+      {/* First focusable element: lets keyboard/SR users jump past the nav
+          straight to the page content. Visually hidden until focused. */}
+      <a className="appshell__skip-link" href={`#${MAIN_ID}`}>{t['appshell.skipToContent']}</a>
       {/* On a brand header the band is dark, so re-scope foreground tokens
           via data-tone="inverse" — anything inside (Avatar, badges, links)
           becomes band-aware automatically without per-call-site colors. */}
@@ -420,7 +471,7 @@ export function AppShell({
                 <div key={s.id ?? i} className="appshell__navsection">
                   {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
                   <ul>{s.items.map((it) => (
-                    <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobileDrawer} />
+                    <NavItemNode key={it.id} item={it} depth={0} linkAs={linkAs} onCloseMobile={closeMobileDrawer} railTooltip={railTooltip} />
                   ))}</ul>
                 </div>
               ))}
@@ -430,7 +481,8 @@ export function AppShell({
             )}
           </aside>
         )}
-        <main className="appshell__content" role="main">{children}</main>
+        {/* tabIndex={-1} so the skip-link can move focus here (not a Tab stop). */}
+        <main id={MAIN_ID} className="appshell__content" role="main" tabIndex={-1}>{children}</main>
         {/* Scrim is a child of the body so it MATCHES the body's exact
             bounds via `position: absolute; inset: 0` — not a sibling of
             the body using viewport-relative math, which couldn't keep up

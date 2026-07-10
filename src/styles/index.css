@@ -2977,8 +2977,60 @@ button, input, select, textarea { box-sizing: border-box; }
   /* Delay visibility:hidden until after the opacity fade completes. */
   transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear var(--duration-fast, 120ms);
 }
-.appshell__navchildren { padding-left: 28px; }
-.appshell__navitem--depth-1 { padding: 8px 10px; font-size: var(--text-sm); font-weight: 500; }
+/* Nested children read as a connected sub-tree, not peers of the top level: a
+   subtle vertical guide (aligned under the parent icon's centre) ties them to
+   the group header, and the items recede (lighter, smaller) so hierarchy is
+   legible even without the chevron. */
+/* Higher specificity than the `.appshell__nav ul { padding: 0 }` reset so the
+   indent actually applies. */
+.appshell__nav .appshell__navchildren { position: relative; margin: 2px 0 6px; padding-left: 30px; }
+.appshell__navchildren::before {
+  content: ''; position: absolute; left: 26px; top: 0; bottom: 8px;
+  width: 1px; background: var(--border-default);
+}
+.appshell__navitem--depth-1 {
+  padding: 7px 10px; font-size: var(--text-sm); font-weight: 500;
+  color: var(--fg-muted);
+}
+.appshell__navitem--depth-1:hover { color: var(--fg-default); }
+/* Children lean on bg tint + colour for "active" (declutters the guide line;
+   the left ::before stripe is a top-level "you are here" marker). */
+.appshell__navitem--depth-1.is-active { color: var(--color-primary); }
+.appshell__navitem--depth-1.is-active::before { display: none; }
+
+/* --- Collapsible group: a NavItem with children renders a disclosure <button>
+   wearing .appshell__navitem, so it only needs the button-chrome reset (font,
+   color, flex, padding all come from .appshell__navitem; no width — the margin
+   would overflow, display:flex already fills like the <a>). --- */
+.appshell__navgroup { border: 0; background: transparent; cursor: pointer; text-align: left; }
+.appshell__navchevron {
+  flex: none; margin-left: auto; color: var(--fg-muted);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.appshell__navgroup.is-open .appshell__navchevron { transform: rotate(90deg); }
+/* The group whose descendant is the current page reads a touch stronger, so the
+   active branch stays legible when the child is scrolled out or collapsed. */
+.appshell__navgroup.is-within { color: var(--fg-default); }
+.appshell__navgroup.is-within .appshell__navicon { color: var(--color-primary); }
+.appshell.is-collapsed .appshell__navchevron { display: none; }
+
+/* Rail tooltip: the kit Tooltip wraps its trigger in an inline <span>; force it
+   block inside the nav so it doesn't shrink the flex nav row to content width. */
+.appshell__nav .tooltip { display: block; }
+
+/* --- Skip-to-content link: first focusable element, hidden until focused --- */
+.appshell__skip-link {
+  position: absolute; top: 8px; left: 8px; z-index: var(--z-toast);
+  padding: 8px 14px; border-radius: var(--radius-sm);
+  background: var(--bg-surface); color: var(--fg-link);
+  border: 1px solid var(--border-focus); box-shadow: var(--shadow-md);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; text-decoration: none;
+  transform: translateY(-150%); opacity: 0; pointer-events: none;
+  transition: transform var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) ease;
+}
+.appshell__skip-link:focus, .appshell__skip-link:focus-visible {
+  transform: translateY(0); opacity: 1; pointer-events: auto; outline: none;
+}
 
 /* ---- Theme: brand (sidebar azul de marca) -----------------------------
    Use case: apps con identidad visual fuerte donde el sidebar completo
