@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.82.0] — 2026-07-10
+
+**Minor. Form-control width convention: fields fill by default.**
+
+### Changed
+- **`Combobox` fills its container** instead of clamping to a fixed 220px
+  (`inline-block`). Now the container constrains the width, not the control, so a
+  Combobox aligns in a form row with `Input` / `Select` / `Textarea` and the
+  date/time/year/month pickers (which already filled). `MultiCombobox` already
+  filled (block auto-width) and is unchanged. Constrain a narrower control via
+  its wrapper, e.g. a `flex: 1 1 160px` column.
+  - `NumberInput` (and `Button`) keep their deliberate exception: content-width
+    by default, `fullWidth` to fill — a compact numeric stepper is often meant to
+    be narrow (quantity fields).
+  - Guarded by `tests/FormControlWidth.test.tsx`.
+
+### Fixed
+- **AppShell autodocs page no longer clips.** The full-viewport shell overflowed
+  the bounded Docs canvas when rendered inline; its stories now render in a sized
+  iframe in Docs (`docs.story.inline: false`). Story/Canvas view is unchanged.
+
 ## [1.81.0] — 2026-07-09
 
 **Minor. Dark theme: brand-colored elements now adapt (they were stuck on light-mode values).**
