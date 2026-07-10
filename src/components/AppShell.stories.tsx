@@ -386,3 +386,46 @@ export const TopbarTallTable: StoryObj = {
   },
 };
 
+
+/**
+ * **Topbar · Collapsible nav groups** (v1.83.0) — a `NavItem` with `children`
+ * renders a disclosure group (a button, not a link). The group holding the
+ * active item auto-opens and reads `is-within`. Collapse the sidebar to see the
+ * rail tooltips (labels recover on hover/focus). Tab first to reach the
+ * skip-to-content link.
+ */
+export const TopbarNestedGroups: StoryObj = {
+  name: 'Topbar · Collapsible nav groups',
+  render: () => (
+    <div style={{ height: '100vh' }}>
+      <AppShell
+        showMenuToggle
+        collapsedRail
+        sections={[
+          { label: 'Operación', items: [
+            { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#' },
+            { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '#', badge: 12 },
+            { id: 'reportes', label: 'Reportes', icon: <Package size={18} />, children: [
+              { id: 'r-ventas', label: 'Ventas', href: '#' },
+              { id: 'r-stock', label: 'Stock', href: '#', active: true },
+              { id: 'r-margen', label: 'Margen', href: '#' },
+            ] },
+          ] },
+          { label: 'Administración', items: [
+            { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '#' },
+            { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '#' },
+          ] },
+        ]}
+        header={{
+          center: <Logo variant="horizontal" bg="auto" height={28} />,
+          right: <Avatar name="Misael Ocas" size={32} />,
+        }}
+      >
+        <div style={{ padding: 24 }}>
+          <PageHeader title="Stock" description="El grupo Reportes se abre solo porque contiene la página activa. Colapsa el sidebar (toggle) para ver los tooltips del rail; Tab llega primero al skip-link." />
+          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        </div>
+      </AppShell>
+    </div>
+  ),
+};

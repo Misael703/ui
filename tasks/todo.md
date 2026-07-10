@@ -224,3 +224,36 @@ Contrast/SurfaceTiers (scoping + dark), tests/ContrastDark.test.tsx (nuevo), CHA
 DESIGN.md + package.json → v1.79.0.
 PENDIENTE: rama feat/dark-mode → commit → PR → smoke CI → merge → GitHub Release → npm
 (espera OK explícito).
+
+---
+
+# AppShell P1 — nav a escala (impeccable, 2026-07-10)
+
+Del análisis del AppShell: 3 huecos reales de un shell "de escala". `NavItem.children`
+existe en el tipo pero NADIE lo usa (vía libre). Tooltip = `<Tooltip label side>`
+(envuelve en <span>, ojo flex). Colapso ya oculta children/labels en rail (CSS).
+
+## 1. Skip-to-content link (a11y)
+- [ ] `<a class="appshell__skip-link" href="#appshell-content">` como PRIMER hijo del shell
+- [ ] `<main id="appshell-content" tabIndex={-1}>`
+- [ ] i18n `appshell.skipToContent` (messages.ts tipo + es.ts valor)
+- [ ] CSS sr-only-hasta-:focus → pill visible top-left al enfocar
+
+## 2. Tooltips en el rail colapsado
+- [ ] AppShell computa `railActive = collapsedRail && collapsed && !isMobile`, lo pasa a NavItemNode
+- [ ] depth 0 + railActive → envolver el node en `<Tooltip label={item.label} side="right">`
+- [ ] CSS `.appshell__nav .tooltip { display:block }` para no romper el flex del item
+
+## 3. Grupos de nav colapsables
+- [ ] `NavItem` gana `defaultOpen?: boolean`; helper `descendantActive(item)`
+- [ ] children presentes → parent = `<button class="appshell__navgroup" aria-expanded aria-controls>` (icon+label+chevron), NO link (su destino propio va como primer child)
+- [ ] `open` init = `defaultOpen ?? descendantActive`; toggle onClick; children `<ul id>` render sólo si open
+- [ ] parent con descendiente activo → clase `is-within` (marca el grupo del page actual)
+- [ ] chevron `ChevronRight` rota 90° con transform al abrir (no anima layout)
+- [ ] en rail: children ya ocultos (CSS); el grupo muestra icono+tooltip
+
+## Verificación
+- [ ] tests: skip-link (target main + tabindex), rail tooltip (wrap en rail), grupos (aria-expanded, toggle, auto-open por active, is-within)
+- [ ] story nueva/extendida con grupos anidados + rail; headless dark+light
+- [ ] full suite + lint + build; sin export nuevo del barrel → no toca smoke gate
+- [ ] release lo hace el user (bump + GitHub Release)

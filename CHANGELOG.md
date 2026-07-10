@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.83.0] — 2026-07-10
+
+**Minor. AppShell: nav at scale (skip link, rail tooltips, collapsible groups).**
+
+### Added
+- **Skip-to-content link.** The AppShell's first focusable element is a
+  skip-to-content link (visually hidden until focused) that jumps keyboard/SR
+  users past the nav to `<main>` (now `id="appshell-content"`, `tabindex="-1"`).
+  Locale key `appshell.skipToContent`.
+- **Rail tooltips.** When the sidebar is collapsed to the icon rail, each
+  top-level nav item shows its (hidden) label as a tooltip on hover/focus, so an
+  icon is never a guessing game. Not shown on mobile (there it's a full drawer).
+- **Collapsible nav groups.** A `NavItem` with `children` now renders a
+  disclosure group (a `<button>`, not a link) with a rotating chevron and
+  `aria-expanded`/`aria-controls`. The group holding the active item auto-opens
+  and is marked `is-within` so the active branch stays legible; `NavItem` gains
+  `defaultOpen?: boolean` to override. Put the group's own destination as a
+  first child.
+
+### Changed
+- Behavior note: previously a `NavItem` with `children` rendered its children
+  always-expanded. They are now a collapsible group (default: expanded only if a
+  descendant is active). No known consumer relied on the always-expanded form.
+
 ## [1.82.0] — 2026-07-10
 
 **Minor. Form-control width convention: fields fill by default.**

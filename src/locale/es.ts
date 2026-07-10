@@ -32,6 +32,7 @@ export const esMessages: UiKitMessages = {
   'appshell.mainNav': 'Navegación principal',
   'appshell.breadcrumb': 'Breadcrumb',
   'appshell.toggleMenu': 'Abrir menú',
+  'appshell.skipToContent': 'Saltar al contenido',
 
   // TimeAgo
   'timeAgo.now': 'ahora',
