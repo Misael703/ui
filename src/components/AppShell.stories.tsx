@@ -11,7 +11,14 @@ import { DataTable, type Column } from './DataTable';
 export default {
   title: 'Layout/AppShell',
   tags: ['autodocs'],
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    layout: 'fullscreen',
+    // AppShell fills the viewport (top layout = internal scroll). Rendered
+    // inline in the autodocs page it overflows the bounded Docs canvas (sidebar
+    // clipped left, content/actions clipped right). Render each story in its own
+    // sized iframe in Docs so 100vh maps to the iframe, not the doc column.
+    docs: { story: { inline: false, iframeHeight: 720 } },
+  },
 } as Meta;
 
 const sections = [

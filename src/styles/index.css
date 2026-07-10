@@ -1926,7 +1926,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .kpi__hint { color: var(--fg-muted); }
 
 /* ---------- Combobox ---------- */
-.combobox { position: relative; display: inline-block; min-width: 220px; }
+/* Fills its container by default, like .input/.select/.textarea and the date/
+   time/year/month pickers (v1.82.0): the container constrains the width, not the
+   control — so a Combobox aligns in a form row instead of clamping to a fixed
+   220px. `min-width: 0` lets it shrink inside a flex item. */
+.combobox { position: relative; display: inline-block; width: 100%; min-width: 0; }
 .combobox__input,
 .combobox__trigger {
   width: 100%;
