@@ -401,19 +401,20 @@ export const TopbarNestedGroups: StoryObj = {
       <AppShell
         showMenuToggle
         collapsedRail
+        currentPath="/reportes/stock"
         sections={[
           { label: 'Operación', items: [
-            { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#' },
-            { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '#', badge: 12 },
+            { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '/' },
+            { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '/pedidos', badge: 12 },
             { id: 'reportes', label: 'Reportes', icon: <Package size={18} />, children: [
-              { id: 'r-ventas', label: 'Ventas', href: '#' },
-              { id: 'r-stock', label: 'Stock', href: '#', active: true },
-              { id: 'r-margen', label: 'Margen', href: '#' },
+              { id: 'r-ventas', label: 'Ventas', href: '/reportes/ventas' },
+              { id: 'r-stock', label: 'Stock', href: '/reportes/stock' },
+              { id: 'r-margen', label: 'Margen', href: '/reportes/margen' },
             ] },
           ] },
           { label: 'Administración', items: [
-            { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '#' },
-            { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '#' },
+            { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '/clientes' },
+            { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '/config' },
           ] },
         ]}
         header={{
@@ -422,7 +423,7 @@ export const TopbarNestedGroups: StoryObj = {
         }}
       >
         <div style={{ padding: 24 }}>
-          <PageHeader title="Stock" description="El grupo Reportes se abre solo porque contiene la página activa. Colapsa el sidebar (toggle) para ver los tooltips del rail; Tab llega primero al skip-link." />
+          <PageHeader title="Stock" description="currentPath activa Stock y abre el grupo Reportes solo, sin setear active a mano. Colapsa el sidebar (toggle) para ver los tooltips del rail; Tab llega primero al skip-link." />
           <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
         </div>
       </AppShell>

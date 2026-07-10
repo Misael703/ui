@@ -72,6 +72,69 @@ describe('AppShell — P1 nav at scale (v1.83.0)', () => {
   });
 });
 
+describe('AppShell — auto-active from currentPath (v1.84.0)', () => {
+  const withPath = (
+    currentPath: string,
+    items: NonNullable<React.ComponentProps<typeof AppShell>['sections']>[number]['items'],
+    extra: Partial<React.ComponentProps<typeof AppShell>> = {},
+  ) => render(
+    <AppShell sections={[{ items }]} currentPath={currentPath} header={{ center: 'X' }} {...extra}>
+      <div>c</div>
+    </AppShell>
+  );
+  const current = (name: string) => screen.getByRole('link', { name }).getAttribute('aria-current');
+
+  it('marks the item whose href matches the current path', () => {
+    withPath('/pedidos', [
+      { id: 'h', label: 'Inicio', href: '/' },
+      { id: 'p', label: 'Pedidos', href: '/pedidos' },
+    ]);
+    expect(current('Pedidos')).toBe('page');
+    expect(current('Inicio')).toBeNull();
+  });
+
+  it('segment-prefix matches descendants; root / only matches exactly', () => {
+    withPath('/pedidos/123', [
+      { id: 'p', label: 'Pedidos', href: '/pedidos' },
+      { id: 'h', label: 'Inicio', href: '/' },
+    ]);
+    expect(current('Pedidos')).toBe('page');  // /pedidos active on /pedidos/123
+    expect(current('Inicio')).toBeNull();      // root does not prefix-match everything
+  });
+
+  it('exact opts out of the descendant match', () => {
+    withPath('/pedidos/123', [{ id: 'p', label: 'Pedidos', href: '/pedidos', exact: true }]);
+    expect(current('Pedidos')).toBeNull();
+  });
+
+  it('an explicit NavItem.active wins over the matcher (both directions)', () => {
+    withPath('/pedidos', [
+      { id: 'p', label: 'Pedidos', href: '/pedidos', active: false }, // matches path but forced off
+      { id: 'x', label: 'Otro', href: '/otro', active: true },        // no match but forced on
+    ]);
+    expect(current('Pedidos')).toBeNull();
+    expect(current('Otro')).toBe('page');
+  });
+
+  it('auto-opens the group whose child matches the current path', () => {
+    render(
+      <AppShell currentPath="/reportes/stock" header={{ center: 'X' }} sections={[{ items: [
+        { id: 'g', label: 'Reportes', children: [{ id: 's', label: 'Stock', href: '/reportes/stock' }] },
+      ] }]}><div>c</div></AppShell>
+    );
+    const btn = screen.getByRole('button', { name: /Reportes/ });
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect(btn.className).toContain('is-within');
+  });
+
+  it('isActive replaces the default matcher', () => {
+    withPath('/anything', [{ id: 'p', label: 'Pedidos', href: '/pedidos' }], {
+      isActive: (item) => item.id === 'p',
+    });
+    expect(current('Pedidos')).toBe('page');
+  });
+});
+
 describe('AppShell CSS guards', () => {
   it('CSS: rail (72px) is scoped to desktop (no rail gap in mobile)', () => {
     // Pre-fix the rail rule fired at every viewport. In mobile the aside is

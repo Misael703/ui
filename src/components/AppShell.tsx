@@ -27,6 +27,8 @@ export interface NavItem {
   children?: NavItem[];
   /** Start a group expanded. Defaults to "expanded if a descendant is active". */
   defaultOpen?: boolean;
+  /** Match `currentPath` exactly (skip the descendant segment-prefix match). */
+  exact?: boolean;
 }
 
 export interface NavSection {
@@ -99,6 +101,21 @@ export interface AppShellProps {
    * nav), e.g. a kiosk/checkout flow.
    */
   sections?: NavSection[];
+  /**
+   * Current route path. When set, a NavItem whose `href` matches it becomes
+   * active automatically — no need to set `active` per item (and no more "two
+   * items look selected" when you forget to clear the old one). Match is exact
+   * for the item's own path and segment-prefix for descendants (`/pedidos` also
+   * matches `/pedidos/123`), unless the item sets `exact`. An explicit
+   * `NavItem.active` always wins; pass `isActive` to replace the matcher.
+   */
+  currentPath?: string;
+  /**
+   * Replace the default `currentPath` matcher. Receives each item + the
+   * `currentPath`; returns whether it's the active item. `NavItem.active` (when
+   * explicitly set) still wins over this.
+   */
+  isActive?: (item: NavItem, currentPath: string | undefined) => boolean;
   /** Slot at the bottom of the sidebar (version label, env tag, etc.). */
   footer?: React.ReactNode;
   /** Initial collapsed state (uncontrolled). */
@@ -170,6 +187,43 @@ interface NavItemNodeProps {
   /** Icon-only rail (collapsed desktop): wrap depth-0 items in a Tooltip so the
    *  hidden label is recoverable on hover/focus. */
   railTooltip: boolean;
+}
+
+// Default active matcher for `currentPath`: exact for the item's own path,
+// segment-prefix for descendants (`/pedidos` also matches `/pedidos/123`). The
+// root `/` and `exact` items match exactly. Query/hash are ignored.
+function matchPath(href: string, currentPath: string, exact?: boolean): boolean {
+  const norm = (s: string) => {
+    const base = s.split(/[?#]/)[0];
+    return base.length > 1 && base.endsWith('/') ? base.slice(0, -1) : base;
+  };
+  const h = norm(href), p = norm(currentPath);
+  if (exact || h === '/') return p === h;
+  return p === h || p.startsWith(h + '/');
+}
+
+// Fill each item's `active` from `currentPath` (or a custom `isActive`) unless it
+// set `active` explicitly. Returns the sections unchanged when neither is given
+// (manual-active back-compat, zero churn). Recurses into groups.
+function resolveSections(
+  sections: NavSection[],
+  currentPath: string | undefined,
+  isActive: AppShellProps['isActive'],
+): NavSection[] {
+  if (currentPath == null && !isActive) return sections;
+  const resolveItem = (item: NavItem): NavItem => {
+    const active = item.active !== undefined
+      ? item.active
+      : isActive
+        ? isActive(item, currentPath)
+        : currentPath != null && item.href != null
+          ? matchPath(item.href, currentPath, item.exact)
+          : item.active;
+    return item.children
+      ? { ...item, active, children: item.children.map(resolveItem) }
+      : { ...item, active };
+  };
+  return sections.map((s) => ({ ...s, items: s.items.map(resolveItem) }));
 }
 
 // A group is "active within" when a descendant is the current page — used to
@@ -276,6 +330,8 @@ const MAIN_ID = 'appshell-content';
 
 export function AppShell({
   sections = [],
+  currentPath,
+  isActive,
   footer,
   defaultCollapsed = false,
   collapsed: ctrlCollapsed,
@@ -297,6 +353,11 @@ export function AppShell({
   // so `theme="brand"` keeps tinting both bands.
   const headerTheme = ctrlHeaderTheme ?? theme;
   const hasSidebar = sections.length > 0;
+  // Resolve `active` from `currentPath` (no-op when the consumer sets it by hand).
+  const resolvedSections = React.useMemo(
+    () => resolveSections(sections, currentPath, isActive),
+    [sections, currentPath, isActive],
+  );
 
   // SSR-safe persistence: the initial render uses `defaultCollapsed` (server
   // and first client render agree → no hydration mismatch), then we sync from
@@ -467,7 +528,7 @@ export function AppShell({
             aria-hidden={isMobile && !mobileOpen ? true : undefined}
           >
             <nav className="appshell__nav">
-              {sections.map((s, i) => (
+              {resolvedSections.map((s, i) => (
                 <div key={s.id ?? i} className="appshell__navsection">
                   {s.label && <div className="appshell__navlabel-section">{s.label}</div>}
                   <ul>{s.items.map((it) => (

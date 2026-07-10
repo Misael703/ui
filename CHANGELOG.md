@@ -5,6 +5,22 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.84.0] — 2026-07-10
+
+**Minor. AppShell: automatic active nav item from `currentPath`.**
+
+### Added
+- **`AppShell.currentPath`** — pass the current route and the matching nav item
+  activates automatically; no need to set `active` per item (and no more "two
+  items look selected" when the old one isn't cleared). Match is exact for the
+  item's own path and segment-prefix for descendants (`/pedidos` also matches
+  `/pedidos/123`); the root `/` matches exactly. Groups auto-open when a
+  descendant matches. `NavItem.exact` opts an item out of the descendant match.
+- **`AppShell.isActive`** — replace the default matcher with a custom
+  `(item, currentPath) => boolean`. An explicit `NavItem.active` still wins over
+  both. Back-compatible: with neither prop, the shell keeps using manual
+  `active`, unchanged.
+
 ## [1.83.0] — 2026-07-10
 
 **Minor. AppShell: nav at scale (skip link, rail tooltips, collapsible groups).**
