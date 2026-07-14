@@ -737,7 +737,17 @@ button, input, select, textarea { box-sizing: border-box; }
   font-weight: 700;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
-  white-space: nowrap;
+  /* Cap the width so a long label WRAPS into a block instead of a
+     viewport-wide single line. `max-content` keeps SHORT labels on one line
+     (shrink-to-fit); the cap forces long ones to wrap; `min(…, 100vw − gutter)`
+     keeps it inside narrow viewports. Override the cap with
+     `--tooltip-max-width`. (Pre-fix this was `white-space: nowrap` with no
+     max-width, so long labels grew unbounded across the screen.) */
+  width: max-content;
+  max-width: min(var(--tooltip-max-width, 260px), calc(100vw - 24px));
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: var(--leading-snug);
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--duration-fast);
