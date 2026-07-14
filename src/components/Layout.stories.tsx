@@ -74,6 +74,24 @@ export const TooltipBasico: StoryObj = {
 };
 
 /**
+ * Label largo: la burbuja se acota (`max-width`) y ENVUELVE en bloque en vez de
+ * estirarse a lo ancho de la pantalla. Los labels cortos siguen en una línea
+ * (shrink-to-fit). Overridable con `--tooltip-max-width`.
+ */
+export const TooltipLargo: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 24px' }}>
+      <Tooltip
+        label="Por cada chofer en el rango (por fecha de entrega): entregas hechas y tiempo en ruta promedio (desde que el despacho sale hasta que se entrega). Solo envíos con chofer; ordenado por volumen. No mostramos % a tiempo: el cumplimiento de fecha es un objetivo aparte."
+        side="bottom"
+      >
+        <Button variant="ghost">Operación de entrega</Button>
+      </Tooltip>
+    </div>
+  ),
+};
+
+/**
  * Tooltip dentro de una tabla con `<thead>` sticky. El bubble se portalea a
  * `document.body`, así que queda por encima del header fijo en lugar de
  * recortarse detrás. Pasa el mouse por "Editar" en cualquier fila.
