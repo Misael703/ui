@@ -237,8 +237,10 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('CSS: the GLOBAL .appshell__content keeps its padding (top scoping must not strip it)', () => {
     // Guard the "do not touch the padding" constraint: the base rule still
-    // carries `padding: 24px`, and the scoped top rule only adds scroll.
-    expect(css).toMatch(/\.appshell__content\s*\{[^}]*padding:\s*24px/);
+    // carries padding — now driven by the overridable `--appshell-content-pad`
+    // var (so a sticky sub-header can counter it) whose default stays 24px.
+    expect(css).toMatch(/\.appshell__content\s*\{[^}]*padding:\s*var\(--appshell-content-pad/);
+    expect(css).toMatch(/--appshell-content-pad:\s*24px/);
   });
 
   it('CSS: the top header padding is driven by overridable vars (not hardcoded)', () => {
