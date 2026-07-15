@@ -3121,6 +3121,17 @@ button, input, select, textarea { box-sizing: border-box; }
      the same vars with a tighter horizontal fallback. */
   --appshell-header-pad-y: 8px;
   --appshell-header-pad-x: 16px;
+  /* Padding of the scroll container (`.appshell__content`). Public because a
+     sticky sub-header is a DIRECT child of that scroll container, and this
+     padding pushes a `top: 0` sticky DOWN by its value — leaving a gap where
+     content peeks above the sub-header and clips against the viewport edge.
+     Reference this var to anchor a sub-header flush + full-bleed:
+       position: sticky;
+       top: calc(-1 * var(--appshell-content-pad));
+       margin: calc(-1 * var(--appshell-content-pad)) calc(-1 * var(--appshell-content-pad)) 0;
+     Driving the padding through the var keeps it in sync with that offset
+     across breakpoints (it drops to 16px under 768px). */
+  --appshell-content-pad: 24px;
   /* Break out of any body margin / wrapper padding so the shell spans the
      full viewport width. Without this, body's UA-default 8px margin (or
      any container the consumer wraps the shell in) made the fixed-position
@@ -3395,7 +3406,7 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 8px;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.appshell__content { padding: 24px; min-height: 0; }
+.appshell__content { padding: var(--appshell-content-pad, 24px); min-height: 0; }
 /* Mobile drawer scrim base — actual display + frame lives inside the top
    mobile block above (anchored under the header, dvh-sized). */
 .appshell__scrim { display: none; }
@@ -3403,7 +3414,9 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Mobile responsive overrides --------------------------------- */
 /* Below --bp-md: tighten container padding and scale form inputs to fit. */
 @media (max-width: 768px) {
-  .appshell__content { padding: 16px; }
+  /* Drive the mobile gutter through the var so a sticky sub-header's negative
+     offset (which reads the same var) stays in sync — not a hardcoded padding. */
+  .appshell__content { --appshell-content-pad: 16px; }
   /* min-width: min(X, 100%) lets these inputs shrink to their container
      on narrow viewports while keeping the desktop minimum. */
   .combobox { min-width: min(220px, 100%); }

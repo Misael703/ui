@@ -78,13 +78,23 @@ function ConfigurableShell({
           ),
         }}
       >
-        {/* A direct child of the scroll container (.appshell__content), so
-            `top: 0` anchors to the top of the content viewport while the
-            header and sidebar stay put. */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-canvas)', padding: '12px 24px', borderBottom: '1px solid var(--border-default)', fontWeight: 600 }}>
+        {/* A direct child of the scroll container (.appshell__content), which is
+            padded. A `top: 0` sticky would anchor to the padded content box —
+            pushed down by the padding, leaving a gap where the content peeks
+            above and clips. Counter the padding with the public
+            `--appshell-content-pad` var so it sits FLUSH + full-bleed; the var
+            stays in sync across breakpoints (24px → 16px under 768px). */}
+        <div style={{
+          position: 'sticky',
+          top: 'calc(-1 * var(--appshell-content-pad, 24px))',
+          margin: 'calc(-1 * var(--appshell-content-pad, 24px)) calc(-1 * var(--appshell-content-pad, 24px)) 0',
+          zIndex: 1, background: 'var(--bg-canvas)', padding: '12px 24px',
+          borderBottom: '1px solid var(--border-default)', fontWeight: 600,
+        }}>
           Sub-header sticky · ancla al tope del contenido al scrollear
         </div>
-        <div style={{ padding: 24, display: 'grid', gap: 16 }}>
+        {/* No inner padding: the scroll container already provides the gutter. */}
+        <div style={{ display: 'grid', gap: 16 }}>
           <PageHeader title="Dashboard" description="Contenido largo para demostrar el scroll interno: el header y el sidebar quedan fijos" actions={<Button>Acción</Button>} />
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} style={{ border: '1px dashed var(--border-default)', borderRadius: 12, height: 200 }} />
