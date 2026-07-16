@@ -28,6 +28,39 @@ export const MultiSeleccion: StoryObj = {
   },
 };
 
+/**
+ * Requisito duro: `options` solo trae los ítems seleccionables ACTUALES, pero
+ * el control viene prellenado con una selección guardada que incluye un valor
+ * cuyo option fue removido después (aquí, un ayudante desactivado). Sin
+ * `resolveLabel` ese chip no se renderizaría y se perdería al guardar. Con
+ * `resolveLabel` el chip se muestra igual (fallback al value crudo si no hay
+ * label), así el usuario lo ve y puede conservarlo o quitarlo a propósito.
+ */
+export const MultiSeleccionConInactivos: StoryObj = {
+  name: 'Multi-selección · value fuera de options',
+  render: () => {
+    // Nombres conocidos por el consumidor (vienen de la guía), no de options.
+    const nombres: Record<string, string> = {
+      ana: 'Ana Rojas', luis: 'Luis Vera', 'pedro-inactivo': 'Pedro Soto',
+    };
+    const [v, setV] = React.useState<string[]>(['ana', 'pedro-inactivo']);
+    return (
+      <div style={{ maxWidth: 420 }}>
+        <MultiCombobox
+          value={v}
+          onChange={setV}
+          options={[
+            { value: 'ana', label: 'Ana Rojas' },
+            { value: 'luis', label: 'Luis Vera' },
+          ]}
+          resolveLabel={(val) => nombres[val]}
+          placeholder="Selecciona ayudantes…"
+        />
+      </div>
+    );
+  },
+};
+
 export const RangoDeFechas: StoryObj = {
   render: () => {
     const [r, setR] = React.useState<DateRange>({ from: null, to: null });

@@ -5,6 +5,40 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.85.0] — 2026-07-16
+
+**Minor. MultiCombobox: chips for values outside `options` (no silent data loss).**
+
+### Added
+- **`MultiCombobox.resolveLabel`** — `(value) => string | undefined`. A selected
+  `value` that is not in `options` (e.g. its option was removed after the value
+  was stored — a deactivated record) now renders a chip instead of being
+  silently dropped on the next `onChange`. Label resolution: option label →
+  `resolveLabel` → raw value (never omitted).
+
+### Changed
+- Chips now follow `value` (selection) order instead of `options` order — a
+  prerequisite for including out-of-`options` values, and more predictable.
+
+## [1.84.2] — 2026-07-15
+
+**Patch. AppShell: sticky sub-headers anchor flush.**
+
+### Fixed
+- Exposed **`--appshell-content-pad`** (the `.appshell__content` gutter — 24px,
+  16px under 768px) so a sticky sub-header can counter it and sit flush +
+  full-bleed instead of leaving a gap where content peeked above and clipped
+  against the viewport edge. Non-breaking.
+
+## [1.84.1] — 2026-07-14
+
+**Patch. Tooltip: long labels wrap.**
+
+### Fixed
+- Tooltip bubbles cap their width (`--tooltip-max-width`, default 260px) and wrap
+  long labels instead of stretching a single line across the viewport. Short
+  labels still stay on one line.
+
 ## [1.84.0] — 2026-07-10
 
 **Minor. AppShell: automatic active nav item from `currentPath`.**

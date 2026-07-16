@@ -33,6 +33,60 @@ describe('MultiCombobox', () => {
     // "Alpha" aparece tanto en el chip seleccionado como en la opción del listbox
     expect(screen.getAllByText('Alpha').length).toBeGreaterThan(0);
   });
+
+  // Requisito duro (EL-75): un value seleccionado que NO está en options debe
+  // renderizar chip igual, para no perderse en silencio al guardar.
+  it('renders a removable chip for a value outside options via resolveLabel', () => {
+    render(
+      <MultiCombobox
+        value={['ghost', 'a']}
+        onChange={vi.fn()}
+        options={[{ value: 'a', label: 'Alpha' }]}
+        resolveLabel={(v) => (v === 'ghost' ? 'Pedro (inactivo)' : undefined)}
+      />
+    );
+    // El chip del value fuera de options se muestra con el label resuelto...
+    expect(screen.getByText('Pedro (inactivo)')).toBeInTheDocument();
+    // ...y es removible (tiene su botón X con aria-label).
+    expect(screen.getByRole('button', { name: /Pedro \(inactivo\)/ })).toBeInTheDocument();
+  });
+
+  it('falls back to the raw value when the label is unresolvable (never omits)', () => {
+    render(
+      <MultiCombobox value={['ghost']} onChange={vi.fn()} options={[{ value: 'a', label: 'Alpha' }]} />
+    );
+    expect(screen.getByText('ghost')).toBeInTheDocument();
+  });
+
+  it('removing an out-of-options chip targets exactly that value', () => {
+    const onChange = vi.fn();
+    render(
+      <MultiCombobox
+        value={['ghost', 'a']}
+        onChange={onChange}
+        options={[{ value: 'a', label: 'Alpha' }]}
+        resolveLabel={() => 'Fantasma'}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Fantasma/ }));
+    expect(onChange).toHaveBeenCalledWith(['a']);
+  });
+
+  it('deselecting an in-options value preserves an out-of-options value (no silent loss)', () => {
+    const onChange = vi.fn();
+    render(
+      <MultiCombobox
+        value={['ghost', 'a']}
+        onChange={onChange}
+        options={[{ value: 'a', label: 'Alpha' }]}
+        resolveLabel={() => 'Fantasma'}
+      />
+    );
+    fireEvent.focus(screen.getByRole('combobox'));
+    // Toggle the known option OFF from the listbox; the unknown value must stay.
+    fireEvent.mouseDown(screen.getByRole('option', { name: /Alpha/ }));
+    expect(onChange).toHaveBeenCalledWith(['ghost']);
+  });
 });
 
 describe('DateRangePicker', () => {

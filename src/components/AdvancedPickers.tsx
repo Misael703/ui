@@ -29,6 +29,16 @@ export interface MultiComboboxProps<T = string> {
   className?: string;
   id?: string;
   maxVisibleChips?: number;
+  /**
+   * Resolve a chip label for a selected `value` that is NOT in `options`. Real
+   * case: the control is prefilled with a stored selection, but `options` only
+   * carries the currently-selectable set — a value whose option was since
+   * removed (deactivated) would otherwise render no chip and be dropped on the
+   * next `onChange` (silent data loss). Return a label to show; when it returns
+   * `undefined` the raw value is shown, never omitted. Values present in
+   * `options` always use the option's label — this is only consulted for the gap.
+   */
+  resolveLabel?: (value: T) => string | undefined;
 }
 
 const dfilter = <T,>(o: MultiComboboxOption<T>, q: string) =>
@@ -37,7 +47,7 @@ const dfilter = <T,>(o: MultiComboboxOption<T>, q: string) =>
 export function MultiCombobox<T = string>({
   value, onChange, options, placeholder,
   emptyMessage, filter = dfilter,
-  invalid, disabled, className, id, maxVisibleChips = 3,
+  invalid, disabled, className, id, maxVisibleChips = 3, resolveLabel,
 }: MultiComboboxProps<T>) {
   const locale = useLocale();
   const ph = placeholder ?? locale['common.search'];
@@ -92,17 +102,29 @@ export function MultiCombobox<T = string>({
     else if (e.key === 'Backspace' && !query && value.length) { onChange(value.slice(0, -1)); }
   };
 
-  const selectedItems = options.filter((o) => selSet.has(o.value));
-  const visible = selectedItems.slice(0, maxVisibleChips);
-  const overflow = selectedItems.length - visible.length;
+  // Chips follow `value` order (selection order), NOT `options` order, so a
+  // selected value absent from `options` (its option removed after it was
+  // stored) still renders a chip instead of being silently dropped on the next
+  // onChange. Label: option label → resolveLabel → raw value (never omitted).
+  const optByValue = React.useMemo(() => {
+    const m = new Map<T, MultiComboboxOption<T>>();
+    for (const o of options) m.set(o.value, o);
+    return m;
+  }, [options]);
+  const chips = value.map((v) => ({
+    value: v,
+    label: optByValue.get(v)?.label ?? resolveLabel?.(v) ?? String(v),
+  }));
+  const visible = chips.slice(0, maxVisibleChips);
+  const overflow = chips.length - visible.length;
 
   return (
     <div ref={wrapRef} className={cx('multicombo', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       <div className="multicombo__chips" onClick={() => inputRef.current?.focus()}>
-        {visible.map((o) => (
-          <span key={String(o.value)} className="multicombo__chip">
-            {o.label}
-            <button type="button" aria-label={formatMsg(locale['combobox.remove'], { label: o.label })} onClick={(e) => { e.stopPropagation(); toggle(o.value); }}><X size={12} /></button>
+        {visible.map((c) => (
+          <span key={String(c.value)} className="multicombo__chip">
+            {c.label}
+            <button type="button" aria-label={formatMsg(locale['combobox.remove'], { label: c.label })} onClick={(e) => { e.stopPropagation(); toggle(c.value); }}><X size={12} /></button>
           </span>
         ))}
         {overflow > 0 && <span className="multicombo__chip multicombo__chip--more">+{overflow}</span>}
@@ -115,7 +137,7 @@ export function MultiCombobox<T = string>({
           aria-controls={listboxId}
           aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
           className="multicombo__input"
-          placeholder={selectedItems.length === 0 ? ph : ''}
+          placeholder={chips.length === 0 ? ph : ''}
           disabled={disabled}
           value={query}
           onFocus={() => setOpen(true)}
