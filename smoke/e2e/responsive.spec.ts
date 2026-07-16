@@ -96,9 +96,11 @@ const ALLOW_SMALL_TARGET = new Set<string>([
   // Rating: 20×20 star buttons — a deliberately compact, inline rating
   // affordance; enlarging them would distort the star row.
   'Rating',
-  // TagInput: the 18×18 "×" remove button sits on a chip; the chip itself
-  // is the primary target, the × is a secondary affordance.
+  // TagInput / MultiCombobox: the 18×18 "×" remove button sits on a chip; the
+  // chip itself is the primary target, the × is a secondary affordance (chips
+  // are also removable via Backspace). Same pattern in both.
   'TagInput',
+  'MultiCombobox',
   // JsonViewer: 11×19 expand/collapse toggles in a dense tree — a code
   // inspector, not a touch-first surface.
   'JsonViewer',
