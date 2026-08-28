@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AppShell, PageHeader, type AppShellTheme, type NavItem } from './AppShell';
+import { AppShell, PageHeader, type AppShellTheme, type NavItem, type NavSection } from './AppShell';
 import { Button } from './Button';
 import { Avatar } from './Display2';
 import { Logo } from './Logo';
@@ -23,20 +23,22 @@ export default {
 
 /* Shared nav fixture. Deliberately MIXED: flat links + a collapsible group
    (`NavItem` with `children`, v1.83.0), so every story exercises the mixed
-   case instead of an isolated one. The active item lives INSIDE the group —
-   the group auto-opens (`is-within`) in every story, and in the collapsed
-   rail its icon shows the recovery tooltip (hover/focus). */
-const sections = [
+   case instead of an isolated one. The active item is TOP-LEVEL (Inicio) so
+   the orange `is-active` stripe — a top-level-only marker — shows in every
+   story; the group still starts open (`defaultOpen`) exposing children +
+   guide line. The dual cell (active INSIDE the group: `is-within` icon,
+   child bg-tint without stripe) is pinned by `TopbarBrandGroup` below. */
+const sections: NavSection[] = [
   {
     label: 'Operación',
     items: [
-      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#' },
+      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#', active: true },
       { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '#', badge: 12 },
       { id: 'productos', label: 'Productos', icon: <Package size={18} />, href: '#' },
       { id: 'despacho', label: 'Despacho', icon: <Truck size={18} />, href: '#' },
-      { id: 'reportes', label: 'Reportes', icon: <FileText size={18} />, children: [
+      { id: 'reportes', label: 'Reportes', icon: <FileText size={18} />, defaultOpen: true, children: [
         { id: 'r-ventas', label: 'Ventas', href: '#' },
-        { id: 'r-stock', label: 'Stock', href: '#', active: true },
+        { id: 'r-stock', label: 'Stock', href: '#' },
         { id: 'r-margen', label: 'Margen', href: '#' },
       ] },
     ],
@@ -50,6 +52,18 @@ const sections = [
   },
 ];
 
+/* The OTHER matrix cell: active item INSIDE the group. Used by the pinned
+   brand story — is-within icon/label (white on brand), child active as
+   bg-tint WITHOUT the stripe (top-level-only by design), guide line. */
+const sectionsGroupActive: NavSection[] = sections.map((s) => ({
+  ...s,
+  items: s.items.map((it): NavItem => it.id === 'home'
+    ? { ...it, active: false }
+    : it.id === 'reportes'
+      ? { ...it, children: it.children!.map((c) => ({ ...c, active: c.id === 'r-stock' })) }
+      : it),
+}));
+
 /* Single shell used by the Playground + the rail story. Mirrors the recommended
    pattern: the kit's `showMenuToggle` (standard filled trigger) at the start of
    `header.left`, brand Logo in `header.center`, avatar in `header.right`.
@@ -59,7 +73,8 @@ function ConfigurableShell({
   headerTheme,
   rail = false,
   startCollapsed = false,
-}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean }) {
+  navSections = sections,
+}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean; navSections?: typeof sections }) {
   const [collapsed, setCollapsed] = React.useState(startCollapsed);
   const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
@@ -69,7 +84,7 @@ function ConfigurableShell({
         theme={theme}
         headerTheme={headerTheme}
         collapsedRail={rail}
-        sections={sections}
+        sections={navSections}
         showMenuToggle
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -167,7 +182,7 @@ export const TopbarRail: StoryObj = {
  */
 export const TopbarBrandGroup: StoryObj = {
   name: 'Topbar · Brand con grupo colapsable',
-  render: () => <ConfigurableShell theme="brand" />,
+  render: () => <ConfigurableShell theme="brand" navSections={sectionsGroupActive} />,
 };
 
 /**
