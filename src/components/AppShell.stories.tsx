@@ -155,6 +155,22 @@ export const TopbarRail: StoryObj = {
 };
 
 /**
+ * **Topbar · Brand sidebar + grupo colapsable** — pins the brand × group
+ * matrix cell (the isolated group story only covered default theme, which is
+ * how the brand contrast bugs shipped). Checklist this story guards:
+ * group icon visible WITHOUT hover (`is-within` on brand = white, not
+ * `--color-primary` — invisible when the preset's primary ≡ the sidebar);
+ * children guide line perceptible but secondary (`--appshell-nav-guide`
+ * override, not the near-white `--border-default`); chevron legible; active
+ * child = bg tint only (the orange `::before` stripe is top-level-only by
+ * design, `--depth-1` hides it).
+ */
+export const TopbarBrandGroup: StoryObj = {
+  name: 'Topbar · Brand con grupo colapsable',
+  render: () => <ConfigurableShell theme="brand" />,
+};
+
+/**
  * **Topbar · uncontrolled, header render-prop** (v1.23.0). The shell owns the
  * collapse state; the hamburger is a `header.left` **render-prop** that gets
  * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled

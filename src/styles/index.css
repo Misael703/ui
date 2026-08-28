@@ -3003,9 +3003,13 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Higher specificity than the `.appshell__nav ul { padding: 0 }` reset so the
    indent actually applies. */
 .appshell__nav .appshell__navchildren { position: relative; margin: 2px 0 6px; padding-left: 30px; }
+/* Guide color is public (`--appshell-nav-guide`, same spirit as
+   `--appshell-content-pad`): the default is a LIGHT-palette border token,
+   which reads near-white on a dark brand sidebar — the brand block overrides
+   the var instead of the rule so consumer themes can retune it too. */
 .appshell__navchildren::before {
   content: ''; position: absolute; left: 26px; top: 0; bottom: 8px;
-  width: 1px; background: var(--border-default);
+  width: 1px; background: var(--appshell-nav-guide, var(--border-default));
 }
 .appshell__navitem--depth-1 {
   padding: 7px 10px; font-size: var(--text-sm); font-weight: 500;
@@ -3092,6 +3096,10 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--brand .appshell__navchevron { color: rgba(255, 255, 255, 0.55); }
 .appshell--brand .appshell__navgroup.is-within { color: var(--color-white); }
 .appshell--brand .appshell__navgroup.is-within .appshell__navicon { color: var(--color-white); }
+/* The children guide (`--border-default` base) reads near-white on the dark
+   sidebar and competes with the active child; alpha in line with the block's
+   other translucents (sidebar-foot .12, navlabel-section .55, navicon .7). */
+.appshell--brand { --appshell-nav-guide: rgba(255, 255, 255, 0.18); }
 .appshell--brand .appshell__navbadge {
   background: var(--color-secondary);
   color: var(--color-white);
