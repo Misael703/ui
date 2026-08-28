@@ -28,6 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bloque. La barra naranja de selección no cambia: top-level la mantiene y
   los hijos siguen sin ella por diseño (bg tint solo).
 
+### Changed
+- **La franja de selección ahora marca el header del grupo `is-within`** — la
+  franja naranja (`--color-secondary`) es el marcador top-level de "estás
+  aquí"; cuando el item activo es un hijo, su representante de primer nivel
+  es el header del grupo, que ahora la lleva. El hijo activo sigue señalando
+  solo con bg tint (sin franja), como antes.
+
 ### Added
 - **`--appshell-nav-guide`** — color del guide vertical de los sub-items,
   ahora variable pública (mismo espíritu que `--appshell-content-pad`): la

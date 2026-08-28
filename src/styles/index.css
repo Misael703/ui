@@ -2953,7 +2953,12 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__navitem.is-active {
   background: var(--color-primary-100); color: var(--color-primary);
 }
-.appshell__navitem.is-active::before {
+/* The stripe is the top-level "you are here" marker. It also marks the GROUP
+   header when the active item is one of its children (`is-within`) — the
+   group is the child's top-level representative; the child itself signals
+   with bg tint only (see the `--depth-1` display:none below). */
+.appshell__navitem.is-active::before,
+.appshell__navgroup.is-within::before {
   content: ''; position: absolute; left: -4px; top: 8px; bottom: 8px;
   width: 3px; border-radius: var(--radius-xs); background: var(--color-secondary);
 }
@@ -3078,7 +3083,8 @@ button, input, select, textarea { box-sizing: border-box; }
   background: rgba(255, 255, 255, 0.16);
   color: var(--color-white);
 }
-.appshell--brand .appshell__navitem.is-active::before {
+.appshell--brand .appshell__navitem.is-active::before,
+.appshell--brand .appshell__navgroup.is-within::before {
   background: var(--color-secondary);
 }
 .appshell--brand .appshell__navicon {
