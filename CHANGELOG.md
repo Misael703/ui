@@ -5,6 +5,43 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.87.0] — 2026-08-28
+
+**Minor. AppShell: grupo colapsable legible en tema brand + franja en el
+grupo activo + `--appshell-nav-guide`.**
+
+### Fixed
+- **AppShell `theme="brand"` + grupo colapsable, ícono invisible** — el ícono
+  del navgroup con item activo adentro (`is-within`) pintaba `--color-primary`
+  sobre el sidebar brand: invisible cuando el primario del preset coincide con
+  el fondo (El Alba navy) — solo reaparecía en hover. La regla `is-within`
+  (0,3,0) le ganaba al override brand del navicon (0,2,0). El chevron del
+  disclosure tampoco tenía override brand (`--fg-muted`, oscuro sobre oscuro).
+  Ahora espejan el tratamiento `is-active` en brand: ícono/label blancos,
+  chevron blanco translúcido. Destapado al mezclar el grupo colapsable en las
+  stories del AppShell (la story aislada solo probaba tema claro; eliminada —
+  el fixture compartido ahora incluye el grupo en todas, + story pinned
+  `Topbar · Brand con grupo colapsable`).
+- **AppShell brand: línea guía de los hijos demasiado fuerte** — el guide
+  vertical de `navchildren` usaba `--border-default` (token de paleta clara),
+  que lee casi blanco sobre el sidebar oscuro y compite con el item activo.
+  En brand baja a `rgba(255,255,255,0.18)`, en línea con los translúcidos del
+  bloque. La barra naranja de selección no cambia: top-level la mantiene y
+  los hijos siguen sin ella por diseño (bg tint solo).
+
+### Changed
+- **La franja de selección ahora marca el header del grupo `is-within`** — la
+  franja naranja (`--color-secondary`) es el marcador top-level de "estás
+  aquí"; cuando el item activo es un hijo, su representante de primer nivel
+  es el header del grupo, que ahora la lleva. El hijo activo sigue señalando
+  solo con bg tint (sin franja), como antes.
+
+### Added
+- **`--appshell-nav-guide`** — color del guide vertical de los sub-items,
+  ahora variable pública (mismo espíritu que `--appshell-content-pad`): la
+  base cae a `--border-default` y el bloque brand overridea la variable, no
+  la regla, así los presets/consumidores pueden retunearla.
+
 ## [1.86.0] — 2026-08-28
 
 **Minor. DataTable: empty/error anclados al viewport (fin del empty estirado).**
