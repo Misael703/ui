@@ -274,6 +274,48 @@ export const SinDatosCustom: StoryObj = {
 };
 
 /**
+ * Tabla MÁS ANCHA que el viewport + estado vacío: el mensaje queda anclado
+ * y centrado en el área visible (overlay hermano de la tabla, fuera del
+ * track de scroll horizontal), mientras el header sigue scrolleable para
+ * comunicar la forma de la tabla. Antes el empty se estiraba al ancho
+ * intrínseco de la tabla y se centraba fuera de pantalla.
+ */
+export const SinDatosTablaAncha: StoryObj = {
+  render: () => (
+    <div style={{ maxWidth: 720 }}>
+      <DataTable
+        rows={[]}
+        rowKey={(r: { id: string }) => r.id}
+        ariaLabel="Despachos"
+        empty={
+          <div>
+            <strong style={{ display: 'block', marginBottom: 4 }}>Sin despachos en el período</strong>
+            <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
+              No hay despachos emitidos entre las fechas elegidas. Prueba con otro rango.
+            </span>
+          </div>
+        }
+        columns={[
+          { key: 'fecha', header: 'Fecha' },
+          { key: 'hora', header: 'Hora' },
+          { key: 'usuario', header: 'Usuario' },
+          { key: 'tipo', header: 'Tipo de despacho' },
+          { key: 'zona', header: 'Zona operativa' },
+          { key: 'comuna', header: 'Comuna' },
+          { key: 'cliente', header: 'Cliente' },
+          { key: 'rut', header: 'RUT cliente' },
+          { key: 'tipoDoc', header: 'Tipo documento' },
+          { key: 'numDoc', header: 'N° documento' },
+          { key: 'guia', header: 'N° guía' },
+          { key: 'chofer', header: 'Chofer' },
+          { key: 'patente', header: 'Patente camión' },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
  * Toolbar / filter zone + DataTable en UNA superficie redondeada. Se pasa
  * por el prop `toolbar`: el DataTable **posee** la superficie
  * (borde+radio+overflow), la toolbar queda clipeada al radio, hay UNA sola

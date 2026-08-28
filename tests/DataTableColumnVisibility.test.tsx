@@ -32,11 +32,15 @@ describe('DataTable hiddenColumnKeys', () => {
     expect(container.querySelectorAll('thead th')).toHaveLength(3);
   });
 
-  it('el colSpan del empty usa solo las columnas visibles', () => {
+  it('empty con columnas ocultas: header visible reducido + overlay fuera de la tabla', () => {
     const { container } = render(
       <DataTable columns={COLS} rows={[]} rowKey={(r) => r.id} hiddenColumnKeys={new Set(['sku', 'price'])} />
     );
-    expect((container.querySelector('tbody td') as HTMLTableCellElement).colSpan).toBe(1);
+    expect(container.querySelectorAll('thead th')).toHaveLength(1);
+    // El empty ya no es un <td colSpan> (se estiraba al ancho intrínseco de
+    // la tabla); es un overlay hermano anclado al viewport.
+    expect(container.querySelector('tbody td')).toBeNull();
+    expect(container.querySelector('.data-table__overlay')).not.toBeNull();
   });
 });
 

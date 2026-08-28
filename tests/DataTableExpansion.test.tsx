@@ -65,10 +65,13 @@ describe('DataTable row expansion', () => {
     expect(onExpandedChange).toHaveBeenCalledWith(new Set());
   });
 
-  it('estados error/empty usan el colSpan con la columna extra', () => {
+  it('estados error/empty: overlay fuera de la tabla, header con la columna extra', () => {
     const { container } = renderTable({ rows: [], expandedKeys: new Set() });
-    const td = container.querySelector('tbody td') as HTMLTableCellElement;
-    expect(td.colSpan).toBe(2); // chevron + 1 columna
+    // El empty ya no es un <td colSpan>; es un overlay hermano anclado al
+    // viewport. El header conserva la celda del chevron + 1 columna.
+    expect(container.querySelector('tbody td')).toBeNull();
+    expect(container.querySelector('.data-table__overlay')).not.toBeNull();
+    expect(container.querySelectorAll('thead th')).toHaveLength(2);
   });
 
   it('el footer de totales agrega la celda líder del chevron', () => {
