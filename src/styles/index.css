@@ -1004,6 +1004,15 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
+/* Error / empty overlay. A block-level sibling of the table, OUTSIDE its
+   horizontal scroll track: width:auto resolves against the wrap (its
+   clientWidth), while only the table overflows — so the message pins and
+   centers in the visible viewport with zero JS, instead of stretching
+   across a wide table's intrinsic width (phantom-centered off-screen). */
+.data-table__overlay {
+  padding: 32px 16px;
+  text-align: center;
+}
 .data-table__error {
   color: var(--color-danger);
   font-size: var(--text-sm);

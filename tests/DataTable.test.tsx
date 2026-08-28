@@ -151,6 +151,57 @@ describe('DataTable', () => {
     expect(screen.queryByText('Sierra')).toBeNull();
   });
 
+  // Empty/error live OUTSIDE the <table>, as a sibling overlay: inside the
+  // table a `<td colSpan>` spans the table's intrinsic width (wider than the
+  // wrap when many nowrap headers overflow), stretching the message across
+  // the horizontal scroll track and centering it off-screen. The overlay is
+  // a block child of the wrap → sizes to the visible viewport.
+  it('empty state renders as an overlay sibling, not inside the table', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} empty="Nada" />
+    );
+    const overlay = container.querySelector('.data-table__overlay')!;
+    expect(overlay).toHaveTextContent('Nada');
+    expect(overlay.closest('table')).toBeNull();
+    // The table (header) moves into its own scroll div so scrolling wide
+    // headers can't drag the pinned overlay along.
+    expect(container.querySelector('.table-wrap__scroll table')).toBeTruthy();
+    expect(overlay.closest('.table-wrap__scroll')).toBeNull();
+    // No stretched full-width cell remains in the body.
+    expect(container.querySelector('tbody td')).toBeNull();
+  });
+
+  it('error state renders as an overlay sibling with role=alert', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} error="Boom" />
+    );
+    const overlay = container.querySelector('.data-table__overlay')!;
+    expect(overlay).toHaveAttribute('role', 'alert');
+    expect(overlay).toHaveClass('data-table__error');
+    expect(overlay.closest('table')).toBeNull();
+  });
+
+  it('no overlay (and no extra scroll div) when rows are present', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} empty="Nada" />
+    );
+    expect(container.querySelector('.data-table__overlay')).toBeNull();
+    // Unbounded mode with rows keeps the legacy structure: table directly
+    // inside .table-wrap (no inner scroll div).
+    expect(container.querySelector('.table-wrap__scroll')).toBeNull();
+    expect(container.querySelector('.table-wrap > table')).toBeTruthy();
+  });
+
+  it('bounded mode (maxHeight) keeps the overlay outside the inner scroll div', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={[]} rowKey={(r: any) => r.id} empty="Nada" maxHeight={300} />
+    );
+    const overlay = container.querySelector('.data-table__overlay')!;
+    expect(overlay).toHaveTextContent('Nada');
+    expect(overlay.closest('.table-wrap__scroll')).toBeNull();
+    expect(container.querySelector('.table-wrap__scroll table')).toBeTruthy();
+  });
+
   it('error takes precedence over empty state', () => {
     render(
       <DataTable

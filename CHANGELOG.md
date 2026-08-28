@@ -5,6 +5,29 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.86.0] — 2026-08-28
+
+**Minor. DataTable: empty/error anclados al viewport (fin del empty estirado).**
+
+### Fixed
+- **`DataTable` empty/error en tablas anchas** — los estados `empty` y `error`
+  ya no se renderizan como `<td colSpan>` dentro de la tabla: en una tabla más
+  ancha que su contenedor (headers `nowrap` que desbordan) esa celda se
+  estiraba al ancho intrínseco completo y el mensaje quedaba centrado fuera de
+  pantalla, sobre un track de scroll horizontal vacío. Ahora se renderizan
+  como overlay hermano de la tabla, FUERA del track de scroll — anclado y
+  centrado en el área visible (patrón "no rows overlay" de MUI/AG Grid). El
+  header sigue visible y scrolleable (comunica la forma de la tabla en el
+  caso filtro-sin-resultados) sin arrastrar el mensaje.
+
+### Changed
+- **Estructura DOM en estado empty/error** — el mensaje vive en
+  `.data-table__overlay` (hermano de `<table>`, dentro de `.table-wrap`), y en
+  modo unbounded la tabla se mueve a un `.table-wrap__scroll` interno para que
+  el scroll horizontal no incluya al overlay. CSS o tests de consumidores que
+  apuntaban al viejo `tbody td` del empty deben apuntar al overlay.
+  `role="alert"` del error se mantiene (ahora en el overlay).
+
 ## [1.85.0] — 2026-07-16
 
 **Minor. MultiCombobox: chips for values outside `options` (no silent data loss).**

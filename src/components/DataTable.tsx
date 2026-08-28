@@ -266,10 +266,17 @@ export interface DataTableProps<T> {
    * this selects the page — not the dataset across all pages.
    */
   onSelectionChange?: (keys: Set<string>) => void;
+  /**
+   * Rendered when `rows` is empty (and not `loading` / `error`). Shown in a
+   * viewport-pinned overlay BELOW the header, outside the horizontal scroll
+   * track — on a wide table it centers in the visible area instead of
+   * stretching to the table's intrinsic width.
+   */
   empty?: React.ReactNode;
   /**
    * Renders an error state in place of the body. Takes precedence over
-   * `loading`, `empty`, and rows. Use it when a fetch fails.
+   * `loading`, `empty`, and rows. Use it when a fetch fails. Same
+   * viewport-pinned overlay placement as `empty`.
    */
   error?: React.ReactNode;
   loading?: boolean;
@@ -585,18 +592,14 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody>
-          {error ? (
-            <tr>
-              <td
-                colSpan={totalCols}
-                className="data-table__error"
-                role="alert"
-                style={{ padding: 32, textAlign: 'center' }}
-              >
-                {error}
-              </td>
-            </tr>
-          ) : loading ? (
+          {/* Error / empty render OUTSIDE the table (the `overlay` sibling,
+              below): a `<td colSpan>` here would span the table's full
+              intrinsic width — wider than the wrapper when 16 nowrap headers
+              overflow — so the message would stretch across the scroll track
+              and center off-screen. The tbody stays empty for those states;
+              only loading keeps per-column skeletons (showing the table's
+              shape IS the point of a skeleton). */}
+          {error != null ? null : loading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={`s${i}`}>
                 {selectable && <td><div className="skel" style={{ height: 14 }} /></td>}
@@ -604,13 +607,7 @@ export function DataTable<T>({
                 {columns.map((c) => <td key={c.key}><div className="skel" style={{ height: 12, width: '70%' }} /></td>)}
               </tr>
             ))
-          ) : rows.length === 0 ? (
-            <tr>
-              <td colSpan={totalCols} style={{ padding: 32 }}>
-                {empty ?? <div style={{ textAlign: 'center', color: 'var(--fg-muted)' }}>{t['table.empty']}</div>}
-              </td>
-            </tr>
-          ) : (
+          ) : rows.length === 0 ? null : (
             <>
             {virtual && vrange.padTop > 0 && (
               <tr className="data-table__spacer" aria-hidden="true">
@@ -687,6 +684,23 @@ export function DataTable<T>({
         )}
       </table>
   );
+  // Error / empty overlay. Rendered as a block-level SIBLING of the table,
+  // outside its horizontal scroll track: a block child of the wrap sizes to
+  // the wrap's clientWidth (width:auto resolves against the containing
+  // block), while only the table overflows it — so the message stays pinned
+  // and centered in the VISIBLE viewport instead of stretching across the
+  // table's intrinsic width (the "no rows overlay" pattern of the big data
+  // grids). The header row above it stays scrollable: with zero rows the
+  // column set still communicates the table's shape (filter-empty case).
+  const overlay = error != null ? (
+    <div className="data-table__overlay data-table__error" role="alert">
+      {error}
+    </div>
+  ) : !loading && rows.length === 0 ? (
+    <div className="data-table__overlay">
+      {empty ?? <div style={{ color: 'var(--fg-muted)' }}>{t['table.empty']}</div>}
+    </div>
+  ) : null;
   // Bounded mode (`maxHeight`): the table lives in an inner scroll
   // container, while the outer `.table-wrap` keeps the border/radius and
   // `overflow: hidden` clips it cleanly — including the sticky header's
@@ -694,6 +708,11 @@ export function DataTable<T>({
   // rounded box AND the sticky scroll container can't clip the sticky paint
   // to its radius in Chrome; splitting the two does, because the outer
   // clipping element is no longer the sticky's scroll container.)
+  //
+  // Overlay states reuse that split in UNBOUNDED mode too: the table moves
+  // into a plain `.table-wrap__scroll` (no maxHeight) so the horizontal
+  // scroll lives on the inner div and the overlay — a sibling OUTSIDE it —
+  // can't be dragged along when the header scrolls.
   const wrap = (
     <div
       className={cx(
@@ -716,7 +735,10 @@ export function DataTable<T>({
             {tableEl}
           </div>
         )
-        : tableEl}
+        : overlay != null
+          ? <div className="table-wrap__scroll">{tableEl}</div>
+          : tableEl}
+      {overlay}
     </div>
   );
   // No toolbar → byte-identical legacy output. With a toolbar, the
