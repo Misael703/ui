@@ -5,9 +5,10 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.86.1] — 2026-08-28
+## [1.87.0] — 2026-08-28
 
-**Patch. AppShell: grupo colapsable legible en tema brand.**
+**Minor. AppShell: grupo colapsable legible en tema brand + franja en el
+grupo activo + `--appshell-nav-guide`.**
 
 ### Fixed
 - **AppShell `theme="brand"` + grupo colapsable, ícono invisible** — el ícono
