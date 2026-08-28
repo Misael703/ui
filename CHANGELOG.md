@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.86.1] — 2026-08-28
+
+**Patch. AppShell: grupo colapsable legible en tema brand.**
+
+### Fixed
+- **AppShell `theme="brand"` + grupo colapsable** — el ícono del navgroup con
+  item activo adentro (`is-within`) pintaba `--color-primary` (token oscuro)
+  sobre el sidebar brand oscuro: invisible. La regla `is-within` (0,3,0) le
+  ganaba al override brand del navicon (0,2,0). El chevron del disclosure
+  tampoco tenía override brand (`--fg-muted`, oscuro sobre oscuro). Ahora
+  espejan el tratamiento `is-active` en brand: ícono/label blancos, chevron
+  blanco translúcido. Destapado al mezclar el grupo colapsable en las stories
+  del AppShell (la story aislada solo probaba tema claro; eliminada — el
+  fixture compartido ahora incluye el grupo en todas las stories).
+
 ## [1.86.0] — 2026-08-28
 
 **Minor. DataTable: empty/error anclados al viewport (fin del empty estirado).**

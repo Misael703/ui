@@ -1,10 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AppShell, PageHeader, type AppShellTheme } from './AppShell';
+import { AppShell, PageHeader, type AppShellTheme, type NavItem } from './AppShell';
 import { Button } from './Button';
 import { Avatar } from './Display2';
 import { Logo } from './Logo';
-import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell } from './Icons';
+import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, FileText } from './Icons';
 import { UserMenu } from './UserMenu';
 import { DataTable, type Column } from './DataTable';
 
@@ -21,14 +21,24 @@ export default {
   },
 } as Meta;
 
+/* Shared nav fixture. Deliberately MIXED: flat links + a collapsible group
+   (`NavItem` with `children`, v1.83.0), so every story exercises the mixed
+   case instead of an isolated one. The active item lives INSIDE the group —
+   the group auto-opens (`is-within`) in every story, and in the collapsed
+   rail its icon shows the recovery tooltip (hover/focus). */
 const sections = [
   {
     label: 'Operación',
     items: [
-      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#', active: true },
+      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#' },
       { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '#', badge: 12 },
       { id: 'productos', label: 'Productos', icon: <Package size={18} />, href: '#' },
       { id: 'despacho', label: 'Despacho', icon: <Truck size={18} />, href: '#' },
+      { id: 'reportes', label: 'Reportes', icon: <FileText size={18} />, children: [
+        { id: 'r-ventas', label: 'Ventas', href: '#' },
+        { id: 'r-stock', label: 'Stock', href: '#', active: true },
+        { id: 'r-margen', label: 'Margen', href: '#' },
+      ] },
     ],
   },
   {
@@ -136,7 +146,9 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 /** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
  *  (icons, active-item bar) instead of hiding the sidebar. The render-prop
  *  trigger drives the collapse. Shown starting collapsed so the rail is
- *  visible. */
+ *  visible. The fixture's "Reportes" group collapses to its icon (marked
+ *  `is-within` — it holds the active item); hover/focus shows the recovery
+ *  tooltip, expand to see the disclosure re-open. */
 export const TopbarRail: StoryObj = {
   name: 'Topbar · Rail (collapsedRail)',
   render: () => <ConfigurableShell theme="brand" rail startCollapsed />,
@@ -275,10 +287,14 @@ export const TopbarMobileDrawerRouting: StoryObj = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: function Routing() {
     const [route, setRoute] = React.useState('Inicio');
-    const routed = sections.map((s) => ({
-      ...s,
-      items: s.items.map((it) => ({ ...it, active: it.label === route })),
-    }));
+    // Recursive: the fixture mixes flat links and a collapsible group, so the
+    // group's children also route (and only ONE item ends up active).
+    const mark = (it: NavItem): NavItem => ({
+      ...it,
+      active: it.label === route,
+      children: it.children?.map(mark),
+    });
+    const routed = sections.map((s) => ({ ...s, items: s.items.map(mark) }));
     return (
       <div style={{ height: '100vh' }}>
         <AppShell
@@ -394,49 +410,4 @@ export const TopbarTallTable: StoryObj = {
       </div>
     );
   },
-};
-
-
-/**
- * **Topbar · Collapsible nav groups** (v1.83.0) — a `NavItem` with `children`
- * renders a disclosure group (a button, not a link). The group holding the
- * active item auto-opens and reads `is-within`. Collapse the sidebar to see the
- * rail tooltips (labels recover on hover/focus). Tab first to reach the
- * skip-to-content link.
- */
-export const TopbarNestedGroups: StoryObj = {
-  name: 'Topbar · Collapsible nav groups',
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        showMenuToggle
-        collapsedRail
-        currentPath="/reportes/stock"
-        sections={[
-          { label: 'Operación', items: [
-            { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '/' },
-            { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '/pedidos', badge: 12 },
-            { id: 'reportes', label: 'Reportes', icon: <Package size={18} />, children: [
-              { id: 'r-ventas', label: 'Ventas', href: '/reportes/ventas' },
-              { id: 'r-stock', label: 'Stock', href: '/reportes/stock' },
-              { id: 'r-margen', label: 'Margen', href: '/reportes/margen' },
-            ] },
-          ] },
-          { label: 'Administración', items: [
-            { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '/clientes' },
-            { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '/config' },
-          ] },
-        ]}
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
-        }}
-      >
-        <div style={{ padding: 24 }}>
-          <PageHeader title="Stock" description="currentPath activa Stock y abre el grupo Reportes solo, sin setear active a mano. Colapsa el sidebar (toggle) para ver los tooltips del rail; Tab llega primero al skip-link." />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
 };

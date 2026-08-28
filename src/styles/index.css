@@ -3084,6 +3084,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--brand .appshell__navitem:hover .appshell__navicon {
   color: var(--color-white);
 }
+/* Collapsible group on brand: the default-theme is-within accents
+   (`--color-primary` icon) and the chevron's `--fg-muted` are DARK tokens —
+   invisible on the dark brand sidebar (the is-within icon rule outranks the
+   brand navicon rule at 0,3,0 vs 0,2,0). Mirror the is-active treatment:
+   white icon/label, translucent chevron. */
+.appshell--brand .appshell__navchevron { color: rgba(255, 255, 255, 0.55); }
+.appshell--brand .appshell__navgroup.is-within { color: var(--color-white); }
+.appshell--brand .appshell__navgroup.is-within .appshell__navicon { color: var(--color-white); }
 .appshell--brand .appshell__navbadge {
   background: var(--color-secondary);
   color: var(--color-white);
