@@ -127,6 +127,38 @@ export const AvatarPropio: StoryObj = {
 };
 
 /**
+ * `compact` colapsa el trigger a puro avatar en TODO viewport — variante de
+ * tamaño opt-in para headers con acciones hermanas (notificaciones, búsqueda)
+ * donde nombre + rol apretarían el slot. El hover es CUADRADO (misma caja
+ * 40×40 del menu toggle): el trigger lee como un control más del header, no
+ * como un círculo suelto. El popover sigue mostrando la identidad completa:
+ * no se pierde nada, solo cambia la huella del trigger.
+ */
+export const Compacto: StoryObj = {
+  name: 'Compacto (compact)',
+  render: () => (
+    <Strip>
+      <button type="button" aria-label="Notificaciones" style={{
+        width: 36, height: 36, borderRadius: 999, border: 0, background: 'transparent',
+        cursor: 'pointer', color: 'inherit', marginRight: 8,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      }}><Bell size={18} /></button>
+      <UserMenu
+        compact
+        name="Misael Ocas"
+        role="Administrador"
+        items={[
+          { label: 'Mi perfil', icon: <User size={16} /> },
+          { label: 'Configuración', icon: <Settings size={16} /> },
+          'separator',
+          { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
+        ]}
+      />
+    </Strip>
+  ),
+};
+
+/**
  * `placement` + `align` controlan de qué lado y con qué anclaje sale el panel.
  * En un topbar normalmente quieres `placement="bottom"` + `align="end"` (default),
  * para que el panel se pegue al borde derecho y no se salga del viewport.

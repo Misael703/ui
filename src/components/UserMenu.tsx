@@ -24,6 +24,15 @@ export interface UserMenuProps {
   align?: PopoverAlign;
   /** Render `href` items through a custom link (e.g. Next `<Link>`). */
   linkAs?: (props: { href: string; className: string; children: React.ReactNode }) => React.ReactNode;
+  /**
+   * Collapse the trigger to just the avatar at EVERY viewport. Opt in when
+   * the header slot has sibling actions (notifications, search) that the
+   * full name + role would crowd out. The popover still shows the full
+   * identity, so nothing is lost — only the trigger footprint changes. The
+   * hover box matches the menu toggle (40×40 squared), so it reads as one
+   * more header control; the <900px auto-collapse keeps its round hover.
+   */
+  compact?: boolean;
   className?: string;
   contentClassName?: string;
   ariaLabel?: string;
@@ -35,12 +44,14 @@ export interface UserMenuProps {
  * below 900px (same breakpoint as the AppShell mobile drawer), so it never
  * overflows a narrow header. A Popover mounts the details on click and closes
  * on ESC / outside-click. The breakpoint is fixed by design — the collapse is
- * the whole point of the component, not a per-consumer decision.
+ * the whole point of the component, not a per-consumer decision. `compact`
+ * applies the same avatar-only collapse at every viewport (a size variant,
+ * not a breakpoint override).
  */
 export function UserMenu({
   name, role, items, avatar,
   placement = 'bottom', align = 'end',
-  linkAs, className, contentClassName, ariaLabel,
+  linkAs, compact = false, className, contentClassName, ariaLabel,
 }: UserMenuProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -75,7 +86,7 @@ export function UserMenu({
       className={className}
       contentClassName={cx('usermenu__panel', contentClassName)}
       trigger={
-        <button type="button" className="usermenu__trigger" aria-label={ariaLabel ?? 'Abrir menú de usuario'}>
+        <button type="button" className={cx('usermenu__trigger', compact && 'usermenu__trigger--compact')} aria-label={ariaLabel ?? 'Abrir menú de usuario'}>
           {avatar ?? <Avatar name={name} size={32} />}
           <span className="usermenu__text">
             <strong className="usermenu__name">{name}</strong>

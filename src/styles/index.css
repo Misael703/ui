@@ -5197,6 +5197,18 @@ button, input, select, textarea { box-sizing: border-box; }
   /* collapsed to just the circular avatar -> round hover, not a rounded square */
   .usermenu__trigger { padding: 0; gap: 0; border-radius: 999px; }
 }
+/* `compact`: avatar-only trigger as an opt-in size variant at every viewport.
+   For headers with sibling actions (notifications, search). Unlike the
+   breakpoint collapse above (round hover hugging the avatar), the hover box
+   matches the `.appshell__menu-toggle` geometry — 40×40, `--radius-md` — so
+   the compact trigger reads as one more SQUARED header control next to its
+   siblings, not a lone circle. */
+.usermenu__trigger--compact .usermenu__text,
+.usermenu__trigger--compact .usermenu__chevron { display: none; }
+.usermenu__trigger--compact {
+  width: 40px; height: 40px; justify-content: center;
+  padding: 0; gap: 0; border-radius: var(--radius-md);
+}
 .usermenu__panel { min-width: 220px; padding: 4px; }
 .usermenu__header { display: flex; gap: 10px; align-items: center; padding: 10px 12px; }
 .usermenu__header-text { display: flex; flex-direction: column; line-height: 1.3; }

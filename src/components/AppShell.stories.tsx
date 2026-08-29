@@ -2,11 +2,9 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppShell, PageHeader, type AppShellTheme, type NavItem, type NavSection } from './AppShell';
 import { Button } from './Button';
-import { Avatar } from './Display2';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, FileText } from './Icons';
 import { UserMenu } from './UserMenu';
-import { DataTable, type Column } from './DataTable';
 
 export default {
   title: 'Layout/AppShell',
@@ -27,7 +25,8 @@ export default {
    the orange `is-active` stripe — a top-level-only marker — shows in every
    story; the group still starts open (`defaultOpen`) exposing children +
    guide line. The dual cell (active INSIDE the group: `is-within` icon,
-   child bg-tint without stripe) is pinned by `TopbarBrandGroup` below. */
+   child bg-tint without stripe) is the Playground's `activeItem: 'en grupo'`
+   control. */
 const sections: NavSection[] = [
   {
     label: 'Operación',
@@ -52,9 +51,10 @@ const sections: NavSection[] = [
   },
 ];
 
-/* The OTHER matrix cell: active item INSIDE the group. Used by the pinned
-   brand story — is-within icon/label (white on brand), child active as
-   bg-tint WITHOUT the stripe (top-level-only by design), guide line. */
+/* The OTHER matrix cell: active item INSIDE the group. Wired to the
+   Playground's `activeItem: 'en grupo'` control — is-within icon/label
+   (white on brand), stripe on the group header, child active as bg-tint
+   WITHOUT the stripe (top-level-only by design), guide line. */
 const sectionsGroupActive: NavSection[] = sections.map((s) => ({
   ...s,
   items: s.items.map((it): NavItem => it.id === 'home'
@@ -64,10 +64,25 @@ const sectionsGroupActive: NavSection[] = sections.map((s) => ({
       : it),
 }));
 
+/* Standard header.right across ALL stories: the kit `UserMenu`, not a bare
+   `<Avatar>` (that was the pre-v1.66.0 pattern; the avatar alone opens
+   nothing and demos a dead end). `compact` = avatar-only trigger, used where
+   sibling actions (Bell) share the slot. */
+const USER_ITEMS = [
+  { label: 'Mi perfil' },
+  { label: 'Configuración' },
+  'separator' as const,
+  { label: 'Cerrar sesión', danger: true },
+];
+const DemoUserMenu = ({ compact = false }: { compact?: boolean }) => (
+  <UserMenu name="Misael Ocas" role="Administrador" items={USER_ITEMS} compact={compact} />
+);
+
 /* Single shell used by the Playground + the rail story. Mirrors the recommended
    pattern: the kit's `showMenuToggle` (standard filled trigger) at the start of
-   `header.left`, brand Logo in `header.center`, avatar in `header.right`.
-   Internal-scroll model — wrap in a 100vh container. */
+   `header.left`, brand Logo in `header.center`, notifications + compact
+   `UserMenu` in `header.right`. Internal-scroll model — wrap in a 100vh
+   container. */
 function ConfigurableShell({
   theme = 'default',
   headerTheme,
@@ -98,7 +113,7 @@ function ConfigurableShell({
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}><Bell size={18} /></button>
               <span aria-hidden="true" style={{ width: 1, height: 20, background: sepColor }} />
-              <Avatar name="Misael Ocas" size={32} />
+              <DemoUserMenu compact />
             </>
           ),
         }}
@@ -135,12 +150,22 @@ interface PlaygroundArgs {
   headerTheme: AppShellTheme;
   collapsedRail: boolean;
   defaultCollapsed: boolean;
+  activeItem: 'top-level' | 'en grupo';
 }
 
 /**
- * **Playground** — configurable AppShell. Flip the controls to explore the
- * whole matrix: `theme` × `headerTheme` × `collapsedRail` × initial
- * collapse. The named stories below pin the variants worth fixing in CI.
+ * **Playground** — the MAIN story: the whole feature matrix behind controls —
+ * `theme` × `headerTheme` × `collapsedRail` × initial collapse × where the
+ * active item lives (`activeItem`). The other stories exist only for what
+ * controls can't represent: the render-prop API path, the no-sidebar layout,
+ * and the mobile drawer + `linkAs` routing.
+ *
+ * Cells worth revisiting when touching nav/brand CSS:
+ * - `theme: brand` + `activeItem: 'en grupo'` — the brand × group contrast
+ *   cell (v1.87.0 fixes): group icon white WITHOUT hover, children guide
+ *   subtle, chevron legible, stripe on the group header, child = bg tint.
+ * - `collapsedRail` + `defaultCollapsed` — the icon rail; the group collapses
+ *   to its icon with the recovery tooltip on hover/focus.
  */
 export const Playground: StoryObj<PlaygroundArgs> = {
   argTypes: {
@@ -148,41 +173,24 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     headerTheme: { control: 'inline-radio', options: ['default', 'brand'] },
     collapsedRail: { control: 'boolean' },
     defaultCollapsed: { control: 'boolean' },
+    activeItem: { control: 'inline-radio', options: ['top-level', 'en grupo'] },
   },
-  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false },
+  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false, activeItem: 'top-level' },
   render: (a) => {
     // Remount the stateful shell when collapse-affecting args change, so the
     // initial-collapse / rail controls take effect (useState init is read once).
     const k = `${a.defaultCollapsed}-${a.collapsedRail}`;
-    return <ConfigurableShell key={k} theme={a.theme} headerTheme={a.headerTheme} rail={a.collapsedRail} startCollapsed={a.defaultCollapsed} />;
+    return (
+      <ConfigurableShell
+        key={k}
+        theme={a.theme}
+        headerTheme={a.headerTheme}
+        rail={a.collapsedRail}
+        startCollapsed={a.defaultCollapsed}
+        navSections={a.activeItem === 'en grupo' ? sectionsGroupActive : sections}
+      />
+    );
   },
-};
-
-/** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
- *  (icons, active-item bar) instead of hiding the sidebar. The render-prop
- *  trigger drives the collapse. Shown starting collapsed so the rail is
- *  visible. The fixture's "Reportes" group collapses to its icon (marked
- *  `is-within` — it holds the active item); hover/focus shows the recovery
- *  tooltip, expand to see the disclosure re-open. */
-export const TopbarRail: StoryObj = {
-  name: 'Topbar · Rail (collapsedRail)',
-  render: () => <ConfigurableShell theme="brand" rail startCollapsed />,
-};
-
-/**
- * **Topbar · Brand sidebar + grupo colapsable** — pins the brand × group
- * matrix cell (the isolated group story only covered default theme, which is
- * how the brand contrast bugs shipped). Checklist this story guards:
- * group icon visible WITHOUT hover (`is-within` on brand = white, not
- * `--color-primary` — invisible when the preset's primary ≡ the sidebar);
- * children guide line perceptible but secondary (`--appshell-nav-guide`
- * override, not the near-white `--border-default`); chevron legible; active
- * child = bg tint only (the orange `::before` stripe is top-level-only by
- * design, `--depth-1` hides it).
- */
-export const TopbarBrandGroup: StoryObj = {
-  name: 'Topbar · Brand con grupo colapsable',
-  render: () => <ConfigurableShell theme="brand" navSections={sectionsGroupActive} />,
 };
 
 /**
@@ -191,36 +199,8 @@ export const TopbarBrandGroup: StoryObj = {
  * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled
  * shell from the header — and what lets `persistKey` (uncontrolled) coexist
  * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
+ * (For the standard trigger, just use `showMenuToggle` — see Playground.)
  */
-/**
- * **Topbar · Built-in menu toggle** (v1.34.0) — `showMenuToggle` opts the
- * consumer into the kit's default hamburger trigger. No render-prop needed:
- * the toggle is prepended to `header.left` and drives the DWIM `toggle()`
- * (drawer in mobile, collapse in desktop). The render-prop API stays
- * available for custom triggers — both can coexist.
- */
-export const TopbarBuiltinMenuToggle: StoryObj = {
-  name: 'Topbar · Built-in menu toggle (showMenuToggle)',
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        collapsedRail
-        showMenuToggle
-        sections={sections}
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
-        }}
-      >
-        <div style={{ padding: 24 }}>
-          <PageHeader title="Dashboard" description="`showMenuToggle` renderiza el toggle estándar del kit — no hace falta render-prop" />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
-};
-
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: () => (
@@ -242,7 +222,7 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
             ><MenuIcon size={20} /></button>
           ),
           center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
+          right: <DemoUserMenu />,
         }}
       >
         <div style={{ padding: 24 }}>
@@ -282,39 +262,14 @@ export const TopbarOnlyNoNav: StoryObj = {
  * **Topbar · Mobile drawer** (v1.31.0). Under 900px the sidebar becomes an
  * overlay anchored beneath the header. The kit's `showMenuToggle` toggles
  * `collapsed` on desktop and opens/closes the drawer on mobile — one control,
- * DWIM by viewport. ESC and a tap on the scrim also close it.
+ * DWIM by viewport. ESC and a tap on the scrim close it; and with `linkAs`
+ * (next/link, where the kit can't inject an `onClick` into the consumer's
+ * node) the drawer also closes itself on link activation — open the menu and
+ * tap an item: the route changes and the drawer disappears. Group children
+ * route too (recursive `active` mapping, only ONE item active at a time).
  */
 export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        sections={sections}
-        showMenuToggle
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={26} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
-        }}
-      >
-        <div style={{ padding: 16 }}>
-          <PageHeader title="Pedidos" description="Toca el menú para abrir el drawer; ESC o tap fuera lo cierran." />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
-};
-
-/**
- * **Topbar · Mobile drawer + `linkAs` (cierra al navegar).** El caso real: con
- * `next/link` (vía `linkAs`) el kit no puede inyectar un `onClick` en el nodo del
- * consumidor, así que antes el drawer navegaba pero quedaba abierto sobre la
- * página nueva. Ahora se cierra solo al activar el link. Abre el menú y toca un
- * item: la ruta cambia y el drawer desaparece.
- */
-export const TopbarMobileDrawerRouting: StoryObj = {
-  name: 'Topbar · Mobile drawer + linkAs (cierra al navegar)',
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: function Routing() {
     const [route, setRoute] = React.useState('Inicio');
@@ -343,11 +298,11 @@ export const TopbarMobileDrawerRouting: StoryObj = {
           )}
           header={{
             center: <Logo variant="horizontal" bg="auto" height={26} />,
-            right: <Avatar name="Misael Ocas" size={32} />,
+            right: <DemoUserMenu />,
           }}
         >
           <div style={{ padding: 16 }}>
-            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer y toca un item: navega (linkAs) y el drawer se cierra solo." />
+            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer con el menú y toca un item: navega (linkAs) y el drawer se cierra solo. ESC o tap fuera también lo cierran." />
           </div>
         </AppShell>
       </div>
@@ -355,90 +310,3 @@ export const TopbarMobileDrawerRouting: StoryObj = {
   },
 };
 
-/**
- * **Topbar · User menu (`<UserMenu>`)** — Linear / Vercel / Notion pattern,
- * empaquetado como componente (v1.66.0). Caso real: en mobile el slot
- * `header.right` con avatar + nombre + rol + chevron desbordaba (~280px de
- * contenido contra un viewport de 320). El componente colapsa el trigger a
- * puro avatar bajo 900px (mismo breakpoint que el mobile drawer) — sin
- * breakpoint hacks del consumer. Abre un popover con nombre + rol + items;
- * cierra con ESC, tap fuera, o al seleccionar un item.
- */
-export const TopbarUserMenu: StoryObj = {
-  name: 'Topbar · User menu (UserMenu)',
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        theme="brand"
-        sections={sections}
-        showMenuToggle
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: (
-            <UserMenu
-              name="Administrador Admin"
-              role="Administrador"
-              items={[
-                { label: 'Mi perfil' },
-                { label: 'Configuración' },
-                'separator',
-                { label: 'Cerrar sesión', danger: true },
-              ]}
-            />
-          ),
-        }}
-      >
-        <div style={{ padding: 24 }}>
-          <PageHeader
-            title="Dashboard"
-            description="Click sobre el avatar para abrir el menú. Misma forma en mobile y desktop — sin overflow ni breakpoint hacks."
-          />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
-};
-
-/**
- * **Topbar · tall DataTable (scroll containment)** — regression guard for the
- * double-scrollbar leak. A `.table-wrap` (`overflow-x: auto`) taller than the
- * viewport used to leak its vertical layout-overflow past `.appshell__content`
- * to the document, producing a SECOND scrollbar at the page level. The shell
- * now contains its scroll boundary, so only `.appshell__content` scrolls. View
- * at a low viewport height: the page itself must not scroll.
- */
-export const TopbarTallTable: StoryObj = {
-  name: 'Topbar · tall DataTable (scroll containment)',
-  render: () => {
-    interface Row { id: string; sku: string; name: string; stock: number }
-    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
-      id: String(i + 1),
-      sku: `SKU-${1000 + i}`,
-      name: `Producto ${i + 1}`,
-      stock: (i * 7) % 50,
-    }));
-    const columns: Column<Row>[] = [
-      { key: 'sku', header: 'SKU' },
-      { key: 'name', header: 'Producto' },
-      { key: 'stock', header: 'Stock', numeric: true },
-    ];
-    return (
-      <div style={{ height: '100vh' }}>
-        <AppShell
-          sections={sections}
-          showMenuToggle
-          header={{
-            center: <Logo variant="horizontal" bg="auto" height={28} />,
-            right: <Avatar name="Misael Ocas" size={32} />,
-          }}
-        >
-          <div style={{ padding: 24, display: 'grid', gap: 16 }}>
-            <PageHeader title="Inventario" description="Tabla más alta que el viewport: el scroll vive en el contenido, no en el documento" />
-            <DataTable ariaLabel="Inventario" rows={rows} rowKey={(r) => r.id} columns={columns} />
-          </div>
-        </AppShell>
-      </div>
-    );
-  },
-};
