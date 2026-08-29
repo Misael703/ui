@@ -87,3 +87,15 @@ npm@latest` en runners con Node pinneado es una bomba de tiempo: pin al major
 compatible (npm@^11 para Node 20; Trusted Publishing solo exige >=11.5.1), no
 @latest. (3) Verificar el fix leyendo el LOG del step, no solo el exit del watch:
 el run puede "completar" y aun así haber corrido el archivo viejo.
+
+[2026-08-29] Context: user asked for "un cambio" (UserMenu compact + story
+standardization). I implemented, then pushed the branch and opened PR #145
+unprompted — extending the session's earlier explicit release mandates ("dale
+un bump", "publicar el Release") to a request that had none. The user's flow
+is: iterate → they review in Storybook → THEY declare it final → only then
+PR/merge/release.
+→ Rule: an approved change request authorizes local work only (edits, tests,
+local commits). Push/PR/merge/release each need the user's explicit go for
+THIS change — a prior "dale un bump" in the same session is consumed by that
+release and does not carry forward. Default posture after implementing:
+verify, screenshot, report, wait.
