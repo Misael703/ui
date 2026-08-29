@@ -127,11 +127,12 @@ export const AvatarPropio: StoryObj = {
 };
 
 /**
- * `compact` colapsa el trigger a puro avatar en TODO viewport (el mismo
- * tratamiento que el breakpoint <900px aplica solo en mobile) — variante de
+ * `compact` colapsa el trigger a puro avatar en TODO viewport — variante de
  * tamaño opt-in para headers con acciones hermanas (notificaciones, búsqueda)
- * donde nombre + rol apretarían el slot. El popover sigue mostrando la
- * identidad completa: no se pierde nada, solo cambia la huella del trigger.
+ * donde nombre + rol apretarían el slot. El hover es CUADRADO (misma caja
+ * 40×40 del menu toggle): el trigger lee como un control más del header, no
+ * como un círculo suelto. El popover sigue mostrando la identidad completa:
+ * no se pierde nada, solo cambia la huella del trigger.
  */
 export const Compacto: StoryObj = {
   name: 'Compacto (compact)',

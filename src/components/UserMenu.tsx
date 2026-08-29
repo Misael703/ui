@@ -25,11 +25,12 @@ export interface UserMenuProps {
   /** Render `href` items through a custom link (e.g. Next `<Link>`). */
   linkAs?: (props: { href: string; className: string; children: React.ReactNode }) => React.ReactNode;
   /**
-   * Collapse the trigger to just the avatar at EVERY viewport (the same
-   * treatment the <900px breakpoint applies automatically). Opt in when the
-   * header slot has sibling actions (notifications, search) that the full
-   * name + role would crowd out. The popover still shows the full identity,
-   * so nothing is lost — only the trigger footprint changes.
+   * Collapse the trigger to just the avatar at EVERY viewport. Opt in when
+   * the header slot has sibling actions (notifications, search) that the
+   * full name + role would crowd out. The popover still shows the full
+   * identity, so nothing is lost — only the trigger footprint changes. The
+   * hover box matches the menu toggle (40×40 squared), so it reads as one
+   * more header control; the <900px auto-collapse keeps its round hover.
    */
   compact?: boolean;
   className?: string;

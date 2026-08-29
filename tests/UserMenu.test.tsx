@@ -99,8 +99,10 @@ describe('UserMenu', () => {
     expect(getByLabelText('Abrir menú de usuario').className).not.toContain('--compact');
   });
 
-  it('CSS: compact modifier mirrors the breakpoint collapse at every viewport', () => {
+  it('CSS: compact hides text + chevron and hover-matches the menu toggle (40px squared)', () => {
     expect(css).toMatch(/\.usermenu__trigger--compact \.usermenu__text,\s*\.usermenu__trigger--compact \.usermenu__chevron \{ display: none/);
-    expect(css).toMatch(/\.usermenu__trigger--compact \{ padding: 0; gap: 0; border-radius: 999px/);
+    // Squared header-control geometry (same as .appshell__menu-toggle), NOT
+    // the round mobile collapse: compact sits next to sibling controls.
+    expect(css).toMatch(/\.usermenu__trigger--compact \{\s*width: 40px; height: 40px; justify-content: center;\s*padding: 0; gap: 0; border-radius: var\(--radius-md\)/);
   });
 });
