@@ -80,4 +80,27 @@ describe('UserMenu', () => {
     // collapsed (mobile, avatar-only) goes round so the hover hugs the circular avatar
     expect(css).toMatch(/@media \(max-width: 900px\)[\s\S]*?\.usermenu__trigger \{ padding: 0; gap: 0; border-radius: 999px/);
   });
+
+  it('compact: trigger carries the modifier class; identity stays in the popover', () => {
+    const { getByLabelText, getByRole } = render(
+      <UserMenu compact name="Ada Lovelace" role="Admin" items={items} />,
+    );
+    const trigger = getByLabelText('Abrir menú de usuario');
+    expect(trigger.className).toContain('usermenu__trigger--compact');
+    // Full identity survives in the popover header — compact only shrinks the trigger.
+    fireEvent.click(trigger);
+    const dialog = getByRole('dialog');
+    expect(within(dialog).getByText('Ada Lovelace')).toBeTruthy();
+    expect(within(dialog).getByText('Admin')).toBeTruthy();
+  });
+
+  it('default: trigger has no compact modifier (avatar-only stays opt-in)', () => {
+    const { getByLabelText } = render(<UserMenu name="Ada" items={items} />);
+    expect(getByLabelText('Abrir menú de usuario').className).not.toContain('--compact');
+  });
+
+  it('CSS: compact modifier mirrors the breakpoint collapse at every viewport', () => {
+    expect(css).toMatch(/\.usermenu__trigger--compact \.usermenu__text,\s*\.usermenu__trigger--compact \.usermenu__chevron \{ display: none/);
+    expect(css).toMatch(/\.usermenu__trigger--compact \{ padding: 0; gap: 0; border-radius: 999px/);
+  });
 });

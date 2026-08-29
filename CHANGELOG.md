@@ -5,6 +5,18 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.88.0] — 2026-08-29
+
+**Minor. UserMenu: variante `compact` (trigger solo-avatar en todo viewport).**
+
+### Added
+- **`UserMenu.compact`** — colapsa el trigger a puro avatar en todo viewport
+  (el mismo tratamiento que el breakpoint <900px aplica solo en mobile).
+  Variante de tamaño opt-in para headers con acciones hermanas
+  (notificaciones, búsqueda) donde nombre + rol apretarían el slot. El
+  popover sigue mostrando la identidad completa. El colapso automático bajo
+  900px no cambia.
+
 ## [1.87.0] — 2026-08-28
 
 **Minor. AppShell: grupo colapsable legible en tema brand + franja en el

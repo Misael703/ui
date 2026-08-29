@@ -2,7 +2,6 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppShell, PageHeader, type AppShellTheme, type NavItem, type NavSection } from './AppShell';
 import { Button } from './Button';
-import { Avatar } from './Display2';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, FileText } from './Icons';
 import { UserMenu } from './UserMenu';
@@ -64,10 +63,25 @@ const sectionsGroupActive: NavSection[] = sections.map((s) => ({
       : it),
 }));
 
+/* Standard header.right across ALL stories: the kit `UserMenu`, not a bare
+   `<Avatar>` (that was the pre-v1.66.0 pattern; the avatar alone opens
+   nothing and demos a dead end). `compact` = avatar-only trigger, used where
+   sibling actions (Bell) share the slot. */
+const USER_ITEMS = [
+  { label: 'Mi perfil' },
+  { label: 'Configuración' },
+  'separator' as const,
+  { label: 'Cerrar sesión', danger: true },
+];
+const DemoUserMenu = ({ compact = false }: { compact?: boolean }) => (
+  <UserMenu name="Misael Ocas" role="Administrador" items={USER_ITEMS} compact={compact} />
+);
+
 /* Single shell used by the Playground + the rail story. Mirrors the recommended
    pattern: the kit's `showMenuToggle` (standard filled trigger) at the start of
-   `header.left`, brand Logo in `header.center`, avatar in `header.right`.
-   Internal-scroll model — wrap in a 100vh container. */
+   `header.left`, brand Logo in `header.center`, notifications + compact
+   `UserMenu` in `header.right`. Internal-scroll model — wrap in a 100vh
+   container. */
 function ConfigurableShell({
   theme = 'default',
   headerTheme,
@@ -98,7 +112,7 @@ function ConfigurableShell({
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}><Bell size={18} /></button>
               <span aria-hidden="true" style={{ width: 1, height: 20, background: sepColor }} />
-              <Avatar name="Misael Ocas" size={32} />
+              <DemoUserMenu compact />
             </>
           ),
         }}
@@ -209,7 +223,7 @@ export const TopbarBuiltinMenuToggle: StoryObj = {
         sections={sections}
         header={{
           center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
+          right: <DemoUserMenu />,
         }}
       >
         <div style={{ padding: 24 }}>
@@ -242,7 +256,7 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
             ><MenuIcon size={20} /></button>
           ),
           center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
+          right: <DemoUserMenu />,
         }}
       >
         <div style={{ padding: 24 }}>
@@ -294,7 +308,7 @@ export const TopbarMobileDrawer: StoryObj = {
         showMenuToggle
         header={{
           center: <Logo variant="horizontal" bg="auto" height={26} />,
-          right: <Avatar name="Misael Ocas" size={32} />,
+          right: <DemoUserMenu />,
         }}
       >
         <div style={{ padding: 16 }}>
@@ -343,7 +357,7 @@ export const TopbarMobileDrawerRouting: StoryObj = {
           )}
           header={{
             center: <Logo variant="horizontal" bg="auto" height={26} />,
-            right: <Avatar name="Misael Ocas" size={32} />,
+            right: <DemoUserMenu />,
           }}
         >
           <div style={{ padding: 16 }}>
@@ -353,51 +367,6 @@ export const TopbarMobileDrawerRouting: StoryObj = {
       </div>
     );
   },
-};
-
-/**
- * **Topbar · User menu (`<UserMenu>`)** — Linear / Vercel / Notion pattern,
- * empaquetado como componente (v1.66.0). Caso real: en mobile el slot
- * `header.right` con avatar + nombre + rol + chevron desbordaba (~280px de
- * contenido contra un viewport de 320). El componente colapsa el trigger a
- * puro avatar bajo 900px (mismo breakpoint que el mobile drawer) — sin
- * breakpoint hacks del consumer. Abre un popover con nombre + rol + items;
- * cierra con ESC, tap fuera, o al seleccionar un item.
- */
-export const TopbarUserMenu: StoryObj = {
-  name: 'Topbar · User menu (UserMenu)',
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        theme="brand"
-        sections={sections}
-        showMenuToggle
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: (
-            <UserMenu
-              name="Administrador Admin"
-              role="Administrador"
-              items={[
-                { label: 'Mi perfil' },
-                { label: 'Configuración' },
-                'separator',
-                { label: 'Cerrar sesión', danger: true },
-              ]}
-            />
-          ),
-        }}
-      >
-        <div style={{ padding: 24 }}>
-          <PageHeader
-            title="Dashboard"
-            description="Click sobre el avatar para abrir el menú. Misma forma en mobile y desktop — sin overflow ni breakpoint hacks."
-          />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
 };
 
 /**
@@ -430,7 +399,7 @@ export const TopbarTallTable: StoryObj = {
           showMenuToggle
           header={{
             center: <Logo variant="horizontal" bg="auto" height={28} />,
-            right: <Avatar name="Misael Ocas" size={32} />,
+            right: <DemoUserMenu />,
           }}
         >
           <div style={{ padding: 24, display: 'grid', gap: 16 }}>
