@@ -25,7 +25,8 @@ export default {
    the orange `is-active` stripe — a top-level-only marker — shows in every
    story; the group still starts open (`defaultOpen`) exposing children +
    guide line. The dual cell (active INSIDE the group: `is-within` icon,
-   child bg-tint without stripe) is pinned by `TopbarBrandGroup` below. */
+   child bg-tint without stripe) is the Playground's `activeItem: 'en grupo'`
+   control. */
 const sections: NavSection[] = [
   {
     label: 'Operación',
@@ -50,9 +51,10 @@ const sections: NavSection[] = [
   },
 ];
 
-/* The OTHER matrix cell: active item INSIDE the group. Used by the pinned
-   brand story — is-within icon/label (white on brand), child active as
-   bg-tint WITHOUT the stripe (top-level-only by design), guide line. */
+/* The OTHER matrix cell: active item INSIDE the group. Wired to the
+   Playground's `activeItem: 'en grupo'` control — is-within icon/label
+   (white on brand), stripe on the group header, child active as bg-tint
+   WITHOUT the stripe (top-level-only by design), guide line. */
 const sectionsGroupActive: NavSection[] = sections.map((s) => ({
   ...s,
   items: s.items.map((it): NavItem => it.id === 'home'
@@ -148,12 +150,22 @@ interface PlaygroundArgs {
   headerTheme: AppShellTheme;
   collapsedRail: boolean;
   defaultCollapsed: boolean;
+  activeItem: 'top-level' | 'en grupo';
 }
 
 /**
- * **Playground** — configurable AppShell. Flip the controls to explore the
- * whole matrix: `theme` × `headerTheme` × `collapsedRail` × initial
- * collapse. The named stories below pin the variants worth fixing in CI.
+ * **Playground** — the MAIN story: the whole feature matrix behind controls —
+ * `theme` × `headerTheme` × `collapsedRail` × initial collapse × where the
+ * active item lives (`activeItem`). The other stories exist only for what
+ * controls can't represent: the render-prop API path, the no-sidebar layout,
+ * and the mobile drawer + `linkAs` routing.
+ *
+ * Cells worth revisiting when touching nav/brand CSS:
+ * - `theme: brand` + `activeItem: 'en grupo'` — the brand × group contrast
+ *   cell (v1.87.0 fixes): group icon white WITHOUT hover, children guide
+ *   subtle, chevron legible, stripe on the group header, child = bg tint.
+ * - `collapsedRail` + `defaultCollapsed` — the icon rail; the group collapses
+ *   to its icon with the recovery tooltip on hover/focus.
  */
 export const Playground: StoryObj<PlaygroundArgs> = {
   argTypes: {
@@ -161,41 +173,24 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     headerTheme: { control: 'inline-radio', options: ['default', 'brand'] },
     collapsedRail: { control: 'boolean' },
     defaultCollapsed: { control: 'boolean' },
+    activeItem: { control: 'inline-radio', options: ['top-level', 'en grupo'] },
   },
-  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false },
+  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false, activeItem: 'top-level' },
   render: (a) => {
     // Remount the stateful shell when collapse-affecting args change, so the
     // initial-collapse / rail controls take effect (useState init is read once).
     const k = `${a.defaultCollapsed}-${a.collapsedRail}`;
-    return <ConfigurableShell key={k} theme={a.theme} headerTheme={a.headerTheme} rail={a.collapsedRail} startCollapsed={a.defaultCollapsed} />;
+    return (
+      <ConfigurableShell
+        key={k}
+        theme={a.theme}
+        headerTheme={a.headerTheme}
+        rail={a.collapsedRail}
+        startCollapsed={a.defaultCollapsed}
+        navSections={a.activeItem === 'en grupo' ? sectionsGroupActive : sections}
+      />
+    );
   },
-};
-
-/** **Topbar + icon rail** — `collapsedRail`: collapsing keeps a 72px rail
- *  (icons, active-item bar) instead of hiding the sidebar. The render-prop
- *  trigger drives the collapse. Shown starting collapsed so the rail is
- *  visible. The fixture's "Reportes" group collapses to its icon (marked
- *  `is-within` — it holds the active item); hover/focus shows the recovery
- *  tooltip, expand to see the disclosure re-open. */
-export const TopbarRail: StoryObj = {
-  name: 'Topbar · Rail (collapsedRail)',
-  render: () => <ConfigurableShell theme="brand" rail startCollapsed />,
-};
-
-/**
- * **Topbar · Brand sidebar + grupo colapsable** — pins the brand × group
- * matrix cell (the isolated group story only covered default theme, which is
- * how the brand contrast bugs shipped). Checklist this story guards:
- * group icon visible WITHOUT hover (`is-within` on brand = white, not
- * `--color-primary` — invisible when the preset's primary ≡ the sidebar);
- * children guide line perceptible but secondary (`--appshell-nav-guide`
- * override, not the near-white `--border-default`); chevron legible; active
- * child = bg tint only (the orange `::before` stripe is top-level-only by
- * design, `--depth-1` hides it).
- */
-export const TopbarBrandGroup: StoryObj = {
-  name: 'Topbar · Brand con grupo colapsable',
-  render: () => <ConfigurableShell theme="brand" navSections={sectionsGroupActive} />,
 };
 
 /**
@@ -204,36 +199,8 @@ export const TopbarBrandGroup: StoryObj = {
  * `{ collapsed, toggle }`. This is the only way to drive an uncontrolled
  * shell from the header — and what lets `persistKey` (uncontrolled) coexist
  * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
+ * (For the standard trigger, just use `showMenuToggle` — see Playground.)
  */
-/**
- * **Topbar · Built-in menu toggle** (v1.34.0) — `showMenuToggle` opts the
- * consumer into the kit's default hamburger trigger. No render-prop needed:
- * the toggle is prepended to `header.left` and drives the DWIM `toggle()`
- * (drawer in mobile, collapse in desktop). The render-prop API stays
- * available for custom triggers — both can coexist.
- */
-export const TopbarBuiltinMenuToggle: StoryObj = {
-  name: 'Topbar · Built-in menu toggle (showMenuToggle)',
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        collapsedRail
-        showMenuToggle
-        sections={sections}
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={28} />,
-          right: <DemoUserMenu />,
-        }}
-      >
-        <div style={{ padding: 24 }}>
-          <PageHeader title="Dashboard" description="`showMenuToggle` renderiza el toggle estándar del kit — no hace falta render-prop" />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
-};
-
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: () => (
