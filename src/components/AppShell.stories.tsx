@@ -5,7 +5,6 @@ import { Button } from './Button';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, FileText } from './Icons';
 import { UserMenu } from './UserMenu';
-import { DataTable, type Column } from './DataTable';
 
 export default {
   title: 'Layout/AppShell',
@@ -296,39 +295,14 @@ export const TopbarOnlyNoNav: StoryObj = {
  * **Topbar · Mobile drawer** (v1.31.0). Under 900px the sidebar becomes an
  * overlay anchored beneath the header. The kit's `showMenuToggle` toggles
  * `collapsed` on desktop and opens/closes the drawer on mobile — one control,
- * DWIM by viewport. ESC and a tap on the scrim also close it.
+ * DWIM by viewport. ESC and a tap on the scrim close it; and with `linkAs`
+ * (next/link, where the kit can't inject an `onClick` into the consumer's
+ * node) the drawer also closes itself on link activation — open the menu and
+ * tap an item: the route changes and the drawer disappears. Group children
+ * route too (recursive `active` mapping, only ONE item active at a time).
  */
 export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
-  render: () => (
-    <div style={{ height: '100vh' }}>
-      <AppShell
-        sections={sections}
-        showMenuToggle
-        header={{
-          center: <Logo variant="horizontal" bg="auto" height={26} />,
-          right: <DemoUserMenu />,
-        }}
-      >
-        <div style={{ padding: 16 }}>
-          <PageHeader title="Pedidos" description="Toca el menú para abrir el drawer; ESC o tap fuera lo cierran." />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
-        </div>
-      </AppShell>
-    </div>
-  ),
-};
-
-/**
- * **Topbar · Mobile drawer + `linkAs` (cierra al navegar).** El caso real: con
- * `next/link` (vía `linkAs`) el kit no puede inyectar un `onClick` en el nodo del
- * consumidor, así que antes el drawer navegaba pero quedaba abierto sobre la
- * página nueva. Ahora se cierra solo al activar el link. Abre el menú y toca un
- * item: la ruta cambia y el drawer desaparece.
- */
-export const TopbarMobileDrawerRouting: StoryObj = {
-  name: 'Topbar · Mobile drawer + linkAs (cierra al navegar)',
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: function Routing() {
     const [route, setRoute] = React.useState('Inicio');
@@ -361,7 +335,7 @@ export const TopbarMobileDrawerRouting: StoryObj = {
           }}
         >
           <div style={{ padding: 16 }}>
-            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer y toca un item: navega (linkAs) y el drawer se cierra solo." />
+            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer con el menú y toca un item: navega (linkAs) y el drawer se cierra solo. ESC o tap fuera también lo cierran." />
           </div>
         </AppShell>
       </div>
@@ -369,45 +343,3 @@ export const TopbarMobileDrawerRouting: StoryObj = {
   },
 };
 
-/**
- * **Topbar · tall DataTable (scroll containment)** — regression guard for the
- * double-scrollbar leak. A `.table-wrap` (`overflow-x: auto`) taller than the
- * viewport used to leak its vertical layout-overflow past `.appshell__content`
- * to the document, producing a SECOND scrollbar at the page level. The shell
- * now contains its scroll boundary, so only `.appshell__content` scrolls. View
- * at a low viewport height: the page itself must not scroll.
- */
-export const TopbarTallTable: StoryObj = {
-  name: 'Topbar · tall DataTable (scroll containment)',
-  render: () => {
-    interface Row { id: string; sku: string; name: string; stock: number }
-    const rows: Row[] = Array.from({ length: 30 }, (_, i) => ({
-      id: String(i + 1),
-      sku: `SKU-${1000 + i}`,
-      name: `Producto ${i + 1}`,
-      stock: (i * 7) % 50,
-    }));
-    const columns: Column<Row>[] = [
-      { key: 'sku', header: 'SKU' },
-      { key: 'name', header: 'Producto' },
-      { key: 'stock', header: 'Stock', numeric: true },
-    ];
-    return (
-      <div style={{ height: '100vh' }}>
-        <AppShell
-          sections={sections}
-          showMenuToggle
-          header={{
-            center: <Logo variant="horizontal" bg="auto" height={28} />,
-            right: <DemoUserMenu />,
-          }}
-        >
-          <div style={{ padding: 24, display: 'grid', gap: 16 }}>
-            <PageHeader title="Inventario" description="Tabla más alta que el viewport: el scroll vive en el contenido, no en el documento" />
-            <DataTable ariaLabel="Inventario" rows={rows} rowKey={(r) => r.id} columns={columns} />
-          </div>
-        </AppShell>
-      </div>
-    );
-  },
-};
