@@ -5,6 +5,25 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] — 2026-08-31
+
+**Patch. `inert` compatible con React 19 (el gate del grupo colapsable estaba
+apagado en silencio).**
+
+### Fixed
+- **`inert: ''` roto bajo React 19** (AppShell navgroup + Collapsible) — el
+  workaround de React 18 (string vacío para evitar `inert="false"`, que el
+  browser trata como ON) es tratado como `false` por React 19: eliminaba el
+  atributo y logueaba un warning en cada toggle. Consecuencia real en
+  consumidores React 19: los hijos del grupo cerrado volvían al tab order y
+  al árbol a11y. Un solo valor NO satisface ambos runtimes (`true` tampoco:
+  React 18 dropea booleans en atributos desconocidos, con su propio warning)
+  — fix = shim `inertAttr()` que ramifica por `React.version`: `''` en 18,
+  `true` en 19, y `{}` cuando no aplica (jamás se emite `inert="false"`).
+  Guard e2e nuevo en el smoke (que corre React 19): atributo presente
+  cerrado / ausente abierto + consola limpia al togglear; los tests del kit
+  cubren el camino React 18.
+
 ## [2.0.0] — 2026-08-31
 
 **Major. AppShell: el rail ES el colapso (adiós hide mode) + colapso re-coreografiado.**

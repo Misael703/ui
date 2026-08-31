@@ -33,6 +33,13 @@ const sections = [
       { id: 'home', label: 'Inicio', href: '#', active: true },
       { id: 'orders', label: 'Pedidos', href: '#' },
       { id: 'dispatch', label: 'Despacho', href: '#' },
+      // Collapsible group: the smoke app runs the NEWEST peer React, so
+      // toggling this in e2e exercises the `inert` gate under React 19
+      // (the `inert: ''` React-18 workaround silently dropped it there).
+      { id: 'reports', label: 'Reportes', children: [
+        { id: 'r-sales', label: 'Ventas', href: '#' },
+        { id: 'r-stock', label: 'Stock', href: '#' },
+      ] },
     ],
   },
 ];

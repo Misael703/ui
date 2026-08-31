@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { inertAttr } from '../utils/inert';
 
 interface CollapsibleContextValue {
   open: boolean;
@@ -79,11 +80,11 @@ export const CollapsibleContent = React.forwardRef<HTMLDivElement, React.HTMLAtt
   function CollapsibleContent({ className, children, ...rest }, ref) {
     const ctx = React.useContext(CollapsibleContext);
     if (!ctx) throw new Error('<CollapsibleContent> must be used inside <Collapsible>');
-    // `inert` (the focus / a11y-tree gate while closed) isn't in @types/react
-    // 18.3's JSX attributes yet, so pass it via spread. Present only when
-    // closed — React 18 would otherwise emit `inert="false"`, still treated as
-    // set by the browser.
-    const closedAttrs = ctx.open ? {} : { inert: '' };
+    // `inert` (the focus / a11y-tree gate while closed) rides in via the
+    // dual-runtime `inertAttr` shim — React 18 and 19 need OPPOSITE values
+    // (18 drops booleans on unknown attrs; 19 drops the `''` workaround).
+    // See src/utils/inert.ts for the full matrix.
+    const closedAttrs = inertAttr(!ctx.open);
     return (
       // Outer "viewport" animates the height (CSS grid-template-rows 0fr→1fr);
       // the content child is overflow-clipped (`min-height: 0`) so it slides

@@ -23,6 +23,9 @@ describe('Collapsible', () => {
     expect(screen.getByText('Body content')).toBeInTheDocument();
     // Closed: inert gates focus + the a11y tree; data-state on both nodes.
     expect(content).toHaveAttribute('inert');
+    // Dual-runtime guard (2.0.1, `inertAttr` shim): `inert="false"` (ON for
+    // browsers) must never render; React 19's path is guarded in the smoke.
+    expect(content.getAttribute('inert')).not.toBe('false');
     expect(content.getAttribute('data-state')).toBe('closed');
     expect(viewport.getAttribute('data-state')).toBe('closed');
 

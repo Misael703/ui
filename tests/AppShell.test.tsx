@@ -61,6 +61,11 @@ describe('AppShell — P1 nav at scale (v1.83.0)', () => {
     expect(screen.getByText('Ventas')).toBeInTheDocument();
     expect(viewport.getAttribute('data-state')).toBe('closed');
     expect(viewport.hasAttribute('inert')).toBe(true);
+    // Dual-runtime guard (2.0.1, `inertAttr` shim): under the test React
+    // (18) the attribute renders as `inert=""`; `inert="false"` (inert-ON
+    // for browsers) must never render in any runtime. React 19's opposite
+    // path is guarded by the smoke e2e (its consumer app runs React 19).
+    expect(viewport.getAttribute('inert')).not.toBe('false');
     fireEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
     expect(viewport.getAttribute('data-state')).toBe('open');
