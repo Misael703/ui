@@ -2928,13 +2928,44 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
+/* Collapsed rail: the section labels collapse away, so adjacent icon groups
+   lose their visual break — a short centred hairline takes over as the group
+   separator (the standard rail idiom). Lives on every section that FOLLOWS
+   another (never above the first). Fades in LATE on collapse (delay ≈ the
+   label fade, so it appears once the text is gone) and out immediately on
+   expand — the base (destination) transition carries no delay. */
+.appshell__navsection + .appshell__navsection { position: relative; }
+.appshell__navsection + .appshell__navsection::before {
+  content: '';
+  position: absolute;
+  top: -8px; /* centre of the 16px inter-section gap (12px pad-bottom + 4px pad-top) */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 1px;
+  background: var(--border-default);
+  opacity: 0;
+  transition: opacity var(--duration-fast, 120ms) ease;
+}
+.appshell.is-collapsed .appshell__navsection + .appshell__navsection::before {
+  opacity: 1;
+  transition: opacity var(--duration-fast, 120ms) ease var(--duration-fast, 120ms);
+}
+.appshell--brand .appshell__navsection + .appshell__navsection::before {
+  background: rgba(255, 255, 255, 0.18);
+}
+/* Collapses via max-height (a concrete cap, so it interpolates — height:auto
+   would not): the pre-2.0 `display: none` removed the row in ONE frame, so
+   the whole list below jumped vertically at t=0 while widths were still
+   animating. Now the row shrinks on the same clock as the rail narrowing. */
 .appshell__navlabel-section {
   padding: 10px 12px 4px;
   font-family: var(--font-body); font-size: var(--text-2xs); font-weight: 700;
   text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-subtle);
+  max-height: 40px;
+  overflow: hidden;
 }
-.appshell.is-collapsed .appshell__navlabel-section { display: none; }
 .appshell__nav ul { list-style: none; margin: 0; padding: 0; }
 /* Layout-invisible wrapper around a `linkAs` node: it only exists to delegate
    the mobile-drawer close (onClick) from the consumer's link, so it must not
@@ -2964,16 +2995,25 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell__navicon { width: 20px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--fg-muted); }
 .appshell__navitem.is-active .appshell__navicon { color: var(--color-primary); }
+/* Concrete expanded max-widths so the collapse interpolates BOTH ways: the
+   pre-2.0 expanded value was `none`, and `none ↔ 0` is a non-interpolable
+   pair — per CSS Transitions it flips discretely at 50% of the duration, so
+   on expand the label popped to full width mid-animation. 160px ≥ the space
+   a label can actually occupy in the 240px sidebar, so the cap is invisible
+   in the expanded state. Base transition = enter timing; the collapsed block
+   re-declares with `--duration-exit` (see the section-label note above). */
 .appshell__navlabel {
   flex: 1; min-width: 0; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap;
-  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+  max-width: 160px;
+  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
 }
 .appshell__navbadge {
   background: var(--color-secondary-100); color: var(--color-secondary-800);
   font-size: var(--text-2xs); font-weight: 700;
   padding: 1px 8px; border-radius: var(--radius-pill);
-  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+  max-width: 80px;
+  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)), padding var(--duration-base, 200ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
 }
 .appshell.is-collapsed .appshell__navlabel,
 .appshell.is-collapsed .appshell__navbadge {
@@ -2983,28 +3023,61 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 0;
   overflow: hidden;
   pointer-events: none;
+  transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-exit, 150ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)), padding var(--duration-exit, 150ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
 }
 .appshell.is-collapsed .appshell__navchildren { display: none; }
-/* Collapsed/rail: the label collapses to width 0, so center the icon and drop the
-   gap — otherwise the leftover gap + padding leave the icon off-centre. */
+/* Collapsed rail: the label collapses to width 0, so center the icon and drop
+   the gap — otherwise the leftover gap + padding leave the icon off-centre.
+   NOTE (2.0.0): the rail IS the collapse — hide mode was removed. These
+   interior rules are desktop-only by construction: the component withholds
+   `is-collapsed` on mobile (the drawer owns the aside there and must never
+   render icon-mode). */
 .appshell.is-collapsed .appshell__navitem { justify-content: center; gap: 0; }
+/* Expanded (base) transition = the ENTER journey; the collapsed block below
+   re-declares it with `--duration-exit` — in CSS the transition declared on
+   the DESTINATION state governs the trip toward it, which is how collapse
+   gets to be faster than expand (exits decisive, entrances softer). */
 .appshell__navlabel-section {
-  transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear 0s;
+  transition:
+    opacity var(--duration-fast, 120ms) ease,
+    max-height var(--duration-base, 200ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
+    padding var(--duration-base, 200ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
+    visibility 0s;
 }
 .appshell.is-collapsed .appshell__navlabel-section {
   opacity: 0;
   visibility: hidden; /* removes from accessibility tree once collapsed */
   pointer-events: none;
-  height: 0;
-  padding: 0;
-  overflow: hidden;
-  /* Delay visibility:hidden until after the opacity fade completes. */
-  transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear var(--duration-fast, 120ms);
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  /* Exit timing; visibility flips AFTER the shrink completes. */
+  transition:
+    opacity var(--duration-fast, 120ms) ease,
+    max-height var(--duration-exit, 150ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
+    padding var(--duration-exit, 150ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)),
+    visibility 0s linear var(--duration-exit, 150ms);
 }
 /* Nested children read as a connected sub-tree, not peers of the top level: a
    subtle vertical guide (aligned under the parent icon's centre) ties them to
    the group header, and the items recede (lighter, smaller) so hierarchy is
    legible even without the chevron. */
+/* Disclosure open/close animates via the same grid-rows 0fr→1fr pattern as
+   `.collapsible__viewport`: the viewport animates its single row, the clip
+   child (`overflow: hidden; min-height: 0`) slides the list instead of
+   jumping. The <ul>'s own margins live INSIDE the clip (overflow:hidden
+   suppresses margin collapse), so the closed viewport is exactly 0px tall.
+   Focus/a11y while closed is gated by `inert` in JS (see AppShell.tsx). */
+.appshell__navchildren-viewport {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+.appshell__navchildren-viewport[data-state="open"] { grid-template-rows: 1fr; }
+.appshell__navchildren-clip { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .appshell__navchildren-viewport { transition: none; }
+}
 /* Higher specificity than the `.appshell__nav ul { padding: 0 }` reset so the
    indent actually applies. */
 .appshell__nav .appshell__navchildren { position: relative; margin: 2px 0 6px; padding-left: 30px; }
@@ -3027,10 +3100,16 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__navitem--depth-1.is-active::before { display: none; }
 
 /* --- Collapsible group: a NavItem with children renders a disclosure <button>
-   wearing .appshell__navitem, so it only needs the button-chrome reset (font,
-   color, flex, padding all come from .appshell__navitem; no width — the margin
-   would overflow, display:flex already fills like the <a>). --- */
-.appshell__navgroup { border: 0; background: transparent; cursor: pointer; text-align: left; }
+   wearing .appshell__navitem, so it needs the button-chrome reset (font,
+   color, flex, padding come from .appshell__navitem) — PLUS an explicit
+   width: a block-level <a> with width:auto fills the <li> minus its margins,
+   but a <button> uses shrink-to-fit even as a flex container, so the group's
+   hover/hit area shrank to its content. The calc mirrors the navitem's
+   `margin: 1px 4px` (8px horizontal total) — keep them in sync. --- */
+.appshell__navgroup {
+  border: 0; background: transparent; cursor: pointer; text-align: left;
+  width: calc(100% - 8px);
+}
 .appshell__navchevron {
   flex: none; margin-left: auto; color: var(--fg-muted);
   transition: transform var(--duration-fast) var(--ease-standard);
@@ -3215,11 +3294,29 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--no-anim .appshell__navlabel,
 .appshell--no-anim .appshell__navbadge,
 .appshell--no-anim .appshell__navlabel-section { transition: none !important; }
+/* Reduced motion: the shell's collapse choreography is real movement (panel
+   slide + content reflow), exactly what the preference asks to suppress —
+   every state still lands, just instantly. Same selector list as the
+   first-paint guard above, plus the chevron rotation. `!important` for the
+   same reason as that guard: state rules re-declare `transition` at higher
+   specificity (e.g. the collapsed exit-timing overrides, the mobile drawer),
+   and a media query adds none. Killing `transition` also collapses the
+   drawer's DELAYED visibility flip to 0s — off-screen links leave the tab
+   order immediately, which is the correct reduced-motion behaviour. (The
+   scrim's opacity fade stays: a pure fade is not vestibular motion.) */
+@media (prefers-reduced-motion: reduce) {
+  .appshell__body,
+  .appshell__sidebar,
+  .appshell__navlabel,
+  .appshell__navbadge,
+  .appshell__navlabel-section,
+  .appshell__navchevron { transition: none !important; }
+}
 .appshell--header-top .appshell__body {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 0;
-  transition: grid-template-columns var(--duration-base) var(--ease-standard);
+  transition: grid-template-columns var(--duration-base) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
   /* Positioning context for the mobile scrim + drawer. Anchoring them to
      the body (not the viewport) makes them match the body's EXACT bounds
      even when the header's rendered height drifts from
@@ -3234,29 +3331,32 @@ button, input, select, textarea { box-sizing: border-box; }
      taller than the viewport) can never leak past the shell to the document
      and raise a second, page-level scrollbar. The shell is `height: 100dvh`,
      so there is nothing here to scroll — `hidden` only clips the leak.
-     Safe with the mobile drawer / desktop hide-mode sidebar: both are
-     absolute children sized to (or translated off) the body's exact bounds,
-     so the open state stays inside and only the off-screen (closed) state is
-     clipped — which is already hidden. Header dropdowns live in row 1
-     (outside the body) and the kit's overlays portal to <body>, so neither
-     is clipped. */
+     Safe with the mobile drawer: an absolute child sized to (or translated
+     off) the body's exact bounds, so the open state stays inside and only
+     the off-screen (closed) state is clipped — which is already hidden.
+     Header dropdowns live in row 1 (outside the body) and the kit's
+     overlays portal to <body>, so neither is clipped. */
   overflow: hidden;
 }
-/* Top hide-mode + rail body grid — desktop-only. In mobile the body is
-   single-column (`1fr`) regardless of `collapsed` / `collapsedRail`; the
-   aside is a fixed overlay (out of grid flow). Leaving these unscoped
-   leaked into mobile: collapsed+rail produced a 72px empty grid track
-   to the left of the content (the aside was no longer occupying it),
-   reading as a 72px left margin on the page. Scoped to `min-width:901px`
-   to match the rail/hide rules block below. */
+/* Collapsed body grid (2.0.0: the 72px icon rail IS the collapse — hide mode
+   removed) — desktop-only. In mobile the body is single-column (`1fr`)
+   regardless of `collapsed`; the aside is a fixed overlay (out of grid flow).
+   Leaving this unscoped leaked into mobile: collapsed produced a 72px empty
+   grid track to the left of the content (the aside was no longer occupying
+   it), reading as a 72px left margin on the page. The `transition` override
+   is the EXIT timing — the destination state's transition governs the trip
+   toward it, so collapsing runs at `--duration-exit` while expanding (base
+   rule) keeps `--duration-base` (exits decisive, entrances softer). */
 @media (min-width: 901px) {
-  .appshell--header-top.is-collapsed .appshell__body { grid-template-columns: 0 1fr; }
-  .appshell--header-top.appshell--rail.is-collapsed .appshell__body { grid-template-columns: 72px 1fr; }
+  .appshell--header-top.is-collapsed .appshell__body {
+    grid-template-columns: 72px 1fr;
+    transition: grid-template-columns var(--duration-exit, 150ms) var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
+  }
 }
 /* Top-bar-only (`sections` omitted, v1.27.0): no sidebar at all → body is a
    single column. The `<aside>` itself is not rendered (in the JSX), this just
-   collapses the grid track. Placed after the rail rule so it wins on the (rare)
-   `appshell--no-nav.appshell--rail` combo by source order. */
+   collapses the grid track. Placed after the collapsed rule so it wins on the
+   (rare) `appshell--no-nav.is-collapsed` combo by source order. */
 .appshell--header-top.appshell--no-nav .appshell__body { grid-template-columns: 1fr; }
 /* Sidebar stretches to its grid row height. The body row is already bounded
    to `100dvh − header`, so the aside auto-sizes correctly without a fixed
@@ -3268,51 +3368,6 @@ button, input, select, textarea { box-sizing: border-box; }
    consumer's in-page sticky sub-header (`position: sticky; top: 0`) then
    anchors to the top of THIS scroll viewport. */
 .appshell--header-top .appshell__content { min-height: 0; overflow-y: auto; }
-/* Hide mode (no rail): SLIDE the sidebar out instead of narrowing it. A
-   width transition (240px → 0) sweeps through ~72px and reads as a momentary
-   rail; instead the sidebar keeps its full width and translates off-screen
-   to the left (overlaying, so it can slide past the edge) while the content
-   reclaims the width immediately. Animated, and never narrows into a rail.
-   Rail mode keeps the smooth 240→72 width transition.
-   Scoped to `min-width: 901px` so it does NOT compete with the mobile
-   drawer rules below the breakpoint — at mobile the overlay frame is
-   different (fixed, anchored under the header) and pre-1.31.0 letting this
-   desktop rule leak into mobile created a 4-class specificity floor that
-   the mobile rules had to fight to override. Keeping it desktop-scoped
-   keeps the mobile block simple. */
-@media (min-width: 901px) {
-  .appshell--header-top:not(.appshell--rail) .appshell__body {
-    transition: none;
-    position: relative;
-  }
-  .appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 240px;
-    transform: translateX(-100%);
-    /* Same tab-order/AT concern as the mobile drawer: the hidden sidebar keeps
-       its links focusable off-screen (and here there's no `aria-hidden` either).
-       Hide after the slide-out; the expanded state (below) restores it at once. */
-    visibility: hidden;
-    transition: transform var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);
-  }
-  .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-    transition: transform var(--duration-base) var(--ease-standard), visibility 0s;
-  }
-  /* Hide-mode collapse bug (v1.31.0): when the aside goes `position: absolute`
-     it leaves the grid flow → grid auto-placement gives the next in-flow item
-     (the <main>) the FIRST column instead of the second. With body grid
-     `0 1fr` that drops the content into a 0-width column; the visible 48px
-     it kept was only its own padding, and content overflowed to a phantom
-     scrollbar at the body's right edge.
-     Fix: explicitly pin the content to column 2 whenever there IS a 2-column
-     body grid (every top layout EXCEPT `no-nav`, which is single-column).
-     `no-nav` is excluded so a `grid-column: 2` doesn't create an implicit
-     second track in its single-column grid. */
-  .appshell--header-top:not(.appshell--no-nav) .appshell__content {
-    grid-column: 2;
-  }
-}
 /* Brand top-header band. Driven by `.appshell--header-brand` (from the
    `headerTheme` prop, which defaults to `theme`) — NOT by `.appshell--brand`.
    That decoupling is what lets a branded top bar sit over a neutral sidebar

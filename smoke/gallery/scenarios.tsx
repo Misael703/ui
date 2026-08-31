@@ -54,7 +54,6 @@ export function ScenarioAppShellCombobox() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-combobox">
       <K.AppShell
-        collapsedRail
         sections={sections}
         header={{
           left: ({ collapsed, toggle }) => (
@@ -255,8 +254,9 @@ export function ScenarioTimelineMilestoneCompact() {
  * 7b/7c/7d add the variant matrix:
  *   - brand: drawer over brand-themed shell (sidebar border switches to the
  *     white-α hairline; data-tone="inverse" cascades into descendants).
- *   - rail: `collapsedRail=true` does NOT interfere with the mobile overlay
- *     (mobile rules override the rail's `grid-template-columns: 72px 1fr`).
+ *   - rail: the collapsed rail (2.0.0: the rail IS the collapse) does NOT
+ *     interfere with the mobile overlay (mobile rules override the rail's
+ *     `grid-template-columns: 72px 1fr`).
  *   - no-nav: `sections=[]` → no aside, no drawer logic; the header still
  *     compacts to `auto 1fr auto` so the brand/right zones don't choke.
  */
@@ -332,7 +332,7 @@ export function ScenarioAppShellTopMobileBrand() {
   );
 }
 
-/* 7c-controlled — top + collapsedRail with a CONTROLLED static button
+/* 7c-controlled — top + collapsed rail with a CONTROLLED static button
    (the TopbarRail Storybook story pattern). Pre-1.31 last fix, flipping
    `collapsed` via a static consumer button (no render-prop) in mobile
    read as dead — the aside was a fixed overlay that ignored collapsed.
@@ -343,7 +343,6 @@ export function ScenarioAppShellTopMobileRailControlled() {
     const [collapsed, setCollapsed] = React.useState(true);
     return (
       <K.AppShell
-        collapsedRail
         sections={sections}
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -377,14 +376,13 @@ export function ScenarioAppShellTopMobileRailControlled() {
   );
 }
 
-/* 7c — collapsedRail variant: mobile rules must override the 72px rail
+/* 7c — collapsed-rail variant: mobile rules must override the 72px rail
    (`grid-template-columns: 72px 1fr` on desktop) and put the aside as a
    fixed overlay anyway. */
 export function ScenarioAppShellTopMobileRail() {
   return (
     <div style={{ height: '100vh' }} data-scenario="appshell-top-mobile-rail">
       <K.AppShell
-        collapsedRail
         sections={sections}
         header={{
           left: ({ toggle }) => (

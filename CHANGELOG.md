@@ -5,6 +5,75 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-08-31
+
+**Major. AppShell: el rail ES el colapso (adiós hide mode) + colapso re-coreografiado.**
+
+### Breaking
+- **`AppShell.collapsedRail` eliminado** — el colapso desktop es SIEMPRE el
+  rail de 72px (íconos + barra de activo). Razones: la matriz de dos modos es
+  donde vivían los bugs de colapso (3 en una sola auditoría), el único
+  consumidor real de sidebar del portafolio ya usaba rail, y bajo 900px el
+  drawer mobile cubre la necesidad de canvas máximo. Migración: borrar el
+  prop (si pasabas `collapsedRail` ya tienes el comportamiento nuevo; si
+  dependías del hide-entirely, no existe más).
+- **`is-collapsed` ya no se aplica en mobile** — el drawer es dueño del aside
+  bajo 900px; un `collapsed=true` persistido ya no puede renderizar el drawer
+  abierto en modo-ícono (quirk latente pre-2.0).
+
+### Changed
+- **Colapso re-coreografiado** (las 4 causas del feel "lento/raro/tosco"):
+  - Timing asimétrico: colapsar corre a `--duration-exit` (150ms), expandir a
+    `--duration-base` (200ms) — exits decisivos, entrances suaves. Curva
+    `--ease-out-quart` (cola corta) en vez de quint (cola larga: el panel
+    "terminaba" a los 130ms pero retenía 200ms muertos).
+  - Labels de sección ya no desaparecen con `display: none` seco (salto
+    vertical instantáneo de toda la lista en t=0): colapsan vía `max-height`
+    interpolable en el mismo reloj que el ancho.
+  - `max-width` expandido concreto en labels (160px) y badges (80px): el par
+    `none ↔ 0` no es interpolable (flip discreto al 50% — el label aparecía
+    de golpe a mitad de la expansión); ahora interpola en ambas direcciones.
+  - **El interior por fin anima de verdad**: el wrapper `Tooltip` del rail se
+    montaba/desmontaba con el colapso → React remontaba cada nav item en el
+    flip y las transiciones de labels/badges nunca corrían (snap). El wrapper
+    ahora es permanente con `disabled` (ver Added) — medido: label 160→0 px
+    fundiéndose en colapso, 0→160 px suave en expansión.
+
+### Added
+- **`Tooltip.disabled`** — mantiene el wrapper montado pero inerte (sin
+  listeners ni bubble). Para triggers cuyo tooltip es condicional: togglear
+  `disabled` preserva la estructura del DOM, mientras que envolver
+  condicionalmente remonta el subtree y mata cualquier transición CSS en él.
+- **Separador de secciones en el rail** — al colapsar, los labels de sección
+  desaparecen y los grupos de íconos perdían su corte visual; ahora un
+  hairline corto centrado (28px) toma su lugar entre secciones adyacentes
+  (idioma estándar de nav rails). Aparece con delay (cuando los labels ya se
+  fundieron) y desaparece inmediato al expandir; variante translúcida en
+  brand.
+
+### Added
+- **Animación del grupo colapsable** — abrir/cerrar el disclosure ya no
+  salta: los hijos deslizan con el mismo patrón grid `0fr→1fr` de
+  `Collapsible` (`--duration-base` + `--ease-standard`), con opt-out por
+  `prefers-reduced-motion`. Los hijos quedan montados (la animación lo
+  requiere) y `inert` los saca del foco y del árbol a11y mientras está
+  cerrado; layout abierto pixel-idéntico y rail sin cambios.
+- **`prefers-reduced-motion` en el shell** — la coreografía de colapso
+  completa (reflow del grid, labels/badges/chevron, drawer) muere bajo la
+  preferencia: cada estado aterriza instantáneo. El fade del scrim se
+  conserva (un fade puro no es movimiento vestibular). Antes solo el badge
+  pulsante, el indicador de tabs y el disclosure nuevo la respetaban.
+
+### Fixed
+- **AppShell: hover/hit area del navgroup encogida** — el header del grupo es
+  un `<button>`, que usa shrink-to-fit incluso como flex container (a
+  diferencia del `<a>` block-level que llena el `<li>`), así que su hover y
+  área de click se achicaban al ancho del contenido. Ahora
+  `width: calc(100% - 8px)` (espejo del `margin: 1px 4px` del navitem):
+  misma fila que los links en expandido y en rail. Efecto colateral
+  correcto: el chevron del disclosure ahora sí cae al borde derecho de la
+  fila (su `margin-left: auto` por fin tiene espacio).
+
 ## [1.88.0] — 2026-08-29
 
 **Minor. UserMenu: variante `compact` (trigger solo-avatar en todo viewport).**

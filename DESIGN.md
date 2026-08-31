@@ -222,19 +222,19 @@ alternatives).
   per-call-site colors**. Outside the AppShell, wrap your branded surface in
   `data-tone="inverse"` (or `.surface-inverse`) to get the same. AA pinned
   in `Contrast.test`.
-- **AppShell `headerLayout="top"` collapse (v1.15.0+).** The collapse toggle
-  is the consumer's to wire (no built-in affordance in `top`, unlike `side`):
-  put a hamburger in `header.left` and drive `collapsed`/`onCollapsedChange`.
-  **Default behavior:** in `top`, `collapsed` hides the sidebar **entirely**
-  (no 72px rail) so the content reclaims the full width; the header stays
-  full-width and invariant. **Opt into a rail with `collapsedRail`
-  (v1.21.0):** collapse to a 72px icon rail (icons + active bar, labels
-  hidden — same mechanics as `side`) instead of hiding the sidebar.
-  `collapsedRail` is **purely visual** (rail vs hide); collapse is *always*
-  driven by the consumer's `header.left` control in `top`, in both modes — no
-  built-in toggle (the bottom chevron is a `side`-only idiom; `side` has no
-  header to host a hamburger). Single control, no redundancy. *(v1.22.0
-  removed the built-in rail toggle added in 1.21.0 for exactly this reason.)*
+- **AppShell `headerLayout="top"` collapse (v1.15.0+, 2.0.0).** The collapse
+  toggle is the consumer's to wire (no built-in affordance in `top`, unlike
+  `side`): put a hamburger in `header.left` (or use `showMenuToggle`) and
+  drive `collapsed`/`onCollapsedChange`. **Since 2.0.0 the 72px icon rail IS
+  the collapse** (icons + active bar, labels hidden): the `collapsedRail`
+  prop and the hide-entirely mode were removed — the mode matrix was where
+  the collapse bugs kept living, the portfolio's only sidebar consumer
+  already used the rail, and under 900px the mobile drawer covers the
+  max-canvas need. Collapse is *always* driven by the consumer's
+  `header.left` control in `top` — no built-in toggle (the bottom chevron is
+  a `side`-only idiom; `side` has no header to host a hamburger). Single
+  control, no redundancy. *(v1.22.0 removed the built-in rail toggle added
+  in 1.21.0 for exactly this reason.)*
   Wire the hamburger via a **header-slot render-prop** (v1.23.0), which hands
   it the collapse API (`{ collapsed, toggle, setCollapsed }`) — this is the
   only way to drive an **uncontrolled** shell from the header (and what lets

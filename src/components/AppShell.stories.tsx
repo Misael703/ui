@@ -78,7 +78,7 @@ const DemoUserMenu = ({ compact = false }: { compact?: boolean }) => (
   <UserMenu name="Misael Ocas" role="Administrador" items={USER_ITEMS} compact={compact} />
 );
 
-/* Single shell used by the Playground + the rail story. Mirrors the recommended
+/* Single shell used by the Playground. Mirrors the recommended
    pattern: the kit's `showMenuToggle` (standard filled trigger) at the start of
    `header.left`, brand Logo in `header.center`, notifications + compact
    `UserMenu` in `header.right`. Internal-scroll model — wrap in a 100vh
@@ -86,10 +86,9 @@ const DemoUserMenu = ({ compact = false }: { compact?: boolean }) => (
 function ConfigurableShell({
   theme = 'default',
   headerTheme,
-  rail = false,
   startCollapsed = false,
   navSections = sections,
-}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; rail?: boolean; startCollapsed?: boolean; navSections?: typeof sections }) {
+}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; startCollapsed?: boolean; navSections?: typeof sections }) {
   const [collapsed, setCollapsed] = React.useState(startCollapsed);
   const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
@@ -98,7 +97,6 @@ function ConfigurableShell({
       <AppShell
         theme={theme}
         headerTheme={headerTheme}
-        collapsedRail={rail}
         sections={navSections}
         showMenuToggle
         collapsed={collapsed}
@@ -148,14 +146,13 @@ function ConfigurableShell({
 interface PlaygroundArgs {
   theme: AppShellTheme;
   headerTheme: AppShellTheme;
-  collapsedRail: boolean;
   defaultCollapsed: boolean;
   activeItem: 'top-level' | 'en grupo';
 }
 
 /**
  * **Playground** — the MAIN story: the whole feature matrix behind controls —
- * `theme` × `headerTheme` × `collapsedRail` × initial collapse × where the
+ * `theme` × `headerTheme` × initial collapse × where the
  * active item lives (`activeItem`). The other stories exist only for what
  * controls can't represent: the render-prop API path, the no-sidebar layout,
  * and the mobile drawer + `linkAs` routing.
@@ -164,28 +161,27 @@ interface PlaygroundArgs {
  * - `theme: brand` + `activeItem: 'en grupo'` — the brand × group contrast
  *   cell (v1.87.0 fixes): group icon white WITHOUT hover, children guide
  *   subtle, chevron legible, stripe on the group header, child = bg tint.
- * - `collapsedRail` + `defaultCollapsed` — the icon rail; the group collapses
- *   to its icon with the recovery tooltip on hover/focus.
+ * - `defaultCollapsed` — the 72px icon rail (2.0.0: the rail IS the
+ *   collapse); the group collapses to its icon with the recovery tooltip
+ *   on hover/focus.
  */
 export const Playground: StoryObj<PlaygroundArgs> = {
   argTypes: {
     theme: { control: 'inline-radio', options: ['default', 'brand'] },
     headerTheme: { control: 'inline-radio', options: ['default', 'brand'] },
-    collapsedRail: { control: 'boolean' },
     defaultCollapsed: { control: 'boolean' },
     activeItem: { control: 'inline-radio', options: ['top-level', 'en grupo'] },
   },
-  args: { theme: 'default', headerTheme: 'brand', collapsedRail: false, defaultCollapsed: false, activeItem: 'top-level' },
+  args: { theme: 'default', headerTheme: 'brand', defaultCollapsed: false, activeItem: 'top-level' },
   render: (a) => {
     // Remount the stateful shell when collapse-affecting args change, so the
-    // initial-collapse / rail controls take effect (useState init is read once).
-    const k = `${a.defaultCollapsed}-${a.collapsedRail}`;
+    // initial-collapse control takes effect (useState init is read once).
+    const k = String(a.defaultCollapsed);
     return (
       <ConfigurableShell
         key={k}
         theme={a.theme}
         headerTheme={a.headerTheme}
-        rail={a.collapsedRail}
         startCollapsed={a.defaultCollapsed}
         navSections={a.activeItem === 'en grupo' ? sectionsGroupActive : sections}
       />
@@ -206,7 +202,6 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
   render: () => (
     <div style={{ height: '100vh' }}>
       <AppShell
-        collapsedRail
         sections={sections}
         header={{
           // A custom render-prop trigger that reuses the kit's `appshell__menu-toggle`

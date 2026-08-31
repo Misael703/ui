@@ -100,15 +100,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(container.querySelector('.appshell__header')).not.toHaveAttribute('data-tone');
   });
 
-  it('collapsedRail adds the rail modifier but NO built-in toggle (top is driven by the header hamburger)', () => {
+  it('no built-in sidebar toggle (top is driven by the header hamburger)', () => {
     // The bottom chevron is a `side`-only idiom (its sidebar has no header to
     // host a hamburger). In `top`, collapse is ALWAYS driven by the consumer's
-    // `header.left` control — in both hide and rail modes — so the shell never
-    // renders its own toggle here. Avoids the two-control redundancy.
+    // `header.left` control, so the shell never renders its own toggle here.
+    // Avoids the two-control redundancy.
     const { container } = render(
-      <AppShell collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>
+      <AppShell header={{ center: 'b' }} sections={sections}>x</AppShell>
     );
-    expect(container.querySelector('.appshell')).toHaveClass('appshell--rail');
     expect(container.querySelector('.appshell__sidebar .appshell__collapse')).toBeNull();
   });
 
@@ -139,23 +138,19 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(container.querySelector('.appshell__header-left [data-testid="static"]')).toBeTruthy();
   });
 
-  it('without collapsedRail there is no rail modifier (default = hide)', () => {
-    const { container } = render(
-      <AppShell header={{ center: 'b' }} sections={sections}>x</AppShell>
-    );
-    expect(container.querySelector('.appshell')).not.toHaveClass('appshell--rail');
+  it('CSS: collapsed keeps a 72px rail (2.0.0: the rail IS the collapse)', () => {
+    expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+    // No hide-mode remnants: nothing slides the DESKTOP sidebar off-screen
+    // (the mobile drawer keeps its own translateX inside max-width: 900px).
+    expect(css).not.toMatch(/appshell--rail/);
   });
 
-  it('CSS: collapsedRail keeps a 72px rail (not 0) when collapsed', () => {
-    expect(css).toMatch(/\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
-  });
-
-  it('CSS: hide mode (no rail) slides the sidebar out (full width, no rail narrowing)', () => {
-    // The 240→0 width transition would flash the ~72px rail; instead the
-    // sidebar keeps its width and translates off-screen (overlaying), so it
-    // never narrows into a rail. Rail mode keeps the width transition.
-    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
-    expect(css).toMatch(/\.appshell--header-top:not\(\.appshell--rail\)\s+\.appshell__sidebar\s*\{[^}]*transition:\s*transform/);
+  it('CSS: collapse runs on exit timing, expand on base (asymmetric)', () => {
+    // The destination state's transition governs the trip toward it: the
+    // collapsed body re-declares --duration-exit while the base keeps
+    // --duration-base — exits decisive, entrances softer.
+    expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*transition:\s*grid-template-columns\s+var\(--duration-exit/);
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__body\s*\{[\s\S]*?transition:\s*grid-template-columns\s+var\(--duration-base/);
   });
 
   it('default top layout (no headerTheme) does not brand the header', () => {
@@ -192,7 +187,8 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('CSS: only the body grid-template-columns reacts to is-collapsed (topbar invariant)', () => {
     // The collapse rule must target the BODY, never the outer or the header.
-    expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*0\s+1fr/);
+    // 2.0.0: collapsed = the 72px icon rail (hide mode removed).
+    expect(css).toMatch(/\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
 
   it('CSS: header-brand band uses --chrome-brand (driven by headerTheme, not theme)', () => {
@@ -303,20 +299,11 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell\.appshell--header-top\s*\{[^}]*height:\s*100vh[^}]*height:\s*100dvh/);
   });
 
-  it('CSS: top hide-mode + rail body grid rules live inside @media (min-width:901px) (mobile gap guard)', () => {
-    // The 0+1fr / 72px+1fr body grids only make sense on desktop, where the
-    // aside is in flow. In mobile the aside is fixed-overlay and any extra
-    // grid track on the left reads as a 72px / 0 margin on the content.
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*0\s+1fr/);
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
-  });
-
-  it('CSS: desktop main is explicitly pinned to grid-column 2 (hide-mode collapse bug guard)', () => {
-    // When the aside goes `position: absolute` (hide-mode collapsed), it
-    // leaves the grid flow → main auto-places to col 1 (0 width). Explicit
-    // `grid-column: 2` keeps it in the 1fr column. Scoped to the desktop
-    // media so mobile single-column grids are not affected.
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--no-nav\)\s+\.appshell__content\s*\{[^}]*grid-column:\s*2/);
+  it('CSS: collapsed body grid rule lives inside @media (min-width:901px) (mobile gap guard)', () => {
+    // The 72px+1fr body grid only makes sense on desktop, where the aside is
+    // in flow. In mobile the aside is fixed-overlay and any extra grid track
+    // on the left reads as a 72px margin on the content.
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
 
   it('CSS: mobile aside uses top:0 + bottom:0 (matches body bounds, no viewport math)', () => {
@@ -328,13 +315,6 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 
   it('CSS: header min-height reads from the same var (single source of truth)', () => {
     expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*min-height:\s*var\(--appshell-header-height\)/);
-  });
-
-  it('CSS: desktop hide/rail overlay rules are scoped to min-width:901px (so they cannot leak into mobile)', () => {
-    // The pre-1.31 rules `position: absolute; translateX(-100%); width: 240px`
-    // used to fire on ALL viewports and outranked the mobile overlay by
-    // specificity. Scoping them to desktop avoids the fight.
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top:not\(\.appshell--rail\)\.is-collapsed\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);
   });
 
   it('CSS: mobile (≤900px) anchors the top sidebar to .appshell__body (position:absolute, no fragile viewport math)', () => {
@@ -462,11 +442,11 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
   });
 
   it('CSS: the hidden drawer is untabbable (visibility:hidden, not just off-screen)', () => {
-    // Mobile closed drawer + desktop hide-collapse both left links focusable
-    // off-screen; visibility:hidden removes them from the tab order and AT.
+    // The closed mobile drawer left links focusable off-screen;
+    // visibility:hidden removes them from the tab order and AT. (2.0.0: no
+    // desktop equivalent — the collapsed rail keeps its icons interactive.)
     expect(css).toMatch(/\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*hidden/);
     expect(css).toMatch(/\.appshell--header-top\.is-mobile-open\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*visible/);
-    expect(css).toMatch(/is-collapsed\s+\.appshell__sidebar\s*\{[^}]*visibility:\s*hidden/);
   });
 
   it('CSS: the `linkAs` close-delegation wrapper is layout-invisible (display:contents)', () => {
@@ -498,14 +478,35 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
       const { container, getByTestId } = render(<Controlled />);
       const root = container.querySelector('.appshell')!;
       expect(root).not.toHaveClass('is-mobile-open');
-      // Initial is-collapsed=true (drawer closed in mobile).
-      expect(root).toHaveClass('is-collapsed');
+      // 2.0.0: `is-collapsed` is desktop-only (withheld on mobile so a
+      // persisted collapsed=true can never render the drawer in icon-mode).
+      expect(root).not.toHaveClass('is-collapsed');
       fireEvent.click(getByTestId('static-trigger'));
       // collapsed flipped → sync sets mobileOpen=true → drawer opens.
       expect(root).toHaveClass('is-mobile-open');
       // Click again: collapsed=true → drawer closes.
       fireEvent.click(getByTestId('static-trigger'));
       expect(root).not.toHaveClass('is-mobile-open');
+    });
+  });
+
+  it('CSS: collapsed rail draws a hairline between adjacent sections', () => {
+    // The section labels collapse away in the rail, so a short centred line
+    // takes over as the group separator. Only BETWEEN sections (sibling
+    // combinator — never above the first), invisible when expanded.
+    expect(css).toMatch(/\.appshell__navsection \+ \.appshell__navsection::before \{[\s\S]*?opacity: 0/);
+    expect(css).toMatch(/\.appshell\.is-collapsed \.appshell__navsection \+ \.appshell__navsection::before \{[\s\S]*?opacity: 1/);
+  });
+
+  it('mobile never gets is-collapsed (the drawer must not render icon-mode)', () => {
+    // 2.0.0: the interior-collapse rules are unscoped in CSS; the desktop-only
+    // gating lives in the COMPONENT (`is-collapsed` withheld while isMobile),
+    // so a persisted collapsed=true can never render the drawer as icons.
+    withMatchMedia(true, () => {
+      const { container } = render(
+        <AppShell defaultCollapsed header={{ center: 'b' }} sections={sections}>x</AppShell>
+      );
+      expect(container.querySelector('.appshell')).not.toHaveClass('is-collapsed');
     });
   });
 
@@ -710,7 +711,7 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
   });
 });
 
-describe('AppShell collapsed/rail nav item centering', () => {
+describe('AppShell collapsed rail nav item centering', () => {
   // When collapsed the nav label is width 0, so the item must center the icon and
   // drop the row gap — otherwise the leftover gap + padding pushes it off-centre.
   it('the collapsed nav item centers its content with no gap', () => {
@@ -718,4 +719,14 @@ describe('AppShell collapsed/rail nav item centering', () => {
     expect(rule).toMatch(/justify-content:\s*center/);
     expect(rule).toMatch(/gap:\s*0/);
   });
+
+  it('CSS: shell collapse choreography honors prefers-reduced-motion', () => {
+    // Grid reflow + interior label/chevron motion must all die under the
+    // preference (states land instantly). !important because the state rules
+    // re-declare `transition` at higher specificity.
+    expect(css).toMatch(
+      /prefers-reduced-motion[^{]*\{\s*\.appshell__body,\s*\.appshell__sidebar,\s*\.appshell__navlabel,\s*\.appshell__navbadge,\s*\.appshell__navlabel-section,\s*\.appshell__navchevron \{ transition: none !important/
+    );
+  });
+
 });

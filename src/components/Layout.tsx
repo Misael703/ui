@@ -136,9 +136,17 @@ export interface TooltipProps {
   label: React.ReactNode;
   children: React.ReactElement;
   side?: 'top' | 'bottom' | 'left' | 'right';
+  /**
+   * Keep the wrapper mounted but inert (no listeners, no bubble). For
+   * triggers whose tooltip is CONDITIONAL (e.g. the AppShell rail shows nav
+   * tooltips only while collapsed): toggling `disabled` preserves the DOM
+   * structure, while conditionally WRAPPING would remount the child subtree
+   * on every flip — killing any CSS transition running on it.
+   */
+  disabled?: boolean;
 }
 
-export function Tooltip({ label, children, side = 'top' }: TooltipProps) {
+export function Tooltip({ label, children, side = 'top', disabled = false }: TooltipProps) {
   const [open, setOpen] = React.useState(false);
   const wrapRef = React.useRef<HTMLSpanElement>(null);
   const bubbleRef = React.useRef<HTMLSpanElement>(null);
@@ -152,6 +160,7 @@ export function Tooltip({ label, children, side = 'top' }: TooltipProps) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
   };
   const show = () => {
+    if (disabled) return;
     clear();
     openTimer.current = setTimeout(() => setOpen(true), 150);
   };
@@ -192,7 +201,7 @@ export function Tooltip({ label, children, side = 'top' }: TooltipProps) {
       onBlur={hide}
     >
       {child}
-      {open && (
+      {open && !disabled && (
         <Portal>
           <span
             ref={bubbleRef}

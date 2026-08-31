@@ -54,11 +54,24 @@ describe('AppShell — P1 nav at scale (v1.83.0)', () => {
     ] }] }]);
     const btn = screen.getByRole('button', { name: /Reportes/ });
     expect(btn.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByText('Ventas')).toBeNull(); // closed → children not in DOM
+    // Children stay MOUNTED (the disclosure animates via grid-rows 0fr→1fr;
+    // unmounting would kill the transition) but the closed viewport is
+    // `inert` — out of the focus order and the a11y tree.
+    const viewport = document.querySelector('.appshell__navchildren-viewport')!;
+    expect(screen.getByText('Ventas')).toBeInTheDocument();
+    expect(viewport.getAttribute('data-state')).toBe('closed');
+    expect(viewport.hasAttribute('inert')).toBe(true);
     fireEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('Ventas')).toBeInTheDocument();
+    expect(viewport.getAttribute('data-state')).toBe('open');
+    expect(viewport.hasAttribute('inert')).toBe(false);
     expect(document.getElementById(btn.getAttribute('aria-controls')!)).not.toBeNull();
+  });
+
+  it('CSS: the disclosure animates like Collapsible (grid 0fr→1fr + reduced-motion off)', () => {
+    expect(css).toMatch(/\.appshell__navchildren-viewport \{[^}]*grid-template-rows: 0fr/);
+    expect(css).toMatch(/\.appshell__navchildren-viewport\[data-state="open"\] \{ grid-template-rows: 1fr/);
+    expect(css).toMatch(/prefers-reduced-motion[\s\S]*?\.appshell__navchildren-viewport \{ transition: none/);
   });
 
   it('auto-opens the group holding the active item and marks it is-within', () => {
@@ -141,7 +154,15 @@ describe('AppShell CSS guards', () => {
     // a fixed overlay, so a 72px grid track on the left became a visible
     // empty margin next to the content. Must live inside
     // `@media (min-width: 901px)`.
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+  });
+
+  it('CSS: group disclosure <button> fills the row like the <a> items', () => {
+    // A block-level <a> with width:auto fills the <li> minus margins, but a
+    // <button> uses shrink-to-fit even as a flex container — pre-fix the
+    // group's hover/hit area shrank to its content width. The calc mirrors
+    // the navitem's `margin: 1px 4px` (8px horizontal).
+    expect(css).toMatch(/\.appshell__navgroup \{[^}]*width: calc\(100% - 8px\)/);
   });
 });
 

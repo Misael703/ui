@@ -544,31 +544,32 @@ test.describe('Scenario · AppShell top mobile drawer — brand variant', () => 
 });
 
 /**
- * Scenario 7e — Desktop hide-mode collapsed without rail (1.31.0 bug guard).
- * Pre-fix, the absolute aside vacated grid col 1 and auto-placement put the
- * <main> into col 1 (0 width) instead of col 2 (1fr). Visible artifact:
- * a 48px main strip + a phantom scrollbar at the viewport's right edge.
- * Fix: explicit `grid-column: 2` on `.appshell__content` in the desktop
- * media. This test pins the geometry: at 1440px viewport, main should fill
- * the entire body width (~1440px), not 48px.
+ * Scenario 7e — Desktop collapsed main placement (2.0.0: the 72px rail IS
+ * the collapse; hide mode removed). The invariant this guards survives the
+ * redesign: the <main> must own ALL the width the aside doesn't (pre-1.31
+ * an auto-placement bug once squeezed it to a 48px padding-only strip).
+ * With the rail, that means: aside = 72px in flow, main = body − 72,
+ * starting exactly at the rail's right edge.
  */
-test.describe('Scenario · AppShell top desktop hide-collapsed — main placement', () => {
-  test('main fills the full body width (not 48px from padding-only)', async ({ page }) => {
+test.describe('Scenario · AppShell top desktop collapsed — main placement', () => {
+  test('main fills the body minus the 72px rail (not 48px from padding-only)', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/scenarios/appshell-top-hide-collapsed', { waitUntil: 'networkidle' });
     await page.waitForTimeout(200);
 
     const m = await page.evaluate(() => {
       const body = document.querySelector('.appshell__body') as HTMLElement;
+      const aside = document.querySelector('.appshell__sidebar') as HTMLElement;
       const main = document.querySelector('.appshell__content') as HTMLElement;
       return {
         bodyRect: body.getBoundingClientRect(),
+        asideRect: aside.getBoundingClientRect(),
         mainRect: main.getBoundingClientRect(),
-        gridCol: getComputedStyle(main).gridColumnStart,
       };
     });
-    expect(m.gridCol, `main should be pinned to grid-column 2 (got ${m.gridCol})`).toBe('2');
-    expect(m.mainRect.width, `main should span the full body (~${m.bodyRect.width}px), not 48px`).toBeGreaterThan(m.bodyRect.width - 5);
+    expect(Math.round(m.asideRect.width), 'collapsed aside is the 72px rail').toBe(72);
+    expect(m.mainRect.left, 'main starts at the rail edge').toBeCloseTo(m.asideRect.right, 0);
+    expect(m.mainRect.width, `main should span body − rail (~${m.bodyRect.width - 72}px), not 48px`).toBeGreaterThan(m.bodyRect.width - 72 - 5);
   });
 });
 
