@@ -3086,7 +3086,13 @@ button, input, select, textarea { box-sizing: border-box; }
    which reads near-white on a dark brand sidebar — the brand block overrides
    the var instead of the rule so consumer themes can retune it too. */
 .appshell__navchildren::before {
-  content: ''; position: absolute; left: 26px; top: 0; bottom: 8px;
+  /* Flush with the children's hover boxes at BOTH ends: the items' 1px
+     vertical margins collapse out of the <ul> (no padding/border on it), so
+     the first hover box top and last hover box bottom sit exactly at the
+     ul's edges — `top: 0; bottom: 0` spans them symmetrically. (Pre-fix
+     `bottom: 8px` stopped the guide ~7px short of the last hover box while
+     the top was flush — visibly lopsided.) */
+  content: ''; position: absolute; left: 26px; top: 0; bottom: 0;
   width: 1px; background: var(--appshell-nav-guide, var(--border-default));
 }
 .appshell__navitem--depth-1 {
