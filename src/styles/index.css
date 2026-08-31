@@ -3242,6 +3242,24 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell--no-anim .appshell__navlabel,
 .appshell--no-anim .appshell__navbadge,
 .appshell--no-anim .appshell__navlabel-section { transition: none !important; }
+/* Reduced motion: the shell's collapse choreography is real movement (panel
+   slide + content reflow), exactly what the preference asks to suppress —
+   every state still lands, just instantly. Same selector list as the
+   first-paint guard above, plus the chevron rotation. `!important` for the
+   same reason as that guard: the per-mode rules re-declare `transition` at
+   higher specificity (e.g. the hide-mode sidebar), and a media query adds
+   none. Killing `transition` also collapses the sidebar's DELAYED visibility
+   flip to 0s — off-screen links leave the tab order immediately, which is
+   the correct reduced-motion behaviour. (The scrim's opacity fade stays: a
+   pure fade is not vestibular motion.) */
+@media (prefers-reduced-motion: reduce) {
+  .appshell__body,
+  .appshell__sidebar,
+  .appshell__navlabel,
+  .appshell__navbadge,
+  .appshell__navlabel-section,
+  .appshell__navchevron { transition: none !important; }
+}
 .appshell--header-top .appshell__body {
   display: grid;
   grid-template-columns: 240px 1fr;

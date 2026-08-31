@@ -721,6 +721,15 @@ describe('AppShell collapsed/rail nav item centering', () => {
     expect(rule).toMatch(/gap:\s*0/);
   });
 
+  it('CSS: shell collapse choreography honors prefers-reduced-motion', () => {
+    // Panel slide + grid reflow + interior label/chevron motion must all die
+    // under the preference (states land instantly). !important because the
+    // per-mode rules re-declare `transition` at higher specificity.
+    expect(css).toMatch(
+      /prefers-reduced-motion[^{]*\{\s*\.appshell__body,\s*\.appshell__sidebar,\s*\.appshell__navlabel,\s*\.appshell__navbadge,\s*\.appshell__navlabel-section,\s*\.appshell__navchevron \{ transition: none !important/
+    );
+  });
+
   it('CSS: no interior-collapse rule remains unscoped to --rail', () => {
     // The whole family (labels, badges, children, chevron, section labels)
     // must be rail-only — an unscoped `.appshell.is-collapsed .appshell__nav*`

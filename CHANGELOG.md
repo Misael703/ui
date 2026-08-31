@@ -18,6 +18,13 @@ fila.**
   requiere) y `inert` los saca del foco y del árbol a11y mientras está
   cerrado; layout abierto pixel-idéntico y rail sin cambios.
 
+### Added (a11y)
+- **`prefers-reduced-motion` en el shell** — la coreografía de colapso
+  completa (slide del panel, reflow del grid, labels/badges/chevron) muere
+  bajo la preferencia: cada estado aterriza instantáneo. El fade del scrim se
+  conserva (un fade puro no es movimiento vestibular). Antes solo el badge
+  pulsante, el indicador de tabs y el disclosure nuevo la respetaban.
+
 ### Fixed
 - **AppShell hide-mode (`collapsedRail: false`): colapso/expansión glitcheado**
   — dos causas: (1) las reglas de interior del rail (labels a `max-width: 0`,
