@@ -5,10 +5,45 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.89.0] — 2026-08-31
+## [2.0.0] — 2026-08-31
 
-**Minor. AppShell: disclosure del grupo animado + botón del grupo llena la
-fila.**
+**Major. AppShell: el rail ES el colapso (adiós hide mode) + colapso re-coreografiado.**
+
+### Breaking
+- **`AppShell.collapsedRail` eliminado** — el colapso desktop es SIEMPRE el
+  rail de 72px (íconos + barra de activo). Razones: la matriz de dos modos es
+  donde vivían los bugs de colapso (3 en una sola auditoría), el único
+  consumidor real de sidebar del portafolio ya usaba rail, y bajo 900px el
+  drawer mobile cubre la necesidad de canvas máximo. Migración: borrar el
+  prop (si pasabas `collapsedRail` ya tienes el comportamiento nuevo; si
+  dependías del hide-entirely, no existe más).
+- **`is-collapsed` ya no se aplica en mobile** — el drawer es dueño del aside
+  bajo 900px; un `collapsed=true` persistido ya no puede renderizar el drawer
+  abierto en modo-ícono (quirk latente pre-2.0).
+
+### Changed
+- **Colapso re-coreografiado** (las 4 causas del feel "lento/raro/tosco"):
+  - Timing asimétrico: colapsar corre a `--duration-exit` (150ms), expandir a
+    `--duration-base` (200ms) — exits decisivos, entrances suaves. Curva
+    `--ease-out-quart` (cola corta) en vez de quint (cola larga: el panel
+    "terminaba" a los 130ms pero retenía 200ms muertos).
+  - Labels de sección ya no desaparecen con `display: none` seco (salto
+    vertical instantáneo de toda la lista en t=0): colapsan vía `max-height`
+    interpolable en el mismo reloj que el ancho.
+  - `max-width` expandido concreto en labels (160px) y badges (80px): el par
+    `none ↔ 0` no es interpolable (flip discreto al 50% — el label aparecía
+    de golpe a mitad de la expansión); ahora interpola en ambas direcciones.
+  - **El interior por fin anima de verdad**: el wrapper `Tooltip` del rail se
+    montaba/desmontaba con el colapso → React remontaba cada nav item en el
+    flip y las transiciones de labels/badges nunca corrían (snap). El wrapper
+    ahora es permanente con `disabled` (ver Added) — medido: label 160→0 px
+    fundiéndose en colapso, 0→160 px suave en expansión.
+
+### Added
+- **`Tooltip.disabled`** — mantiene el wrapper montado pero inerte (sin
+  listeners ni bubble). Para triggers cuyo tooltip es condicional: togglear
+  `disabled` preserva la estructura del DOM, mientras que envolver
+  condicionalmente remonta el subtree y mata cualquier transición CSS en él.
 
 ### Added
 - **Animación del grupo colapsable** — abrir/cerrar el disclosure ya no
@@ -17,26 +52,13 @@ fila.**
   `prefers-reduced-motion`. Los hijos quedan montados (la animación lo
   requiere) y `inert` los saca del foco y del árbol a11y mientras está
   cerrado; layout abierto pixel-idéntico y rail sin cambios.
-
-### Added (a11y)
 - **`prefers-reduced-motion` en el shell** — la coreografía de colapso
-  completa (slide del panel, reflow del grid, labels/badges/chevron) muere
-  bajo la preferencia: cada estado aterriza instantáneo. El fade del scrim se
+  completa (reflow del grid, labels/badges/chevron, drawer) muere bajo la
+  preferencia: cada estado aterriza instantáneo. El fade del scrim se
   conserva (un fade puro no es movimiento vestibular). Antes solo el badge
   pulsante, el indicador de tabs y el disclosure nuevo la respetaban.
 
 ### Fixed
-- **AppShell hide-mode (`collapsedRail: false`): colapso/expansión glitcheado**
-  — dos causas: (1) las reglas de interior del rail (labels a `max-width: 0`,
-  íconos recentrados, hijos `display: none`) no estaban scopeadas a `--rail`
-  y desarmaban el panel mientras deslizaba; ahora son rail-only y el panel
-  sale/entra **entero**, como el drawer mobile. (2) el grid del body tenía
-  `transition: none` (remedio de un diseño anterior donde el aside encogía),
-  así que el contenido saltaba de golpe; ahora el aside es overlay permanente
-  de ancho fijo (240px, nunca se angosta → sin "falso rail") y el track del
-  grid anima 240↔0 en paralelo — borde del contenido y panel se mueven
-  pixel-sincronizados en ambas direcciones (misma duración + easing). Rail
-  mode intacto (240→72 con su coreografía de siempre).
 - **AppShell: hover/hit area del navgroup encogida** — el header del grupo es
   un `<button>`, que usa shrink-to-fit incluso como flex container (a
   diferencia del `<a>` block-level que llena el `<li>`), así que su hover y

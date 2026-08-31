@@ -77,7 +77,7 @@ describe('AppShell persistKey', () => {
     const getItem = vi.spyOn(Storage.prototype, 'getItem');
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
     render(
-      <AppShell collapsedRail header={{ center: 'b' }} sections={sections}>x</AppShell>,
+      <AppShell header={{ center: 'b' }} sections={sections}>x</AppShell>,
     );
     expect(getItem).not.toHaveBeenCalled();
     expect(setItem).not.toHaveBeenCalled();

@@ -151,13 +151,6 @@ export interface AppShellProps {
    */
   headerTheme?: AppShellTheme;
   /**
-   * Collapse to an icon rail (72px) instead of hiding the sidebar entirely.
-   * Default `false` → `collapsed` hides the sidebar (slides off-screen).
-   * `true` → `collapsed` keeps a 72px rail showing the nav icons (labels
-   * hidden, active-item bar kept).
-   */
-  collapsedRail?: boolean;
-  /**
    * Render the kit's standard menu toggle (hamburger) at the start of
    * `header.left`. Default trigger for the drawer (mobile) / collapsed
    * state (desktop), so consumers don't need the `header.left`
@@ -241,9 +234,15 @@ const NavItemNode = React.memo(function NavItemNode({
   const [open, setOpen] = React.useState(item.defaultOpen ?? withinActive);
   const childrenId = React.useId();
   // Only depth-0 items collapse to an icon on the rail, so only they need the
-  // recovery tooltip; children are hidden there entirely.
+  // recovery tooltip; children are hidden there entirely. The Tooltip wrapper
+  // is ALWAYS mounted (`disabled` toggles activation) — conditionally
+  // wrapping changed the element type at this position on every collapse
+  // flip, so React remounted the whole item subtree and the label/badge
+  // CSS transitions never ran (items snapped instead of fading).
   const tip = (node: React.ReactElement) =>
-    depth === 0 && railTooltip ? <Tooltip label={item.label} side="right">{node}</Tooltip> : node;
+    depth === 0
+      ? <Tooltip label={item.label} side="right" disabled={!railTooltip}>{node}</Tooltip>
+      : node;
 
   if (hasChildren) {
     // A group is a disclosure BUTTON, not a link — its own destination (if any)
@@ -353,7 +352,6 @@ export function AppShell({
   className,
   theme = 'default',
   headerTheme: ctrlHeaderTheme,
-  collapsedRail = false,
   showMenuToggle = false,
   header,
   linkAs,
@@ -491,14 +489,17 @@ export function AppShell({
     typeof s === 'function' ? (s as (api: AppShellHeaderApi) => React.ReactNode)(headerApi) : s;
   // Icon-only rail: the desktop-collapsed rail hides labels, so nav items get a
   // hover/focus tooltip to recover them. Not on mobile (there it's a full drawer).
-  const railTooltip = collapsedRail && collapsed && !isMobile;
+  const railTooltip = collapsed && !isMobile;
 
   return (
     <div className={cx(
       'appshell', `appshell--${theme}`, 'appshell--header-top', `appshell--header-${headerTheme}`,
-      collapsedRail && 'appshell--rail',
       !hasSidebar && 'appshell--no-nav',
-      collapsed && 'is-collapsed',
+      // Desktop-only: `collapsed` = the 72px icon rail (2.0.0 — hide mode
+      // removed; rail is THE collapse). On mobile the drawer owns the aside,
+      // so the class is withheld — otherwise a persisted collapsed=true would
+      // render the open drawer in icon-mode (the pre-2.0 latent quirk).
+      collapsed && !isMobile && 'is-collapsed',
       mobileOpen && 'is-mobile-open',
       !animReady && 'appshell--no-anim',
       className,

@@ -154,7 +154,7 @@ describe('AppShell CSS guards', () => {
     // a fixed overlay, so a 72px grid track on the left became a visible
     // empty margin next to the content. Must live inside
     // `@media (min-width: 901px)`.
-    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
+    expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
 
   it('CSS: group disclosure <button> fills the row like the <a> items', () => {
