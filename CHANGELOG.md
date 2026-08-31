@@ -5,6 +5,20 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.88.1] — 2026-08-31
+
+**Patch. AppShell: el botón del grupo colapsable llena la fila.**
+
+### Fixed
+- **AppShell: hover/hit area del navgroup encogida** — el header del grupo es
+  un `<button>`, que usa shrink-to-fit incluso como flex container (a
+  diferencia del `<a>` block-level que llena el `<li>`), así que su hover y
+  área de click se achicaban al ancho del contenido. Ahora
+  `width: calc(100% - 8px)` (espejo del `margin: 1px 4px` del navitem):
+  misma fila que los links en expandido y en rail. Efecto colateral
+  correcto: el chevron del disclosure ahora sí cae al borde derecho de la
+  fila (su `margin-left: auto` por fin tiene espacio).
+
 ## [1.88.0] — 2026-08-29
 
 **Minor. UserMenu: variante `compact` (trigger solo-avatar en todo viewport).**

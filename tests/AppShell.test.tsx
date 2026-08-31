@@ -143,6 +143,14 @@ describe('AppShell CSS guards', () => {
     // `@media (min-width: 901px)`.
     expect(css).toMatch(/@media\s*\(min-width:\s*901px\)\s*\{[\s\S]*?\.appshell--header-top\.appshell--rail\.is-collapsed\s+\.appshell__body\s*\{[^}]*grid-template-columns:\s*72px\s+1fr/);
   });
+
+  it('CSS: group disclosure <button> fills the row like the <a> items', () => {
+    // A block-level <a> with width:auto fills the <li> minus margins, but a
+    // <button> uses shrink-to-fit even as a flex container — pre-fix the
+    // group's hover/hit area shrank to its content width. The calc mirrors
+    // the navitem's `margin: 1px 4px` (8px horizontal).
+    expect(css).toMatch(/\.appshell__navgroup \{[^}]*width: calc\(100% - 8px\)/);
+  });
 });
 
 describe('PageHeader', () => {

@@ -3027,10 +3027,16 @@ button, input, select, textarea { box-sizing: border-box; }
 .appshell__navitem--depth-1.is-active::before { display: none; }
 
 /* --- Collapsible group: a NavItem with children renders a disclosure <button>
-   wearing .appshell__navitem, so it only needs the button-chrome reset (font,
-   color, flex, padding all come from .appshell__navitem; no width — the margin
-   would overflow, display:flex already fills like the <a>). --- */
-.appshell__navgroup { border: 0; background: transparent; cursor: pointer; text-align: left; }
+   wearing .appshell__navitem, so it needs the button-chrome reset (font,
+   color, flex, padding come from .appshell__navitem) — PLUS an explicit
+   width: a block-level <a> with width:auto fills the <li> minus its margins,
+   but a <button> uses shrink-to-fit even as a flex container, so the group's
+   hover/hit area shrank to its content. The calc mirrors the navitem's
+   `margin: 1px 4px` (8px horizontal total) — keep them in sync. --- */
+.appshell__navgroup {
+  border: 0; background: transparent; cursor: pointer; text-align: left;
+  width: calc(100% - 8px);
+}
 .appshell__navchevron {
   flex: none; margin-left: auto; color: var(--fg-muted);
   transition: transform var(--duration-fast) var(--ease-standard);
