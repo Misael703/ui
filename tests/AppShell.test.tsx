@@ -54,11 +54,24 @@ describe('AppShell — P1 nav at scale (v1.83.0)', () => {
     ] }] }]);
     const btn = screen.getByRole('button', { name: /Reportes/ });
     expect(btn.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByText('Ventas')).toBeNull(); // closed → children not in DOM
+    // Children stay MOUNTED (the disclosure animates via grid-rows 0fr→1fr;
+    // unmounting would kill the transition) but the closed viewport is
+    // `inert` — out of the focus order and the a11y tree.
+    const viewport = document.querySelector('.appshell__navchildren-viewport')!;
+    expect(screen.getByText('Ventas')).toBeInTheDocument();
+    expect(viewport.getAttribute('data-state')).toBe('closed');
+    expect(viewport.hasAttribute('inert')).toBe(true);
     fireEvent.click(btn);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('Ventas')).toBeInTheDocument();
+    expect(viewport.getAttribute('data-state')).toBe('open');
+    expect(viewport.hasAttribute('inert')).toBe(false);
     expect(document.getElementById(btn.getAttribute('aria-controls')!)).not.toBeNull();
+  });
+
+  it('CSS: the disclosure animates like Collapsible (grid 0fr→1fr + reduced-motion off)', () => {
+    expect(css).toMatch(/\.appshell__navchildren-viewport \{[^}]*grid-template-rows: 0fr/);
+    expect(css).toMatch(/\.appshell__navchildren-viewport\[data-state="open"\] \{ grid-template-rows: 1fr/);
+    expect(css).toMatch(/prefers-reduced-motion[\s\S]*?\.appshell__navchildren-viewport \{ transition: none/);
   });
 
   it('auto-opens the group holding the active item and marks it is-within', () => {

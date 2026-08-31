@@ -264,13 +264,25 @@ const NavItemNode = React.memo(function NavItemNode({
             <ChevronRight size={16} className="appshell__navchevron" aria-hidden="true" />
           </button>
         )}
-        {open && (
-          <ul id={childrenId} className="appshell__navchildren">
-            {item.children?.map((c) => (
-              <NavItemNode key={c.id} item={c} depth={depth + 1} linkAs={linkAs} onCloseMobile={onCloseMobile} railTooltip={railTooltip} />
-            ))}
-          </ul>
-        )}
+        {/* Children stay MOUNTED so the disclosure can animate (same
+            grid-rows 0fr→1fr pattern as Collapsible — `display: none` /
+            unmounting kills the transition). `inert` gates focus + the a11y
+            tree while closed; not in @types/react, so it rides in via a
+            spread — React 18 would otherwise emit `inert="false"`, still
+            treated as inert-ON by browsers. */}
+        <div
+          className="appshell__navchildren-viewport"
+          data-state={open ? 'open' : 'closed'}
+          {...(open ? {} : { inert: '' })}
+        >
+          <div className="appshell__navchildren-clip">
+            <ul id={childrenId} className="appshell__navchildren">
+              {item.children?.map((c) => (
+                <NavItemNode key={c.id} item={c} depth={depth + 1} linkAs={linkAs} onCloseMobile={onCloseMobile} railTooltip={railTooltip} />
+              ))}
+            </ul>
+          </div>
+        </div>
       </li>
     );
   }

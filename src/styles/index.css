@@ -3005,6 +3005,22 @@ button, input, select, textarea { box-sizing: border-box; }
    subtle vertical guide (aligned under the parent icon's centre) ties them to
    the group header, and the items recede (lighter, smaller) so hierarchy is
    legible even without the chevron. */
+/* Disclosure open/close animates via the same grid-rows 0fr→1fr pattern as
+   `.collapsible__viewport`: the viewport animates its single row, the clip
+   child (`overflow: hidden; min-height: 0`) slides the list instead of
+   jumping. The <ul>'s own margins live INSIDE the clip (overflow:hidden
+   suppresses margin collapse), so the closed viewport is exactly 0px tall.
+   Focus/a11y while closed is gated by `inert` in JS (see AppShell.tsx). */
+.appshell__navchildren-viewport {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+.appshell__navchildren-viewport[data-state="open"] { grid-template-rows: 1fr; }
+.appshell__navchildren-clip { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .appshell__navchildren-viewport { transition: none; }
+}
 /* Higher specificity than the `.appshell__nav ul { padding: 0 }` reset so the
    indent actually applies. */
 .appshell__nav .appshell__navchildren { position: relative; margin: 2px 0 6px; padding-left: 30px; }
