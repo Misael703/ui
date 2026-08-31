@@ -490,6 +490,14 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     });
   });
 
+  it('CSS: collapsed rail draws a hairline between adjacent sections', () => {
+    // The section labels collapse away in the rail, so a short centred line
+    // takes over as the group separator. Only BETWEEN sections (sibling
+    // combinator — never above the first), invisible when expanded.
+    expect(css).toMatch(/\.appshell__navsection \+ \.appshell__navsection::before \{[\s\S]*?opacity: 0/);
+    expect(css).toMatch(/\.appshell\.is-collapsed \.appshell__navsection \+ \.appshell__navsection::before \{[\s\S]*?opacity: 1/);
+  });
+
   it('mobile never gets is-collapsed (the drawer must not render icon-mode)', () => {
     // 2.0.0: the interior-collapse rules are unscoped in CSS; the desktop-only
     // gating lives in the COMPONENT (`is-collapsed` withheld while isMobile),

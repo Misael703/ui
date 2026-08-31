@@ -2928,6 +2928,32 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
+/* Collapsed rail: the section labels collapse away, so adjacent icon groups
+   lose their visual break — a short centred hairline takes over as the group
+   separator (the standard rail idiom). Lives on every section that FOLLOWS
+   another (never above the first). Fades in LATE on collapse (delay ≈ the
+   label fade, so it appears once the text is gone) and out immediately on
+   expand — the base (destination) transition carries no delay. */
+.appshell__navsection + .appshell__navsection { position: relative; }
+.appshell__navsection + .appshell__navsection::before {
+  content: '';
+  position: absolute;
+  top: -8px; /* centre of the 16px inter-section gap (12px pad-bottom + 4px pad-top) */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 1px;
+  background: var(--border-default);
+  opacity: 0;
+  transition: opacity var(--duration-fast, 120ms) ease;
+}
+.appshell.is-collapsed .appshell__navsection + .appshell__navsection::before {
+  opacity: 1;
+  transition: opacity var(--duration-fast, 120ms) ease var(--duration-fast, 120ms);
+}
+.appshell--brand .appshell__navsection + .appshell__navsection::before {
+  background: rgba(255, 255, 255, 0.18);
+}
 /* Collapses via max-height (a concrete cap, so it interpolates — height:auto
    would not): the pre-2.0 `display: none` removed the row in ONE frame, so
    the whole list below jumped vertically at t=0 while widths were still

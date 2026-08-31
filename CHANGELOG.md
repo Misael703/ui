@@ -44,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   listeners ni bubble). Para triggers cuyo tooltip es condicional: togglear
   `disabled` preserva la estructura del DOM, mientras que envolver
   condicionalmente remonta el subtree y mata cualquier transición CSS en él.
+- **Separador de secciones en el rail** — al colapsar, los labels de sección
+  desaparecen y los grupos de íconos perdían su corte visual; ahora un
+  hairline corto centrado (28px) toma su lugar entre secciones adyacentes
+  (idioma estándar de nav rails). Aparece con delay (cuando los labels ya se
+  fundieron) y desaparece inmediato al expandir; variante translúcida en
+  brand.
 
 ### Added
 - **Animación del grupo colapsable** — abrir/cerrar el disclosure ya no
