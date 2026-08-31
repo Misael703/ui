@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { inertAttr } from '../utils/inert';
 import { useLocale } from '../locale/LocaleProvider';
 import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
 import { MenuIcon, ChevronRight } from './Icons';
@@ -266,13 +267,12 @@ const NavItemNode = React.memo(function NavItemNode({
         {/* Children stay MOUNTED so the disclosure can animate (same
             grid-rows 0fr→1fr pattern as Collapsible — `display: none` /
             unmounting kills the transition). `inert` gates focus + the a11y
-            tree while closed; not in @types/react, so it rides in via a
-            spread — React 18 would otherwise emit `inert="false"`, still
-            treated as inert-ON by browsers. */}
+            tree while closed — via the dual-runtime `inertAttr` shim: React
+            18 and 19 need OPPOSITE values (see src/utils/inert.ts). */}
         <div
           className="appshell__navchildren-viewport"
           data-state={open ? 'open' : 'closed'}
-          {...(open ? {} : { inert: '' })}
+          {...inertAttr(!open)}
         >
           <div className="appshell__navchildren-clip">
             <ul id={childrenId} className="appshell__navchildren">

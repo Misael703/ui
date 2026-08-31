@@ -686,3 +686,42 @@ test.describe('Scenario · form controls inside a positioned scroll container', 
     expect(result.outOfBox, 'every hidden input must overlay within its label box').toBe(0);
   });
 });
+
+/**
+ * Scenario 7f — nav group `inert` gate under the NEWEST peer React (2.0.1).
+ * The kit's React-18 workaround (`inert: ''`) is treated as FALSE by React
+ * 19: the attribute was silently dropped, so a closed group's children were
+ * back in the tab order / a11y tree (and dev builds logged "Received an
+ * empty string for a boolean attribute `inert`" on every toggle). The smoke
+ * app runs React 19, so THIS is the real regression surface: the attribute
+ * assertions below fail against the old value even in the production build
+ * (the drop is value semantics, not just the warning).
+ */
+test.describe('Scenario · AppShell nav group inert gate (React 19)', () => {
+  test('closed group children are inert; toggling is attribute- and console-clean', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
+    page.on('pageerror', (err) => errors.push(String(err)));
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.goto('/scenarios', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+
+    const viewport = page.locator('.appshell__navchildren-viewport');
+    // Boots closed (no active child): gate ON. React 19 renders boolean
+    // `true` as an empty-valued attribute — presence is the contract.
+    await expect(viewport).toHaveAttribute('inert', /.*/);
+    // Never the React-18 danger serialization.
+    expect(await viewport.getAttribute('inert')).not.toBe('false');
+
+    await page.getByRole('button', { name: 'Reportes' }).click();
+    await page.waitForTimeout(300);
+    await expect(viewport).not.toHaveAttribute('inert');
+    await expect(page.getByRole('link', { name: 'Ventas' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Reportes' }).click();
+    await page.waitForTimeout(300);
+    await expect(viewport).toHaveAttribute('inert', /.*/);
+
+    expect(errors, `console must be clean while toggling:\n${errors.join('\n')}`).toEqual([]);
+  });
+});
