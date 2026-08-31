@@ -5,9 +5,18 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.88.1] — 2026-08-31
+## [1.89.0] — 2026-08-31
 
-**Patch. AppShell: el botón del grupo colapsable llena la fila.**
+**Minor. AppShell: disclosure del grupo animado + botón del grupo llena la
+fila.**
+
+### Added
+- **Animación del grupo colapsable** — abrir/cerrar el disclosure ya no
+  salta: los hijos deslizan con el mismo patrón grid `0fr→1fr` de
+  `Collapsible` (`--duration-base` + `--ease-standard`), con opt-out por
+  `prefers-reduced-motion`. Los hijos quedan montados (la animación lo
+  requiere) y `inert` los saca del foco y del árbol a11y mientras está
+  cerrado; layout abierto pixel-idéntico y rail sin cambios.
 
 ### Fixed
 - **AppShell: hover/hit area del navgroup encogida** — el header del grupo es
