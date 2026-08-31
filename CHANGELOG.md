@@ -19,6 +19,17 @@ fila.**
   cerrado; layout abierto pixel-idéntico y rail sin cambios.
 
 ### Fixed
+- **AppShell hide-mode (`collapsedRail: false`): colapso/expansión glitcheado**
+  — dos causas: (1) las reglas de interior del rail (labels a `max-width: 0`,
+  íconos recentrados, hijos `display: none`) no estaban scopeadas a `--rail`
+  y desarmaban el panel mientras deslizaba; ahora son rail-only y el panel
+  sale/entra **entero**, como el drawer mobile. (2) el grid del body tenía
+  `transition: none` (remedio de un diseño anterior donde el aside encogía),
+  así que el contenido saltaba de golpe; ahora el aside es overlay permanente
+  de ancho fijo (240px, nunca se angosta → sin "falso rail") y el track del
+  grid anima 240↔0 en paralelo — borde del contenido y panel se mueven
+  pixel-sincronizados en ambas direcciones (misma duración + easing). Rail
+  mode intacto (240→72 con su coreografía de siempre).
 - **AppShell: hover/hit area del navgroup encogida** — el header del grupo es
   un `<button>`, que usa shrink-to-fit incluso como flex container (a
   diferencia del `<a>` block-level que llena el `<li>`), así que su hover y

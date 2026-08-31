@@ -2934,7 +2934,7 @@ button, input, select, textarea { box-sizing: border-box; }
   text-transform: var(--tt-label); letter-spacing: var(--tracking-wider);
   color: var(--fg-subtle);
 }
-.appshell.is-collapsed .appshell__navlabel-section { display: none; }
+.appshell--rail.is-collapsed .appshell__navlabel-section { display: none; }
 .appshell__nav ul { list-style: none; margin: 0; padding: 0; }
 /* Layout-invisible wrapper around a `linkAs` node: it only exists to delegate
    the mobile-drawer close (onClick) from the consumer's link, so it must not
@@ -2975,8 +2975,8 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 1px 8px; border-radius: var(--radius-pill);
   transition: opacity var(--duration-fast, 120ms) ease, max-width var(--duration-base, 200ms) var(--ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
-.appshell.is-collapsed .appshell__navlabel,
-.appshell.is-collapsed .appshell__navbadge {
+.appshell--rail.is-collapsed .appshell__navlabel,
+.appshell--rail.is-collapsed .appshell__navbadge {
   opacity: 0;
   max-width: 0;
   margin: 0;
@@ -2984,14 +2984,19 @@ button, input, select, textarea { box-sizing: border-box; }
   overflow: hidden;
   pointer-events: none;
 }
-.appshell.is-collapsed .appshell__navchildren { display: none; }
+.appshell--rail.is-collapsed .appshell__navchildren { display: none; }
 /* Collapsed/rail: the label collapses to width 0, so center the icon and drop the
-   gap — otherwise the leftover gap + padding leave the icon off-centre. */
-.appshell.is-collapsed .appshell__navitem { justify-content: center; gap: 0; }
+   gap — otherwise the leftover gap + padding leave the icon off-centre.
+   NOTE: every interior-collapse rule in this family is scoped to `--rail` —
+   only the rail narrows the sidebar into icon mode. In hide mode
+   (`collapsedRail: false`) the panel SLIDES off-screen at full width, so its
+   interior must stay intact during the exit (pre-scoping, labels evaporated
+   and icons re-centred mid-slide — the panel visibly dismantled itself). */
+.appshell--rail.is-collapsed .appshell__navitem { justify-content: center; gap: 0; }
 .appshell__navlabel-section {
   transition: opacity var(--duration-fast, 120ms) ease, visibility 0s linear 0s;
 }
-.appshell.is-collapsed .appshell__navlabel-section {
+.appshell--rail.is-collapsed .appshell__navlabel-section {
   opacity: 0;
   visibility: hidden; /* removes from accessibility tree once collapsed */
   pointer-events: none;
@@ -3062,7 +3067,7 @@ button, input, select, textarea { box-sizing: border-box; }
    active branch stays legible when the child is scrolled out or collapsed. */
 .appshell__navgroup.is-within { color: var(--fg-default); }
 .appshell__navgroup.is-within .appshell__navicon { color: var(--color-primary); }
-.appshell.is-collapsed .appshell__navchevron { display: none; }
+.appshell--rail.is-collapsed .appshell__navchevron { display: none; }
 
 /* Rail tooltip: the kit Tooltip wraps its trigger in an inline <span>; force it
    block inside the nav so it doesn't shrink the flex nav row to content width. */
@@ -3291,11 +3296,14 @@ button, input, select, textarea { box-sizing: border-box; }
    anchors to the top of THIS scroll viewport. */
 .appshell--header-top .appshell__content { min-height: 0; overflow-y: auto; }
 /* Hide mode (no rail): SLIDE the sidebar out instead of narrowing it. A
-   width transition (240px → 0) sweeps through ~72px and reads as a momentary
-   rail; instead the sidebar keeps its full width and translates off-screen
-   to the left (overlaying, so it can slide past the edge) while the content
-   reclaims the width immediately. Animated, and never narrows into a rail.
-   Rail mode keeps the smooth 240→72 width transition.
+   width transition (240px → 0) on the ASIDE would sweep through ~72px and
+   read as a momentary rail; instead the sidebar is a PERMANENT overlay here
+   (absolute, fixed 240px width, out of grid flow) that translates off-screen
+   to the left, while the body's grid track animates 240px↔0 underneath so
+   the content edge reflows in sync — same duration + easing means the
+   aside's right edge and the content's left edge move together, pixel-
+   coincident, with no interior squish in either direction (the aside never
+   changes width). Rail mode keeps the smooth 240→72 width transition.
    Scoped to `min-width: 901px` so it does NOT compete with the mobile
    drawer rules below the breakpoint — at mobile the overlay frame is
    different (fixed, anchored under the header) and pre-1.31.0 letting this
@@ -3303,23 +3311,19 @@ button, input, select, textarea { box-sizing: border-box; }
    the mobile rules had to fight to override. Keeping it desktop-scoped
    keeps the mobile block simple. */
 @media (min-width: 901px) {
-  .appshell--header-top:not(.appshell--rail) .appshell__body {
-    transition: none;
-    position: relative;
-  }
-  .appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
+  .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
     position: absolute;
     inset: 0 auto 0 0;
     width: 240px;
+    transition: transform var(--duration-base) var(--ease-standard), visibility 0s;
+  }
+  .appshell--header-top:not(.appshell--rail).is-collapsed .appshell__sidebar {
     transform: translateX(-100%);
     /* Same tab-order/AT concern as the mobile drawer: the hidden sidebar keeps
        its links focusable off-screen (and here there's no `aria-hidden` either).
-       Hide after the slide-out; the expanded state (below) restores it at once. */
+       Hide after the slide-out; the expanded state (above) restores it at once. */
     visibility: hidden;
     transition: transform var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);
-  }
-  .appshell--header-top:not(.appshell--rail) .appshell__sidebar {
-    transition: transform var(--duration-base) var(--ease-standard), visibility 0s;
   }
   /* Hide-mode collapse bug (v1.31.0): when the aside goes `position: absolute`
      it leaves the grid flow → grid auto-placement gives the next in-flow item

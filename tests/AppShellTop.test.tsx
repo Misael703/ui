@@ -713,9 +713,18 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
 describe('AppShell collapsed/rail nav item centering', () => {
   // When collapsed the nav label is width 0, so the item must center the icon and
   // drop the row gap — otherwise the leftover gap + padding pushes it off-centre.
-  it('the collapsed nav item centers its content with no gap', () => {
-    const rule = css.match(/\.appshell\.is-collapsed \.appshell__navitem\s*\{([^}]*)\}/)?.[1] ?? '';
+  // Scoped to `--rail`: hide mode slides the full-width panel off-screen, so
+  // its interior must NOT go icon-mode mid-slide (the pre-scoping glitch).
+  it('the collapsed RAIL nav item centers its content with no gap', () => {
+    const rule = css.match(/\.appshell--rail\.is-collapsed \.appshell__navitem\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(rule).toMatch(/justify-content:\s*center/);
     expect(rule).toMatch(/gap:\s*0/);
+  });
+
+  it('CSS: no interior-collapse rule remains unscoped to --rail', () => {
+    // The whole family (labels, badges, children, chevron, section labels)
+    // must be rail-only — an unscoped `.appshell.is-collapsed .appshell__nav*`
+    // rule would dismantle the hide-mode panel while it slides out.
+    expect(css).not.toMatch(/\.appshell\.is-collapsed \.appshell__nav/);
   });
 });
