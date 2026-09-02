@@ -124,3 +124,30 @@ describe('compact register — picker family consumes tokens', () => {
     expect(ruleBody(index, '.gridpicker__toggle')).toMatch(/height:\s*var\(--control-h-md\)/);
   });
 });
+
+describe('compact register — sweep (Task 8)', () => {
+  it('.number-input usa var(--control-h-md)', () => {
+    expect(ruleBody(index, '.number-input')).toMatch(/height:\s*var\(--control-h-md\)/);
+  });
+  it('.cmdk__input usa var(--control-font-md)', () => {
+    expect(ruleBody(index, '.cmdk__input')).toMatch(/font-size:\s*var\(--control-font-md\)/);
+  });
+  it('.notif__trigger usa var(--control-h-md) en width y height', () => {
+    const r = ruleBody(index, '.notif__trigger');
+    expect(r).toMatch(/width:\s*var\(--control-h-md\)/);
+    expect(r).toMatch(/height:\s*var\(--control-h-md\)/);
+  });
+  it('.gallery__nav usa var(--control-h-md) en width y height', () => {
+    const r = ruleBody(index, '.gallery__nav');
+    expect(r).toMatch(/width:\s*var\(--control-h-md\)/);
+    expect(r).toMatch(/height:\s*var\(--control-h-md\)/);
+  });
+  it('.carousel__control usa var(--control-h-md) en width y height', () => {
+    const r = ruleBody(index, '.carousel__control');
+    expect(r).toMatch(/width:\s*var\(--control-h-md\)/);
+    expect(r).toMatch(/height:\s*var\(--control-h-md\)/);
+  });
+  it('.usermenu__name baja a var(--text-sm)', () => {
+    expect(ruleBody(index, '.usermenu__name')).toMatch(/font-size:\s*var\(--text-sm\)/);
+  });
+});

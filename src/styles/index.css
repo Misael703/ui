@@ -1862,7 +1862,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
   overflow: hidden;
-  height: 40px;
+  height: var(--control-h-md);
 }
 .number-input.is-invalid { border-color: var(--color-danger); }
 .number-input.is-disabled { opacity: 0.55; pointer-events: none; }
@@ -2875,7 +2875,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .cmdk__input {
   flex: 1; border: 0; outline: none;
   background: transparent; color: var(--fg-default);
-  font-family: var(--font-body); font-size: var(--text-md);
+  font-family: var(--font-body); font-size: var(--control-font-md);
 }
 .cmdk__esc {
   font-family: var(--font-mono); font-size: var(--text-2xs);
@@ -3914,7 +3914,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- NotificationCenter ---------------------------------------- */
 .notif { position: relative; display: inline-block; }
 .notif__trigger {
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   border-radius: var(--radius-pill);
   background: transparent; border: 0;
   cursor: pointer;
@@ -4319,7 +4319,7 @@ button, input, select, textarea { box-sizing: border-box; }
   position: absolute; top: 50%; transform: translateY(-50%);
   background: rgba(0,0,0,0.5); color: var(--color-white);
   border: 0; border-radius: var(--radius-pill);
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; opacity: 0;
   transition: opacity var(--duration-fast);
@@ -4865,7 +4865,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .carousel__slide { flex: 0 0 100%; min-width: 0; }
 .carousel__control {
   position: absolute; top: 50%; transform: translateY(-50%);
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   display: inline-flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
   color: var(--fg-default);
@@ -5261,7 +5261,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .usermenu__trigger:hover { background: var(--bg-subtle); }
 .appshell--header-brand .usermenu__trigger:hover { background: rgba(255, 255, 255, 0.12); }
 .usermenu__text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
-.usermenu__name { font-size: var(--text-md); font-weight: 600; }
+.usermenu__name { font-size: var(--text-sm); font-weight: 600; }
 .usermenu__role { font-size: var(--text-sm); opacity: 0.7; }
 .usermenu__chevron { display: inline-flex; }
 @media (max-width: 900px) {
