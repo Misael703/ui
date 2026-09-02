@@ -232,13 +232,12 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  /* Tokenized control metrics (v1.10.0). Default stays the 44px WCAG
-     2.5.5 touch target — that IS the product default and must not regress
-     for the mobile operators the kit serves. A dense desktop filter row
-     of ~7 controls used to wrap because 44px was hardcoded; wrap a row in
-     `.fields--dense` to drop every control (input/select/textarea AND
-     combobox) to a compact 36px together — kit-owned, no per-component
-     prop, default untouched. */
+  /* Tokenized control metrics (v3.0.0). Default is now the compact register
+     38px—desktop-optimized form density. On touch-capable devices
+     (@media pointer:coarse in _root.css), the WCAG 2.5.5 touch target 44px
+     is automatically restored to serve mobile operators. Wrap a filter row
+     in `.fields--dense` to drop every control to a more compact 36px
+     (input/select/textarea AND combobox) — kit-owned, no per-component prop. */
   padding: var(--field-pad-y, 7px) var(--field-pad-x, 12px);
   min-height: var(--field-min-h, 38px);
   width: 100%;
