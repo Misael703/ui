@@ -63,3 +63,18 @@ describe('compact register — fields', () => {
     expect(index).toMatch(/\.daterange__field-input\s*\{[^}]*font-size:\s*var\(--control-font-md\)/);
   });
 });
+
+describe('compact register — buttons', () => {
+  it('md: 38px, 13px uppercase, radio 6, centrado por flex', () => {
+    const md = ruleBody(index, '.btn--md');
+    expect(md).toMatch(/min-height:\s*var\(--control-h-md\)/);
+    expect(md).toMatch(/font-size:\s*var\(--text-data\)/);
+    expect(md).toMatch(/padding:\s*0 16px/);
+    expect(md).toMatch(/border-radius:\s*var\(--control-radius-md\)/);
+  });
+  it('lg baja a 44/14', () => {
+    const lg = ruleBody(index, '.btn--lg');
+    expect(lg).toMatch(/min-height:\s*var\(--control-h-lg\)/);
+    expect(lg).toMatch(/font-size:\s*var\(--text-sm\)/);
+  });
+});
