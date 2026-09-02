@@ -241,6 +241,39 @@
   --chart-series-7: #6b7e95;  /* muted slate-blue */
   --chart-series-8: #d4a574;  /* warm sand        */
 
+  /* -------- Dataviz semantic roles (v3.1.0) --------------------------- */
+  /* For chart MARKS (SVG fill/stroke, Meter/ProportionBar segments), by the
+     job a series does — never by position. Consumer-driven (despachos reports
+     dashboard): the app kept a local hex palette because the kit exposed no
+     dataviz roles, which broke "the kit owns the palette" and left every chart
+     blind to dark mode. Each role ALIASES an existing primitive — no new hex —
+     so a brand preset re-tints them for free and the dark block below only
+     re-points the roles whose light stop sinks into a dark surface. Values
+     resolve to a FLAT colour (no color-mix / gradient): consumers pass
+     `var(--chart-*)` straight into SVG, and ChartTokens.test resolves the chain.
+       --chart-primary   main / demand series. -600 (not the -700/-800 ink base):
+                         the ink stop reads heavy as a bar; -600 sits in the
+                         chart lightness band and still clears 3:1 on canvas.
+       --chart-positive  good  ─┐ RESERVED status roles: never a decorative
+       --chart-negative  bad   ─┘ "series N". Ship with a label, never colour alone.
+       --chart-warn      warning / attention. yellow-700, one step darker than
+                         `--color-warning` (-600 = 2.9:1 as a mark on white).
+                         Gold, not amber, per the v1.29.0 status retune (amber
+                         collides with the El Alba brand orange).
+       --chart-alt       alternate category (cat-1: cyan in El Alba, blue here).
+       --chart-muted     neutral / previous-period series (cat-6 slate).
+     Contrast ≥ 3:1 (SC 1.4.11, non-text) on --bg-surface pinned in
+     tests/ChartTokens.test.tsx for both palettes in both themes. These are
+     ROLES, not a categorical sequence — they are not tuned for pairwise
+     separation as N adjacent series (primary/alt/muted are all cool mids).
+     For "N categories that just need to differ" use --cat-1…6 in order. */
+  --chart-primary:  var(--color-primary-600);
+  --chart-positive: var(--color-green-700);
+  --chart-negative: var(--color-danger);
+  --chart-warn:     var(--color-yellow-700);
+  --chart-alt:      var(--cat-1);
+  --chart-muted:    var(--cat-6);
+
   /* -------- Breakpoints --------------------------------------------- */
   /* CSS custom properties cannot be used inside @media query conditions,
      so these serve as design-system documentation. The same numbers are
@@ -539,6 +572,17 @@
   --cat-4-bg: color-mix(in oklab, var(--cat-4) 22%, var(--bg-surface)); --cat-4-fg: color-mix(in oklab, var(--cat-4) 45%, var(--color-white));
   --cat-5-bg: color-mix(in oklab, var(--cat-5) 22%, var(--bg-surface)); --cat-5-fg: color-mix(in oklab, var(--cat-5) 45%, var(--color-white));
   --cat-6-bg: color-mix(in oklab, var(--cat-6) 22%, var(--bg-surface)); --cat-6-fg: color-mix(in oklab, var(--cat-6) 45%, var(--color-white));
+
+  /* Dataviz roles — SELECTED dark steps from the same scales, not a flip. Only
+     the three whose light stop sinks into the dark surface move: brand -600 →
+     -400 (El Alba navy #1a46a0 is ~2:1 on #141d31), green-700 → -600, red-600 →
+     -500. warn (yellow-700), alt (cat-1) and muted (cat-6) already clear 3:1 on
+     every dark tier of both palettes and sit inside the dark lightness band, so
+     they keep their light value — one identity across themes. Scale aliases
+     resolve through the preset's own scale, so El Alba needs no override here. */
+  --chart-primary:  var(--color-primary-400);
+  --chart-positive: var(--color-green-600);
+  --chart-negative: var(--color-red-500);
 }
 
 /* Touch guard (WCAG 2.5.5): en puntero grueso los controles interactivos

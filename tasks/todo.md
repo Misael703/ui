@@ -1,25 +1,26 @@
-# UI Kit v3.0.0 — Compact Register
+# UI Kit v3.1.0 — Dataviz semantic tokens (`--chart-*`)
 
-**Spec:** [docs/superpowers/specs/2026-09-02-compact-register-design.md](docs/superpowers/specs/2026-09-02-compact-register-design.md)
-**Plan:** [docs/superpowers/plans/2026-09-02-compact-register.md](docs/superpowers/plans/2026-09-02-compact-register.md)
+**Pedido:** consumer-driven desde despachos-ferreteria (dashboard de reportes). Cierra el ítem P3 (dark mode) de la auditoría ERP con consumidor real.
+**Branch:** `feat/chart-tokens` (local; push/PR solo con OK explícito).
 
-## Implementation Tasks
+## Decisiones aprobadas (2026-09-02)
+- Capa semántica `--chart-*` que **aliasa** primitivos existentes; cero hex nuevo en light.
+- `DESIGN.md` manda sobre los seeds: verde → escala green del kit, ámbar → gold (yellow-700), navy → `--color-primary-600`.
+- **No** se agrega `--focus-ring` (colisión de tipo con la familia box-shadow `--focus-ring-*`); el consumidor usa `--border-focus`.
+- Ambas paletas: base define light + dark; El Alba hereda por alias de escala (sin override).
+- Valores planos (hex / alias de escala), sin `color-mix`, para que el test los resuelva y el consumidor los pase a SVG.
 
-- [x] **T1 — Token audit** (commit `160c7d4`)
-- [x] **T2 — Fields layout** (commit `8ea787e`)
-- [x] **T3 — Button behavior** (commit `c127f0b`)
-- [x] **T4 — Toggle fields** (commit `7b3ca84`)
-- [x] **T5 — Table density** (commit `abe3443`)
-- [x] **T6 — Page header & card** (commit `4cabcda`)
-- [x] **T7 — Pickers & inputs** (commit `0505b95`)
-- [x] **T8 — Visual sweep** (commit `8d215f5`)
-- [x] **T9 — Docs & bump** (commit `0020954`)
-- [x] **T10 — Cleanup** (this commit)
+## Tareas
+- [x] T1 — `tests/ChartTokens.test.tsx` (rojo): 6 tokens definidos en base light + dark; resuelven a hex plano en base y El Alba, ambos temas; ≥ 3:1 vs `--bg-surface` en los 4 mapas.
+- [x] T2 — `src/styles/_root.css`: bloque `--chart-*` en `:root` (alias) + override en `:root[data-theme="dark"]`.
+- [x] T3 — Test verde; validador dataviz sobre los valores finales (light + dark, ambas paletas).
+- [x] T4 — `DESIGN.md` (sección dataviz) + `CHANGELOG.md` 3.1.0 + bump `package.json`.
+- [x] T5 — Suite completa + build; verificación visual de swatches light/dark (scratch, no se commitea).
+- [x] T6 — Commit local. Reportar. Esperar OK para push/PR.
 
 ## Review
-
-**Tests:** 1070 unit tests passing; smoke:ci 70 e2e passing.
-**Build:** tsup + postcss green.
-**Verification:** Visual sweep of 9 key stories (El Alba light/dark, generic light/dark) — AppShell chrome intacto, form fields compact, table density control working, pickers responsive, page hierarchy maintained.
-
-**Status:** PENDIENTE push + PR + release 3.0.0. Aguardando confirmación explícita del usuario.
+**Tests:** 1102 unit (31 nuevos en `ChartTokens.test.tsx`), eslint limpio, `npm run build` verde; tokens presentes en `dist/styles.css` y `dist/tokens.css`.
+**Validador dataviz:** contraste ≥ 3:1 vs surface en las 4 combinaciones; banda de luminosidad dark OK (El Alba) — los FAIL de separación adyacente aplican a sets categóricos, no a roles (anotado en el comentario del token).
+**Visual:** swatches + mini chart SVG en Chromium (scratch, no commiteado): valores computados coinciden con el diseño; flip de tema re-tinta primary/positive/negative.
+**Ajuste de plan:** el test dejó de exigir los 6 roles en el bloque dark (3 se mantienen a propósito); el contrato real lo pinea el mapa fusionado.
+**Status:** commit local en `feat/chart-tokens`. PENDIENTE push + PR + release 3.1.0, aguardando OK explícito.
