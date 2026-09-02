@@ -586,9 +586,9 @@ button, input, select, textarea { box-sizing: border-box; }
 /* No double elevation: a card nested inside another card is a sub-panel,
    not a second floating surface — drop its lift (keep border/radius). */
 .card .card { box-shadow: none; }
-.card__body { padding: 20px 24px; }
-.card__header { padding: 20px 24px; border-bottom: 1px solid var(--border-default); }
-.card__footer { padding: 16px 24px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
+.card__body { padding: 16px 20px; }
+.card__header { padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
+.card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
 .card__title {
   font-family: var(--font-body);
   font-weight: 700;
@@ -3556,9 +3556,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .page-header__title-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .page-header__title {
   font-family: var(--font-display); font-weight: 700;
-  /* Step down from 3xl to xl on narrow viewports without breaking the
+  /* Step down from 2xl to lg on narrow viewports without breaking the
      desktop scale. clamp() handles the fluid step natively. */
-  font-size: clamp(var(--text-xl), 3vw + 0.75rem, var(--text-3xl));
+  font-size: clamp(var(--text-lg), 2vw + 0.5rem, var(--text-2xl));
   line-height: 1.1;
   text-transform: var(--tt-title); letter-spacing: var(--tracking-tight);
   margin: 0; color: var(--fg-default);

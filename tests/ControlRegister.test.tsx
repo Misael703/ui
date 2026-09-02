@@ -87,3 +87,20 @@ describe('compact register — toggle / segmented', () => {
     expect(md).toMatch(/padding:\s*5px var\(--space-2\)/);
   });
 });
+
+describe('compact register — page header + card', () => {
+  it('.page-header__title matchea clamp(var(--text-lg), 2vw + 0.5rem, var(--text-2xl))', () => {
+    expect(ruleBody(index, '.page-header__title')).toMatch(
+      /clamp\(var\(--text-lg\), 2vw \+ 0\.5rem, var\(--text-2xl\)\)/
+    );
+  });
+  it('.card__body matchea padding: 16px 20px', () => {
+    expect(ruleBody(index, '.card__body')).toMatch(/padding:\s*16px 20px/);
+  });
+  it('.card__header matchea padding: 16px 20px', () => {
+    expect(ruleBody(index, '.card__header')).toMatch(/padding:\s*16px 20px/);
+  });
+  it('.card__footer matchea padding: 12px 20px', () => {
+    expect(ruleBody(index, '.card__footer')).toMatch(/padding:\s*12px 20px/);
+  });
+});
