@@ -101,13 +101,13 @@ button, input, select, textarea { box-sizing: border-box; }
 /* sizes */
 .btn--xs { padding: 6px 10px; font-size: var(--text-2xs); min-height: 28px; }
 .btn--sm { padding: 8px 14px; font-size: var(--text-xs); min-height: 36px; }
-.btn--md { padding: 10px 18px; font-size: var(--text-sm); min-height: 44px; }
-.btn--lg { padding: 14px 24px; font-size: var(--text-md); min-height: 52px; }
-.btn--xl { padding: 18px 32px; font-size: var(--text-lg); min-height: 60px; }
+.btn--md { padding: 0 16px; font-size: var(--text-data); min-height: var(--control-h-md); border-radius: var(--control-radius-md); }
+.btn--lg { padding: 0 20px; font-size: var(--text-sm); min-height: var(--control-h-lg); }
+.btn--xl { padding: 14px 28px; font-size: var(--text-md); min-height: 52px; }
 .btn--icon { padding: 0; aspect-ratio: 1; }
 .btn--icon.btn--sm { width: 36px; }
-.btn--icon.btn--md { width: 44px; }
-.btn--icon.btn--lg { width: 52px; }
+.btn--icon.btn--md { width: 38px; }
+.btn--icon.btn--lg { width: 44px; }
 .btn--block { display: flex; width: 100%; }
 
 /* variants */
@@ -202,7 +202,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .field__label {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--fg-default);
   display: flex;
   gap: 4px;
@@ -227,20 +227,19 @@ button, input, select, textarea { box-sizing: border-box; }
 
 .input, .select, .textarea {
   font-family: var(--font-body);
-  font-size: var(--text-md);
+  font-size: var(--control-font-md);
   color: var(--fg-default);
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  /* Tokenized control metrics (v1.10.0). Default stays the 44px WCAG
-     2.5.5 touch target — that IS the product default and must not regress
-     for the mobile operators the kit serves. A dense desktop filter row
-     of ~7 controls used to wrap because 44px was hardcoded; wrap a row in
-     `.fields--dense` to drop every control (input/select/textarea AND
-     combobox) to a compact 36px together — kit-owned, no per-component
-     prop, default untouched. */
-  padding: var(--field-pad-y, 10px) var(--field-pad-x, 14px);
-  min-height: var(--field-min-h, 44px);
+  /* Tokenized control metrics (v3.0.0). Default is now the compact register
+     38px—desktop-optimized form density. On touch-capable devices
+     (@media pointer:coarse in _root.css), the WCAG 2.5.5 touch target 44px
+     is automatically restored to serve mobile operators. Wrap a filter row
+     in `.fields--dense` to drop every control to a more compact 36px
+     (input/select/textarea AND combobox) — kit-owned, no per-component prop. */
+  padding: var(--field-pad-y, 7px) var(--field-pad-x, 12px);
+  min-height: var(--field-min-h, 38px);
   width: 100%;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
@@ -587,9 +586,9 @@ button, input, select, textarea { box-sizing: border-box; }
 /* No double elevation: a card nested inside another card is a sub-panel,
    not a second floating surface — drop its lift (keep border/radius). */
 .card .card { box-shadow: none; }
-.card__body { padding: 20px 24px; }
-.card__header { padding: 20px 24px; border-bottom: 1px solid var(--border-default); }
-.card__footer { padding: 16px 24px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
+.card__body { padding: 16px 20px; }
+.card__header { padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
+.card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
 .card__title {
   font-family: var(--font-body);
   font-weight: 700;
@@ -976,7 +975,7 @@ button, input, select, textarea { box-sizing: border-box; }
   letter-spacing: var(--tracking-snug);
   text-transform: var(--tt-data);
   color: var(--fg-muted);
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
 }
@@ -1247,9 +1246,10 @@ button, input, select, textarea { box-sizing: border-box; }
      the airy layout with `density="comfortable"` (.table--comfortable).
      v1.14.0: primary cell text --text-xs→--text-sm (~12→14px) to match the
      gold from-scratch table; the eco/secondary line uses `.cell-meta`
-     (11px / --fg-meta). Padding stays compact (8·12). */
-  padding: 8px 12px;
-  font-size: var(--text-sm);
+     (11px / --fg-meta). Padding stays compact (8·12). v3.0.0: --text-sm→--text-data
+     (14→13px), padding 8·12→7·10 for compact register default. */
+  padding: 7px 10px;
+  font-size: var(--text-data);
   border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
   white-space: nowrap;
@@ -1264,7 +1264,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .table tbody tr:hover { background: var(--bg-muted); }
 /* `.table--compact` is now identical to the base — kept idempotent so any
    consumer that already opted in keeps working (no breaking change). */
-.table--compact th, .table--compact td { padding: 8px 12px; font-size: var(--text-xs); }
+.table--compact th, .table--compact td { padding: 7px 10px; font-size: var(--text-data); }
 /* Opt-out: restore the pre-1.10.0 roomy density (and its wrapping). */
 .table--comfortable th { padding: 14px 16px; }
 .table--comfortable td {
@@ -1862,7 +1862,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
   overflow: hidden;
-  height: 40px;
+  height: var(--control-h-md);
 }
 .number-input.is-invalid { border-color: var(--color-danger); }
 .number-input.is-disabled { opacity: 0.55; pointer-events: none; }
@@ -1959,11 +1959,11 @@ button, input, select, textarea { box-sizing: border-box; }
      looked like static text ("Todos") rather than a dropdown control. The
      same rule covers `.combobox__trigger` (the non-searchable button
      variant, v1.15.0) so both line up at any density. */
-  min-height: var(--field-min-h, 44px);
+  min-height: var(--field-min-h, 38px);
   /* Same tokenized metrics as .input/.select so the three line up at any
      density (`.fields--dense` compacts all of them together). Extra right
      padding is fixed: it reserves room for the chevron, not density. */
-  padding: var(--field-pad-y, 10px) 38px var(--field-pad-y, 10px) var(--field-pad-x, 14px);
+  padding: var(--field-pad-y, 7px) 38px var(--field-pad-y, 7px) var(--field-pad-x, 12px);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2172,7 +2172,7 @@ button, input, select, textarea { box-sizing: border-box; }
      each side, so MonthPicker hugs the toggle. `flex: 1` still fills a wider
      cell. (Was 160px — generous; the year-only value is shorter still.) */
   flex: 1;
-  height: 40px; padding: 0 12px; min-width: min(144px, 100%);
+  height: var(--control-h-md); padding: 0 12px; min-width: min(144px, 100%);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   background: var(--bg-surface); color: var(--fg-default);
@@ -2184,7 +2184,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .gridpicker.is-invalid .gridpicker__input { border-color: var(--color-danger); }
 .gridpicker.is-disabled { opacity: 0.6; pointer-events: none; }
 .gridpicker__toggle {
-  width: 40px; height: 40px; padding: 0;
+  width: var(--control-h-md); height: var(--control-h-md); padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-default); border-left: none;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -2214,7 +2214,7 @@ button, input, select, textarea { box-sizing: border-box; }
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
 }
 .gridpicker__cell {
-  min-height: 44px; padding: 8px 6px; border: none; background: transparent;
+  min-height: var(--control-h-md); padding: 8px 6px; border: none; background: transparent;
   color: var(--fg-default); border-radius: var(--radius-sm);
   cursor: pointer; font-family: var(--font-body); font-size: var(--text-sm);
 }
@@ -2373,7 +2373,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Tag input ---------- */
 .tag-input {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  min-height: 44px; padding: 6px 8px;
+  min-height: var(--field-min-h); padding: 6px 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2412,7 +2412,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
-  overflow: hidden; height: 44px; width: 100%;
+  overflow: hidden; height: var(--field-min-h); width: 100%;
 }
 .phone-input:focus-within {
   border-color: var(--color-primary);
@@ -2565,7 +2565,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo { position: relative; min-width: 240px; }
 .multicombo__chips {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  min-height: 44px; padding: 6px 8px;
+  min-height: var(--field-min-h); padding: 6px 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2649,7 +2649,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__trigger {
   width: 100%;
   display: inline-flex; align-items: center; gap: 8px;
-  height: 44px; padding: 0 14px;
+  height: var(--field-min-h); padding: 0 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2875,7 +2875,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .cmdk__input {
   flex: 1; border: 0; outline: none;
   background: transparent; color: var(--fg-default);
-  font-family: var(--font-body); font-size: var(--text-md);
+  font-family: var(--font-body); font-size: var(--control-font-md);
 }
 .cmdk__esc {
   font-family: var(--font-mono); font-size: var(--text-2xs);
@@ -3556,9 +3556,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .page-header__title-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .page-header__title {
   font-family: var(--font-display); font-weight: 700;
-  /* Step down from 3xl to xl on narrow viewports without breaking the
+  /* Step down from 2xl to lg on narrow viewports without breaking the
      desktop scale. clamp() handles the fluid step natively. */
-  font-size: clamp(var(--text-xl), 3vw + 0.75rem, var(--text-3xl));
+  font-size: clamp(var(--text-lg), 2vw + 0.5rem, var(--text-2xl));
   line-height: 1.1;
   text-transform: var(--tt-title); letter-spacing: var(--tracking-tight);
   margin: 0; color: var(--fg-default);
@@ -3914,7 +3914,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- NotificationCenter ---------------------------------------- */
 .notif { position: relative; display: inline-block; }
 .notif__trigger {
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   border-radius: var(--radius-pill);
   background: transparent; border: 0;
   cursor: pointer;
@@ -4319,7 +4319,7 @@ button, input, select, textarea { box-sizing: border-box; }
   position: absolute; top: 50%; transform: translateY(-50%);
   background: rgba(0,0,0,0.5); color: var(--color-white);
   border: 0; border-radius: var(--radius-pill);
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; opacity: 0;
   transition: opacity var(--duration-fast);
@@ -4749,9 +4749,9 @@ button, input, select, textarea { box-sizing: border-box; }
   font-weight: 500;
   transition: background var(--duration-fast, 120ms), color var(--duration-fast, 120ms), border-color var(--duration-fast, 120ms);
 }
-.toggle--sm { padding: 4px var(--space-2); font-size: var(--text-xs); height: 28px; }
-.toggle--md { padding: 6px var(--space-3); font-size: var(--text-sm); height: 36px; }
-.toggle--lg { padding: 8px var(--space-4); font-size: var(--text-base); height: 44px; }
+.toggle--sm { padding: 4px var(--space-2); font-size: var(--text-xs); height: var(--control-h-sm); }
+.toggle--md { padding: 5px var(--space-2); font-size: var(--text-xs); height: 32px; }
+.toggle--lg { padding: 8px var(--space-4); font-size: var(--text-sm); height: var(--control-h-md); }
 .toggle--outline { border-color: var(--border-default); }
 
 /* Hover when NOT pressed: subtle gray background with dark text. */
@@ -4865,7 +4865,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .carousel__slide { flex: 0 0 100%; min-width: 0; }
 .carousel__control {
   position: absolute; top: 50%; transform: translateY(-50%);
-  width: 40px; height: 40px;
+  width: var(--control-h-md); height: var(--control-h-md);
   display: inline-flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
   color: var(--fg-default);
@@ -5232,20 +5232,21 @@ button, input, select, textarea { box-sizing: border-box; }
 .heatmap__legend-text { margin: 0 2px; }
 
 /* ===== Field text size: unify pickers/combobox with the base .input/.select =====
-   The base .input/.select/.textarea use --text-md (16px); the picker + combobox
+   The base .input/.select/.textarea use --control-font-md (14px); the picker + combobox
    inputs historically used --text-sm (14px), so a DatePicker/Combobox looked
    smaller than a sibling field in a filter row. This single-class override
-   (placed last, so it wins over the earlier text-sm) lifts them to 16px to match.
-   The `.fields--dense` variant has higher specificity, so it still drops to the
+   (placed last, so it wins over the earlier text-sm) lifts them to match.
+   The `.fields--dense` variant has higher specificity, so it still keeps the
    compact 14px on purpose. */
 .datepicker__input,
 .gridpicker__input,
 .timepicker__trigger,
 .combobox__input,
+.combobox__trigger,
 .multicombo__input,
 .daterange__trigger,
 .daterange__field-input {
-  font-size: var(--text-md);
+  font-size: var(--control-font-md);
 }
 
 /* UserMenu — topbar avatar that opens a popover with name/role + actions.

@@ -5,6 +5,39 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] — 2026-09-02
+
+**Major. Registro compact por default — el contenido baja un paso; el chrome no
+se mueve.**
+
+### Changed (BREAKING — visual only, no API)
+- **Todo el set de controles consume los nuevos tokens `--control-*`** —
+  campos 44→38px (font 16→14), Button md 44→38 (13px uppercase, radio 6), lg
+  52→44, xl 60→52 (font 18→16px), toggle/segmented md 36→32, celdas de tabla
+  14px/8·12→13px/7·10 (nuevo stop `--text-data`), título de PageHeader cap
+  30→24 (piso del clamp 20→18), Card 20·24→16·20 (footer 16·24→12·20),
+  `.field__label` 14→12px, toggle `lg` 44→38 (y fix de bug: leía un
+  `--text-base` inexistente, ahora `--text-sm`), familia picker/tag/phone/
+  combobox al set md.
+- **Barrida final de auditoría (Task 8)** — grep de los `height`/`font-size`
+  fijos restantes en `src/styles/index.css` migró los sitios de contenido que
+  habían quedado fuera de las tasks anteriores: `.number-input`, `.cmdk__input`,
+  `.notif__trigger`, `.gallery__nav`, `.carousel__control` al set md, y
+  `.gridpicker__toggle` (fix previo de Task 7). Criterio aplicado sitio por
+  sitio: chrome del AppShell y no-controles (`.stepper__circle`, indicador no
+  interactivo) quedaron fuera a propósito; `.btn--xl` ya migrado en el set de
+  Button (ver arriba).
+- `@media (pointer: coarse)` restaura el touch target de 44px en táctil
+  (WCAG 2.5.5) — solo crece el área, el font queda.
+- **AppShell NO cambia** — incluido `.usermenu__name`: la barrida lo tocó por
+  error (es el trigger label del topbar, chrome, no el popover) y se revirtió
+  a `text-md` en el mismo día. `--text-*` (rem) NO cambian. `.fields--dense` y
+  `density="comfortable"` siguen funcionando como desvíos.
+
+### Added
+- Tokens `--control-h-{sm,md,lg}`, `--control-font-{sm,md}`,
+  `--control-pad-x-{sm,md}`, `--control-radius-{sm,md}`, `--text-data`.
+
 ## [2.0.2] — 2026-09-02
 
 **Patch. Guía de hijos alineada + box math del shell inmune al host.**

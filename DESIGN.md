@@ -151,6 +151,65 @@ alternatives).
 - Breakpoints (documentation + JS use, not usable in `@media` conditions):
   `--bp-sm` 480 / `--bp-md` 768 / `--bp-lg` 1024 / `--bp-xl` 1280.
 
+## Registro compact (v3.0.0)
+
+Major visual-only breaking change: the kit's default control register moved
+one notch denser. The rule, the tokens, and the audit criterion that decided
+what moved and what didn't.
+
+- **The scale rule — internal ~3:1 height:font, never a lone height.** A
+  control's height, font, padding and radius scale *together* as one
+  named set; changing one without the others is the anti-pattern this
+  register forbids (comment pinned at the token definition in
+  `_root.css`). `--control-h-md` 38px / `--control-font-md` (`--text-sm`
+  14px) ≈ 2.7:1; `Button`'s `sm` tier (36px / `--text-xs` 12px) lands
+  exactly at 3:1 — the ratio is a heuristic band, not a formula solved
+  per component.
+- **Tokens.** `--control-h-{sm,md,lg}` (28 / 38 / 44px), `--control-font-{sm,md}`
+  (aliases to `--text-xs` / `--text-sm` — no new font sizes, reuses the
+  existing type scale), `--control-pad-x-{sm,md}` (10 / 12px),
+  `--control-radius-{sm,md}` (4 / 6px), plus `--text-data` (0.8125rem/13px,
+  a new stop between `--text-xs` and `--text-sm`) for dense data — table
+  cells and the `Button` `md` label (see next). `--field-min-h` /
+  `--field-pad-x` are re-fed from `--control-h-md` / `--control-pad-x-md`
+  rather than carrying their own literals, so fields and every other `md`
+  control stay locked to one source.
+- **Documented exception — `Button` `md` reads `--text-data` (13px), not
+  `--control-font-md` (14px).** Every other `md` control (fields, table
+  toolbars, pickers) takes the 14px control font untouched. `.btn` carries
+  `font-weight: 700` + `text-transform: var(--tt-label)` (uppercase) +
+  `letter-spacing: var(--tracking-wide)` (0.04em) unconditionally — that
+  combination reads visually heavier/larger than a plain-case 14px label at
+  the same pixel size, so `Button` `md` is pinned one stop down to `--text-data`
+  to land at the same *perceived* weight as its sibling controls, not the
+  same literal font-size. `lg` doesn't need the correction (`--text-sm`
+  14px, unchanged) because at that size the caps+bold treatment reads
+  proportionate.
+- **Touch guard — `@media (pointer: coarse)` (WCAG 2.5.5).** On a coarse
+  pointer, `--control-h-md` is re-pinned to 44px and `--field-pad-y` grows
+  10px, restoring the 44px touch target on touch devices. Only the tap
+  *area* grows; `--control-font-md` is untouched, so the type doesn't
+  visually inflate on mobile just because the desktop default got denser.
+- **The audit criterion (Task 8 sweep).** Once the named components were
+  migrated, a `grep` for leftover literal `44px`/`40px` heights and
+  `var(--text-md)` font-sizes in `src/styles/index.css` classified every
+  hit into one of three buckets, applied consistently across the sweep:
+  - **Chrome** (AppShell shell, the `UserMenu` *trigger* label in the
+    topbar) — never migrates; the register is about content density, the
+    shell is a fixed frame. `.usermenu__name` was migrated by mistake mid-sweep
+    and reverted same-day once traced to the trigger (chrome), not the
+    popover body (`.usermenu__header-name`, already `--text-sm`, correctly
+    dense).
+  - **Interactive content control** (dropdown menus, command-palette input,
+    icon buttons that are real content affordances — notification trigger,
+    gallery nav, carousel controls, the numeric stepper) — migrates to the
+    `md` set.
+  - **Non-control content** (avatars, testimonial art, price displays,
+    order-summary rows, widget/calendar titles, product-card titles) and
+    genuine **ties** (documented, left untouched rather than guessed) —
+    never migrates. `Button`'s `xl` tier is a deliberate larger register
+    (52px), not an oversight, so it's explicitly out of the `md` set too.
+
 ## Motion
 
 - Easing: an exponential ease-out family (confident deceleration, no bounce) —

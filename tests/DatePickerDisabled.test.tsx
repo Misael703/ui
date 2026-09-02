@@ -176,14 +176,14 @@ describe('DateRangePicker isDateDisabled', () => {
   });
 });
 
-// The picker + combobox field text was --text-sm (14px) while the base
-// .input/.select/.textarea are --text-md (16px), so a DatePicker looked smaller
-// than a sibling field in a filter row. A single-class override unifies them to
-// 16px; the higher-specificity .fields--dense variant keeps the compact 14px.
-describe('field text size: pickers/combobox match the base .input (16px)', () => {
-  it('the unification rule lifts the picker + combobox inputs to --text-md', () => {
+// All field inputs (pickers, combobox, base inputs) now consume the compact
+// register --control-font-md (14px) by default. Historically, pickers used
+// --text-sm (14px) while base fields used --text-md (16px), creating visual
+// inconsistency in filter rows. The compact register v3.0.0 unifies them.
+describe('field text size: pickers/combobox match the base .input (14px compact)', () => {
+  it('the picker + combobox inputs use --control-font-md (14px)', () => {
     const rule = css.match(/\.datepicker__input,\s*\.gridpicker__input,[\s\S]*?\{([^}]*)\}/)?.[1] ?? '';
-    expect(rule).toMatch(/font-size:\s*var\(--text-md\)/);
+    expect(rule).toMatch(/font-size:\s*var\(--control-font-md\)/);
     // covers the whole field family
     const head = css.match(/(\.datepicker__input,\s*\.gridpicker__input,[\s\S]*?)\{/)?.[1] ?? '';
     for (const sel of ['datepicker__input', 'gridpicker__input', 'timepicker__trigger', 'combobox__input', 'multicombo__input', 'daterange__trigger', 'daterange__field-input']) {
@@ -191,9 +191,9 @@ describe('field text size: pickers/combobox match the base .input (16px)', () =>
     }
   });
 
-  it('the base .input/.select/.textarea are --text-md (the size being matched)', () => {
+  it('the base .input/.select/.textarea are --control-font-md (14px, the unified size)', () => {
     const base = css.match(/\.input,\s*\.select,\s*\.textarea\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(base).toMatch(/font-size:\s*var\(--text-md\)/);
+    expect(base).toMatch(/font-size:\s*var\(--control-font-md\)/);
   });
 
   it('.fields--dense keeps the combobox compact (text-sm) via higher specificity', () => {
