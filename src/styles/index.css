@@ -975,7 +975,7 @@ button, input, select, textarea { box-sizing: border-box; }
   letter-spacing: var(--tracking-snug);
   text-transform: var(--tt-data);
   color: var(--fg-muted);
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
 }
@@ -1246,9 +1246,10 @@ button, input, select, textarea { box-sizing: border-box; }
      the airy layout with `density="comfortable"` (.table--comfortable).
      v1.14.0: primary cell text --text-xs→--text-sm (~12→14px) to match the
      gold from-scratch table; the eco/secondary line uses `.cell-meta`
-     (11px / --fg-meta). Padding stays compact (8·12). */
-  padding: 8px 12px;
-  font-size: var(--text-sm);
+     (11px / --fg-meta). Padding stays compact (8·12). v3.0.0: --text-sm→--text-data
+     (14→13px), padding 8·12→7·10 for compact register default. */
+  padding: 7px 10px;
+  font-size: var(--text-data);
   border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
   white-space: nowrap;
@@ -1263,7 +1264,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .table tbody tr:hover { background: var(--bg-muted); }
 /* `.table--compact` is now identical to the base — kept idempotent so any
    consumer that already opted in keeps working (no breaking change). */
-.table--compact th, .table--compact td { padding: 8px 12px; font-size: var(--text-xs); }
+.table--compact th, .table--compact td { padding: 7px 10px; font-size: var(--text-data); }
 /* Opt-out: restore the pre-1.10.0 roomy density (and its wrapping). */
 .table--comfortable th { padding: 14px 16px; }
 .table--comfortable td {

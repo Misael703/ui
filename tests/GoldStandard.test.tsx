@@ -68,12 +68,12 @@ describe('P2 — first-class meta/eco register', () => {
   });
 });
 
-describe('P3 — gold cell text size by default', () => {
-  it('default cell text is --text-sm (~14px), not --text-xs', () => {
-    expect(decl(ruleBody(index, '.table td'), 'font-size')).toBe('var(--text-sm)');
+describe('P3 — compact register cell text by default (v3.0.0)', () => {
+  it('default cell text is --text-data (13px)', () => {
+    expect(decl(ruleBody(index, '.table td'), 'font-size')).toBe('var(--text-data)');
   });
-  it('compact padding is unchanged (8px 12px)', () => {
-    expect(decl(ruleBody(index, '.table td'), 'padding')).toBe('8px 12px');
+  it('padding drops to 7px 10px', () => {
+    expect(decl(ruleBody(index, '.table td'), 'padding')).toBe('7px 10px');
   });
 });
 
