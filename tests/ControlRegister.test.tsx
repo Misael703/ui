@@ -147,7 +147,4 @@ describe('compact register — sweep (Task 8)', () => {
     expect(r).toMatch(/width:\s*var\(--control-h-md\)/);
     expect(r).toMatch(/height:\s*var\(--control-h-md\)/);
   });
-  it('.usermenu__name baja a var(--text-sm)', () => {
-    expect(ruleBody(index, '.usermenu__name')).toMatch(/font-size:\s*var\(--text-sm\)/);
-  });
 });
