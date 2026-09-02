@@ -5,6 +5,46 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] — 2026-09-02
+
+**Minor. Tokens semánticos de dataviz — los charts dejan de ser ciegos al
+tema.** Pedido consumer-driven (dashboard de reportes de despachos, que
+mantenía una mini-paleta local de hex para Recharts). Cierra el ítem P3 (dark
+mode) de la auditoría ERP con consumidor real. Solo CSS: sin export nuevo en el
+barrel, sin cambio de API en los componentes de chart.
+
+### Added
+- **`--chart-{primary,positive,negative,warn,alt,muted}`** en `_root.css`,
+  por el rol semántico de la serie (demanda, bueno, malo, atención, categoría
+  alterna, neutro/periodo anterior). Cada rol **aliasa un primitivo existente**
+  (brand -600, green-700, `--color-danger`, yellow-700, `--cat-1`, `--cat-6`):
+  cero hex nuevo, el preset El Alba los re-tinta por su propia escala sin
+  override. Resuelven a color plano (sin `color-mix`) para pasarlos directo a
+  SVG `fill`/`stroke` como `var(--chart-*)`.
+- **Override dark** en `:root[data-theme="dark"]` solo para los tres roles cuyo
+  stop light se hunde en superficie oscura: primary → brand -400, positive →
+  green-600, negative → red-500. warn / alt / muted ya claran 3:1 en todos los
+  tiers dark de ambas paletas y conservan su identidad entre temas.
+- `tests/ChartTokens.test.tsx`: pinea que cada rol existe, resuelve a hex
+  plano y clara **3:1 (SC 1.4.11, no-texto) sobre `--bg-surface`** en las
+  cuatro combinaciones paleta × tema, y que un preset que remapee un rol en
+  light lo re-aserte en dark (trampa de cascada documentada en
+  `ContrastDark.test`).
+- Sección "Dataviz roles" en `DESIGN.md`.
+
+### Notes
+- Deltas visuales respecto a los hex seed del consumidor, por decisión de
+  `DESIGN.md`: verde Tailwind `#16a34a` → green-700 `#1f7a3d`; ámbar `#d97706`
+  → gold yellow-700 `#a16207` (el ámbar colisiona con el naranja El Alba, misma
+  razón del retune de `--color-warning` en 1.29.0); azul Tailwind `#1d4ed8` →
+  navy de marca `#1a46a0`. Rojo, cian y slate quedan byte-idénticos.
+- **No** se agrega `--focus-ring` como color: ese nombre es la familia
+  box-shadow `--focus-ring-{brand,accent,danger}`. El color de outline de foco
+  es `--border-focus` (light + dark). `--fg-link` ya existe en ambos temas.
+- Deuda anotada, fuera de scope: la `PALETTE` default de `Charts.tsx` usa
+  success/warning/danger como series 4–6 (status decorativo). Rehacerla sobre
+  `--chart-*` es el siguiente paso natural.
+
 ## [3.0.0] — 2026-09-02
 
 **Major. Registro compact por default — el contenido baja un paso; el chrome no

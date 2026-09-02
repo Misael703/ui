@@ -82,6 +82,27 @@ in `Contrast.test`). Palette-neutral (defined in the base, inherited by every
 preset). Use for operational zones, regions, tags, teams — anything that only
 needs to be *distinguishable*, not *meaningful*.
 
+**Dataviz roles (v3.1.0).** `--chart-{primary,positive,negative,warn,alt,muted}`
+are the semantic layer for chart MARKS (Recharts `fill`/`stroke`, Meter /
+ProportionBar segments), named by the job a series does — demand, good, bad,
+attention, alternate category, neutral/previous period — never by position.
+Each role **aliases an existing primitive** (brand -600, green-700, red-600,
+yellow-700, `--cat-1`, `--cat-6`): no new hex, so a preset re-tints them through
+its own scales without overriding anything. `positive`/`negative` are RESERVED
+status roles (never a decorative "series 4") and ship with a label, never colour
+alone. `warn` is gold, not amber, for the same reason `--color-warning` moved in
+v1.29.0 (amber collides with the El Alba brand orange). Dark is **selected**, not
+flipped: only the three roles whose light stop sinks into a dark surface move
+(brand → -400, green → -600, red → -500); the other three already clear 3:1 on
+every dark tier and keep one identity across themes. Every role resolves to a
+flat colour (no `color-mix`) and clears WCAG 3:1 non-text contrast on
+`--bg-surface` in both palettes and both themes, pinned in
+`tests/ChartTokens.test.tsx`. Consumer-driven by the despachos reports
+dashboard; it also closes the ERP audit's parked "dark mode for dataviz" item.
+Not a `--focus-ring` colour: that name is the box-shadow family
+(`--focus-ring-{brand,accent,danger}`); a focus *outline colour* is
+`--border-focus`.
+
 **Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
 `--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,
 `--border-{default,strong,brand,focus}`, `--accent-{primary,secondary}`.
