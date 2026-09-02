@@ -2184,7 +2184,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .gridpicker.is-invalid .gridpicker__input { border-color: var(--color-danger); }
 .gridpicker.is-disabled { opacity: 0.6; pointer-events: none; }
 .gridpicker__toggle {
-  width: 40px; height: 40px; padding: 0;
+  width: var(--control-h-md); height: var(--control-h-md); padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-default); border-left: none;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;

@@ -117,4 +117,10 @@ describe('compact register — picker family consumes tokens', () => {
   it('.gridpicker__cell usa var(--control-h-md)', () => {
     expect(ruleBody(index, '.gridpicker__cell')).toMatch(/min-height:\s*var\(--control-h-md\)/);
   });
+  it('.gridpicker__toggle width usa var(--control-h-md)', () => {
+    expect(ruleBody(index, '.gridpicker__toggle')).toMatch(/width:\s*var\(--control-h-md\)/);
+  });
+  it('.gridpicker__toggle height usa var(--control-h-md)', () => {
+    expect(ruleBody(index, '.gridpicker__toggle')).toMatch(/height:\s*var\(--control-h-md\)/);
+  });
 });
