@@ -1,0 +1,13 @@
+/* Storybook-only host reset. Every real consumer app (Next + Tailwind
+   preflight or a hand-written reset) ships `border-box`, but the kit's own
+   stylesheet deliberately does NOT (form controls only) — so without this,
+   Storybook rendered the kit under the UA's `content-box` and every
+   explicitly-sized element measured bigger than in a real app (the AppShell
+   header: 81px here vs 64px in despachos). This makes the preview measure
+   like the kit's actual hosts; the kit additionally declares box-sizing
+   locally on its own explicitly-sized chrome so it never depends on this. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

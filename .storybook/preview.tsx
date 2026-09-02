@@ -7,6 +7,7 @@ import { GLOBALS_UPDATED, SET_GLOBALS, STORY_ARGS_UPDATED } from '@storybook/cor
 // for the dist/ layout where fonts/ is a sibling subdir — those paths
 // would 404 if imported as-is from src/styles/ in Storybook).
 import './fonts.css';
+import './reset.css';
 import '../src/styles/index.css';
 // Vite `?inline` returns the CSS file's content as a string instead of
 // injecting it. We toggle it in/out via the decorator below, so Storybook

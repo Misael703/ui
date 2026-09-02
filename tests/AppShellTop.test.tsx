@@ -317,6 +317,15 @@ describe('AppShell headerLayout="top" — full-width topbar variant', () => {
     expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*min-height:\s*var\(--appshell-header-height\)/);
   });
 
+  it('CSS: header + sidebar box math is host-independent (explicit border-box)', () => {
+    // The kit ships no global box-sizing reset (deliberate), so any element
+    // with an explicit dimension + padding/border must declare border-box
+    // itself — in a content-box host the 64px header rendered 81px
+    // (64 + 2×8 pad + 1 border).
+    expect(css).toMatch(/\.appshell--header-top\s+\.appshell__header\s*\{[^}]*box-sizing:\s*border-box/);
+    expect(css).toMatch(/\.appshell__sidebar\s*\{[^}]*box-sizing:\s*border-box/);
+  });
+
   it('CSS: mobile (≤900px) anchors the top sidebar to .appshell__body (position:absolute, no fragile viewport math)', () => {
     expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*position:\s*absolute/);
     expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*?\.appshell--header-top\s+\.appshell__sidebar\s*\{[^}]*transform:\s*translateX\(-100%\)/);

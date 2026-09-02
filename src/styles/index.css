@@ -2925,6 +2925,10 @@ button, input, select, textarea { box-sizing: border-box; }
   border-right: 1px solid var(--border-default);
   display: flex; flex-direction: column;
   overflow: hidden;
+  /* Host-independent box math for the explicit widths this element takes
+     (mobile drawer `min(280px, 85vw)`): without it a content-box host adds
+     the border-right on top. See the header's box-sizing note. */
+  box-sizing: border-box;
 }
 .appshell__nav { flex: 1; overflow: auto; padding: 12px 8px; }
 .appshell__navsection { padding: 4px 0 12px; }
@@ -3086,7 +3090,13 @@ button, input, select, textarea { box-sizing: border-box; }
    which reads near-white on a dark brand sidebar — the brand block overrides
    the var instead of the rule so consumer themes can retune it too. */
 .appshell__navchildren::before {
-  content: ''; position: absolute; left: 26px; top: 0; bottom: 8px;
+  /* Flush with the children's hover boxes at BOTH ends: the items' 1px
+     vertical margins collapse out of the <ul> (no padding/border on it), so
+     the first hover box top and last hover box bottom sit exactly at the
+     ul's edges — `top: 0; bottom: 0` spans them symmetrically. (Pre-fix
+     `bottom: 8px` stopped the guide ~7px short of the last hover box while
+     the top was flush — visibly lopsided.) */
+  content: ''; position: absolute; left: 26px; top: 0; bottom: 0;
   width: 1px; background: var(--appshell-nav-guide, var(--border-default));
 }
 .appshell__navitem--depth-1 {
@@ -3260,6 +3270,14 @@ button, input, select, textarea { box-sizing: border-box; }
   gap: 12px;
   padding: var(--appshell-header-pad-y, 8px) var(--appshell-header-pad-x, 16px);
   min-height: var(--appshell-header-height);
+  /* `--appshell-header-height` is the TOTAL band height (padding + border
+     included), so the box math must be host-independent: the kit ships no
+     global `* { box-sizing }` reset (deliberate — form controls only, see
+     the top of this file), and in a host without its own reset the UA's
+     content-box turned 64px into 64+16+1 = 81px rendered (the Storybook
+     preview reproduced exactly this before its reset). Same pattern as the
+     other explicitly-sized kit rules: declare it locally. */
+  box-sizing: border-box;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   color: var(--fg-default);
