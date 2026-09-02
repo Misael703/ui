@@ -1959,11 +1959,11 @@ button, input, select, textarea { box-sizing: border-box; }
      looked like static text ("Todos") rather than a dropdown control. The
      same rule covers `.combobox__trigger` (the non-searchable button
      variant, v1.15.0) so both line up at any density. */
-  min-height: var(--field-min-h, 44px);
+  min-height: var(--field-min-h, 38px);
   /* Same tokenized metrics as .input/.select so the three line up at any
      density (`.fields--dense` compacts all of them together). Extra right
      padding is fixed: it reserves room for the chevron, not density. */
-  padding: var(--field-pad-y, 10px) 38px var(--field-pad-y, 10px) var(--field-pad-x, 14px);
+  padding: var(--field-pad-y, 7px) 38px var(--field-pad-y, 7px) var(--field-pad-x, 12px);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2172,7 +2172,7 @@ button, input, select, textarea { box-sizing: border-box; }
      each side, so MonthPicker hugs the toggle. `flex: 1` still fills a wider
      cell. (Was 160px — generous; the year-only value is shorter still.) */
   flex: 1;
-  height: 40px; padding: 0 12px; min-width: min(144px, 100%);
+  height: var(--control-h-md); padding: 0 12px; min-width: min(144px, 100%);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   background: var(--bg-surface); color: var(--fg-default);
@@ -2214,7 +2214,7 @@ button, input, select, textarea { box-sizing: border-box; }
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
 }
 .gridpicker__cell {
-  min-height: 44px; padding: 8px 6px; border: none; background: transparent;
+  min-height: var(--control-h-md); padding: 8px 6px; border: none; background: transparent;
   color: var(--fg-default); border-radius: var(--radius-sm);
   cursor: pointer; font-family: var(--font-body); font-size: var(--text-sm);
 }
@@ -2373,7 +2373,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Tag input ---------- */
 .tag-input {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  min-height: 44px; padding: 6px 8px;
+  min-height: var(--field-min-h); padding: 6px 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2412,7 +2412,7 @@ button, input, select, textarea { box-sizing: border-box; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
-  overflow: hidden; height: 44px; width: 100%;
+  overflow: hidden; height: var(--field-min-h); width: 100%;
 }
 .phone-input:focus-within {
   border-color: var(--color-primary);
@@ -2565,7 +2565,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo { position: relative; min-width: 240px; }
 .multicombo__chips {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  min-height: 44px; padding: 6px 8px;
+  min-height: var(--field-min-h); padding: 6px 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2649,7 +2649,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__trigger {
   width: 100%;
   display: inline-flex; align-items: center; gap: 8px;
-  height: 44px; padding: 0 14px;
+  height: var(--field-min-h); padding: 0 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);

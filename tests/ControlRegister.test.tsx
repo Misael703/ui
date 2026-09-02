@@ -104,3 +104,17 @@ describe('compact register — page header + card', () => {
     expect(ruleBody(index, '.card__footer')).toMatch(/padding:\s*12px 20px/);
   });
 });
+
+describe('compact register — picker family consumes tokens', () => {
+  for (const sel of ['.tag-input', '.multicombo__chips']) {
+    it(`${sel} usa var(--field-min-h)`, () => {
+      expect(ruleBody(index, sel)).toMatch(/min-height:\s*var\(--field-min-h/);
+    });
+  }
+  it('.daterange__trigger usa var(--field-min-h)', () => {
+    expect(ruleBody(index, '.daterange__trigger')).toMatch(/height:\s*var\(--field-min-h/);
+  });
+  it('.gridpicker__cell usa var(--control-h-md)', () => {
+    expect(ruleBody(index, '.gridpicker__cell')).toMatch(/min-height:\s*var\(--control-h-md\)/);
+  });
+});
