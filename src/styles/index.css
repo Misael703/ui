@@ -5242,6 +5242,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .gridpicker__input,
 .timepicker__trigger,
 .combobox__input,
+.combobox__trigger,
 .multicombo__input,
 .daterange__trigger,
 .daterange__field-input {

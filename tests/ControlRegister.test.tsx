@@ -123,6 +123,11 @@ describe('compact register — picker family consumes tokens', () => {
   it('.gridpicker__toggle height usa var(--control-h-md)', () => {
     expect(ruleBody(index, '.gridpicker__toggle')).toMatch(/height:\s*var\(--control-h-md\)/);
   });
+  it('.combobox__trigger se une al bloque agrupado de font md (no queda solo en --text-md)', () => {
+    // el bloque agrupado incluye .combobox__input y .combobox__trigger (variante
+    // botón, no-buscable) — sin esto el trigger queda en 16px junto a campos de 14px
+    expect(index).toMatch(/\.combobox__trigger,\s*[\s\S]*?\.daterange__field-input\s*\{[^}]*font-size:\s*var\(--control-font-md\)/);
+  });
 });
 
 describe('compact register — sweep (Task 8)', () => {
