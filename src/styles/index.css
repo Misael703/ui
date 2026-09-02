@@ -4748,9 +4748,9 @@ button, input, select, textarea { box-sizing: border-box; }
   font-weight: 500;
   transition: background var(--duration-fast, 120ms), color var(--duration-fast, 120ms), border-color var(--duration-fast, 120ms);
 }
-.toggle--sm { padding: 4px var(--space-2); font-size: var(--text-xs); height: 28px; }
-.toggle--md { padding: 6px var(--space-3); font-size: var(--text-sm); height: 36px; }
-.toggle--lg { padding: 8px var(--space-4); font-size: var(--text-base); height: 44px; }
+.toggle--sm { padding: 4px var(--space-2); font-size: var(--text-xs); height: var(--control-h-sm); }
+.toggle--md { padding: 5px var(--space-2); font-size: var(--text-xs); height: 32px; }
+.toggle--lg { padding: 8px var(--space-4); font-size: var(--text-sm); height: var(--control-h-md); }
 .toggle--outline { border-color: var(--border-default); }
 
 /* Hover when NOT pressed: subtle gray background with dark text. */

@@ -78,3 +78,12 @@ describe('compact register — buttons', () => {
     expect(lg).toMatch(/font-size:\s*var\(--text-sm\)/);
   });
 });
+
+describe('compact register — toggle / segmented', () => {
+  it('md: 32px, 12px, pad 5px left-right 8px', () => {
+    const md = ruleBody(index, '.toggle--md');
+    expect(md).toMatch(/height:\s*32px/);
+    expect(md).toMatch(/font-size:\s*var\(--text-xs\)/);
+    expect(md).toMatch(/padding:\s*5px var\(--space-2\)/);
+  });
+});
