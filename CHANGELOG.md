@@ -5,6 +5,26 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] — 2026-09-02
+
+**Patch. Guía de hijos alineada + box math del shell inmune al host.**
+
+### Fixed
+- **Guía vertical de los hijos del grupo desalineada** — corría `top: 0;
+  bottom: 8px`: flush con el hover del primer item pero cortándose ~7px antes
+  del fondo del último. Los márgenes verticales de 1px de los items colapsan
+  fuera del `<ul>` (sin padding/borde), así que las cajas de hover quedan
+  exactamente en los bordes del ul → `top: 0; bottom: 0` la deja flush en
+  ambos extremos (deltas medidos 0/0).
+- **Header del AppShell medía 81px en hosts sin reset de `box-sizing`** — el
+  kit no shipea reset global (deliberado: solo form controls), y
+  `--appshell-header-height: 64px` bajo el `content-box` default del UA
+  rendía 64 + 16 de padding + 1 de borde = 81. `box-sizing: border-box`
+  explícito en `.appshell__header` y `.appshell__sidebar` (el patrón local
+  que el kit ya usa en sus reglas con dimensiones explícitas): 64px totales
+  en cualquier host. El preview de Storybook además gana el reset estándar
+  para medir como una app real (antes reproducía el drift).
+
 ## [2.0.1] — 2026-08-31
 
 **Patch. `inert` compatible con React 19 (el gate del grupo colapsable estaba
