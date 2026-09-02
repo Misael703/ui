@@ -202,7 +202,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .field__label {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--fg-default);
   display: flex;
   gap: 4px;
@@ -227,7 +227,7 @@ button, input, select, textarea { box-sizing: border-box; }
 
 .input, .select, .textarea {
   font-family: var(--font-body);
-  font-size: var(--text-md);
+  font-size: var(--control-font-md);
   color: var(--fg-default);
   background: var(--bg-surface);
   border: 1px solid var(--border-strong);
@@ -239,8 +239,8 @@ button, input, select, textarea { box-sizing: border-box; }
      `.fields--dense` to drop every control (input/select/textarea AND
      combobox) to a compact 36px together — kit-owned, no per-component
      prop, default untouched. */
-  padding: var(--field-pad-y, 10px) var(--field-pad-x, 14px);
-  min-height: var(--field-min-h, 44px);
+  padding: var(--field-pad-y, 7px) var(--field-pad-x, 12px);
+  min-height: var(--field-min-h, 38px);
   width: 100%;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
@@ -5232,11 +5232,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .heatmap__legend-text { margin: 0 2px; }
 
 /* ===== Field text size: unify pickers/combobox with the base .input/.select =====
-   The base .input/.select/.textarea use --text-md (16px); the picker + combobox
+   The base .input/.select/.textarea use --control-font-md (14px); the picker + combobox
    inputs historically used --text-sm (14px), so a DatePicker/Combobox looked
    smaller than a sibling field in a filter row. This single-class override
-   (placed last, so it wins over the earlier text-sm) lifts them to 16px to match.
-   The `.fields--dense` variant has higher specificity, so it still drops to the
+   (placed last, so it wins over the earlier text-sm) lifts them to match.
+   The `.fields--dense` variant has higher specificity, so it still keeps the
    compact 14px on purpose. */
 .datepicker__input,
 .gridpicker__input,
@@ -5245,7 +5245,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo__input,
 .daterange__trigger,
 .daterange__field-input {
-  font-size: var(--text-md);
+  font-size: var(--control-font-md);
 }
 
 /* UserMenu — topbar avatar that opens a popover with name/role + actions.
