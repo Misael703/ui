@@ -323,11 +323,12 @@ describe('DataTable', () => {
     const base = tableCss.match(/\.kit-scrollbar[^{]*\.table-wrap__scroll[^{]*\{([^}]*)\}/)?.[1] ?? '';
     expect(base).toMatch(/scrollbar-width:\s*thin/);
     expect(base).toMatch(/scrollbar-color:[^;]*transparent/);
-    // the thumb floats (inset transparent border + content-box clip) on a
-    // transparent track — what keeps the corner clean.
-    const thumb = tableCss.match(/::-webkit-scrollbar-thumb[^{]*\{([^}]*background-clip:\s*content-box[^}]*)\}/)?.[1] ?? '';
-    expect(thumb).toMatch(/border:\s*3px solid transparent/);
-    expect(thumb).toMatch(/border-radius:\s*999px/);
+    // v3.2.0: STANDARD properties only. Browsers ignore `::-webkit-scrollbar`
+    // on any element whose scrollbar-width/color is not `auto` (spec), so the
+    // old companion rules were dead code — pinned gone so they don't creep
+    // back as a "fix" for something the standard props already own.
+    const noComments = tableCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(noComments).not.toMatch(/::-webkit-scrollbar/);
   });
 
   it('CSS: the stuck header gains a soft drop shadow (on-scroll elevation)', () => {

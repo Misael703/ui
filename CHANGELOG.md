@@ -37,6 +37,17 @@ y cuya tabla de 16 columnas no daba pista alguna de las 9 escondidas.
   header, click-through. `tests/DataTableScrollEdges.test.tsx` pinea el
   toggling en los tres modos con métricas mockeadas.
 
+### Removed
+- **Reglas `::-webkit-scrollbar` de los scrollers del kit** (`.kit-scrollbar`,
+  `.table-wrap__scroll`, bodies de Modal/Drawer, listboxes, `.scroll-area`,
+  `.tabs__list`). Por spec los navegadores las ignoran en cualquier elemento
+  cuyo `scrollbar-width`/`scrollbar-color` no sea `auto`, y todos esos
+  elementos ya declaraban los estándar: eran código muerto (verificado lado a
+  lado en Safari y Chrome: píxel-idéntico con y sin). Quedan solo
+  `scrollbar-width: thin` + `scrollbar-color`. Trade-off documentado: un
+  `scrollbar-color` no-`auto` desactiva el overlay auto-hide de macOS; se
+  mantiene a propósito (una barra predecible en toda plataforma).
+
 ### Notes
 - `useScrollEdges` es interno (no se exporta del barrel): sin cambio en
   smoke/gallery.

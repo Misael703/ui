@@ -793,7 +793,6 @@ button, input, select, textarea { box-sizing: border-box; }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-.tabs__list::-webkit-scrollbar { display: none; }
 /* `variant="plain"`: drop the full-width baseline. Keeps the 1px border as
    transparent so the row height matches `underline` exactly (no shift) — for
    tabs on open canvas where the gray baseline floats. */
@@ -1087,25 +1086,31 @@ button, input, select, textarea { box-sizing: border-box; }
 .table-wrap__sentinel { height: 0; }
 
 /* ---------- Refined scrollbar (kit panels) ----------------------------- */
-/* A thin, rounded, FLOATING thumb on a TRANSPARENT track. The native bar's
-   square track filled the corner of a rounded scroll container, so the
-   scrollbar side read as square while the other side stayed rounded — an
-   asymmetry. A transparent track + an inset rounded thumb (3px transparent
-   border + `background-clip: content-box` makes it float ~6px wide) leaves
-   the rounded corners clean and symmetric. Applied to the kit's own
-   panel / body / listbox scroll surfaces; the public `.kit-scrollbar`
-   utility opts any other element in. The consumer's PAGE scrollbar is left
-   untouched (we never style `html`/`body`). */
+/* A thin thumb on a TRANSPARENT track, via the STANDARD properties only
+   (CSS Scrollbars Styling Module). The native bar's square track filled the
+   corner of a rounded scroll container, so the scrollbar side read as square
+   while the other side stayed rounded — an asymmetry; the transparent track
+   leaves the rounded corners clean. Applied to the kit's own panel / body /
+   listbox scroll surfaces; the public `.kit-scrollbar` utility opts any
+   other element in. The consumer's PAGE scrollbar is left untouched (we
+   never style `html`/`body`).
+
+   v3.2.0 dropped the `::-webkit-scrollbar` companion rules (12px bar, 3px
+   inset floating thumb, hover tint). Per spec, browsers IGNORE the webkit
+   pseudo-elements on any element whose computed `scrollbar-width` or
+   `scrollbar-color` is not `auto` — which every element here sets — so those
+   rules had been dead code in Chrome 121+ and Safari 18.2+; verified
+   side-by-side in both (pixel-identical with and without). Known trade-off,
+   measured on macOS: a non-`auto` `scrollbar-color` opts OUT of the OS
+   overlay (auto-hiding) scrollbar; the thin tinted bar stays visible, which
+   also matches what macOS does whenever a mouse is connected. Chosen on
+   purpose: one predictable bar on every platform beats a Mac-only fade. */
 .kit-scrollbar, .table-wrap__scroll, .modal__body, .drawer__body,
 .combobox__list, .multicombo__list, .menu__panel, .cmdk__list,
 .notif__list, .transfer__list {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
 }
-.kit-scrollbar::-webkit-scrollbar, .table-wrap__scroll::-webkit-scrollbar, .modal__body::-webkit-scrollbar, .drawer__body::-webkit-scrollbar, .combobox__list::-webkit-scrollbar, .multicombo__list::-webkit-scrollbar, .menu__panel::-webkit-scrollbar, .cmdk__list::-webkit-scrollbar, .notif__list::-webkit-scrollbar, .transfer__list::-webkit-scrollbar { width: 12px; height: 12px; }
-.kit-scrollbar::-webkit-scrollbar-track, .table-wrap__scroll::-webkit-scrollbar-track, .modal__body::-webkit-scrollbar-track, .drawer__body::-webkit-scrollbar-track, .combobox__list::-webkit-scrollbar-track, .multicombo__list::-webkit-scrollbar-track, .menu__panel::-webkit-scrollbar-track, .cmdk__list::-webkit-scrollbar-track, .notif__list::-webkit-scrollbar-track, .transfer__list::-webkit-scrollbar-track { background: transparent; }
-.kit-scrollbar::-webkit-scrollbar-thumb, .table-wrap__scroll::-webkit-scrollbar-thumb, .modal__body::-webkit-scrollbar-thumb, .drawer__body::-webkit-scrollbar-thumb, .combobox__list::-webkit-scrollbar-thumb, .multicombo__list::-webkit-scrollbar-thumb, .menu__panel::-webkit-scrollbar-thumb, .cmdk__list::-webkit-scrollbar-thumb, .notif__list::-webkit-scrollbar-thumb, .transfer__list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
-.kit-scrollbar::-webkit-scrollbar-thumb:hover, .table-wrap__scroll::-webkit-scrollbar-thumb:hover, .modal__body::-webkit-scrollbar-thumb:hover, .drawer__body::-webkit-scrollbar-thumb:hover, .combobox__list::-webkit-scrollbar-thumb:hover, .multicombo__list::-webkit-scrollbar-thumb:hover, .menu__panel::-webkit-scrollbar-thumb:hover, .cmdk__list::-webkit-scrollbar-thumb:hover, .notif__list::-webkit-scrollbar-thumb:hover, .transfer__list::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
 /* `stickyHeader` WITHOUT a bounded box: the wrap must NOT be a scroll
    container, otherwise the base `overflow-x: auto` would trap the sticky
    thead against the wrap (CSS forces `overflow-y` to `auto` when
@@ -5128,16 +5133,6 @@ button, input, select, textarea { box-sizing: border-box; }
 .scroll-area--vertical { overflow-y: auto; overflow-x: hidden; }
 .scroll-area--horizontal { overflow-x: auto; overflow-y: hidden; }
 .scroll-area--both { overflow: auto; }
-.scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
-.scroll-area::-webkit-scrollbar-track { background: transparent; }
-.scroll-area::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-pill);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-.scroll-area::-webkit-scrollbar-thumb:hover { background-color: var(--fg-muted); }
-.scroll-area::-webkit-scrollbar-corner { background: transparent; }
 
 /* ===== Metrics / dashboard data-viz (CSS-only) ===== */
 
