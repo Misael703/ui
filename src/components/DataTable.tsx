@@ -6,6 +6,7 @@ import { Checkbox } from './Form';
 import { Popover } from './Popover';
 import { Button } from './Button';
 import { useVirtualRows } from '../hooks/useVirtualRows';
+import { useScrollEdges } from '../hooks/useScrollEdges';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -303,6 +304,22 @@ export interface DataTableProps<T> {
    */
   maxHeight?: string | number;
   /**
+   * Bounded scroll region WITHOUT a number (v3.2.0): the table fills the
+   * height of its parent and scrolls inside it — the same structure as
+   * `maxHeight` (inner scroller, sticky header pins to it, horizontal scroll,
+   * `virtualizeRows` allowed), sized by layout instead of arithmetic. Use it
+   * for the "table + pagination must fit the viewport" page: no more
+   * `calc(100vh - 249px)` measured against a header the kit resizes.
+   *
+   * Contract: the parent must have a DEFINITE height — a flex column or grid
+   * row that ends at a sized ancestor (e.g. the AppShell content area). The
+   * wrap becomes `flex: 1; min-height: 0; height: 100%`, so it works as a flex
+   * item or as the sole child of a sized box. In a parent that just grows with
+   * content there is nothing to fill: the table renders at its natural height
+   * (harmless, but then use `maxHeight` or nothing).
+   */
+  fillHeight?: boolean;
+  /**
    * Layout for narrow viewports (`<600px`):
    * - `'table'` (default): the table scrolls horizontally inside its wrapper.
    * - `'cards'`: each row collapses to a stacked card with the column
@@ -426,7 +443,7 @@ export function DataTable<T>({
   columns: allColumns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, stickyHeader, maxHeight, mobileLayout = 'table',
+  empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'table',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
   renderExpanded, expandedKeys, onExpandedChange,
@@ -454,10 +471,14 @@ export function DataTable<T>({
   // it. IO (not a scroll listener) → no per-frame work; SSR/jsdom-safe via
   // the `typeof` guard. Ancestor-stick mode keeps the flush header (the
   // outer scroller isn't ours to observe).
+  // Bounded scroll region: `maxHeight` (a cap) or `fillHeight` (the parent's
+  // height). Both put the table in the inner scroller; everything gated on
+  // "is there an internal scroller" reads this, never `maxHeight` alone.
+  const bounded = maxHeight != null || fillHeight === true;
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const sentinelRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
-  const elevatable = stickyHeader && maxHeight != null;
+  const elevatable = stickyHeader && bounded;
   React.useEffect(() => {
     if (!elevatable) { setStuck(false); return; }
     const root = scrollRef.current;
@@ -512,7 +533,7 @@ export function DataTable<T>({
   // actually true (see the prop's JSDoc). When the gate is off the hook is
   // inert and returns the full range, so there is ONE render path below.
   const virtual =
-    virtualizeRows != null && maxHeight != null && !expandable && mobileLayout !== 'cards';
+    virtualizeRows != null && bounded && !expandable && mobileLayout !== 'cards';
   const vrange = useVirtualRows(scrollRef, {
     count: rows.length,
     rowHeight: virtualizeRows?.rowHeight ?? 1,
@@ -713,30 +734,42 @@ export function DataTable<T>({
   // into a plain `.table-wrap__scroll` (no maxHeight) so the horizontal
   // scroll lives on the inner div and the overlay — a sibling OUTSIDE it —
   // can't be dragged along when the header scrolls.
+  // Which element actually scrolls, per mode: the inner div (bounded, or
+  // overlay states) or the wrap itself (unbounded rows — legacy structure).
+  // `scrollRef` always points at THAT element, so the edge hints below and
+  // the virtualizer measure the real scroller. The key re-subscribes the
+  // hook when the structure changes (the ref moves between elements).
+  const scrollerMode = bounded ? 'inner' : overlay != null ? 'overlay' : 'wrap';
+  const edges = useScrollEdges(scrollRef, scrollerMode);
   const wrap = (
     <div
+      ref={scrollerMode === 'wrap' ? scrollRef : undefined}
       className={cx(
         'table-wrap',
         stickyHeader && 'table-wrap--sticky',
-        maxHeight != null && 'table-wrap--scroll',
+        bounded && 'table-wrap--scroll',
+        fillHeight && 'table-wrap--fill',
         mobileLayout === 'cards' && 'table-wrap--cards',
         surface === 'flush' && toolbar == null && 'table-wrap--flush',
+        edges.left && 'has-more-left',
+        edges.right && 'has-more-right',
+        edges.down && 'has-more-down',
         className,
       )}
     >
-      {maxHeight != null
+      {bounded
         ? (
           <div
             ref={scrollRef}
             className={cx('table-wrap__scroll', stuck && 'is-stuck')}
-            style={{ maxHeight }}
+            style={maxHeight != null ? { maxHeight } : undefined}
           >
             {elevatable && <div ref={sentinelRef} className="table-wrap__sentinel" aria-hidden="true" />}
             {tableEl}
           </div>
         )
         : overlay != null
-          ? <div className="table-wrap__scroll">{tableEl}</div>
+          ? <div ref={scrollRef} className="table-wrap__scroll">{tableEl}</div>
           : tableEl}
       {overlay}
     </div>
@@ -746,7 +779,7 @@ export function DataTable<T>({
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
   return toolbar == null ? wrap : (
-    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush')}>
+    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill')}>
       <div className="table-surface__bar">{toolbar}</div>
       {wrap}
     </div>

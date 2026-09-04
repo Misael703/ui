@@ -202,6 +202,38 @@ describe('DataTable', () => {
     expect(container.querySelector('.table-wrap__scroll table')).toBeTruthy();
   });
 
+  // `fillHeight` (v3.2.0): the bounded scroll region without a number. The
+  // consumer used to compute `calc(100vh - 249px)` against a header whose
+  // height the kit changes every other release; now the wrap fills its
+  // (definite-height) parent via flex and the inner div scrolls.
+  it('fillHeight renders the bounded structure with no inline max-height', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} fillHeight stickyHeader />
+    );
+    const wrap = container.querySelector('.table-wrap')!;
+    expect(wrap).toHaveClass('table-wrap--scroll');
+    expect(wrap).toHaveClass('table-wrap--fill');
+    const scroller = container.querySelector('.table-wrap__scroll') as HTMLElement;
+    expect(scroller).toBeTruthy();
+    expect(scroller.style.maxHeight).toBe('');
+    expect(scroller.querySelector('table')).toBeTruthy();
+  });
+
+  it('fillHeight with a toolbar marks the shared surface so the flex chain is unbroken', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} fillHeight toolbar={<div>tb</div>} />
+    );
+    expect(container.querySelector('.table-surface')).toHaveClass('table-surface--fill');
+    expect(container.querySelector('.table-wrap')).toHaveClass('table-wrap--fill');
+  });
+
+  it('maxHeight without fillHeight does not add the fill class', () => {
+    const { container } = render(
+      <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} maxHeight={300} />
+    );
+    expect(container.querySelector('.table-wrap')).not.toHaveClass('table-wrap--fill');
+  });
+
   it('error takes precedence over empty state', () => {
     render(
       <DataTable

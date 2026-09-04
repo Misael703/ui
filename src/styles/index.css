@@ -888,30 +888,9 @@ button, input, select, textarea { box-sizing: border-box; }
      `overflow` below by higher specificity / source order, so this does not
      touch them. */
   overflow-y: clip;
-  /* Scroll shadows pattern (Lea Verou, 2012). Hints "more content on this
-     side" when the table overflows horizontally — useful on mobile / iOS
-     Safari where scrollbars are invisible. Four background layers stack
-     in two pairs:
-
-       1. Solid surface fill (base, always opaque).
-       2. Cover masks on each edge (background-attachment: local) — these
-          move with the scrollable content. When the scroll is at start/end,
-          the matching mask sits over the shadow and hides it.
-       3. Shadows on each edge (background-attachment: scroll) — fixed to
-          the wrapper; revealed only when the local mask scrolls away.
-
-     Net: left shadow appears only when scrolled right (content hidden on
-     the left), right shadow only when content overflows past the right.
-     Empty or non-overflowing tables show neither. */
-  background:
-    linear-gradient(to right, var(--bg-surface) 30%, transparent) left center,
-    linear-gradient(to left,  var(--bg-surface) 30%, transparent) right center,
-    linear-gradient(to right, var(--edge-shadow), transparent 24px) left center,
-    linear-gradient(to left,  var(--edge-shadow), transparent 24px) right center,
-    var(--bg-surface);
-  background-size: 30px 100%, 30px 100%, 24px 100%, 24px 100%, 100% 100%;
-  background-attachment: local, local, scroll, scroll, scroll;
-  background-repeat: no-repeat;
+  background: var(--bg-surface);
+  /* Anchor for the `::after` edge-hint overlay below (v3.2.0). */
+  position: relative;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   /* Standalone DataTable is FLAT by default (no shadow), unlike `.card`,
@@ -932,11 +911,48 @@ button, input, select, textarea { box-sizing: border-box; }
      instead, which drops this border/radius/shadow. */
   background-clip: padding-box;
 }
+/* Scroll-edge hints (v3.2.0) — "more content this way". Pre-3.2.0 this was
+   the CSS-only scroll-shadow trick (background layers with
+   `background-attachment: local` on the wrap), which only works when the
+   wrap ITSELF scrolls: in bounded (`maxHeight` / `fillHeight`) and overlay
+   modes the scroll lives in `.table-wrap__scroll`, so the masks never moved
+   and no shadow ever showed — a 16-column report gave no hint of the nine
+   columns hidden to the right. And with two scroll axes the local masks
+   scroll away vertically and reveal a horizontal shadow that lies.
+
+   Now the real scroller is MEASURED (`useScrollEdges`: scroll + resize) and
+   the wrap gets `has-more-{left,right,down}`; this single `::after` paints
+   the three edge shadows as gradient layers whose colour is a variable —
+   `transparent` (invisible) by default, the shadow tone when the class is
+   on. Sits above the scroller AND the sticky header (z-index 2 in the wrap's
+   stacking context), so the cue runs the full height of the box, and is
+   click-through. `border-radius: inherit` keeps it inside the rounded
+   corners; the toolbar'd `.table-surface` case unrounds the wrap, so it
+   follows automatically. */
+.table-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  --edge-l: transparent;
+  --edge-r: transparent;
+  --edge-b: transparent;
+  background:
+    linear-gradient(to right, var(--edge-l), transparent 24px) left center / 24px 100% no-repeat,
+    linear-gradient(to left,  var(--edge-r), transparent 24px) right center / 24px 100% no-repeat,
+    linear-gradient(to top,   var(--edge-b), transparent 20px) center bottom / 100% 20px no-repeat;
+}
+.table-wrap.has-more-left::after  { --edge-l: var(--edge-shadow); }
+.table-wrap.has-more-right::after { --edge-r: var(--edge-shadow); }
+.table-wrap.has-more-down::after  { --edge-b: var(--edge-shadow); }
+
 /* `surface="flush"`: the table draws no chrome of its own so it sits clean
-   inside an already-bordered/elevated parent (a Card). Keeps the scroll-
-   shadow background fill (the base surface color still matches the parent)
-   but drops border, radius, and elevation — and un-rounds the header so it
-   doesn't poke a radius into a square-cornered parent. */
+   inside an already-bordered/elevated parent (a Card). Keeps the surface
+   fill (the base colour still matches the parent) but drops border, radius,
+   and elevation — and un-rounds the header so it doesn't poke a radius into
+   a square-cornered parent. */
 .table-wrap--flush {
   border: 0;
   border-radius: 0;
@@ -1041,6 +1057,29 @@ button, input, select, textarea { box-sizing: border-box; }
      still scrolls horizontally inside the box. */
 .table-wrap--scroll { overflow: hidden; }
 .table-wrap__scroll { overflow: auto; }
+/* `fillHeight` (v3.2.0): the bounded region sized by LAYOUT. The wrap is a
+   flex column that takes its parent's height (`height: 100%` for a sized
+   box, `flex: 1` for a flex-column parent; `min-height: 0` lets it shrink
+   below the table's intrinsic height, which is the whole point), and the
+   inner scroller takes whatever is left. With a toolbar the shared surface
+   carries the same chain so the toolbar bar keeps its natural height and the
+   wrap below it flexes. No `max-height` anywhere. */
+.table-wrap--fill {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+.table-wrap--fill > .table-wrap__scroll { flex: 1 1 auto; min-height: 0; }
+.table-surface--fill {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+.table-surface--fill > .table-wrap--fill { height: auto; }
 /* Sentinel: a zero-height probe at the very top of the scroll content. An
    IntersectionObserver watches it against the scroller — once it scrolls
    out of the top, the header is "stuck" and the inner scroller gets

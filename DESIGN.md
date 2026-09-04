@@ -284,6 +284,23 @@ what moved and what didn't.
   your own bordered container is the anti-pattern. The bare sibling pattern
   still works (legacy `.table-toolbar + .table-wrap`) but is not the
   recommended path.
+- **Bounded scroll region: `maxHeight` (a cap) or `fillHeight` (the
+  parent's height) (v3.2.0).** Both move the table into an inner scroller
+  (sticky header pins to it, horizontal scroll lives there, `virtualizeRows`
+  allowed). `fillHeight` is the one for "table + pagination must fit the
+  viewport": the wrap becomes a flex column (`height:100%; flex:1;
+  min-height:0`) and the scroller takes the rest — sized by layout, never by
+  `calc(100vh - N)` against a header the kit resizes. Contract: a
+  definite-height parent chain (flex column / grid row up to a sized
+  ancestor such as the AppShell content).
+- **Scroll-edge hints are state, not a CSS trick (v3.2.0).** The wrap gets
+  `has-more-{left,right,down}` from `useScrollEdges` (the REAL scroller is
+  measured: scroll + resize) and one `::after` paints the edge shadows above
+  the scroller and the sticky header. The old background-layer trick
+  (`background-attachment: local`) only worked when the wrap itself scrolled,
+  so bounded and overlay modes never showed a shadow, and it lied with two
+  scroll axes. Rule going forward: a cue derived from scroll position comes
+  from the element that scrolls, painted wherever it reads best.
 - **DataTable density is `compact` by default (v1.10.0).** The
   readable-dense register (≈30px rows, `--text-xs`, single-line cells)
   is the default because the kit serves data-heavy screens — "default =
