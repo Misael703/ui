@@ -122,6 +122,23 @@ describe('DataTable virtualizeRows (integración)', () => {
     restore();
   });
 
+  it('fillHeight es un scroller válido para virtualizar (v3.2.0)', () => {
+    const restore = mockClientHeight(320);
+    const { container } = render(
+      <DataTable
+        columns={COLS}
+        rows={makeRows(5000)}
+        rowKey={(r) => r.id}
+        fillHeight
+        virtualizeRows={{ rowHeight: 32, overscan: 5 }}
+      />
+    );
+    const dataRows = container.querySelectorAll('tbody tr:not(.data-table__spacer)');
+    expect(dataRows.length).toBeLessThan(50);
+    expect(container.querySelector('.data-table__spacer td')).not.toBeNull();
+    restore();
+  });
+
   it('sin maxHeight la virtualización se desactiva (render completo)', () => {
     const restore = mockClientHeight(320);
     const { container } = render(

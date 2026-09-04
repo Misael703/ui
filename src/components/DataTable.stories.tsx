@@ -765,3 +765,71 @@ export const GoldStandard: StoryObj = {
     );
   },
 };
+
+/* 16 columnas de ancho fijo (espejo de un XLSX) cuya suma supera cualquier
+   contenedor: el caso del reporte de despachos que motivó `fillHeight` y las
+   pistas de borde. */
+const WIDE_COLS = [
+  'Fecha', 'Hora', 'Usuario', 'Tipo de despacho', 'Zona operativa', 'Comuna', 'Cliente',
+  'RUT', 'Documento', 'Guía', 'Chofer', 'Camión', 'Ayudante', 'Bultos', 'Peso (kg)', 'Observación',
+].map((header, i) => ({ key: `c${i}`, header, width: i === 6 ? 260 : 130 }));
+const wideRows = Array.from({ length: 60 }, (_, r) => Object.fromEntries([
+  ['id', String(r)],
+  ...WIDE_COLS.map((c, i) => [c.key, i === 0 ? '31/08/2026' : i === 1 ? `${9 + (r % 9)}:${String((r * 7) % 60).padStart(2, '0')}` : `${c.header} ${r + 1}`]),
+])) as Array<Record<string, string>>;
+
+/**
+ * **Fill height** (v3.2.0): la región de scroll acotada SIN número. La tabla
+ * llena el alto de su contenedor (columna flex de alto definido) y scrollea
+ * adentro; la paginación queda pegada al fondo. Antes el consumidor calculaba
+ * `maxHeight="calc(100vh - 249px)"` contra un header que el kit cambia de
+ * alto cada tanto — ahora el layout manda.
+ *
+ * También muestra las **pistas de borde** (`has-more-{left,right,down}`):
+ * sombra a la derecha mientras haya columnas escondidas, a la izquierda al
+ * scrollear, abajo mientras queden filas. Antes de 3.2.0 esas sombras no se
+ * mostraban en modo acotado (el truco CSS solo funcionaba si el wrap era el
+ * scroller). Redimensiona el canvas: la tabla se adapta sola.
+ */
+export const FillHeight: StoryObj = {
+  name: 'Fill height (región de scroll + pistas de borde)',
+  render: () => {
+    const [page, setPage] = React.useState(1);
+    return (
+      <div style={{ height: 520, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <strong>Detalle de despachos</strong>
+          <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Contenedor de 520px · la tabla toma el resto</span>
+        </div>
+        <DataTable
+          rows={wideRows}
+          rowKey={(r) => r.id}
+          columns={WIDE_COLS}
+          fillHeight
+          stickyHeader
+          density="compact"
+          ariaLabel="Detalle de despachos"
+        />
+        <TablePagination page={page} pageSize={60} total={158} onPageChange={setPage} />
+      </div>
+    );
+  },
+};
+
+/** Misma tabla ancha, acotada con `maxHeight` y con toolbar: la cadena fill no
+ *  aplica, pero las pistas de borde sí (antes de 3.2.0 tampoco se veían aquí). */
+export const AnchaAcotadaConToolbar: StoryObj = {
+  name: 'Ancha acotada (maxHeight) con toolbar',
+  render: () => (
+    <DataTable
+      rows={wideRows}
+      rowKey={(r) => r.id}
+      columns={WIDE_COLS}
+      maxHeight={360}
+      stickyHeader
+      density="compact"
+      toolbar={<TableToolbar><Input placeholder="Buscar cliente" /></TableToolbar>}
+      ariaLabel="Detalle de despachos"
+    />
+  ),
+};

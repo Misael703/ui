@@ -1,26 +1,23 @@
-# UI Kit v3.1.0 — Dataviz semantic tokens (`--chart-*`)
+# UI Kit v3.2.0 — DataTable `fillHeight` + scroll-edge shadows por estado
 
-**Pedido:** consumer-driven desde despachos-ferreteria (dashboard de reportes). Cierra el ítem P3 (dark mode) de la auditoría ERP con consumidor real.
-**Branch:** `feat/chart-tokens` (local; push/PR solo con OK explícito).
+**Origen:** auditoría de scrolls del reporte "Detalle de despachos" (despachos-ferreteria, 2026-09-04). Solo las piezas del kit.
+**Branch:** `feat/datatable-fill-scroll-edges` (desde main; local, push/PR/release con OK explícito).
 
-## Decisiones aprobadas (2026-09-02)
-- Capa semántica `--chart-*` que **aliasa** primitivos existentes; cero hex nuevo en light.
-- `DESIGN.md` manda sobre los seeds: verde → escala green del kit, ámbar → gold (yellow-700), navy → `--color-primary-600`.
-- **No** se agrega `--focus-ring` (colisión de tipo con la familia box-shadow `--focus-ring-*`); el consumidor usa `--border-focus`.
-- Ambas paletas: base define light + dark; El Alba hereda por alias de escala (sin override).
-- Valores planos (hex / alias de escala), sin `color-mix`, para que el test los resuelva y el consumidor los pase a SVG.
+## Decisiones aprobadas
+- **Fix sombras de scroll:** el patrón Lea Verou (background-attachment local) muere cuando el scroll vive en `.table-wrap__scroll` (modo `maxHeight` y overlay) y falla con 2 ejes. Reemplazo: hook interno `useScrollEdges` (scroll pasivo + ResizeObserver) → clases `has-more-{left,right,down}` en el wrap → `::after` overlay con gradientes por variable. Aplica a los 3 modos.
+- **`fillHeight`:** prop booleana; activa el modo acotado sin valor. Wrap = columna flex `height:100%; flex:1; min-height:0`; scroller `flex:1; min-height:0`. Con toolbar, `.table-surface--fill`. `virtualizeRows` lo acepta. Contrato: el padre tiene alto definido.
+- Hook NO exportado del barrel (sin tocar smoke/gallery).
 
 ## Tareas
-- [x] T1 — `tests/ChartTokens.test.tsx` (rojo): 6 tokens definidos en base light + dark; resuelven a hex plano en base y El Alba, ambos temas; ≥ 3:1 vs `--bg-surface` en los 4 mapas.
-- [x] T2 — `src/styles/_root.css`: bloque `--chart-*` en `:root` (alias) + override en `:root[data-theme="dark"]`.
-- [x] T3 — Test verde; validador dataviz sobre los valores finales (light + dark, ambas paletas).
-- [x] T4 — `DESIGN.md` (sección dataviz) + `CHANGELOG.md` 3.1.0 + bump `package.json`.
-- [x] T5 — Suite completa + build; verificación visual de swatches light/dark (scratch, no se commitea).
-- [x] T6 — Commit local. Reportar. Esperar OK para push/PR.
+- [x] T1 — Tests rojos: `DataTable.test` (estructura fill, sin max-height inline, surface fill), `DataTableVirtual.test` (virtual con fill), `DataTableScrollEdges.test.tsx` (clases por scroll/overflow en bounded y unbounded, edge inferior).
+- [x] T2 — `src/hooks/useScrollEdges.ts` + wiring en `DataTable.tsx` (scrollRef siempre en el scroller real; `bounded = maxHeight != null || fillHeight`).
+- [x] T3 — CSS: quitar capas de fondo del wrap; `::after` con `--edge-l/r/b`; `.table-wrap--fill` / `.table-surface--fill`.
+- [x] T4 — Story `DataTable` "Fill height (scroll region)": contenedor 520px, 16 columnas anchas, paginación abajo. Verificar también "Virtualizado" (maxHeight).
+- [x] T5 — Suite + lint + build; Storybook + Playwright: capturas en scroll 0 / medio / final (H y V).
+- [x] T6 — DESIGN.md + CHANGELOG 3.2.0 + bump. Commit local. Reportar stories a revisar.
 
 ## Review
-**Tests:** 1102 unit (31 nuevos en `ChartTokens.test.tsx`), eslint limpio, `npm run build` verde; tokens presentes en `dist/styles.css` y `dist/tokens.css`.
-**Validador dataviz:** contraste ≥ 3:1 vs surface en las 4 combinaciones; banda de luminosidad dark OK (El Alba) — los FAIL de separación adyacente aplican a sets categóricos, no a roles (anotado en el comentario del token).
-**Visual:** swatches + mini chart SVG en Chromium (scratch, no commiteado): valores computados coinciden con el diseño; flip de tema re-tinta primary/positive/negative.
-**Ajuste de plan:** el test dejó de exigir los 6 roles en el bloque dark (3 se mantienen a propósito); el contrato real lo pinea el mapa fusionado.
-**Status:** commit local en `feat/chart-tokens`. PENDIENTE push + PR + release 3.1.0, aguardando OK explícito.
+**Tests:** 1112 unit (nuevos: `DataTableScrollEdges.test.tsx` ×6, `fillHeight` ×3 en DataTable.test, virtual+fill ×1), eslint sin errores (5 warnings preexistentes en las stories), tsc limpio, `npm run build` verde.
+**Chromium (Storybook + Playwright):** story Fill height: `has-more-right`+`has-more-down` al inicio, `has-more-left` al final, sin `max-height` inline, scroller 417px en contenedor 520; al angostar el viewport el ResizeObserver recalcula (left+right). Ancha acotada con toolbar y Virtualizada (maxHeight) también muestran pistas. Recortes 2x light/dark: sombras visibles, intensidad = token `--edge-shadow`.
+**Hallazgo de paso:** el scroll horizontal máximo de la story es 414px (los anchos de columna se compactan), no un bug.
+**Status:** commit local en `feat/datatable-fill-scroll-edges`. PENDIENTE push + PR + release 3.2.0, aguardando OK explícito.

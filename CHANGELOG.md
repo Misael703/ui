@@ -5,6 +5,55 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] — 2026-09-04
+
+**Minor. DataTable: región de scroll por layout (`fillHeight`) y pistas de
+borde que funcionan en todos los modos.** Origen: auditoría de scrolls del
+reporte "Detalle de despachos" (despachos-ferreteria), que calculaba
+`maxHeight="calc(100vh - 249px)"` contra un header que el kit cambia de alto,
+y cuya tabla de 16 columnas no daba pista alguna de las 9 escondidas.
+
+### Added
+- **`fillHeight`** en `DataTable`: la región acotada SIN número. Misma
+  estructura que `maxHeight` (scroller interno, sticky header pegado a él,
+  scroll horizontal propio, `virtualizeRows` permitido), pero el alto lo da el
+  layout: el wrap es columna flex `height:100%; flex:1; min-height:0` y el
+  scroller toma el resto. Contrato: el padre tiene alto definido (columna flex
+  o fila de grid hasta un ancestro dimensionado, p. ej. el contenido del
+  AppShell). Con `toolbar`, `.table-surface--fill` mantiene la cadena.
+- Stories `Fill height` (tabla de 16 columnas llenando un contenedor de
+  520px con paginación abajo) y `Ancha acotada (maxHeight) con toolbar`.
+
+### Fixed
+- **Las sombras de scroll no se mostraban en modo acotado ni con overlay.**
+  Eran el truco CSS de capas de fondo con `background-attachment: local` en
+  `.table-wrap`, que solo funciona si el wrap es el que scrollea; en
+  `maxHeight`/overlay el scroll vive en `.table-wrap__scroll`, así que las
+  máscaras nunca se movían. Y con dos ejes el truco miente (las máscaras se van
+  al scrollear vertical). Reemplazo: hook interno `useScrollEdges` mide el
+  scroller real (scroll pasivo + `ResizeObserver`) y el wrap recibe
+  `has-more-{left,right,down}`; un único `::after` pinta las tres sombras
+  (nueva la inferior: "quedan filas") por encima del scroller y del sticky
+  header, click-through. `tests/DataTableScrollEdges.test.tsx` pinea el
+  toggling en los tres modos con métricas mockeadas.
+
+### Removed
+- **Reglas `::-webkit-scrollbar` de los scrollers del kit** (`.kit-scrollbar`,
+  `.table-wrap__scroll`, bodies de Modal/Drawer, listboxes, `.scroll-area`,
+  `.tabs__list`). Por spec los navegadores las ignoran en cualquier elemento
+  cuyo `scrollbar-width`/`scrollbar-color` no sea `auto`, y todos esos
+  elementos ya declaraban los estándar: eran código muerto (verificado lado a
+  lado en Safari y Chrome: píxel-idéntico con y sin). Quedan solo
+  `scrollbar-width: thin` + `scrollbar-color`. Trade-off documentado: un
+  `scrollbar-color` no-`auto` desactiva el overlay auto-hide de macOS; se
+  mantiene a propósito (una barra predecible en toda plataforma).
+
+### Notes
+- `useScrollEdges` es interno (no se exporta del barrel): sin cambio en
+  smoke/gallery.
+- El consumidor que motivó esto (despachos) pasa de `maxHeight` calculado a
+  `fillHeight` con una columna flex en la página; queda de su lado.
+
 ## [3.1.0] — 2026-09-02
 
 **Minor. Tokens semánticos de dataviz — los charts dejan de ser ciegos al
