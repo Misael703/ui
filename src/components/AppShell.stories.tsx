@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AppShell, PageHeader, type AppShellTheme, type NavItem, type NavSection } from './AppShell';
+import { AppShell, PageHeader, type AppShellProps, type AppShellTheme, type NavSection } from './AppShell';
 import { Button } from './Button';
 import { Logo } from './Logo';
 import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, FileText } from './Icons';
@@ -21,48 +21,94 @@ export default {
 
 /* Shared nav fixture. Deliberately MIXED: flat links + a collapsible group
    (`NavItem` with `children`, v1.83.0), so every story exercises the mixed
-   case instead of an isolated one. The active item is TOP-LEVEL (Inicio) so
-   the orange `is-active` stripe — a top-level-only marker — shows in every
-   story; the group still starts open (`defaultOpen`) exposing children +
-   guide line. The dual cell (active INSIDE the group: `is-within` icon,
-   child bg-tint without stripe) is the Playground's `activeItem: 'en grupo'`
-   control. */
+   case instead of an isolated one. Items carry REAL paths and no hardcoded
+   `active`: the stories drive the active item through `currentPath` (the
+   consumer pattern — despachos feeds `usePathname()`), so clicking navigates.
+   Starting on a TOP-LEVEL item shows the orange `is-active` stripe (a
+   top-level-only marker); the group starts open (`defaultOpen`) exposing
+   children + guide line. The dual cell (active INSIDE the group: `is-within`
+   icon, child bg-tint without stripe) is one click away — or the Playground's
+   `activeItem: 'en grupo'` control, which starts there. */
 const sections: NavSection[] = [
   {
     label: 'Operación',
     items: [
-      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '#', active: true },
-      { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '#', badge: 12 },
-      { id: 'productos', label: 'Productos', icon: <Package size={18} />, href: '#' },
-      { id: 'despacho', label: 'Despacho', icon: <Truck size={18} />, href: '#' },
+      { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '/inicio' },
+      { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '/pedidos', badge: 12 },
+      { id: 'productos', label: 'Productos', icon: <Package size={18} />, href: '/productos' },
+      { id: 'despacho', label: 'Despacho', icon: <Truck size={18} />, href: '/despacho' },
       { id: 'reportes', label: 'Reportes', icon: <FileText size={18} />, defaultOpen: true, children: [
-        { id: 'r-ventas', label: 'Ventas', href: '#' },
-        { id: 'r-stock', label: 'Stock', href: '#' },
-        { id: 'r-margen', label: 'Margen', href: '#' },
+        { id: 'r-ventas', label: 'Ventas', href: '/reportes/ventas' },
+        { id: 'r-stock', label: 'Stock', href: '/reportes/stock' },
+        { id: 'r-margen', label: 'Margen', href: '/reportes/margen' },
       ] },
     ],
   },
   {
     label: 'Administración',
     items: [
-      { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '#' },
-      { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '#' },
+      { id: 'clientes', label: 'Clientes', icon: <Users size={18} />, href: '/clientes' },
+      { id: 'config', label: 'Configuración', icon: <Settings size={18} />, href: '/configuracion' },
     ],
   },
 ];
 
-/* The OTHER matrix cell: active item INSIDE the group. Wired to the
-   Playground's `activeItem: 'en grupo'` control — is-within icon/label
-   (white on brand), stripe on the group header, child active as bg-tint
-   WITHOUT the stripe (top-level-only by design), guide line. */
-const sectionsGroupActive: NavSection[] = sections.map((s) => ({
-  ...s,
-  items: s.items.map((it): NavItem => it.id === 'home'
-    ? { ...it, active: false }
-    : it.id === 'reportes'
-      ? { ...it, children: it.children!.map((c) => ({ ...c, active: c.id === 'r-stock' })) }
-      : it),
-}));
+const ROUTE_TOP_LEVEL = '/inicio';
+const ROUTE_IN_GROUP = '/reportes/stock';
+
+/* Page title per route, so the content area visibly changes with the nav. */
+const ROUTE_TITLES: Record<string, string> = {
+  '/inicio': 'Inicio', '/pedidos': 'Pedidos', '/productos': 'Productos', '/despacho': 'Despacho',
+  '/reportes/ventas': 'Reporte de ventas', '/reportes/stock': 'Reporte de stock', '/reportes/margen': 'Reporte de margen',
+  '/clientes': 'Clientes', '/configuracion': 'Configuración',
+};
+
+/* In-memory router for the stories — the smallest stand-in for next/link +
+   usePathname. `linkAs` renders a real <a> (href kept for semantics: middle-
+   click, copy link, a11y) but intercepts the click and updates `path`; the
+   shell then re-derives the active item from `currentPath`. Stable via
+   useCallback: NavItemNode is memoized and an inline arrow would defeat it. */
+function useDemoRouter(initial: string) {
+  const [path, setPath] = React.useState(initial);
+  const linkAs = React.useCallback<NonNullable<AppShellProps['linkAs']>>((item, content, className) => (
+    <a
+      href={item.href}
+      className={className}
+      aria-current={item.active ? 'page' : undefined}
+      data-testid={`nav-${item.id}`}
+      onClick={(e) => { e.preventDefault(); setPath(item.href!); }}
+    >
+      {content}
+    </a>
+  ), []);
+  return { path, linkAs };
+}
+
+/* Wall clock with millis: consecutive clicks land in the same second, and the
+   whole point is that the page timestamp moves while the shell's doesn't. */
+const clock = () => {
+  const d = new Date();
+  return `${d.toLocaleTimeString('es-CL', { hour12: false })}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+};
+
+/* Content for the current route. Keyed by `path` where it's used so it
+   REMOUNTS per navigation (as a Next `page` does), while the shell around it
+   only re-renders — the two timestamps make that difference visible. */
+function DemoPage({ path, shellMountedAt, actions }: { path: string; shellMountedAt: string; actions?: React.ReactNode }) {
+  const mountedAt = React.useRef(clock());
+  return (
+    <>
+      <PageHeader
+        title={ROUTE_TITLES[path] ?? path}
+        description={`Ruta actual: ${path} · Haz clic en el menú para navegar (linkAs + currentPath)`}
+        actions={actions}
+      />
+      <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--fg-meta)' }}>
+        Shell montado a las {shellMountedAt} (no se remonta al navegar) · Página montada a las {mountedAt.current}
+      </p>
+    </>
+  );
+}
 
 /* Standard header.right across ALL stories: the kit `UserMenu`, not a bare
    `<Avatar>` (that was the pre-v1.66.0 pattern; the avatar alone opens
@@ -87,9 +133,11 @@ function ConfigurableShell({
   theme = 'default',
   headerTheme,
   startCollapsed = false,
-  navSections = sections,
-}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; startCollapsed?: boolean; navSections?: typeof sections }) {
+  startPath = ROUTE_TOP_LEVEL,
+}: { theme?: AppShellTheme; headerTheme?: AppShellTheme; startCollapsed?: boolean; startPath?: string }) {
   const [collapsed, setCollapsed] = React.useState(startCollapsed);
+  const { path, linkAs } = useDemoRouter(startPath);
+  const shellMountedAt = React.useRef(clock());
   const brand = (headerTheme ?? theme) === 'brand';
   const sepColor = brand ? 'rgba(255,255,255,0.24)' : 'var(--border-default)';
   return (
@@ -97,7 +145,9 @@ function ConfigurableShell({
       <AppShell
         theme={theme}
         headerTheme={headerTheme}
-        sections={navSections}
+        sections={sections}
+        currentPath={path}
+        linkAs={linkAs}
         showMenuToggle
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -133,7 +183,7 @@ function ConfigurableShell({
         </div>
         {/* No inner padding: the scroll container already provides the gutter. */}
         <div style={{ display: 'grid', gap: 16 }}>
-          <PageHeader title="Dashboard" description="Contenido largo para demostrar el scroll interno: el header y el sidebar quedan fijos" actions={<Button>Acción</Button>} />
+          <DemoPage key={path} path={path} shellMountedAt={shellMountedAt.current} actions={<Button>Acción</Button>} />
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} style={{ border: '1px dashed var(--border-default)', borderRadius: 12, height: 200 }} />
           ))}
@@ -153,9 +203,11 @@ interface PlaygroundArgs {
 /**
  * **Playground** — the MAIN story: the whole feature matrix behind controls —
  * `theme` × `headerTheme` × initial collapse × where the
- * active item lives (`activeItem`). The other stories exist only for what
- * controls can't represent: the render-prop API path, the no-sidebar layout,
- * and the mobile drawer + `linkAs` routing.
+ * active item STARTS (`activeItem`). The nav is live: items carry real paths
+ * and the active one is derived from `currentPath` (the consumer pattern), so
+ * clicking navigates — the content swaps and remounts, the shell only
+ * re-renders. The other stories exist only for what controls can't represent:
+ * the render-prop API path, the no-sidebar layout, and the mobile drawer.
  *
  * Cells worth revisiting when touching nav/brand CSS:
  * - `theme: brand` + `activeItem: 'en grupo'` — the brand × group contrast
@@ -174,16 +226,16 @@ export const Playground: StoryObj<PlaygroundArgs> = {
   },
   args: { theme: 'default', headerTheme: 'brand', defaultCollapsed: false, activeItem: 'top-level' },
   render: (a) => {
-    // Remount the stateful shell when collapse-affecting args change, so the
-    // initial-collapse control takes effect (useState init is read once).
-    const k = String(a.defaultCollapsed);
+    // Remount the stateful shell when an initial-state arg changes (collapse,
+    // start route), so the control takes effect (useState init is read once).
+    const k = `${a.defaultCollapsed}-${a.activeItem}`;
     return (
       <ConfigurableShell
         key={k}
         theme={a.theme}
         headerTheme={a.headerTheme}
         startCollapsed={a.defaultCollapsed}
-        navSections={a.activeItem === 'en grupo' ? sectionsGroupActive : sections}
+        startPath={a.activeItem === 'en grupo' ? ROUTE_IN_GROUP : ROUTE_TOP_LEVEL}
       />
     );
   },
@@ -199,10 +251,15 @@ export const Playground: StoryObj<PlaygroundArgs> = {
  */
 export const TopbarUncontrolledRenderProp: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
-  render: () => (
+  render: function Uncontrolled() {
+    const { path, linkAs } = useDemoRouter(ROUTE_TOP_LEVEL);
+    const shellMountedAt = React.useRef(clock());
+    return (
     <div style={{ height: '100vh' }}>
       <AppShell
         sections={sections}
+        currentPath={path}
+        linkAs={linkAs}
         header={{
           // A custom render-prop trigger that reuses the kit's `appshell__menu-toggle`
           // class, so it looks identical to the standard toggle (bare icon + hover
@@ -220,13 +277,14 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
           right: <DemoUserMenu />,
         }}
       >
-        <div style={{ padding: 24 }}>
-          <PageHeader title="Dashboard" description="El estado lo administra el AppShell; el hamburger lo togglea vía render-prop" />
-          <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
+        <div style={{ padding: 24, display: 'grid', gap: 16 }}>
+          <DemoPage key={path} path={path} shellMountedAt={shellMountedAt.current} />
+          <div style={{ border: '1px dashed var(--border-default)', borderRadius: 12, height: 320 }} />
         </div>
       </AppShell>
     </div>
-  ),
+    );
+  },
 };
 
 /**
@@ -267,37 +325,23 @@ export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: function Routing() {
-    const [route, setRoute] = React.useState('Inicio');
-    // Recursive: the fixture mixes flat links and a collapsible group, so the
-    // group's children also route (and only ONE item ends up active).
-    const mark = (it: NavItem): NavItem => ({
-      ...it,
-      active: it.label === route,
-      children: it.children?.map(mark),
-    });
-    const routed = sections.map((s) => ({ ...s, items: s.items.map(mark) }));
+    // Same in-memory router as the Playground: `currentPath` resolves the
+    // active item recursively (group children route too, only ONE active).
+    const { path, linkAs } = useDemoRouter(ROUTE_TOP_LEVEL);
     return (
       <div style={{ height: '100vh' }}>
         <AppShell
-          sections={routed}
+          sections={sections}
+          currentPath={path}
+          linkAs={linkAs}
           showMenuToggle
-          linkAs={(item, content, className) => (
-            <a
-              data-testid={`nav-${item.id}`}
-              href={item.href}
-              className={className}
-              onClick={(e) => { e.preventDefault(); setRoute(String(item.label)); }}
-            >
-              {content}
-            </a>
-          )}
           header={{
             center: <Logo variant="horizontal" bg="auto" height={26} />,
             right: <DemoUserMenu />,
           }}
         >
           <div style={{ padding: 16 }}>
-            <PageHeader title={`Ruta: ${route}`} description="Abre el drawer con el menú y toca un item: navega (linkAs) y el drawer se cierra solo. ESC o tap fuera también lo cierran." />
+            <PageHeader title={ROUTE_TITLES[path] ?? path} description={`Ruta: ${path} · Abre el drawer con el menú y toca un item: navega (linkAs) y el drawer se cierra solo. ESC o tap fuera también lo cierran.`} />
           </div>
         </AppShell>
       </div>
