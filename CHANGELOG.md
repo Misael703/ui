@@ -5,6 +5,46 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] — 2026-09-05
+
+**Minor. Retune de paleta tras auditoría OKLCH (WCAG 2 + APCA) — visual,
+sin cambio de API.** Cada token de fondo, texto y borde de ambos presets en
+ambos temas se convirtió a OKLCH y se midió. Las correcciones están pineadas
+en `Contrast.test` / `ContrastDark.test` (APCA, ΔL entre roles, tinte, 3:1 de
+control).
+
+### Added
+- **`--border-control`**: borde en reposo de todo control de formulario
+  (input, select, textarea, checkbox, date/time/daterange pickers, combobox,
+  multicombo, tag/phone inputs, qty). WCAG 1.4.11 pide 3:1 para el límite de
+  un control; `--border-strong` (~1.5:1) nunca lo cumplió. Valores: genérico
+  `#95918f` / dark `#76706a`; El Alba `#8d929f` / dark `#6a7184` (3.1–3.5:1
+  sobre surface). Hover de textarea/checkbox pasa a `--fg-subtle` (más oscuro
+  que el reposo: "hover oscurece"). `--border-strong` sigue para hairlines
+  decorativas.
+
+### Changed
+- **Genérico light: insets tintados.** `--bg-surface` deja de ser `#ffffff`
+  puro → `#fffdfa`; `--bg-subtle` `#f5f5f4` → `#f7f5f1`; `--bg-muted`
+  `#efedeb` → `#f0ede8`. Mismo L, un susurro del tono del canvas (el único
+  lugar donde el kit rompía su regla "todo neutro tintado"). `--color-white`
+  sigue siendo `#ffffff`.
+- **`--fg-muted` / `--fg-subtle` vuelven a ser dos roles.** Eran el mismo
+  color (ΔL .015 genérico, .007 El Alba). Light: genérico `#605a54`/`#655e57`
+  → `#57514c`/`#69625b`; El Alba muted `#5b6173` → `#515869` (subtle queda
+  `#5e6373`). Muted = texto secundario esencial, subtle/meta = decorativo.
+- **Dark: texto secundario legible según APCA.** WCAG 2 sobreestima
+  claro-sobre-oscuro: muted pasaba AA a 5–8:1 pero medía Lc 50–58. Genérico
+  `--fg-muted` `#b3a89d` → `#c7bcb0`, `--fg-subtle` `#a89e91` → `#b7ac9f`;
+  El Alba `#a6afc2` → `#b5bed1`, `#99a2b7` → `#a5aec3`. Muted ≥ Lc 60 en los
+  cuatro tiers; subtle ≥ 50 (recesivo a propósito).
+
+### Notes
+- Fuera de scope, anotado: la story Colors muestra los hex del preset
+  genérico bajo los swatches de El Alba (etiquetas hardcodeadas); la escala
+  gris genérica tiene un hueco 500→600 (ΔL .16); el espresso pierde croma en
+  la base (-800) con drift de 14°.
+
 ## [3.2.0] — 2026-09-04
 
 **Minor. DataTable: región de scroll por layout (`fillHeight`) y pistas de

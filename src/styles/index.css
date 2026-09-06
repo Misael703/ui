@@ -230,7 +230,7 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--control-font-md);
   color: var(--fg-default);
   background: var(--bg-surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   /* Tokenized control metrics (v3.0.0). Default is now the compact register
      38px—desktop-optimized form density. On touch-capable devices
@@ -255,7 +255,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .input::placeholder, .textarea::placeholder { color: var(--fg-subtle); }
 .input:hover:not(:disabled),
 .select:hover:not(:disabled),
-.textarea:hover:not(:disabled) { border-color: var(--border-strong); }
+.textarea:hover:not(:disabled) { border-color: var(--fg-subtle); }
 .input:focus, .select:focus, .textarea:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -303,7 +303,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .input-group {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   overflow: hidden;
@@ -376,7 +376,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .check__box {
   flex: none;
   width: 20px; height: 20px;
-  border: 1.5px solid var(--border-strong);
+  border: 1.5px solid var(--border-control);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
   display: inline-flex; align-items: center; justify-content: center;
@@ -389,7 +389,7 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--color-white);
 }
 .check input:focus-visible ~ .check__box { outline: none; box-shadow: var(--focus-ring-accent); }
-.check:hover .check__box { border-color: var(--border-strong); }
+.check:hover .check__box { border-color: var(--fg-subtle); }
 .check input:disabled ~ .check__box { background: var(--bg-subtle); border-color: var(--border-default); }
 .check__box svg { opacity: 0; transition: opacity var(--duration-fast); }
 .check input:checked ~ .check__box svg { opacity: 1; }
@@ -2008,7 +2008,7 @@ button, input, select, textarea { box-sizing: border-box; }
      density (`.fields--dense` compacts all of them together). Extra right
      padding is fixed: it reserves room for the chevron, not density. */
   padding: var(--field-pad-y, 7px) 38px var(--field-pad-y, 7px) var(--field-pad-x, 12px);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   color: var(--fg-default);
@@ -2083,7 +2083,7 @@ button, input, select, textarea { box-sizing: border-box; }
   position: relative; display: inline-flex; align-items: stretch;
   width: 100%; box-sizing: border-box;
   background: var(--bg-surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   min-height: var(--field-min-h, 44px);
   color: var(--fg-default);
@@ -2175,7 +2175,7 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: var(--field-min-h, 44px);
   padding: 0 var(--field-pad-x, 14px);
   background: var(--bg-surface);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  border: 1px solid var(--border-control); border-radius: var(--radius-md);
   color: var(--fg-default);
   font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
@@ -2418,7 +2418,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .tag-input {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   min-height: var(--field-min-h); padding: 6px 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   cursor: text;
@@ -2453,7 +2453,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- PhoneInput ---------- */
 .phone-input {
   display: inline-flex; align-items: stretch;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   overflow: hidden; height: var(--field-min-h); width: 100%;
@@ -2610,7 +2610,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo__chips {
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   min-height: var(--field-min-h); padding: 6px 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   cursor: text;
@@ -2671,7 +2671,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .multicombo__option.is-disabled { opacity: 0.5; pointer-events: none; }
 .multicombo__check {
   width: 18px; height: 18px; flex: none;
-  border: 1.5px solid var(--border-strong);
+  border: 1.5px solid var(--border-control);
   border-radius: var(--radius-sm); display: inline-flex;
   align-items: center; justify-content: center;
   font-size: var(--text-xs); color: var(--bg-surface);
@@ -2694,7 +2694,7 @@ button, input, select, textarea { box-sizing: border-box; }
   width: 100%;
   display: inline-flex; align-items: center; gap: 8px;
   height: var(--field-min-h); padding: 0 14px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   font-family: var(--font-body); font-size: var(--text-sm);
@@ -2826,7 +2826,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .daterange__field {
   display: flex; flex-direction: column; gap: 2px;
-  border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  border: 1px solid var(--border-control); border-radius: var(--radius-md);
   padding: 4px 10px 5px; background: var(--bg-surface);
 }
 .daterange__field:focus-within { border-color: var(--color-primary); box-shadow: var(--focus-ring-brand); }
@@ -4426,7 +4426,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- QuantitySelector ------------------------------------------ */
 .qty {
   display: inline-flex; align-items: center;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   overflow: hidden;

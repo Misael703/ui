@@ -1,23 +1,24 @@
-# UI Kit v3.2.0 — DataTable `fillHeight` + scroll-edge shadows por estado
+# UI Kit v3.3.0 — Retune de paleta (auditoría OKLCH 2026-09-05)
 
-**Origen:** auditoría de scrolls del reporte "Detalle de despachos" (despachos-ferreteria, 2026-09-04). Solo las piezas del kit.
-**Branch:** `feat/datatable-fill-scroll-edges` (desde main; local, push/PR/release con OK explícito).
+**Origen:** crítica de paleta con `oklch-skill` sobre ambos presets × ambos temas (WCAG 2 + APCA).
+**Branch:** `feat/palette-retune` (desde main; local, push/PR/release con OK explícito).
 
-## Decisiones aprobadas
-- **Fix sombras de scroll:** el patrón Lea Verou (background-attachment local) muere cuando el scroll vive en `.table-wrap__scroll` (modo `maxHeight` y overlay) y falla con 2 ejes. Reemplazo: hook interno `useScrollEdges` (scroll pasivo + ResizeObserver) → clases `has-more-{left,right,down}` en el wrap → `::after` overlay con gradientes por variable. Aplica a los 3 modos.
-- **`fillHeight`:** prop booleana; activa el modo acotado sin valor. Wrap = columna flex `height:100%; flex:1; min-height:0`; scroller `flex:1; min-height:0`. Con toolbar, `.table-surface--fill`. `virtualizeRows` lo acepta. Contrato: el padre tiene alto definido.
-- Hook NO exportado del barrel (sin tocar smoke/gallery).
+## Cambios aprobados
+- Genérico light: surface/subtle/muted tintados al tono del canvas (H≈80), mismo L. Surface deja de ser `#ffffff` puro.
+- `--fg-muted` / `--fg-subtle`: abrir el paso (ΔL ≈ .05–.06) en ambos presets light.
+- Dark: `--fg-muted` a L 0.80 (APCA ≥ 60 en los 4 tiers); `--fg-subtle` a L 0.75 (rol decorativo, queda 50–58 documentado).
+- Nuevo rol `--border-control` (3:1 sobre surface, SC 1.4.11) para límites de controles de formulario; `--border-strong` sigue para lo decorativo.
+- NO en scope: story Colors con hex hardcodeados (anotado), escala gris genérica, drift del espresso.
 
 ## Tareas
-- [x] T1 — Tests rojos: `DataTable.test` (estructura fill, sin max-height inline, surface fill), `DataTableVirtual.test` (virtual con fill), `DataTableScrollEdges.test.tsx` (clases por scroll/overflow en bounded y unbounded, edge inferior).
-- [x] T2 — `src/hooks/useScrollEdges.ts` + wiring en `DataTable.tsx` (scrollRef siempre en el scroller real; `bounded = maxHeight != null || fillHeight`).
-- [x] T3 — CSS: quitar capas de fondo del wrap; `::after` con `--edge-l/r/b`; `.table-wrap--fill` / `.table-surface--fill`.
-- [x] T4 — Story `DataTable` "Fill height (scroll region)": contenedor 520px, 16 columnas anchas, paginación abajo. Verificar también "Virtualizado" (maxHeight).
-- [x] T5 — Suite + lint + build; Storybook + Playwright: capturas en scroll 0 / medio / final (H y V).
-- [x] T6 — DESIGN.md + CHANGELOG 3.2.0 + bump. Commit local. Reportar stories a revisar.
+- [x] T1 — Tests: extender Contrast/ContrastDark con APCA (muted ≥ 60 en todos los tiers dark; control border ≥ 3:1 surface light+dark); pinear ΔL muted↔subtle ≥ .04.
+- [x] T2 — `_root.css` + `presets/elalba/styles.css`: tokens nuevos/retuneados (light + dark), comentarios actualizados.
+- [x] T3 — `index.css`: controles de formulario → `--border-control`.
+- [x] T4 — Suite + build; capturas Storybook (Colors, formularios, AppShell) 4 combos.
+- [x] T5 — DESIGN.md + CHANGELOG 3.3.0 + bump. Commit local. Reportar.
 
 ## Review
-**Tests:** 1112 unit (nuevos: `DataTableScrollEdges.test.tsx` ×6, `fillHeight` ×3 en DataTable.test, virtual+fill ×1), eslint sin errores (5 warnings preexistentes en las stories), tsc limpio, `npm run build` verde.
-**Chromium (Storybook + Playwright):** story Fill height: `has-more-right`+`has-more-down` al inicio, `has-more-left` al final, sin `max-height` inline, scroller 417px en contenedor 520; al angostar el viewport el ResizeObserver recalcula (left+right). Ancha acotada con toolbar y Virtualizada (maxHeight) también muestran pistas. Recortes 2x light/dark: sombras visibles, intensidad = token `--edge-shadow`.
-**Hallazgo de paso:** el scroll horizontal máximo de la story es 414px (los anchos de columna se compactan), no un bug.
-**Status:** commit local en `feat/datatable-fill-scroll-edges`. PENDIENTE push + PR + release 3.2.0, aguardando OK explícito.
+**Tests:** 1127 unit; 12 aserciones nuevas (APCA, ΔL de roles, tinte de tiers, `--border-control` 3:1) en Contrast/ContrastDark; `DatePickerDisabled.test` re-apuntado a `--border-control` (único test que pineaba el token viejo). Lint limpio, build verde.
+**Visual (Storybook, 4 combos):** borde de input legible en todas; superficie genérica tintada imperceptible como cambio; header de tabla dark más legible (fg-muted L .80).
+**Decisión de diseño:** subtle dark queda Lc 52–58 a propósito (rol recesivo), pineado ≥ 50; muted ≥ 60 en los 4 tiers.
+**Status:** commit local en `feat/palette-retune`. PENDIENTE push + PR + release 3.3.0, aguardando OK explícito.

@@ -150,9 +150,15 @@
      Cards, Modals etc. visually float above the page (the figure/ground that
      is the default look's signature). */
   --bg-canvas:       #ede1cc;
-  --bg-surface:      var(--color-white);
-  --bg-subtle:       var(--color-gray-100);
-  --bg-muted:        var(--color-gray-150);
+  /* v3.3.0 (OKLCH audit): the three insets used to be UNTINTED greys
+     (surface was pure #ffffff, subtle/muted gray-100/150 at chroma ≈ 0) on a
+     warm sand canvas (H 82°) — a 26° hue spread across the neutrals, the one
+     place the kit broke its own "tint every neutral" rule (El Alba fixed its
+     surface in 1.77.0). Same L as before, a whisper of the canvas hue
+     (oklch C 0.004–0.008, H 80). `--color-white` stays #ffffff for text. */
+  --bg-surface:      #fffdfa;
+  --bg-subtle:       #f7f5f1;
+  --bg-muted:        #f0ede8;
   --bg-inverse:      var(--color-primary);
   --bg-inverse-strong: var(--color-primary-900);
 
@@ -163,10 +169,16 @@
      inversion (canvas was lighter than muted), so both fg-muted and fg-subtle
      are re-anchored a step darker to clear 4.5:1 on the new canvas while
      keeping the warm undertone and a perceptible muted↔subtle step.
-     fg-muted #605a54 → ~6.5 surface · ~5.2 canvas · ~6.0 subtle.
-     fg-subtle #655e57 → ~6.0 surface · ~4.7 canvas · ~5.5 subtle. */
-  --fg-muted:        #605a54;
-  --fg-subtle:       #655e57;
+     v3.3.0 (OKLCH audit): the two were the SAME colour (OKLab L .471 vs
+     .486, ΔL .015 — below perception), so the muted/subtle/meta roles were
+     one value with three names. Re-anchored a real step apart (ΔL .06):
+     muted darker (essential secondary text), subtle lighter (decorative
+     meta). Both keep the warm undertone and clear AA + APCA Lc 60 on canvas.
+     fg-muted  #57514c → 7.7 surface · 6.1 canvas (Lc 70).
+     fg-subtle #69625b → 5.9 surface · 4.6 canvas (Lc 63). Pinned in
+     Contrast.test (ΔL ≥ .04, APCA). */
+  --fg-muted:        #57514c;
+  --fg-subtle:       #69625b;
   /* Decorative meta/eco role (secondary cell line, "RUT under name", doc
      echo). Separated from the ESSENTIAL --fg-muted so marking text as
      secondary recedes on its own without consumers hand-tuning a colour.
@@ -209,6 +221,14 @@
 
   --border-default:  var(--color-gray-200);
   --border-strong:   var(--color-gray-300);
+  /* Form-control boundary (v3.3.0). WCAG 1.4.11 asks 3:1 for the edge of an
+     input/select/checkbox against its surroundings; `--border-strong`
+     (~1.5:1 on surface) never met it and was doing that job. Split the role:
+     `--border-control` is the resting border of every form control (3.1:1 on
+     surface, pinned in Contrast.test); `--border-strong` stays the DECORATIVE
+     strong hairline (dividers, dropzones, chips). Hover on a control goes to
+     `--fg-subtle` (darker still — "hover darkens"), focus to `--border-focus`. */
+  --border-control:  #95918f;
   --border-brand:    var(--color-primary);
   /* Focus border identity (v1.29.0 G). Pre-1.29.0 this was `--color-secondary`,
      which produced a focused-element look with an ORANGE border + a BLUE halo
@@ -487,10 +507,16 @@
 
   /* Foreground — warm off-white + light stone greys (AA on surface + canvas). */
   --fg-default:      #ece6df;
-  --fg-muted:        #b3a89d;
+  /* v3.3.0: WCAG 2 over-rates light-on-dark — #b3a89d passed AA at 5.4–7.6:1
+     while APCA put it at Lc 50–55, under the normal-text line (60). Lifted to
+     L 0.80 (Lc 61–66 on every tier, pinned in ContrastDark.test). */
+  --fg-muted:        #c7bcb0;
   /* Clears AA on every dark bg tier INCLUDING muted (hover/pressed inset), where
      the old #9b9084 dropped to ~4.0 as secondary/meta text. */
-  --fg-subtle:       #a89e91;
+  /* v3.3.0: a real step under muted (ΔL .05). Decorative meta role: APCA
+     Lc 52–57 across tiers, deliberately under 60 (recessive by design, ≥ 50
+     pinned). Was #a89e91 (Lc 45–49, and ΔL .03 from muted). */
+  --fg-subtle:       #b7ac9f;
   --fg-meta:         var(--fg-subtle);
   --fg-on-brand:     var(--color-white);
   /* Generic secondary is light sand → DARK text. Pinned to a dark step because
@@ -504,6 +530,7 @@
   /* Borders — low-contrast hairlines on dark. */
   --border-default:  #362f28;
   --border-strong:   #453d35;
+  --border-control:  #76706a;   /* 3.3:1 on the dark surface (SC 1.4.11) */
   --border-brand:    var(--color-primary-400);
   --border-focus:    var(--color-primary-400);
 
