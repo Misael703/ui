@@ -98,11 +98,27 @@
      otherwise cool-tinted system (a pure-white island on a tinted page). Now it
      joins the slate hue per the "tint every neutral" rule. Imperceptible and
      AA-safe (fg-muted 6.17 → 6.06), still strictly the lightest tier.
-     --color-white stays #ffffff for text-on-dark. */
+     --color-white stays #ffffff for text-on-dark.
+
+     v3.4.0 — canvas "F". The v1.29.0 canvas (#dde3ed, OKLab L .914, a slate
+     grey) bought figure/ground by TONE alone: strong enough that the page read
+     as GREY, and every group of content had to be a floating card to look
+     placed. Retune, measured in OKLCH: the canvas lifts to L .95 and points
+     its hue at the brand navy (#e8effb, C .018, H 262 — reads "soft blue", not
+     grey), and the two insets re-step above it so the canvas stays the deepest
+     tier with perceptible steps (ΔL .013–.016; SurfaceTiers pins ≥ .012):
+       --bg-surface #fcfdff  L .994
+       --bg-subtle  #f6f8fc  L .978   (was #f1f4f9)
+       --bg-muted   #f0f4f9  L .965   (was #e7ebf2)
+       --bg-canvas  #e8effb  L .950   (was #dde3ed)
+     Text on canvas improves (fg-muted APCA Lc 68 → 75). The other half of the
+     decision is a CONSUMPTION pattern, not a token: content goes on the page
+     or in `Card variant="inset"`; a floating card is for self-contained
+     objects only, and a table never sits inside one (see DESIGN.md). */
   --bg-surface: #fcfdff;
-  --bg-canvas:  #dde3ed;
-  --bg-subtle:  #f1f4f9;
-  --bg-muted:   #e7ebf2;
+  --bg-canvas:  #e8effb;
+  --bg-subtle:  #f6f8fc;
+  --bg-muted:   #f0f4f9;
 
   /* Base aliases — El Alba anchors primary at the 700 stop and secondary
      at the 600 stop (matches the original @misael703/elalba-ui). */

@@ -152,6 +152,42 @@ checkDark('El Alba preset', elalbaDarkMap);
 
 // v1.77.0: the El Alba surface is tinted off pure white. Guard both properties
 // (tinted AND still the lightest tier) so neither regresses on its own.
+// v3.4.0 — canvas "F": the El Alba page tint reads as brand navy, not grey.
+// The pre-3.4.0 canvas (#dde3ed, OKLab L .914) separated surfaces by tone so
+// strongly it read as a grey page; the retune lifts it to L .95 and points its
+// hue at the brand navy, and re-steps the insets above it so the canvas stays
+// the deepest tier (SurfaceTiers ordering) with perceptible steps.
+function oklabLCH(hex: string): { L: number; C: number; H: number } {
+  const [r, g, b] = rgb(hex).map(lin);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  let H = (Math.atan2(bb, a) * 180) / Math.PI; if (H < 0) H += 360;
+  return { L: 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, C: Math.hypot(a, bb), H };
+}
+describe('El Alba — canvas F (v3.4.0): light, brand-tinted, tiers re-stepped', () => {
+  const canvas = oklabLCH(tier(elalbaMap, '--bg-canvas'));
+  const muted = oklabLCH(tier(elalbaMap, '--bg-muted'));
+  const subtle = oklabLCH(tier(elalbaMap, '--bg-subtle'));
+  const surface = oklabLCH(tier(elalbaMap, '--bg-surface'));
+  const primary = oklabLCH(tier(elalbaMap, '--color-primary-700'));
+  it('canvas is light (OKLab L ≥ 0.94) — no longer a grey page', () => {
+    expect(canvas.L, `canvas L ${canvas.L.toFixed(3)}`).toBeGreaterThanOrEqual(0.94);
+  });
+  it('canvas hue sits within 10° of the brand navy and is visibly tinted (C ≥ 0.012)', () => {
+    const dh = Math.abs(((canvas.H - primary.H + 540) % 360) - 180);
+    expect(dh, `Δhue ${dh.toFixed(1)}°`).toBeLessThanOrEqual(10);
+    expect(canvas.C, `canvas C ${canvas.C.toFixed(4)}`).toBeGreaterThanOrEqual(0.012);
+  });
+  it('every tier step stays perceptible (ΔL ≥ 0.012) after the re-step', () => {
+    for (const [a, b, lbl] of [[surface, subtle, 'surface→subtle'], [subtle, muted, 'subtle→muted'], [muted, canvas, 'muted→canvas']] as const) {
+      expect(a.L - b.L, `${lbl} ΔL ${(a.L - b.L).toFixed(3)}`).toBeGreaterThanOrEqual(0.012);
+    }
+  });
+});
+
 describe('El Alba — tinted surface (v1.77.0)', () => {
   it('surface is a whisper of tint, not pure #ffffff, and still the lightest tier', () => {
     const surface = tier(elalbaMap, '--bg-surface');

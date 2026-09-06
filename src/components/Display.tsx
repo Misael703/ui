@@ -10,9 +10,22 @@ export type CardAccent =
   | 'brand' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'
   | CategoryAccent;
 
+export type CardVariant = 'card' | 'inset';
+
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
   accent?: Extensible<CardAccent>;
+  /**
+   * Surface mode (v3.4.0). `'card'` (default): the floating surface — border,
+   * radius, `--shadow-card` lift — for a SELF-CONTAINED OBJECT that reads as a
+   * unit (a metric, a product, an order summary). `'inset'`: a sunken panel
+   * on `--bg-subtle` with no border and no shadow — for GROUPING (a form
+   * section, related fields, a summary strip). Same header/body/footer API.
+   * Rule of thumb: if it would not make sense to drag it somewhere else on
+   * its own, it is a section, not a card — use `inset`. A DataTable never
+   * goes inside either: it owns its own surface.
+   */
+  variant?: CardVariant;
   /**
    * Render as the provided single child element instead of `<div>` (e.g.
    * a clickable card as `next/link`'s `<a>`). Card classes, ref and handlers
@@ -22,11 +35,12 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
-  { interactive, accent, className, asChild = false, ...rest },
+  { interactive, accent, variant = 'card', className, asChild = false, ...rest },
   ref
 ) {
   const cls = cx(
     'card',
+    variant === 'inset' && 'card--inset',
     interactive && 'card--interactive',
     accent && `card--accent-${accent}`,
     className
