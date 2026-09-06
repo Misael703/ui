@@ -1931,7 +1931,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .number-input__btn:hover { background: var(--color-gray-200); }
 .number-input__field {
-  border: none; outline: none; padding: 0 12px; min-width: 80px;
+  border: none; outline: none; padding: 0 12px; min-width: 64px;
   background: transparent; color: var(--fg-default);
   font-family: var(--font-body); font-size: var(--text-sm);
   text-align: center;
@@ -1939,6 +1939,14 @@ button, input, select, textarea { box-sizing: border-box; }
 .number-input__field::-webkit-inner-spin-button,
 .number-input__field::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .number-input__field { -moz-appearance: textfield; appearance: textfield; }
+/* `size="sm"` (v3.5.0): the counter-in-a-row register. Buttons shrink to the
+   control height so the stepper stays square-ended; the field keeps room for
+   three digits. Numbers validated in the despachos picking table, which had
+   overridden the md stepper app-side for exactly this. */
+.number-input--sm { height: var(--control-h-sm); }
+.number-input--sm .number-input__btn { width: 28px; font-size: var(--text-md); }
+.number-input--sm .number-input__field { min-width: 48px; padding: 0 6px; font-size: var(--text-xs); }
+.number-input--sm .number-input__affix { padding: 0 6px; font-size: var(--text-xs); }
 .number-input__affix {
   display: inline-flex; align-items: center; padding: 0 8px;
   color: var(--fg-muted); font-size: var(--text-sm);
