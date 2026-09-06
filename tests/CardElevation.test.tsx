@@ -79,11 +79,14 @@ describe('Card variant="inset" (v3.4.0)', () => {
     const { container } = render(<Card><CardBody>x</CardBody></Card>);
     expect(container.firstElementChild!.className).toBe('card');
   });
-  it('CSS: inset sits on --bg-subtle with no border and no elevation', () => {
+  it('CSS: inset sits on --bg-subtle with the on-canvas hairline (v3.6.0) and no elevation', () => {
     const m = css.match(/\.card--inset\s*\{([^}]*)\}/);
     expect(m, '.card--inset rule must exist').toBeTruthy();
     expect(m![1]).toMatch(/background:\s*var\(--bg-subtle\)/);
-    expect(m![1]).toMatch(/border-color:\s*transparent/);
+    // 3.4.0 shipped `transparent`; at 1.09:1 against the canvas-F page the panel
+    // was invisible except for its corners (measured by despachos) — the token's
+    // floors are pinned in ContrastDark.test.
+    expect(m![1]).toMatch(/border-color:\s*var\(--border-on-canvas\)/);
     expect(m![1]).toMatch(/box-shadow:\s*none/);
   });
   it('CSS: header/footer dividers inside an inset use the surface tier below them, not a second inset', () => {

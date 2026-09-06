@@ -587,17 +587,24 @@ button, input, select, textarea { box-sizing: border-box; }
    not a second floating surface — drop its lift (keep border/radius). */
 .card .card { box-shadow: none; }
 /* `variant="inset"` (v3.4.0): the sunken panel — grouping WITHOUT floating.
-   Sits on the subtle tier with no border and no lift, so a section reads as
-   part of the page rather than as an object placed on it. The footer drops
-   its own subtle fill (it would fuse with the panel) and keeps the divider;
-   header keeps its divider. Nested: an inset inside a card stays inset (the
-   `.card .card` rule already removes lift; border is transparent here). */
+   Sits on the subtle tier with no lift, so a section reads as part of the
+   page rather than as an object placed on it.
+   v3.6.0: it gets a HAIRLINE. With no border and no shadow, the inset's only
+   figure/ground signal on the canvas-F page was its fill — 1.09:1, ΔL .028
+   (measured by despachos): the rounded corners were the only tell. The edge
+   uses `--border-on-canvas` (brand-tinted, tuned for the canvas; the
+   surface-tuned `--border-default` is 1.08:1 there). Header and footer
+   dividers use the SAME hairline: `--border-default` on `--bg-subtle` read
+   1.18:1, and one tint per panel keeps the inset reading as one object. The
+   footer still drops its subtle fill (it would fuse with the panel). Nested:
+   an inset inside a card keeps the hairline and no lift (`.card .card`). */
 .card--inset {
   background: var(--bg-subtle);
-  border-color: transparent;
+  border-color: var(--border-on-canvas);
   box-shadow: none;
 }
-.card--inset > .card__footer { background: transparent; }
+.card--inset > .card__header { border-bottom-color: var(--border-on-canvas); }
+.card--inset > .card__footer { background: transparent; border-top-color: var(--border-on-canvas); }
 .card__body { padding: 16px 20px; }
 .card__header { padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
 .card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }

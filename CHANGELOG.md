@@ -5,6 +5,40 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] — 2026-09-06
+
+**Minor. `--border-on-canvas`: el inset vuelve a verse.** Pedido
+consumer-driven: despachos migró a 3.5.0, adoptó `Card variant="inset"`
+(Cliente / Entrega / Historial del detalle de orden, buscador de nueva orden)
+y midió en El Alba light que el panel casi no se distingue del canvas F:
+inset `#f6f8fc` sobre canvas `#e8effb` = ΔL +.028, **1.09:1**; sin borde ni
+sombra, lo único que lo delata son las esquinas. `--border-default` (`#e3e6ec`)
+sobre el canvas da 1.08:1 — un hairline con ese token es invisible ahí (está
+afinado para vivir sobre `--bg-surface`). Causa: los tiers del canvas F se
+re-escalonaron con pasos de .013–.016, y `SurfaceTiers` pinea ΔL ≥ .012 como
+umbral de ORDEN, no de legibilidad de un panel plano.
+
+### Added
+- **`--border-on-canvas`**: hairline para cantos que viven sobre `--bg-canvas`.
+  DERIVADO: `color-mix(in oklab, var(--color-primary) 18%, var(--bg-canvas))` en
+  light y 30% en dark, definido en el base (light + dark); cada preset lo
+  resuelve contra su propio brand ink y canvas, sin override (El Alba: navy
+  sobre `#e8effb` → `#bccce7`, 1.41:1 vs canvas, 1.53:1 vs inset). Dark mezcla
+  más porque los tiers son aditivos: el inset es más claro que el canvas y el
+  18% caía justo en su luminancia (1.02:1). Pinneado en los 4 mapas
+  (`ContrastDark.test`): ≥ 1.3:1 vs canvas, ≥ 1.2:1 vs inset.
+
+### Changed
+- **`.card--inset`** pasa de `border-color: transparent` a
+  `var(--border-on-canvas)`. Los divisores de `.card__header` / `.card__footer`
+  dentro del inset usan el mismo token (`--border-default` sobre `--bg-subtle`
+  era 1.18:1; un solo tinte por panel).
+
+### Notes
+- Consumidores: nada que cambiar, se arregla al bumpear. Un bloque plano
+  propio sobre la página que quiera canto usa `border: 1px solid
+  var(--border-on-canvas)`.
+
 ## [3.5.0] — 2026-09-06
 
 **Minor. `NumberInput size`.** El stepper tenía un solo tamaño
