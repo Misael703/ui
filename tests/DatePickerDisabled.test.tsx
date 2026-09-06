@@ -11,7 +11,7 @@ const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8')
 describe('DatePicker field consistency (matches .input/.select)', () => {
   it('the wrapper IS the field — same border + radius tokens as .input', () => {
     const wrap = css.match(/\.datepicker\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(wrap).toMatch(/border:\s*1px solid var\(--border-strong\)/);
+    expect(wrap).toMatch(/border:\s*1px solid var\(--border-control\)/);
     expect(wrap).toMatch(/border-radius:\s*var\(--radius-md\)/);
     expect(wrap).toMatch(/min-height:\s*var\(--field-min-h/);
   });

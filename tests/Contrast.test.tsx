@@ -150,6 +150,85 @@ run('default palette', baseMap);
 run('El Alba preset', elalbaMap);
 
 /**
+ * Palette retune (v3.3.0) — the OKLCH audit findings, pinned:
+ *  - fg-muted / fg-subtle were the SAME colour (ΔL 0.015 generic, 0.007 El
+ *    Alba): two tokens, one value, a dead role. Pinned ≥ 0.04 apart.
+ *  - APCA alongside WCAG 2: WCAG's ratio is fine in light, but pinning Lc too
+ *    keeps both palettes honest (Lc 60 = normal text).
+ *  - Generic light insets were untinted greys on a warm sand canvas (surface
+ *    was pure #ffffff); every neutral now carries the canvas hue.
+ *  - `--border-control`: form-control boundaries need 3:1 (SC 1.4.11);
+ *    `--border-strong` (~1.5:1) never did. New role, pinned.
+ */
+const apcaY = (hex: string) => {
+  const [r, g, b] = rgb(hex).map((c) => (c / 255) ** 2.4);
+  return 0.2126729 * r + 0.7151522 * g + 0.072175 * b;
+};
+// APCA-W3 0.1.9 (SAPC-4g). Signed Lc; use |Lc| against thresholds.
+function apca(txt: string, bg: string): number {
+  const clamp = (Y: number) => (Y > 0.022 ? Y : Y + (0.022 - Y) ** 1.414);
+  const Yt = clamp(apcaY(txt)), Yb = clamp(apcaY(bg));
+  if (Math.abs(Yb - Yt) < 0.0005) return 0;
+  if (Yb > Yt) { const S = (Yb ** 0.56 - Yt ** 0.57) * 1.14; return (S < 0.1 ? 0 : S - 0.027) * 100; }
+  const S = (Yb ** 0.65 - Yt ** 0.62) * 1.14; return (S > -0.1 ? 0 : S + 0.027) * 100;
+}
+function oklab(hex: string): { L: number; C: number } {
+  const [r, g, b] = rgb(hex).map(lin);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  return { L: 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, C: Math.hypot(a, bb) };
+}
+
+describe('palette retune (v3.3.0) — light', () => {
+  for (const [name, map] of [['default palette', baseMap], ['El Alba preset', elalbaMap]] as const) {
+    const T = (n: string) => tok(map, n);
+    it(`${name}: fg-muted and fg-subtle are distinct roles (OKLab ΔL ≥ 0.04, subtle lighter)`, () => {
+      const d = oklab(T('--fg-subtle')).L - oklab(T('--fg-muted')).L;
+      expect(d, `ΔL = ${d.toFixed(3)}`).toBeGreaterThanOrEqual(0.04);
+    });
+    it(`${name}: fg-muted and fg-subtle read as normal text on canvas (APCA |Lc| ≥ 60)`, () => {
+      for (const fg of ['--fg-muted', '--fg-subtle']) {
+        const lc = Math.abs(apca(T(fg), T('--bg-canvas')));
+        expect(lc, `${fg} on canvas Lc ${lc.toFixed(0)}`).toBeGreaterThanOrEqual(60);
+      }
+    });
+    it(`${name}: --border-control is defined and clears 3:1 on surface (SC 1.4.11)`, () => {
+      const c = T('--border-control');
+      expect(c, '--border-control missing').toMatch(/^#[0-9a-f]{6}$/i);
+      const r = contrast(c, T('--bg-surface'));
+      expect(r, `border-control on surface ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    });
+  }
+  // The generic grey ramp was Tailwind's stone scale renumbered (kit 500 =
+  // stone-400, kit 600 = stone-500 …) with two extra light stops: six stops
+  // between L .98 and .80, then a .163 hole from 500 to 600 — no grey existed
+  // where secondary text lives, which is why fg-muted had to be hand-pinned.
+  // Pinned: monotonic, and no step wider than 0.14 L (El Alba's widest is .13).
+  for (const [name, map] of [['default palette', baseMap], ['El Alba preset', elalbaMap]] as const) {
+    it(`${name}: the grey ramp is monotonic with no hole wider than 0.14 L`, () => {
+      const stops = ['50', '100', '150', '200', '300', '400', '500', '600', '700', '800', '900'];
+      const Ls = stops.map((st) => oklab(tok(map, `--color-gray-${st}`)).L);
+      for (let i = 1; i < Ls.length; i++) {
+        const d = Ls[i - 1] - Ls[i];
+        expect(d, `gray-${stops[i - 1]}→${stops[i]} ΔL ${d.toFixed(3)}`).toBeGreaterThan(0);
+        expect(d, `gray-${stops[i - 1]}→${stops[i]} ΔL ${d.toFixed(3)} (hole)`).toBeLessThanOrEqual(0.14);
+      }
+    });
+  }
+  it('default palette: every light tier is tinted toward the canvas hue (no untinted grey, no pure #fff)', () => {
+    for (const t of ['--bg-surface', '--bg-subtle', '--bg-muted']) {
+      const hex = tok(baseMap, t);
+      expect(hex.toLowerCase(), `${t} is pure white`).not.toBe('#ffffff');
+      const { C } = oklab(hex);
+      expect(C, `${t} ${hex} chroma ${C.toFixed(4)}`).toBeGreaterThanOrEqual(0.003);
+    }
+  });
+});
+
+/**
  * Band-aware Avatar (v1.21.0). On an inverse/brand surface the avatar chip
  * is `color-mix(--fg-on-brand 16%, transparent)` over the brand color, with
  * `--fg-on-brand` text. Compose the translucent chip over the brand surface

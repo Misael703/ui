@@ -46,15 +46,29 @@ interface SwatchProps {
 
 /* The hex + token name sit BELOW the colour chip (on the page surface),
    never overlaid on the swatch itself — overlaying white/dark text on an
-   arbitrary token colour can't satisfy WCAG contrast for mid-tones. */
+   arbitrary token colour can't satisfy WCAG contrast for mid-tones.
+
+   The hex is MEASURED from the computed style, never typed. Two timing traps
+   (fixed 2026-09-05 — the label used to show the generic value under El Alba
+   swatches): (1) the preset <style> and `data-theme` are applied by the
+   Storybook decorators' effects, which are PARENT effects and run after this
+   child effect — so measure on the next frame, not synchronously; (2) a
+   toolbar switch re-renders but changes nothing this effect depends on — so
+   re-measure whenever the root's `data-theme` or the head's stylesheet set
+   changes (MutationObserver), which is exactly what the decorators mutate. */
 function Swatch({ token, hex }: SwatchProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [resolved, setResolved] = React.useState(hex ?? '');
   React.useEffect(() => {
-    if (!hex && ref.current) {
-      const v = getComputedStyle(ref.current).backgroundColor;
-      setResolved(rgbToHex(v));
-    }
+    if (hex) return undefined;
+    const measure = () => {
+      if (ref.current) setResolved(rgbToHex(getComputedStyle(ref.current).backgroundColor));
+    };
+    const raf = requestAnimationFrame(measure);
+    const mo = new MutationObserver(measure);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    mo.observe(document.head, { childList: true });
+    return () => { cancelAnimationFrame(raf); mo.disconnect(); };
   }, [hex]);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>

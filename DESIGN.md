@@ -113,6 +113,23 @@ essential `--fg-muted` so marking text as secondary recedes on its own.
 `--border-focus` unified on `--color-primary` (v1.29.0) so a focused element's
 border and halo share one brand identity.
 
+**Palette retune (v3.3.0, OKLCH audit).** Every token was converted to OKLCH
+and measured with WCAG 2 *and* APCA. Four corrections, all pinned in
+`Contrast.test` / `ContrastDark.test`: (1) the generic light insets were
+untinted greys (surface pure `#ffffff`) on a warm sand canvas — now a whisper
+of the canvas hue at the same L, so no neutral is off-hue; (2) `--fg-muted` and
+`--fg-subtle` were the same colour (ΔL .015 generic, .007 El Alba) — re-anchored
+≥ .04 apart so muted (essential secondary text) and subtle/meta (decorative)
+are real roles; (3) in dark, WCAG 2 over-rates light-on-dark: muted passed AA
+at 5–8:1 but sat at APCA Lc 50–58, under the normal-text line — lifted to
+L 0.80 (Lc ≥ 60 on every tier), subtle to L 0.75 (Lc ≥ 50, recessive by
+design); (4) **`--border-control`**, the resting border of every form control
+(input, select, textarea, checkbox, pickers, combobox, tag/phone inputs, qty):
+WCAG 1.4.11 asks 3:1 for a control's boundary and `--border-strong` (~1.5:1)
+never met it. `--border-strong` remains the decorative strong hairline. Rule:
+a contrast fix moves **L only** (chroma has no effect on contrast); measure
+with APCA alongside WCAG, especially on dark.
+
 **Contrast floor (v1.10.0).** `--fg-muted` and `--fg-subtle` are explicit,
 WCAG-AA-clearing values (not raw gray stops): the generic gray ramp shipped
 below 4.5:1 as body text on the kit's own surfaces (table headers on

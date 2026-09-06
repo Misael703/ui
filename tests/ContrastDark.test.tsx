@@ -172,6 +172,56 @@ function run(name: string, map: Record<string, string>) {
 run('default palette', baseDark);
 run('El Alba preset', elalbaDark);
 
+/**
+ * Palette retune (v3.3.0). WCAG 2 over-rates light-on-dark: fg-muted passed
+ * AA at 5–8:1 while APCA put it at Lc 50–58, under the normal-text line (60).
+ * Pinned with APCA here: muted (essential secondary text) ≥ 60 on EVERY dark
+ * tier; subtle (decorative meta, meant to recede) ≥ 50 — the documented
+ * trade-off of having a recessive tier at all. Plus the role separation and
+ * the 3:1 control border, same as light.
+ */
+const apcaY = (hex: string) => {
+  const [r, g, b] = rgb(hex).map((c) => (c / 255) ** 2.4);
+  return 0.2126729 * r + 0.7151522 * g + 0.072175 * b;
+};
+function apca(txt: string, bg: string): number {
+  const clamp = (Y: number) => (Y > 0.022 ? Y : Y + (0.022 - Y) ** 1.414);
+  const Yt = clamp(apcaY(txt)), Yb = clamp(apcaY(bg));
+  if (Math.abs(Yb - Yt) < 0.0005) return 0;
+  if (Yb > Yt) { const S = (Yb ** 0.56 - Yt ** 0.57) * 1.14; return (S < 0.1 ? 0 : S - 0.027) * 100; }
+  const S = (Yb ** 0.65 - Yt ** 0.62) * 1.14; return (S > -0.1 ? 0 : S + 0.027) * 100;
+}
+const oklabL = (hex: string) => linToOklab(...(rgb(hex).map(toLin) as [number, number, number]))[0];
+
+describe('palette retune (v3.3.0) — dark', () => {
+  for (const [name, map] of [['default palette', baseDark], ['El Alba preset', elalbaDark]] as const) {
+    const C = (n: string) => evalColor(map, `var(${n})`);
+    const TIERS = ['--bg-canvas', '--bg-surface', '--bg-subtle', '--bg-muted'];
+    it(`${name}: fg-muted is normal-text legible on every tier (APCA |Lc| ≥ 60)`, () => {
+      for (const bg of TIERS) {
+        const lc = Math.abs(apca(C('--fg-muted'), C(bg)));
+        expect(lc, `fg-muted on ${bg} Lc ${lc.toFixed(0)}`).toBeGreaterThanOrEqual(60);
+      }
+    });
+    it(`${name}: fg-subtle (decorative meta) keeps APCA |Lc| ≥ 50 on every tier`, () => {
+      for (const bg of TIERS) {
+        const lc = Math.abs(apca(C('--fg-subtle'), C(bg)));
+        expect(lc, `fg-subtle on ${bg} Lc ${lc.toFixed(0)}`).toBeGreaterThanOrEqual(50);
+      }
+    });
+    it(`${name}: fg-muted and fg-subtle are distinct roles (OKLab ΔL ≥ 0.04, muted lighter on dark)`, () => {
+      const d = oklabL(C('--fg-muted')) - oklabL(C('--fg-subtle'));
+      expect(d, `ΔL = ${d.toFixed(3)}`).toBeGreaterThanOrEqual(0.04);
+    });
+    it(`${name}: --border-control clears 3:1 on the dark surface (SC 1.4.11)`, () => {
+      const c = C('--border-control');
+      expect(c, '--border-control missing').toMatch(/^#[0-9a-f]{6}$/i);
+      const r = contrast(c, C('--bg-surface'));
+      expect(r, `border-control on surface ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    });
+  }
+});
+
 // Native widgets (scrollbars, form controls, the pre-CSS canvas) follow the theme
 // via `color-scheme` — without it the browser paints a bright light scrollbar on
 // the dark UI.

@@ -129,13 +129,19 @@
      canvas (#eaeef5) dropped `fg-subtle`/`fg-meta` on canvas to 4.44:1
      (just under AA); this clears it (~4.58 canvas / ~5.33 surface / ~4.77
      subtle). Net: captions/meta read a hair stronger everywhere. */
-  --fg-muted:  var(--color-gray-600);
+  /* v3.3.0 (OKLCH audit): gray-600 (#5b6173, L .494) and --fg-subtle (#5e6373,
+     L .501) were the SAME colour — ΔL .007. muted steps DOWN to L .46 so the
+     two roles exist (ΔL .04; muted = essential secondary text, subtle = meta).
+     5.5 canvas / 7.0 surface, APCA Lc 68 on canvas. Pinned in Contrast.test. */
+  --fg-muted:  #515869;
   /* v1.29.0: with the new darker canvas (#dde3ed, see surface tier block above)
      the pre-1.29.0 `#666b78` dropped to 4.13:1 on canvas (just under AA). One
      slate step darker clears it everywhere — pinned in Contrast.test.
      (~4.61 canvas / ~5.39 subtle / ~5.83 surface.) Still a hair lighter than
      `--fg-muted` (gray-600 #5b6173), preserving the muted/subtle relationship. */
   --fg-subtle: #5e6373;
+  /* Form-control boundary (v3.3.0, see _root.css): 3.1:1 on the surface. */
+  --border-control: #8d929f;
 
   /* Button primary↔secondary swap (El Alba only, buttons only — these
      tokens are read solely by .btn--primary/.btn--secondary; links, focus
@@ -195,12 +201,16 @@
   /* Cool off-white + slate foregrounds. fg-subtle clears AA on every dark tier
      including muted (hover/pressed), where #8e97ab dropped to ~4.3 as meta text. */
   --fg-default: #e7ebf4;
-  --fg-muted:   #a6afc2;
-  --fg-subtle:  #99a2b7;
+  /* v3.3.0 (APCA): #a6afc2 passed WCAG AA but sat at Lc 53–58; lifted to
+     L 0.80 (Lc 61–66 on every tier). subtle to L 0.75 (Lc 53–58, recessive
+     meta role by design, ≥ 50 pinned), a real step under muted (ΔL .05). */
+  --fg-muted:   #b5bed1;
+  --fg-subtle:  #a5aec3;
 
   /* Cool hairlines. */
   --border-default: #2a3450;
   --border-strong:  #3a466a;
+  --border-control: #6a7184;   /* 3.5:1 on the dark surface (SC 1.4.11) */
 
   /* El Alba's secondary is the saturated brand orange → white text on it. The
      base dark points --fg-on-secondary at the dark primary (correct only for the
