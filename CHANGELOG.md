@@ -47,10 +47,22 @@ control).
   re-medía. Ahora mide en el siguiente frame y re-mide con `MutationObserver`
   sobre `data-theme` y el `<head>`.
 
+- **Escala gris genérica re-espaciada.** Era la escala stone de Tailwind
+  renumerada (500 = stone-400, 600 = stone-500 …) con dos stops claros
+  insertados: seis stops entre L .98 y .80 y un hueco de .16 entre 500 y 600,
+  justo donde vive el texto secundario. Ahora pasos parejos de L en OKLCH
+  (.98 → .29), tono 65° constante, croma subiendo apenas hacia el medio.
+  Stops que se mueven de forma visible: 600 `#78716c` → `#88827d` (deja de
+  ser texto AA sobre blanco: 3.8:1, solo texto grande/UI), 700 `#57534e` →
+  `#6a6560` (5.8:1), 800 `#44403c` → `#4e4945`, 900 `#292524` → `#2e2b28`.
+  `--color-ink` no cambia. Los tokens semánticos de texto son hex explícitos,
+  así que el texto del kit no se mueve; los usos internos de los stops
+  (badge neutro, code block, dots de estado) siguen AA. Pinneado: rampa
+  monotónica sin paso > .14 L (Contrast.test).
+
 ### Notes
-- Fuera de scope, anotado: la escala gris genérica tiene un hueco 500→600
-  (ΔL .16, heredado de la escala stone de Tailwind renumerada); el espresso
-  pierde croma en la base (-800) con drift de 14°.
+- Fuera de scope, anotado: el espresso pierde croma en la base (-800) con
+  drift de 14°.
 
 ## [3.2.0] — 2026-09-04
 

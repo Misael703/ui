@@ -202,6 +202,22 @@ describe('palette retune (v3.3.0) — light', () => {
       expect(r, `border-control on surface ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
     });
   }
+  // The generic grey ramp was Tailwind's stone scale renumbered (kit 500 =
+  // stone-400, kit 600 = stone-500 …) with two extra light stops: six stops
+  // between L .98 and .80, then a .163 hole from 500 to 600 — no grey existed
+  // where secondary text lives, which is why fg-muted had to be hand-pinned.
+  // Pinned: monotonic, and no step wider than 0.14 L (El Alba's widest is .13).
+  for (const [name, map] of [['default palette', baseMap], ['El Alba preset', elalbaMap]] as const) {
+    it(`${name}: the grey ramp is monotonic with no hole wider than 0.14 L`, () => {
+      const stops = ['50', '100', '150', '200', '300', '400', '500', '600', '700', '800', '900'];
+      const Ls = stops.map((st) => oklab(tok(map, `--color-gray-${st}`)).L);
+      for (let i = 1; i < Ls.length; i++) {
+        const d = Ls[i - 1] - Ls[i];
+        expect(d, `gray-${stops[i - 1]}→${stops[i]} ΔL ${d.toFixed(3)}`).toBeGreaterThan(0);
+        expect(d, `gray-${stops[i - 1]}→${stops[i]} ΔL ${d.toFixed(3)} (hole)`).toBeLessThanOrEqual(0.14);
+      }
+    });
+  }
   it('default palette: every light tier is tinted toward the canvas hue (no untinted grey, no pure #fff)', () => {
     for (const t of ['--bg-surface', '--bg-subtle', '--bg-muted']) {
       const hex = tok(baseMap, t);
