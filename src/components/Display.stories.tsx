@@ -25,7 +25,9 @@ export const CardBasica: StoryObj = {
 export const CardInset: StoryObj = {
   name: 'Card · inset vs card (cuándo cada una)',
   render: () => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, maxWidth: 760 }}>
+    // `alignItems: 'start'`: a grid stretches both cards to the tallest one and
+    // the floating card would show empty surface under its footer.
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, maxWidth: 760, alignItems: 'start' }}>
       <Card variant="inset">
         <CardHeader>Cliente</CardHeader>
         <CardBody>
