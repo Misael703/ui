@@ -5,6 +5,22 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1] — 2026-09-06
+
+### Fixed
+- **DatePicker: el toggle del calendario sobresalía del campo en celdas
+  angostas.** El input tenía `min-width: min(108px, 100%)` y el toggle 40px
+  fijos: en una celda de 138px (despachos, "Fecha de entrega") 108 + 40 supera
+  los 136 internos y el botón salía 11px por fuera del borde. Ahora el input
+  declara su preferencia como base flex (`flex: 1 1 108px; min-width: 0`): un
+  campo content-sized sigue abrazando el ícono, uno ancho sigue llenando, y
+  uno angosto encoge el input en vez de desbordar. Verificado en Chromium a
+  138, 110 y 320px: 0px de overflow, toggle siempre de 40px.
+- **MonthPicker / YearPicker: misma causa, otro síntoma.** El input tenía
+  `min-width: min(144px, 100%)` y el toggle no tenía `flex-shrink: 0`, así que en
+  una celda angosta el que se aplastaba era el ícono (33px a 160px, 26px a
+  130px). Ahora el input lleva base flex de 144px y el toggle no encoge.
+
 ## [3.6.0] — 2026-09-06
 
 **Minor. `--border-on-canvas`: el inset vuelve a verse.** Pedido

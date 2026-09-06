@@ -25,6 +25,23 @@ describe('DatePicker field consistency (matches .input/.select)', () => {
     expect(toggle).not.toMatch(/background:\s*var\(--bg-subtle\)/);
   });
 
+  // v3.6.1: in a narrow cell (despachos "Fecha de entrega", 138px) the old
+  // `min-width: min(108px, 100%)` floor + the fixed 40px toggle summed past the
+  // field's inner width and the toggle overflowed the border by 11px. A flex
+  // BASIS keeps the 108px preference (content-sized fields still hug the icon)
+  // but lets the input shrink when the cell cannot fit both.
+  it('the input can shrink below its 108px preference so the fixed toggle never overflows', () => {
+    const input = css.match(/\.datepicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(input).toMatch(/flex:\s*1 1 108px/);
+    expect(input).toMatch(/min-width:\s*0/);
+    expect(input).not.toMatch(/min-width:\s*min\(/);
+    // Same shape in the MonthPicker field (fixed --control-h-md toggle).
+    const gridInput = css.match(/\.gridpicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(gridInput).toMatch(/flex:\s*1 1 144px/);
+    expect(gridInput).toMatch(/min-width:\s*0/);
+    const gridToggle = css.match(/\.gridpicker__toggle\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(gridToggle).toMatch(/flex-shrink:\s*0/);
+  });
   it('the input is borderless/transparent inside the field', () => {
     const input = css.match(/\.datepicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(input).toMatch(/border:\s*none/);
@@ -62,12 +79,14 @@ describe('DatePicker field consistency (matches .input/.select)', () => {
   // left a gap); `flex: 1` still fills a wider cell.
   it('the input min-width floors are tight to the format, not generous', () => {
     const input = css.match(/\.datepicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(input).toMatch(/min-width:\s*min\(108px,\s*100%\)/);
-    expect(input).not.toMatch(/min-width:\s*132px/);
+    // v3.6.1: the 108px preference is a flex BASIS now (see the shrink test
+    // above) — the floor itself is 0 so the fixed toggle can never overflow.
+    expect(input).toMatch(/flex:\s*1 1 108px/);
+    expect(input).not.toMatch(/108px[^;]*;[^}]*min-width:\s*1\d\dpx/);
 
     const gridInput = css.match(/\.gridpicker__input\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(gridInput).toMatch(/min-width:\s*min\(144px,\s*100%\)/);
-    expect(gridInput).not.toMatch(/min-width:\s*160px/);
+    expect(gridInput).toMatch(/flex:\s*1 1 144px/);
+    expect(gridInput).toMatch(/min-width:\s*0/);
 
     const tpTrigger = css.match(/\.timepicker__trigger\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(tpTrigger).toMatch(/min-width:\s*min\(88px,\s*100%\)/);
