@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Card, CardHeader, CardBody, CardFooter, Badge, Alert, Skeleton, Spinner, Chip, ChipGroup, ProductCard } from './Display';
 import { Button } from './Button';
+import { DataTable } from './DataTable';
 
 export default { title: 'Data Display/Card & Badge', tags: ['autodocs'] } as Meta;
 
@@ -12,6 +13,100 @@ export const CardBasica: StoryObj = {
       <CardBody>Cliente: Northwind Builders. 14 ítems.</CardBody>
       <CardFooter>$1.245.000</CardFooter>
     </Card>
+  ),
+};
+
+/**
+ * **`variant="inset"`** (v3.4.0) — el panel hundido: agrupa sin flotar. Al lado,
+ * la card por default (flota: borde + sombra) para comparar. Regla: card =
+ * objeto autocontenido (métrica, producto, resumen de orden); inset = sección
+ * o grupo de campos. Una tabla nunca va dentro de ninguna de las dos.
+ */
+export const CardInset: StoryObj = {
+  name: 'Card · inset vs card (cuándo cada una)',
+  render: () => (
+    // `alignItems: 'start'`: a grid stretches both cards to the tallest one and
+    // the floating card would show empty surface under its footer.
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, maxWidth: 760, alignItems: 'start' }}>
+      <Card variant="inset">
+        <CardHeader>Cliente</CardHeader>
+        <CardBody>
+          <div style={{ display: 'grid', gap: 4, fontSize: 'var(--text-sm)' }}>
+            <div>Northwind Builders</div>
+            <div style={{ color: 'var(--fg-muted)' }}>76.543.210-K · Av. Las Torres 1200, Colina</div>
+          </div>
+        </CardBody>
+        <CardFooter>Sección de un formulario: agrupa, no flota.</CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>Pedido #1042</CardHeader>
+        <CardBody>14 ítems · entrega mañana AM</CardBody>
+        <CardFooter>$1.245.000</CardFooter>
+      </Card>
+    </div>
+  ),
+};
+
+/**
+ * **Página sin cards** — el patrón de consumo recomendado (2026-09-06). El
+ * contenido va directo sobre el canvas: la tabla se dibuja sola (tiene borde,
+ * radio y elevación propios), lo agrupado va en un `inset`, y la card flotante
+ * queda solo para el objeto que se lee como unidad (aquí, el resumen). Antes
+ * cada bloque era una card y el canvas tenía que ser muy gris para que
+ * "flotaran"; con canvas F (3.4.0) y este patrón, la página respira.
+ */
+export const PaginaSinCards: StoryObj = {
+  name: 'Página sin cards (patrón recomendado)',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700 }}>Orden #1042</div>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg-muted)' }}>Creada hoy 09:26 · Nairely Perez</div>
+        </div>
+        <Button>Despachar</Button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gap: 16 }}>
+          <Card variant="inset">
+            <CardHeader>Cliente y entrega</CardHeader>
+            <CardBody>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 'var(--text-sm)' }}>
+                <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
+                <div><div style={{ color: 'var(--fg-muted)' }}>Comuna</div><div>Colina · Local</div></div>
+                <div><div style={{ color: 'var(--fg-muted)' }}>Ventana</div><div>Mañana AM</div></div>
+                <div><div style={{ color: 'var(--fg-muted)' }}>Chofer</div><div>Por asignar</div></div>
+              </div>
+            </CardBody>
+          </Card>
+          <DataTable
+            ariaLabel="Ítems"
+            rows={[
+              { id: '1', name: 'Cemento 25 kg', qty: 40, picked: 40 },
+              { id: '2', name: 'Fierro 12 mm × 6 m', qty: 30, picked: 12 },
+              { id: '3', name: 'Malla acma', qty: 6, picked: 0 },
+            ]}
+            rowKey={(r) => r.id}
+            columns={[
+              { key: 'name', header: 'Producto' },
+              { key: 'qty', header: 'Pedido', numeric: true },
+              { key: 'picked', header: 'Armado', numeric: true },
+            ]}
+          />
+        </div>
+        <Card>
+          <CardHeader>Resumen</CardHeader>
+          <CardBody>
+            <div style={{ display: 'grid', gap: 6, fontSize: 'var(--text-sm)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Ítems</span><strong>3</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Armado</span><strong>52 / 76</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Estado</span><Badge variant="warning">Pendiente</Badge></div>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    </div>
   ),
 };
 

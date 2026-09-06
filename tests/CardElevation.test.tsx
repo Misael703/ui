@@ -1,4 +1,7 @@
+import * as React from 'react';
 import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/react';
+import { Card, CardBody } from '../src/components/Display';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -54,5 +57,38 @@ describe('Card accent (CSS) — tinted surface + hue border, not a side rail', (
 
   it('the special accent-hover box-shadow block is gone (base :hover just works)', () => {
     expect(css).not.toMatch(/\.card--interactive\.card--accent-[a-z0-9-]+:hover/);
+  });
+});
+
+/**
+ * `variant="inset"` (v3.4.0). The kit only had ONE way to group content — a
+ * floating Card (border + shadow + surface). Consumers who wanted a grouped
+ * section that does NOT float invented a `card-flat` class; that escape hatch
+ * is the signal the vocabulary was missing. Inset = a sunken panel on
+ * `--bg-subtle`, no border, no shadow, same header/body/footer API. It is the
+ * "E" pattern: cards only for self-contained objects, sections go inset.
+ */
+describe('Card variant="inset" (v3.4.0)', () => {
+  it('renders the modifier class and keeps the base card class (same API)', () => {
+    const { container } = render(<Card variant="inset"><CardBody>x</CardBody></Card>);
+    const el = container.firstElementChild!;
+    expect(el).toHaveClass('card');
+    expect(el).toHaveClass('card--inset');
+  });
+  it('default variant adds no modifier (byte-identical to pre-3.4.0)', () => {
+    const { container } = render(<Card><CardBody>x</CardBody></Card>);
+    expect(container.firstElementChild!.className).toBe('card');
+  });
+  it('CSS: inset sits on --bg-subtle with no border and no elevation', () => {
+    const m = css.match(/\.card--inset\s*\{([^}]*)\}/);
+    expect(m, '.card--inset rule must exist').toBeTruthy();
+    expect(m![1]).toMatch(/background:\s*var\(--bg-subtle\)/);
+    expect(m![1]).toMatch(/border-color:\s*transparent/);
+    expect(m![1]).toMatch(/box-shadow:\s*none/);
+  });
+  it('CSS: header/footer dividers inside an inset use the surface tier below them, not a second inset', () => {
+    // A footer on --bg-subtle inside an inset on --bg-subtle would vanish; the
+    // inset footer drops its fill and keeps only the divider line.
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer\s*\{[^}]*background:\s*transparent/);
   });
 });

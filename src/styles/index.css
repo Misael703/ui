@@ -586,6 +586,18 @@ button, input, select, textarea { box-sizing: border-box; }
 /* No double elevation: a card nested inside another card is a sub-panel,
    not a second floating surface — drop its lift (keep border/radius). */
 .card .card { box-shadow: none; }
+/* `variant="inset"` (v3.4.0): the sunken panel — grouping WITHOUT floating.
+   Sits on the subtle tier with no border and no lift, so a section reads as
+   part of the page rather than as an object placed on it. The footer drops
+   its own subtle fill (it would fuse with the panel) and keeps the divider;
+   header keeps its divider. Nested: an inset inside a card stays inset (the
+   `.card .card` rule already removes lift; border is transparent here). */
+.card--inset {
+  background: var(--bg-subtle);
+  border-color: transparent;
+  box-shadow: none;
+}
+.card--inset > .card__footer { background: transparent; }
 .card__body { padding: 16px 20px; }
 .card__header { padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
 .card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }

@@ -57,14 +57,18 @@ Two palettes ship. The generic default and the El Alba preset
 
 **El Alba preset:** Pantone 287 C blue (`--color-primary-700` `#002f87`) +
 Pantone 165 C orange (`--color-secondary-600` `#ff671d`), cool-slate canvas
-(`--bg-canvas` `#dde3ed`) on white surfaces, cool slate-tinted neutrals. Tier
+(`--bg-canvas` `#e8effb`) on white surfaces, cool slate-tinted neutrals. Tier
 scale (semantics preserved, `subtle`→`muted` stays the hover progression):
-**canvas `#dde3ed` is the deepest tier (the page)**, with subtle `#f1f4f9` and
-muted `#e7ebf2` as lighter insets on a surface `#fff`. The cool canvas gives
-white Cards/DataTables figure/ground without the consumer touching CSS (pre-1.16
-the El Alba canvas was pure white = no contrast; pre-1.29.0 it was `#eaeef5`,
-which sat lighter than its own insets — the v1.29.0 retune deepened it to
-`#dde3ed` so the page is unambiguously the bottom tier).
+**canvas `#e8effb` is the deepest tier (the page)**, with subtle `#f6f8fc` and
+muted `#f0f4f9` as lighter insets on a surface `#fcfdff`. History: pre-1.16 the
+El Alba canvas was pure white (no figure/ground at all); v1.29.0 deepened it to
+a slate grey `#dde3ed` (L .914) so the page was unambiguously the bottom tier —
+strong enough that the page read as GREY and every group had to be a floating
+card to look placed. **v3.4.0 ("canvas F")** lifts it to L .95 with the hue
+pointed at the brand navy (reads "soft blue"), and re-steps the insets above it
+(ΔL .013–.016, pinned ≥ .012 in `SurfaceTiers.test`) so the canvas stays the
+deepest tier. Tone still does the figure/ground work; it just does less of it,
+because the other half of the decision is how content is placed (next).
 
 **Status:** full green / yellow / red / info scales; all four semantics alias
 the **600** step (`--color-success` = green-600, `--color-warning` = yellow-600,
@@ -102,6 +106,19 @@ dashboard; it also closes the ERP audit's parked "dark mode for dataviz" item.
 Not a `--focus-ring` colour: that name is the box-shadow family
 (`--focus-ring-{brand,accent,danger}`); a focus *outline colour* is
 `--border-focus`.
+
+**When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
+the FLOATING surface — border, radius, `--shadow-card` — for a self-contained
+OBJECT that reads as a unit and would make sense on its own: a metric, a
+product, an order summary. `Card variant="inset"` is the SUNKEN panel on
+`--bg-subtle`, no border, no shadow — for GROUPING: a form section, related
+fields, a summary strip. A `DataTable` never goes inside either (it owns its
+surface: border, radius, `--table-elevation`); it sits directly on the page.
+Rule of thumb: if you would not drag it somewhere else as a thing, it is a
+section, not a card. Consumers who wrapped every block in a card (and patched
+a `card-flat` class to un-float sections) were compensating for a canvas that
+had to be very grey to make everything float; with canvas F and this rule, a
+page has one or two floating objects and breathes. Story: "Página sin cards".
 
 **Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
 `--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,

@@ -5,6 +5,35 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] — 2026-09-06
+
+**Minor. Canvas El Alba "F" + `Card variant="inset"` — el canvas deja de ser
+gris y el kit gana la forma de agrupar sin flotar.** Decisión tomada sobre una
+comparativa de seis estrategias de figura/fondo con componentes reales.
+
+### Changed
+- **El Alba light: canvas `#dde3ed` → `#e8effb`** (OKLab L .914 → .95, tono
+  apuntado al navy de marca: lee "azul suave", no gris). Los insets se
+  re-espacian por encima para que el canvas siga siendo el tier más profundo:
+  `--bg-subtle` `#f1f4f9` → `#f6f8fc`, `--bg-muted` `#e7ebf2` → `#f0f4f9`;
+  surface sin cambio. Pasos ΔL .013–.016 (`SurfaceTiers.test` pinea ≥ .012,
+  canvas L ≥ .94 y tono a ≤ 10° del navy). Texto secundario sobre canvas mejora
+  (APCA Lc 68 → 75). Dark y preset genérico intactos.
+
+### Added
+- **`Card variant="inset"`**: panel hundido sobre `--bg-subtle`, sin borde ni
+  sombra, misma API (`CardHeader`/`CardBody`/`CardFooter`; el footer pierde su
+  relleno para no fundirse con el panel). Es la respuesta al `card-flat` que el
+  consumidor tuvo que inventar. Regla en `DESIGN.md` ("When to card"): card =
+  objeto autocontenido; inset = sección o grupo de campos; una tabla nunca va
+  dentro de ninguna.
+- Stories `Card · inset vs card` y `Página sin cards (patrón recomendado)`.
+
+### Notes
+- Migración sugerida en consumidores (despachos): desenvolver los `DataTable`
+  que están dentro de `Card`, convertir las secciones `card-flat` a
+  `variant="inset"`, dejar cards solo para objetos (MetricCard, resúmenes).
+
 ## [3.3.0] — 2026-09-05
 
 **Minor. Retune de paleta tras auditoría OKLCH (WCAG 2 + APCA) — visual,
