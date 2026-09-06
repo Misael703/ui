@@ -5,7 +5,7 @@ import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
 // ---------- NumberInput --------------------------------------------------
-export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type' | 'prefix'> {
+export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type' | 'prefix' | 'size'> {
   value?: number | null;
   onChange?: (v: number | null) => void;
   min?: number;
@@ -17,10 +17,17 @@ export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInp
   /** Fill the container width (field grows, text left-aligned) instead of the
    *  default intrinsic inline width. Mirrors Button's `fullWidth`. */
   fullWidth?: boolean;
+  /**
+   * Control register (v3.5.0). `'md'` (default): `--control-h-md`, the form
+   * field size. `'sm'`: `--control-h-sm` with 28px buttons and a 48px field —
+   * for a counter inside a table row or a dense toolbar, where the md stepper
+   * (~150px) is out of proportion. Mirrors `QuantitySelector`'s `size`.
+   */
+  size?: 'sm' | 'md';
 }
 
 export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
-  { value, onChange, min, max, step = 1, invalid, prefix, suffix, fullWidth, className, disabled, ...rest },
+  { value, onChange, min, max, step = 1, invalid, prefix, suffix, fullWidth, size = 'md', className, disabled, ...rest },
   ref
 ) {
   const t = useLocale();
@@ -33,7 +40,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   };
   const incr = (mult: number) => set((value ?? 0) + step * mult);
   return (
-    <div className={cx('number-input', fullWidth && 'number-input--block', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
+    <div className={cx('number-input', size === 'sm' && 'number-input--sm', fullWidth && 'number-input--block', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       <button type="button" className="number-input__btn" tabIndex={-1} aria-label={t['numberInput.decrement']} onClick={() => incr(-1)} disabled={disabled}>−</button>
       {prefix && <span className="number-input__affix">{prefix}</span>}
       {/* Wheeling over a FOCUSED number input does native ±step, silently

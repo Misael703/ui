@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Pagination, NumberInput, EmptyState, Kpi } from '../src/components/Inputs';
 import { LocaleProvider } from '../src/locale';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 describe('Pagination', () => {
   it('renders info and navigates', () => {
@@ -99,5 +101,35 @@ describe('Kpi', () => {
     expect(screen.getByText('Ventas')).toBeInTheDocument();
     expect(screen.getByText('$1.2M')).toBeInTheDocument();
     expect(screen.getByText(/12%/)).toBeInTheDocument();
+  });
+});
+
+/**
+ * `size` (v3.5.0). NumberInput had ONE size — `--control-h-md`, 36px buttons,
+ * an 80px field — about 150px per row, out of proportion in a numeric table
+ * cell. The consumer (despachos picking table) overrode it app-side and left
+ * a "follow-up: NumberInput size=sm" note; the sibling QuantitySelector already
+ * had sm/md. Pinned: `sm` on --control-h-sm with 28px buttons, `md` default
+ * unchanged except the field floor (80 → 64px).
+ */
+describe('NumberInput size (v3.5.0)', () => {
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  it('size="sm" adds the modifier; default md adds none (byte-identical class list)', () => {
+    const { container, rerender } = render(<NumberInput value={1} onChange={() => {}} size="sm" />);
+    expect(container.firstElementChild).toHaveClass('number-input--sm');
+    rerender(<NumberInput value={1} onChange={() => {}} />);
+    expect(container.firstElementChild!.className).toBe('number-input');
+  });
+  it('CSS: sm sits on --control-h-sm with 28px buttons and a 48px field floor', () => {
+    const root = css.match(/\.number-input--sm\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(root).toMatch(/height:\s*var\(--control-h-sm\)/);
+    const btn = css.match(/\.number-input--sm\s+\.number-input__btn\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(btn).toMatch(/width:\s*28px/);
+    const field = css.match(/\.number-input--sm\s+\.number-input__field\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(field).toMatch(/min-width:\s*48px/);
+  });
+  it('CSS: md field floor is 64px (was 80px — too wide for a unit counter)', () => {
+    const field = css.match(/(^|\})\s*\.number-input__field\s*\{([^}]*)\}/)?.[2] ?? '';
+    expect(field).toMatch(/min-width:\s*64px/);
   });
 });

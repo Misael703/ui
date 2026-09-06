@@ -5,6 +5,28 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] — 2026-09-06
+
+**Minor. `NumberInput size`.** El stepper tenía un solo tamaño
+(`--control-h-md`, botones de 36px, campo mínimo de 80px: ~150px por fila),
+desproporcionado en una celda numérica. Despachos lo había parcheado app-side
+en su tabla de picking con la nota "follow-up del kit: `size="sm"`"; el stepper
+hermano `QuantitySelector` ya tenía sm/md.
+
+### Added
+- **`NumberInput size?: 'sm' | 'md'`** (`md` default, sin cambio de clases).
+  `sm`: alto `--control-h-sm`, botones de 28px, campo mínimo 48px con padding
+  6px, afijos en `--text-xs`. Story `NumberInput · size sm vs md`; control
+  `size` en el playground.
+
+### Changed
+- **`md`: piso del campo 80 → 64px.** Un contador de unidades no necesita 80px;
+  el stepper md se angosta 16px en todos los consumidores. `fullWidth` no cambia.
+
+### Notes
+- Despachos: pasar `size="sm"` en las tablas de picking y borrar el override
+  `.pick-table .number-input*` de `globals.css`.
+
 ## [3.4.0] — 2026-09-06
 
 **Minor. Canvas El Alba "F" + `Card variant="inset"` — el canvas deja de ser
