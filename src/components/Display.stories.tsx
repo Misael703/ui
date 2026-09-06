@@ -21,6 +21,11 @@ export const CardBasica: StoryObj = {
  * la card por default (flota: borde + sombra) para comparar. Regla: card =
  * objeto autocontenido (métrica, producto, resumen de orden); inset = sección
  * o grupo de campos. Una tabla nunca va dentro de ninguna de las dos.
+ *
+ * v3.6.0: el inset lleva un hairline `--border-on-canvas` (tinte de marca sobre
+ * el canvas). Sin él quedaba a 1.09:1 del canvas F y solo las esquinas lo
+ * delataban (medido por despachos). Cambia el tema: en dark el canto es más
+ * claro que ambos lados porque los tiers son aditivos.
  */
 export const CardInset: StoryObj = {
   name: 'Card · inset vs card (cuándo cada una)',

@@ -111,8 +111,9 @@ Not a `--focus-ring` colour: that name is the box-shadow family
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained
 OBJECT that reads as a unit and would make sense on its own: a metric, a
 product, an order summary. `Card variant="inset"` is the SUNKEN panel on
-`--bg-subtle`, no border, no shadow — for GROUPING: a form section, related
-fields, a summary strip. A `DataTable` never goes inside either (it owns its
+`--bg-subtle` with a `--border-on-canvas` hairline and no shadow (v3.6.0: with
+no edge it sat at 1.09:1 against the canvas-F page and only its corners gave
+it away) — for GROUPING: a form section, related fields, a summary strip. A `DataTable` never goes inside either (it owns its
 surface: border, radius, `--table-elevation`); it sits directly on the page.
 Rule of thumb: if you would not drag it somewhere else as a thing, it is a
 section, not a card. Consumers who wrapped every block in a card (and patched
@@ -122,7 +123,13 @@ page has one or two floating objects and breathes. Story: "Página sin cards".
 
 **Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
 `--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,
-`--border-{default,strong,brand,focus}`, `--accent-{primary,secondary}`.
+`--border-{default,strong,control,on-canvas,brand,focus}`, `--accent-{primary,secondary}`.
+`--border-on-canvas` (v3.6.0) is the hairline for edges that live ON THE
+CANVAS (an inset panel, any flat bordered block on the page): `--border-default`
+is tuned for `--bg-surface` and reads ~1.08:1 on the canvas. Derived
+(`color-mix` of the brand ink into the canvas, 18% light / 30% dark) so every
+preset gets an on-hue edge with no override; pinned ≥ 1.3:1 vs canvas and
+≥ 1.2:1 vs the inset in both palettes and themes (`ContrastDark.test`).
 Components must use these, never raw scale stops or hex. `--fg-meta` (= the
 lightest AA-clearing grey, currently aliased to `--fg-subtle`) is the decorative
 meta/echo role (secondary cell line, "RUT under name"), separated from the

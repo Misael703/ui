@@ -245,3 +245,49 @@ describe('oklab color-mix port', () => {
     expect(r).toBeLessThan(115);
   });
 });
+
+/**
+ * `--border-on-canvas` (v3.6.0). A `Card variant="inset"` is a flat panel on
+ * `--bg-subtle` with no shadow; on the canvas-F page (3.4.0) that left it at
+ * 1.09:1 / ΔL .028 against the canvas — only the rounded corners gave it away
+ * (measured by the consumer, despachos, in El Alba light). `--border-default`
+ * is tuned for edges that live on `--bg-surface` and reads 1.08:1 on the
+ * canvas: invisible there. This token is the hairline for edges that live on
+ * the canvas, derived from the brand ink so it stays on-hue in every preset.
+ *
+ * Threshold: the edge has to separate BOTH sides — the canvas outside and the
+ * inset inside — so it is pinned against each. 1.3:1 vs canvas is the floor
+ * where a 1px line stops being "maybe" on a light page (the consumer's 14%
+ * probe read as "sutil pero legible" at 1.30); 1.2:1 vs the inset because the
+ * inset is already closer in tone. Dark is checked with the same floors: the
+ * inset is LIGHTER than the canvas there (additive tiers), so a mix that works
+ * in light lands exactly on the inset's lightness in dark (1.02:1) — which is
+ * why the dark block mixes a higher share of the (lifted) brand ink.
+ */
+describe('--border-on-canvas (v3.6.0) — inset edge legible on the page', () => {
+  const elalbaLight = { ...baseLight, ...parseTokens(blockFor(elalbaCss, ':root')) };
+  const MAPS: Array<[string, Record<string, string>]> = [
+    ['default palette light', baseLight],
+    ['El Alba light', elalbaLight],
+    ['default palette dark', baseDark],
+    ['El Alba dark', elalbaDark],
+  ];
+  for (const [name, map] of MAPS) {
+    const C = (n: string) => evalColor(map, `var(${n})`);
+    it(`${name}: token resolves and clears 1.3:1 vs canvas and 1.2:1 vs the inset (--bg-subtle)`, () => {
+      const edge = C('--border-on-canvas');
+      expect(edge, `unresolved --border-on-canvas: ${edge}`).toMatch(/^#[0-9a-f]{6}$/i);
+      const vsCanvas = contrast(edge, C('--bg-canvas'));
+      const vsInset = contrast(edge, C('--bg-subtle'));
+      expect(vsCanvas, `${edge} vs canvas ${vsCanvas.toFixed(2)}:1`).toBeGreaterThanOrEqual(1.3);
+      expect(vsInset, `${edge} vs inset ${vsInset.toFixed(2)}:1`).toBeGreaterThanOrEqual(1.2);
+    });
+  }
+  it('CSS: the inset border, header and footer dividers all use the on-canvas hairline', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const inset = css.match(/\.card--inset\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(inset).toMatch(/border-color:\s*var\(--border-on-canvas\)/);
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__header\s*\{[^}]*border-bottom-color:\s*var\(--border-on-canvas\)/);
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer\s*\{[^}]*border-top-color:\s*var\(--border-on-canvas\)/);
+  });
+});

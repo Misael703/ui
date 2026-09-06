@@ -236,6 +236,17 @@
      strong hairline (dividers, dropzones, chips). Hover on a control goes to
      `--fg-subtle` (darker still — "hover darkens"), focus to `--border-focus`. */
   --border-control:  #95918f;
+  /* Edge that lives ON THE CANVAS (v3.6.0): the hairline of a flat panel
+     placed directly on the page — `Card variant="inset"`, any bordered block
+     that is not a floating surface. `--border-default` is tuned for edges on
+     `--bg-surface` and reads ~1.08:1 on the canvas: invisible there. A
+     consumer (despachos) measured the inset at 1.09:1 against the canvas-F
+     page: only its rounded corners gave it away. DERIVED, not a hex: a share
+     of the brand ink mixed into the canvas, so every preset gets an on-hue
+     hairline without overriding anything (El Alba resolves it against its
+     own navy + canvas). Light: 18% → ~1.4:1 vs canvas, ~1.5:1 vs the inset.
+     Pinned against BOTH sides in ContrastDark.test (1.3 / 1.2 floors). */
+  --border-on-canvas: color-mix(in oklab, var(--color-primary) 18%, var(--bg-canvas));
   --border-brand:    var(--color-primary);
   /* Focus border identity (v1.29.0 G). Pre-1.29.0 this was `--color-secondary`,
      which produced a focused-element look with an ORANGE border + a BLUE halo
@@ -538,6 +549,11 @@
   --border-default:  #362f28;
   --border-strong:   #453d35;
   --border-control:  #76706a;   /* 3.3:1 on the dark surface (SC 1.4.11) */
+  /* Dark tiers are additive: the inset is LIGHTER than the canvas, so the light
+     recipe (18% ink into canvas) lands exactly on the inset's lightness and
+     vanishes (1.02:1). Mix a larger share of the (lifted) brand ink so the edge
+     sits above both: 30% → ~1.7:1 vs canvas, ~1.4:1 vs the inset. */
+  --border-on-canvas: color-mix(in oklab, var(--color-primary) 30%, var(--bg-canvas));
   --border-brand:    var(--color-primary-400);
   --border-focus:    var(--color-primary-400);
 
