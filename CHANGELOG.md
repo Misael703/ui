@@ -39,11 +39,18 @@ control).
   El Alba `#a6afc2` → `#b5bed1`, `#99a2b7` → `#a5aec3`. Muted ≥ Lc 60 en los
   cuatro tiers; subtle ≥ 50 (recesivo a propósito).
 
+### Fixed
+- **Story Foundations/Colors: el hex bajo cada swatch seguía siendo el del
+  preset genérico al cambiar a El Alba o a dark.** No estaba hardcodeado: se
+  medía una sola vez en un efecto hijo, ANTES de que los decoradores (efectos
+  padre) inyectaran el `<style>` del preset o `data-theme`, y nunca se
+  re-medía. Ahora mide en el siguiente frame y re-mide con `MutationObserver`
+  sobre `data-theme` y el `<head>`.
+
 ### Notes
-- Fuera de scope, anotado: la story Colors muestra los hex del preset
-  genérico bajo los swatches de El Alba (etiquetas hardcodeadas); la escala
-  gris genérica tiene un hueco 500→600 (ΔL .16); el espresso pierde croma en
-  la base (-800) con drift de 14°.
+- Fuera de scope, anotado: la escala gris genérica tiene un hueco 500→600
+  (ΔL .16, heredado de la escala stone de Tailwind renumerada); el espresso
+  pierde croma en la base (-800) con drift de 14°.
 
 ## [3.2.0] — 2026-09-04
 
