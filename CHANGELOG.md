@@ -35,10 +35,13 @@ mano" que `FilterBar` existe para reemplazar.
   abierto.
 
 ### Changed
-- **`FilterBar`: las líneas llenan la barra.** Los campos pasan de una grilla
-  de columnas iguales a una fila flex-wrap (`flex: 1 1 160px`): una segunda
+- **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de
+  columnas iguales y entran al flujo flex-wrap de la barra (`display:
+  contents` en la caja de campos, `flex: 1 1 160px` por campo): una segunda
   línea de dos campos se estira a todo el ancho en vez de dejar celdas
-  vacías. Las columnas ya no se alinean entre líneas, a propósito; `columns`
+  vacías, y el grupo final (toggle · conteo · acciones) comparte la última
+  línea con los campos, que le hacen espacio, en vez de caer a una línea
+  propia. Las columnas ya no se alinean entre líneas, a propósito; `columns`
   conserva la grilla fija.
 - Story **"Playground · CRUD"** (Patterns/CRUD): el ciclo completo de un
   recurso con estado local real — receta de listado, acciones por fila,

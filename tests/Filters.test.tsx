@@ -207,10 +207,11 @@ describe('FilterBar summary is a status message (v3.7.0)', () => {
  */
 describe('FilterBar fills rows and collapses extra fields', () => {
   const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  it('CSS: fields wrap as flex items that grow from the column minimum', () => {
+  it('CSS: fields join the bar\'s flex-wrap flow (display: contents) and grow from the column minimum', () => {
     const fields = css.match(/(^|\})\s*\.filter-bar__fields\s*\{([^}]*)\}/)?.[2] ?? '';
-    expect(fields).toMatch(/display:\s*flex/);
-    expect(fields).toMatch(/flex-wrap:\s*wrap/);
+    expect(fields).toMatch(/display:\s*contents/);
+    const bar = css.match(/(^|\})\s*\.filter-bar\s*\{([^}]*)\}/)?.[2] ?? '';
+    expect(bar).toMatch(/flex-wrap:\s*wrap/);
     const field = css.match(/(^|\})\s*\.filter-field\s*\{([^}]*)\}/)?.[2] ?? '';
     expect(field).toMatch(/flex:\s*1 1 var\(--filter-col-min/);
     // fixed `columns` mode stays a grid
