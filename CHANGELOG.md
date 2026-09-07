@@ -33,6 +33,12 @@ mano" que `FilterBar` existe para reemplazar.
   "Menos filtros" (`aria-expanded`, claves de locale `filterBar.more/less`),
   con badge de filtros aplicados escondidos. `defaultExpanded` para arrancar
   abierto.
+- **`FilterBar mobile="drawer"` (default) + `activeCount`**: bajo 600px la
+  barra reemplaza los campos por un botón "Filtros" con badge de aplicados
+  que abre un `Drawer` con los mismos `FilterField` apilados a todo el ancho;
+  conteo y acciones se quedan en la barra. `mobile="inline"` conserva el
+  comportamiento de escritorio. Hook interno `useMediaQuery` (no exportado).
+  Claves de locale `filterBar.filters` / `filterBar.done`.
 
 ### Changed
 - **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de

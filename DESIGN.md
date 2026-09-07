@@ -121,7 +121,12 @@ selectors next, date last; when the set wraps to a second desktop line, cap
 it with `visibleCount` (the first N are the daily filters, the rest behind the
 "Más filtros" toggle, badged with `hiddenActiveCount` so an applied filter
 never hides silently). Each line shares its width among its fields (flex-wrap,
-not an equal-column grid), so a wrapped pair fills the bar. Pages sharing the
+not an equal-column grid), so a wrapped pair fills the bar. Below 600px the
+bar swaps the fields for a "Filtros" button (badged with `activeCount`) that
+opens a Drawer holding the same fields, stacked — `mobile="drawer"` by default;
+summary and actions stay in the bar. Inline expansion is for desktop, where
+filter and result stay in view together; the drawer is the mobile answer, not
+a desktop alternative. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

@@ -22,6 +22,8 @@ export const esMessages: UiKitMessages = {
   'table.empty': 'Sin datos',
   'filterBar.more': 'Más filtros',
   'filterBar.less': 'Menos filtros',
+  'filterBar.filters': 'Filtros',
+  'filterBar.done': 'Listo',
   'table.selectAll': 'Seleccionar todo',
   'table.selectRow': 'Seleccionar {label}',
   'table.rowAction': 'Ver {label}',

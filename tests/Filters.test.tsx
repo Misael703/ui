@@ -252,3 +252,57 @@ describe('FilterBar fills rows and collapses extra fields', () => {
     expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('2');
   });
 });
+
+/**
+ * Mobile (v3.7.0): below 600px an expanded bar becomes a column of fields that
+ * pushes the table off-screen. `mobile="drawer"` (default) swaps the inline
+ * fields for a "Filtros" button — badged with `activeCount` — that opens a
+ * Drawer holding the same FilterFields; summary and actions stay in the bar.
+ * jsdom has no matchMedia: it is stubbed per test to pick the branch.
+ */
+describe('FilterBar mobile mode', () => {
+  const stubMedia = (matches: boolean) => {
+    const listeners = new Set<() => void>();
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true, writable: true,
+      value: (query: string) => ({
+        matches, media: query, onchange: null,
+        addEventListener: (_: string, cb: () => void) => listeners.add(cb),
+        removeEventListener: (_: string, cb: () => void) => listeners.delete(cb),
+        addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false,
+      }),
+    });
+  };
+  const fields = [
+    <FilterField key="a" label="Estado"><input /></FilterField>,
+    <FilterField key="b" label="Zona"><input /></FilterField>,
+  ];
+  it('wide viewport: inline fields, no mobile toggle', () => {
+    stubMedia(false);
+    const { container } = render(<FilterBar summary="3">{fields}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+    expect(container.querySelector('.filter-bar__mobile-toggle')).toBeNull();
+  });
+  it('narrow viewport: a badged "Filtros" button replaces the fields and opens a Drawer with them', () => {
+    stubMedia(true);
+    const { container, baseElement } = render(<FilterBar summary="3" activeCount={2} actions={<button type="button">Limpiar</button>}>{fields}</FilterBar>);
+    expect(container.querySelectorAll('.filter-bar .filter-field')).toHaveLength(0);
+    const toggle = container.querySelector('.filter-bar__mobile-toggle') as HTMLButtonElement;
+    expect(toggle).toHaveTextContent('Filtros');
+    expect(toggle).toHaveTextContent('2');
+    // summary and actions stay in the bar
+    expect(container.querySelector('.filter-bar__summary')).toHaveTextContent('3');
+    expect(screen.getByText('Limpiar')).toBeInTheDocument();
+    fireEvent.click(toggle);
+    const drawer = baseElement.querySelector('.drawer');
+    expect(drawer).not.toBeNull();
+    expect(drawer!.querySelectorAll('.filter-field')).toHaveLength(2);
+    expect(screen.getByLabelText('Zona')).toBeInTheDocument();
+  });
+  it('mobile="inline" keeps the fields inline on a narrow viewport', () => {
+    stubMedia(true);
+    const { container } = render(<FilterBar mobile="inline">{fields}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+    expect(container.querySelector('.filter-bar__mobile-toggle')).toBeNull();
+  });
+});

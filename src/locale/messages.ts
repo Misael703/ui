@@ -26,6 +26,9 @@ export interface UiKitMessages {
   /** FilterBar `visibleCount` toggle (v3.7.0). */
   'filterBar.more': string;
   'filterBar.less': string;
+  /** FilterBar mobile drawer (v3.7.0): trigger label and sheet title / close. */
+  'filterBar.filters': string;
+  'filterBar.done': string;
   'table.selectAll': string;
   /** Template: "Seleccionar {label}" */
   'table.selectRow': string;

@@ -3,6 +3,9 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronDown, ChevronUp, X } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { Drawer } from './Overlay';
+import { Button } from './Button';
 import { format } from '../locale/messages';
 
 // ---------- FilterPanel -------------------------------------------------
@@ -164,6 +167,20 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   hiddenActiveCount?: number;
   /** Start expanded (uncontrolled; the toggle owns the state after mount). */
   defaultExpanded?: boolean;
+  /**
+   * Below 600px (the kit's mobile breakpoint) an expanded bar is a column of
+   * fields that pushes the table off-screen. `'drawer'` (default) swaps the
+   * inline fields for a "Filtros" button that opens a Drawer holding the same
+   * FilterFields (stacked, full width); `summary` and `actions` stay in the
+   * bar. `'inline'` keeps the desktop behaviour everywhere.
+   */
+  mobile?: 'drawer' | 'inline';
+  /**
+   * How many filters currently hold a value — the badge on the mobile
+   * "Filtros" button (the drawer hides ALL fields, so this is the total).
+   * The bar cannot know it: it does not own the values.
+   */
+  activeCount?: number;
   /** Min field width (px) before the row wraps; fields grow from it. Default 160. */
   minColWidth?: number;
   /**
@@ -173,14 +190,19 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   columns?: number;
 }
 
+const MOBILE_QUERY = '(max-width: 600px)';
+
 export function FilterBar({
   summary, actions, visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
+  mobile = 'drawer', activeCount = 0,
   minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
   const t = useLocale();
   const [expanded, setExpanded] = React.useState(defaultExpanded);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const isMobile = useMediaQuery(MOBILE_QUERY) && mobile === 'drawer';
   const all = React.Children.toArray(children);
-  const collapsible = visibleCount != null && visibleCount < all.length;
+  const collapsible = !isMobile && visibleCount != null && visibleCount < all.length;
   const shown = collapsible && !expanded ? all.slice(0, visibleCount) : all;
   const toggle = collapsible ? (
     <button
@@ -204,7 +226,34 @@ export function FilterBar({
       style={gridVars}
       {...rest}
     >
-      <div className="filter-bar__fields">{shown}</div>
+      {isMobile ? (
+        <>
+          {/* Mobile: the fields move into a Drawer; the bar keeps a badged
+              trigger so the applied-filter count never hides. */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="filter-bar__mobile-toggle"
+            aria-haspopup="dialog"
+            aria-expanded={sheetOpen}
+            onClick={() => setSheetOpen(true)}
+          >
+            {t['filterBar.filters']}
+            {activeCount > 0 && <span className="filter-bar__toggle-badge">{activeCount}</span>}
+          </Button>
+          <Drawer
+            open={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            title={t['filterBar.filters']}
+            footer={<Button onClick={() => setSheetOpen(false)}>{t['filterBar.done']}</Button>}
+          >
+            <div className="filter-bar__sheet fields--dense">{all}</div>
+          </Drawer>
+        </>
+      ) : (
+        <div className="filter-bar__fields">{shown}</div>
+      )}
       {/* One trailing group, so the toggle, the count and the actions wrap
           TOGETHER: as separate flex items the actions could drop to a new line
           while the count stayed up with the fields — a readout split from its

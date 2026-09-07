@@ -4213,6 +4213,10 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .filter-bar__toggle:hover { color: var(--fg-default); background: var(--bg-subtle); }
 .filter-bar__toggle:focus-visible { outline: none; box-shadow: var(--focus-ring-brand); }
+/* Mobile drawer (v3.7.0): the fields stack full-width inside the sheet. */
+.filter-bar__sheet { display: grid; gap: var(--space-3); }
+.filter-bar__sheet .filter-field { flex: none; }
+.filter-bar__mobile-toggle { gap: 6px; }
 .filter-bar__toggle-badge {
   min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
