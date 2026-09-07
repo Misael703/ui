@@ -6,7 +6,8 @@
 ## Tareas
 - [x] T1 — Test rojo: slot `summary` (orden fields → summary → actions; solo si se provee); CSS `margin-left:auto` + `min-height: var(--field-min-h)`; padding de `.table-surface__bar > .filter-bar`.
 - [x] T2 — `FilterBar summary` + CSS; padding dentro del toolbar del DataTable.
-- [x] T3 — Story `Receta: página de listado` (Patterns/Filters) con switcher, conteo, Limpiar condicional.
+- [x] T3 — Story `Playground · página de listado` (Patterns/Filters) con controls (switcher, campos 2–7, conteo, filtros aplicados).
+- [x] T3b — REGLA nueva del usuario: stories genéricas, nunca calcadas de capturas del consumidor. Reemplazadas "Fill height" + "Ancha acotada con toolbar" → `Playground · región de scroll`, "Página sin cards" → `Playground · superficies en una página`. Lección en tasks/lessons.md.
 - [x] T4 — DESIGN.md (List-page recipe) + CHANGELOG 3.7.0 + bump.
 - [x] T5 — Suite + build + tsc; Storybook a 1280 y 760: summary a 16px del borde y centrado en la banda de controles (36px) en ambos; a 760 los campos envuelven a 2 filas y el summary sigue alineado con la última.
 

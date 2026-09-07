@@ -119,7 +119,7 @@ per-field widths; dense labels (`FilterField`), not form labels; free-text
 search first, selectors next, date last; five visible fields as the cap, the
 rest behind "Más filtros" (a Drawer, which doubles as the mobile bar). Pages
 sharing the same fields get a twenty-line local composition over `FilterBar`,
-not a kit component. Story: Patterns/Filters › "Receta: página de listado".
+not a kit component. Story: Patterns/Filters › "Playground · página de listado".
 
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained

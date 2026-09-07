@@ -766,70 +766,74 @@ export const GoldStandard: StoryObj = {
   },
 };
 
-/* 16 columnas de ancho fijo (espejo de un XLSX) cuya suma supera cualquier
-   contenedor: el caso del reporte de despachos que motivó `fillHeight` y las
-   pistas de borde. */
-const WIDE_COLS = [
-  'Fecha', 'Hora', 'Usuario', 'Tipo de despacho', 'Zona operativa', 'Comuna', 'Cliente',
-  'RUT', 'Documento', 'Guía', 'Chofer', 'Camión', 'Ayudante', 'Bultos', 'Peso (kg)', 'Observación',
-].map((header, i) => ({ key: `c${i}`, header, width: i === 6 ? 260 : 130 }));
-const wideRows = Array.from({ length: 60 }, (_, r) => Object.fromEntries([
+/* Dataset ancho genérico (16 columnas de ancho fijo): la suma supera cualquier
+   contenedor, para ejercitar scroll horizontal + pistas de borde. */
+const WIDE_HEADERS = [
+  'Producto', 'SKU', 'Categoría', 'Bodega', 'Lote', 'Proveedor', 'Unidad', 'Stock',
+  'Reservado', 'Disponible', 'Costo', 'Precio', 'Margen', 'Actualizado', 'Responsable', 'Observación',
+];
+const makeWideCols = (n: number) => WIDE_HEADERS.slice(0, n).map((header, i) => ({ key: `c${i}`, header, width: i === 0 ? 220 : 120 }));
+const makeWideRows = (n: number, cols: number) => Array.from({ length: n }, (_, r) => Object.fromEntries([
   ['id', String(r)],
-  ...WIDE_COLS.map((c, i) => [c.key, i === 0 ? '31/08/2026' : i === 1 ? `${9 + (r % 9)}:${String((r * 7) % 60).padStart(2, '0')}` : `${c.header} ${r + 1}`]),
+  ...WIDE_HEADERS.slice(0, cols).map((h, i) => [`c${i}`, i === 0 ? `Producto ${r + 1}` : `${h} ${r + 1}`]),
 ])) as Array<Record<string, string>>;
 
+interface ScrollRegionArgs {
+  mode: 'fillHeight' | 'maxHeight';
+  columns: number;
+  rows: number;
+  containerHeight: number;
+  toolbar: boolean;
+  pagination: boolean;
+  virtualize: boolean;
+}
+
 /**
- * **Fill height** (v3.2.0): la región de scroll acotada SIN número. La tabla
- * llena el alto de su contenedor (columna flex de alto definido) y scrollea
- * adentro; la paginación queda pegada al fondo. Antes el consumidor calculaba
- * `maxHeight="calc(100vh - 249px)"` contra un header que el kit cambia de
- * alto cada tanto — ahora el layout manda.
- *
- * También muestra las **pistas de borde** (`has-more-{left,right,down}`):
- * sombra a la derecha mientras haya columnas escondidas, a la izquierda al
- * scrollear, abajo mientras queden filas. Antes de 3.2.0 esas sombras no se
- * mostraban en modo acotado (el truco CSS solo funcionaba si el wrap era el
- * scroller). Redimensiona el canvas: la tabla se adapta sola.
+ * **Playground · región de scroll.** Cómo se comportan `fillHeight` / `maxHeight`
+ * al combinarse con toolbar, paginación, virtualización y una tabla más ancha
+ * que su contenedor. `fillHeight` (v3.2.0) llena el alto del contenedor (columna
+ * flex de alto definido) sin número; `maxHeight` fija un tope. En ambos, el
+ * sticky header se pega al scroller interno y las **pistas de borde**
+ * (`has-more-{left,right,down}`) marcan hacia dónde queda contenido — antes de
+ * 3.2.0 no se veían en modo acotado. Sube `columns` a 16 para el scroll
+ * horizontal; `rows` a 400 + `virtualize` para el windowing.
  */
-export const FillHeight: StoryObj = {
-  name: 'Fill height (región de scroll + pistas de borde)',
-  render: () => {
+export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
+  name: 'Playground · región de scroll (fillHeight / maxHeight)',
+  args: { mode: 'fillHeight', columns: 16, rows: 60, containerHeight: 520, toolbar: false, pagination: true, virtualize: false },
+  argTypes: {
+    mode: { control: 'inline-radio', options: ['fillHeight', 'maxHeight'] },
+    columns: { control: { type: 'range', min: 3, max: 16, step: 1 } },
+    rows: { control: 'inline-radio', options: [12, 60, 400] },
+    containerHeight: { control: 'inline-radio', options: [360, 520, 720] },
+    toolbar: { control: 'boolean' },
+    pagination: { control: 'boolean' },
+    virtualize: { control: 'boolean' },
+  },
+  render: (a) => {
+    const cols = React.useMemo(() => makeWideCols(a.columns), [a.columns]);
+    const data = React.useMemo(() => makeWideRows(a.rows, a.columns), [a.rows, a.columns]);
     const [page, setPage] = React.useState(1);
     return (
-      <div style={{ height: 520, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
+      <div style={{ height: a.containerHeight, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <strong>Detalle de despachos</strong>
-          <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Contenedor de 520px · la tabla toma el resto</span>
+          <strong>Inventario</strong>
+          <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Contenedor de {a.containerHeight}px · {a.mode}</span>
         </div>
         <DataTable
-          rows={wideRows}
+          rows={data}
           rowKey={(r) => r.id}
-          columns={WIDE_COLS}
-          fillHeight
+          columns={cols}
+          fillHeight={a.mode === 'fillHeight'}
+          maxHeight={a.mode === 'maxHeight' ? 360 : undefined}
           stickyHeader
           density="compact"
-          ariaLabel="Detalle de despachos"
+          virtualizeRows={a.virtualize ? { rowHeight: 31 } : undefined}
+          toolbar={a.toolbar ? <TableToolbar><Input placeholder="Buscar producto" /></TableToolbar> : undefined}
+          ariaLabel="Inventario"
         />
-        <TablePagination page={page} pageSize={60} total={158} onPageChange={setPage} />
+        {a.pagination && <TablePagination page={page} pageSize={a.rows} total={a.rows * 3} onPageChange={setPage} />}
       </div>
     );
   },
-};
-
-/** Misma tabla ancha, acotada con `maxHeight` y con toolbar: la cadena fill no
- *  aplica, pero las pistas de borde sí (antes de 3.2.0 tampoco se veían aquí). */
-export const AnchaAcotadaConToolbar: StoryObj = {
-  name: 'Ancha acotada (maxHeight) con toolbar',
-  render: () => (
-    <DataTable
-      rows={wideRows}
-      rowKey={(r) => r.id}
-      columns={WIDE_COLS}
-      maxHeight={360}
-      stickyHeader
-      density="compact"
-      toolbar={<TableToolbar><Input placeholder="Buscar cliente" /></TableToolbar>}
-      ariaLabel="Detalle de despachos"
-    />
-  ),
 };

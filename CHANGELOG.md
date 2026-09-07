@@ -21,9 +21,18 @@ mano" que `FilterBar` existe para reemplazar.
 - **`.table-surface__bar > .filter-bar`** con padding propio: la barra ya se
   puede meter directo en el `toolbar` del `DataTable`, apilada bajo un
   `TableToolbar`, sin envoltorio.
-- Story **"Receta: página de listado"** (Patterns/Filters): `PageHeader` →
-  `DataTable toolbar={TableToolbar + FilterBar}` → filas, con switcher,
-  conteo en `summary` y "Limpiar" condicional. Reglas en `DESIGN.md`.
+- Story **"Playground · página de listado"** (Patterns/Filters): `PageHeader` →
+  `DataTable toolbar={TableToolbar + FilterBar}` → filas, con controls para
+  switcher, cantidad de campos, conteo y filtros aplicados. Reglas en
+  `DESIGN.md`.
+
+### Changed
+- **Stories de composición genéricas.** "Fill height", "Ancha acotada con
+  toolbar" y "Página sin cards" (3.2.0/3.4.0) estaban calcadas de pantallas de
+  un consumidor; se reemplazan por dos playgrounds con controls: "Playground ·
+  región de scroll (fillHeight / maxHeight)" (DataTable) y "Playground ·
+  superficies en una página" (Card). Regla: las stories son genéricas y las
+  combinaciones se prueban con controls, no con una story por caso.
 
 ### Notes
 - Despachos: reemplazar `Card` + `.ord-toolbar` + `.app-filter-grid` +

@@ -99,3 +99,15 @@ local commits). Push/PR/merge/release each need the user's explicit go for
 THIS change — a prior "dale un bump" in the same session is consumed by that
 release and does not carry forward. Default posture after implementing:
 verify, screenshot, report, wait.
+
+[2026-09-07] Context: durante una semana de pedidos consumer-driven (despachos) creé stories
+calcadas de las capturas del usuario: "Fill height" con las 16 columnas del XLSX de despachos y
+el título "Detalle de despachos", "Página sin cards" con "Orden #1042 · Nairely Perez", "Receta:
+página de listado" con "Órdenes de despacho · Trazabilidad desde la venta en Bsale". El usuario:
+"deja de crear stories adaptadas a las screenshots que te paso, son de un caso en específico y me
+manchas el storybook completo".
+→ Rule: las stories del kit son GENÉRICAS (dominio de muestra del kit: Taladro, Pedido #1042,
+Northwind Builders; nunca nombres reales, columnas o copy de una app). Para probar cómo se
+comportan elementos al juntarse, un PLAYGROUND con controls o una story de composición con las
+variantes como args — no una story por caso. El caso concreto del consumidor se reproduce en
+scratch (story desechable sin commitear, o Playwright con overrides sobre la story genérica).

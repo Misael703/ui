@@ -140,88 +140,85 @@ export const FilterBarDemo: StoryObj = {
   },
 };
 
+interface ListPageArgs {
+  viewSwitcher: boolean;
+  fields: number;
+  summary: boolean;
+  filtersApplied: boolean;
+  viewAction: boolean;
+}
+
 /**
- * **Receta: página de listado** (v3.7.0). La estructura estándar de todo CRUD:
- * `PageHeader` (título + acción primaria) → `DataTable` con `toolbar` → filas.
- * El `toolbar` apila dos bandas sobre la misma superficie de la tabla:
- * `TableToolbar` con el switcher de vistas ("cómo veo") y acciones de vista, y
- * `FilterBar` con los campos ("qué veo"), el conteo en `summary` y "Limpiar" en
- * `actions` solo cuando hay filtros aplicados. La fila superior existe solo si
- * hay switcher; el conteo va SIEMPRE en `summary`, junto a los filtros que lo
- * producen. Sin Card: la tabla es la superficie.
- *
- * Reglas: una fila en escritorio y los campos envuelven por ancho mínimo (160),
- * nunca anchos fijos por campo; labels en registro denso (los de `FilterField`);
- * búsqueda libre primero, selectores después, fecha al final; cinco campos como
- * tope, el resto detrás de "Más filtros". Tres páginas con los mismos campos
- * (Buscar + Estado) = una composición local de veinte líneas sobre `FilterBar`,
- * no un componente nuevo del kit.
+ * **Playground · página de listado.** La estructura estándar de un listado y
+ * cómo se comportan sus piezas al juntarse: `PageHeader` → `DataTable` con
+ * `toolbar` → filas. El `toolbar` apila `TableToolbar` ("cómo veo": switcher de
+ * vistas y acciones de vista, solo si hay switcher) y `FilterBar` ("qué veo":
+ * campos, conteo en `summary`, "Limpiar" en `actions` solo con filtros
+ * aplicados). Sin Card: la tabla es la superficie. Sube `fields` a 7 para ver
+ * cómo envuelve la grilla y dónde queda el conteo; quita el switcher para el
+ * caso de un CRUD simple. Reglas completas en DESIGN.md › List-page recipe.
  */
-export const RecetaPaginaDeListado: StoryObj = {
-  name: 'Receta: página de listado',
+export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
+  name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  render: () => {
+  args: { viewSwitcher: true, fields: 5, summary: true, filtersApplied: false, viewAction: true },
+  argTypes: {
+    viewSwitcher: { control: 'boolean' },
+    fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
+    summary: { control: 'boolean' },
+    filtersApplied: { control: 'boolean' },
+    viewAction: { control: 'boolean' },
+  },
+  render: (a) => {
     const [view, setView] = React.useState('table');
-    const [q, setQ] = React.useState('');
-    const [status, setStatus] = React.useState<string | null>('active');
-    const [zone, setZone] = React.useState<string | null>(null);
-    const [date, setDate] = React.useState<Date | null>(null);
     const rows = [
-      { id: '623', doc: '623', client: 'Misael Hetfield', zone: 'Local', date: '8 jul 2026', status: 'Sin preparar' },
-      { id: '1363', doc: '1363', client: 'Cliente Boleta', zone: 'Metropolitana', date: '4 jul 2026', status: 'En ruta' },
-      { id: '1401', doc: '1401', client: 'Constructora Norte', zone: 'V Región', date: '9 jul 2026', status: 'En preparación' },
+      { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
+      { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
+      { id: '1044', doc: '1044', client: 'Cliente de mesón', branch: 'Casa matriz', date: '9 jul 2026', status: 'Entregado' },
     ];
-    const hasFilters = q !== '' || status !== 'active' || zone != null || date != null;
-    const clear = () => { setQ(''); setStatus('active'); setZone(null); setDate(null); };
+    const opts = (vals: string[]) => vals.map((v) => ({ value: v.toLowerCase(), label: v }));
+    const allFields = [
+      <FilterField key="q" label="Buscar"><Input defaultValue={a.filtersApplied ? '1042' : ''} placeholder="N° o cliente" /></FilterField>,
+      <FilterField key="status" label="Estado"><Combobox value={a.filtersApplied ? 'pendiente' : 'todos'} onChange={() => {}} searchable={false} options={opts(['Todos', 'Pendiente', 'Preparado', 'Entregado'])} /></FilterField>,
+      <FilterField key="branch" label="Sucursal"><Combobox value={null} onChange={() => {}} placeholder="Todas" searchable={false} options={opts(['Casa matriz', 'Sucursal Sur'])} /></FilterField>,
+      <FilterField key="seller" label="Vendedor"><Combobox value={null} onChange={() => {}} placeholder="Todos" options={opts(['Mesón 1', 'Mesón 2'])} /></FilterField>,
+      <FilterField key="date" label="Fecha"><DatePicker value={null} onChange={() => {}} placeholder="Cualquiera" /></FilterField>,
+      <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
+      <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,
+    ];
     return (
       <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gap: 16, alignContent: 'start' }}>
-        <PageHeader title="Órdenes de despacho" description="Trazabilidad desde la venta en Bsale hasta la entrega." actions={<Button>Nueva orden</Button>} />
+        <PageHeader title="Pedidos" description="Ventas y entregas de la sucursal." actions={<Button>Nuevo pedido</Button>} />
         <DataTable
-          ariaLabel="Órdenes"
+          ariaLabel="Pedidos"
           toolbar={
             <>
-              <TableToolbar>
-                <SegmentedControl value={view} onChange={(v) => setView(v ?? 'table')} ariaLabel="Vista">
-                  <SegmentedControlItem value="table">Tabla</SegmentedControlItem>
-                  <SegmentedControlItem value="agenda">Agenda</SegmentedControlItem>
-                  <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
-                </SegmentedControl>
-                <span className="grow" />
-                <Button variant="outline" size="sm">Exportar</Button>
-              </TableToolbar>
+              {a.viewSwitcher && (
+                <TableToolbar>
+                  <SegmentedControl value={view} onChange={(v) => setView(v ?? 'table')} ariaLabel="Vista">
+                    <SegmentedControlItem value="table">Tabla</SegmentedControlItem>
+                    <SegmentedControlItem value="cards">Tarjetas</SegmentedControlItem>
+                    <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
+                  </SegmentedControl>
+                  <span className="grow" />
+                  {a.viewAction && <Button variant="outline" size="sm">Exportar</Button>}
+                </TableToolbar>
+              )}
               <FilterBar
-                summary={`${rows.length} órdenes`}
-                actions={hasFilters ? <Button variant="ghost" size="sm" onClick={clear}>Limpiar</Button> : undefined}
+                summary={a.summary ? `${rows.length} pedidos` : undefined}
+                actions={a.filtersApplied ? <Button variant="ghost" size="sm">Limpiar</Button> : undefined}
               >
-                <FilterField label="Buscar">
-                  <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Documento o cliente" />
-                </FilterField>
-                <FilterField label="Estado">
-                  <Combobox value={status} onChange={setStatus} searchable={false} options={[
-                    { value: 'active', label: 'Activas' }, { value: 'all', label: 'Todas' }, { value: 'delivered', label: 'Entregadas' },
-                  ]} />
-                </FilterField>
-                <FilterField label="Zona">
-                  <Combobox value={zone} onChange={setZone} placeholder="Todas" searchable={false} options={[
-                    { value: 'local', label: 'Local' }, { value: 'rm', label: 'Metropolitana' }, { value: 'v', label: 'V Región' },
-                  ]} />
-                </FilterField>
-                <FilterField label="Vendedor">
-                  <Combobox value={null} onChange={() => {}} placeholder="Todos" options={[{ value: 'vt', label: 'Vendedor Test' }]} />
-                </FilterField>
-                <FilterField label="Entrega">
-                  <DatePicker value={date} onChange={setDate} placeholder="Cualquiera" />
-                </FilterField>
+                {allFields.slice(0, a.fields)}
               </FilterBar>
             </>
           }
           rows={rows}
           rowKey={(r) => r.id}
           columns={[
-            { key: 'doc', header: 'N° documento' },
+            { key: 'doc', header: 'N° pedido' },
             { key: 'client', header: 'Cliente' },
-            { key: 'zone', header: 'Zona' },
-            { key: 'date', header: 'Entrega' },
+            { key: 'branch', header: 'Sucursal' },
+            { key: 'date', header: 'Fecha' },
             { key: 'status', header: 'Estado' },
           ]}
         />
