@@ -3,6 +3,9 @@ import { resolve } from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from '../src/components/Filters';
+import { Combobox, DatePicker } from '../src/components/Pickers';
+import { DateRangePicker } from '../src/components/AdvancedPickers';
+import { Select } from '../src/components/Form';
 
 describe('FilterPanel', () => {
   it('shows count badge and clear button when active', () => {
@@ -155,5 +158,42 @@ describe('FilterBar', () => {
     const bar = container.querySelector('.filter-bar') as HTMLElement;
     expect(bar).toHaveClass('filter-bar--fixed-cols');
     expect(bar.style.getPropertyValue('--filter-cols')).toBe('4');
+  });
+});
+
+/**
+ * FilterField injects an id into its child via cloneElement and points the
+ * <label for> at it. That only names the control if the child forwards the id
+ * to its FOCUSABLE element (input / button). A composite picker that drops it
+ * leaves the label pointing at nothing — a filter with no accessible name.
+ * Pinned for every control the list-page recipe puts in a filter cell.
+ */
+describe('FilterField names composite controls (label → focusable element)', () => {
+  it('Select', () => {
+    render(<FilterField label="Estado"><Select defaultValue="a"><option value="a">A</option></Select></FilterField>);
+    expect(screen.getByLabelText('Estado').tagName).toBe('SELECT');
+  });
+  it('Combobox', () => {
+    render(<FilterField label="Vendedor"><Combobox value={null} onChange={() => {}} options={[{ value: 'a', label: 'A' }]} /></FilterField>);
+    const el = screen.getByLabelText('Vendedor');
+    expect(['INPUT', 'BUTTON']).toContain(el.tagName);
+  });
+  it('DatePicker', () => {
+    render(<FilterField label="Fecha"><DatePicker value={null} onChange={() => {}} /></FilterField>);
+    expect(screen.getByLabelText('Fecha').tagName).toBe('INPUT');
+  });
+  it('DateRangePicker', () => {
+    render(<FilterField label="Periodo"><DateRangePicker onApply={() => {}} /></FilterField>);
+    const el = screen.getByLabelText('Periodo');
+    expect(['INPUT', 'BUTTON']).toContain(el.tagName);
+  });
+});
+
+describe('FilterBar summary is a status message (v3.7.0)', () => {
+  it('announces politely: role="status" on the summary', () => {
+    const { container } = render(<FilterBar summary="12 pedidos"><span>f</span></FilterBar>);
+    const s = container.querySelector('.filter-bar__summary')!;
+    expect(s).toHaveAttribute('role', 'status');
+    expect(s).toHaveTextContent('12 pedidos');
   });
 });

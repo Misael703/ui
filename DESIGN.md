@@ -120,7 +120,15 @@ dense labels (`FilterField`), not form labels; free-text search first,
 selectors next, date last; five visible fields as the cap, the rest behind
 "Más filtros" (a Drawer, which doubles as the mobile bar). Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
-component. Story: Patterns/Filters › "Playground · página de listado".
+component. **Select vs Combobox in a filter cell:** native `Select` for a
+short, static list (a status enum, a handful of zones); `Combobox` for a
+dynamic or long one (sellers, trucks, drivers — anything fetched or worth
+typing into). One control per kind of task, so the user never meets two
+widgets for the same job across pages. The count in `summary` is a live
+region (`role="status"`): the new number is what tells a screen-reader user
+the filter acted. `FilterField` names every control the recipe uses — Select,
+Combobox, DatePicker, DateRangePicker — pinned in `Filters.test`. Story:
+Patterns/Filters › "Playground · página de listado".
 
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained

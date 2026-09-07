@@ -139,10 +139,12 @@ export function SortDropdown<T extends string = string>({
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Right-aligned, read-only slot for the RESULT of the filters — the row
-   * count ("12 órdenes"), a total. Sits at the fields' baseline, at the end of
-   * the row, and stays there when the fields grid wraps. Not an action:
-   * `actions` is for controls (Limpiar, Exportar); this is a datum, and a
-   * datum lives next to what produces it — the filters, not a toolbar row above.
+   * count ("12 pedidos"), a total, or a Skeleton while it loads. Sits at the
+   * fields' baseline, at the end of the row, and wraps together with `actions`.
+   * Rendered as a live region (`role="status"`), so a screen reader hears the
+   * new count when a filter changes — the only signal that the filter acted.
+   * Not an action: `actions` is for controls (Limpiar, Exportar); this is a
+   * datum, and a datum lives next to what produces it.
    */
   summary?: React.ReactNode;
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
@@ -175,7 +177,10 @@ export function FilterBar({
           count stayed up with the fields — a readout split from its buttons. */}
       {(summary != null || actions != null) && (
         <div className="filter-bar__end">
-          {summary != null && <div className="filter-bar__summary">{summary}</div>}
+          {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
+              the only signal that it acted; role="status" announces it politely
+              without stealing focus. Any node fits — a Skeleton while loading. */}
+          {summary != null && <div className="filter-bar__summary" role="status">{summary}</div>}
           {actions != null && <div className="filter-bar__actions">{actions}</div>}
         </div>
       )}

@@ -20,6 +20,14 @@ mano" que `FilterBar` existe para reemplazar.
   es un dato, y un dato vive junto a lo que lo produce.
 - **`.table-surface__bar > .filter-bar`** con padding propio: la barra ya se
   puede meter directo en el `toolbar` del `DataTable`, sin envoltorio.
+- **`summary` es una live region** (`role="status"`): al cambiar un filtro, el
+  conteo nuevo es la única señal de que el filtro actuó; se anuncia sin robar
+  el foco. Acepta cualquier nodo, p. ej. un `Skeleton` mientras carga.
+- **Tests de nombre accesible en `FilterField`** para Select, Combobox,
+  DatePicker y DateRangePicker: el `id` que inyecta por `cloneElement` llega
+  al elemento enfocable en los cuatro (ya era así; ahora está pineado).
+- **Regla Select vs Combobox** en `DESIGN.md`: nativo para listas cortas y
+  estáticas, Combobox para dinámicas o largas.
 - Story **"Playground · página de listado"** (Patterns/Filters): `PageHeader` →
   `DataTable toolbar={<FilterBar/>}` → filas, con controls para cantidad de
   campos, conteo, filtros aplicados y acción de exportar. Reglas en
