@@ -7,7 +7,8 @@ import { Button } from './Button';
 import { FormField, Input, Select } from './Form';
 import { NumberInput, EmptyState } from './Inputs';
 import { Modal, Drawer } from './Overlay';
-import { Badge, Alert, Skeleton } from './Display';
+import { Badge, Skeleton } from './Display';
+import { AlertTriangle } from './Icons';
 import { ToastProvider, useToast } from './Toast';
 
 export default { title: 'Patterns/CRUD', tags: ['autodocs'] } as Meta;
@@ -54,7 +55,7 @@ function validate(f: FormState, items: Product[], editingId: string | null): Par
  * **Playground · CRUD.** El ciclo completo de un recurso, con estado local real
  * (crea, edita y borra de verdad dentro del Storybook), para ver cómo se
  * comportan las piezas al juntarse: la receta de listado (`PageHeader` →
- * `DataTable` con `FilterBar` en `toolbar`), acciones por fila, selección con
+ * `DataTable` con `FilterBar` en `toolbar`: N campos, aquí tres), acciones por fila, selección con
  * `BulkActionBar`, crear/editar en `Drawer` o `Modal` con `FormField` y
  * validación, confirmación de borrado en `Modal`, `Toast` de resultado,
  * paginación, y los tres vacíos: sin datos, sin resultados por filtro, cargando
@@ -82,12 +83,14 @@ function CrudPage(a: CrudArgs) {
   // Filtros (la receta): búsqueda libre + un selector estático.
   const [q, setQ] = React.useState('');
   const [category, setCategory] = React.useState<'all' | Category>('all');
-  const hasFilters = q !== '' || category !== 'all';
-  const clearFilters = () => { setQ(''); setCategory('all'); setPage(1); };
+  const [availability, setAvailability] = React.useState<'all' | 'in' | 'out'>('all');
+  const hasFilters = q !== '' || category !== 'all' || availability !== 'all';
+  const clearFilters = () => { setQ(''); setCategory('all'); setAvailability('all'); setPage(1); };
   const filtered = React.useMemo(() => items.filter((p) =>
     (category === 'all' || p.category === category) &&
+    (availability === 'all' || (availability === 'in' ? p.stock > 0 : p.stock === 0)) &&
     (q === '' || `${p.name} ${p.sku}`.toLowerCase().includes(q.toLowerCase()))
-  ), [items, q, category]);
+  ), [items, q, category, availability]);
 
   const [page, setPage] = React.useState(1);
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -183,7 +186,7 @@ function CrudPage(a: CrudArgs) {
         ariaLabel="Productos"
         toolbar={
           <FilterBar
-            summary={a.state === 'loading' ? <Skeleton width={72} height={14} /> : `${filtered.length} productos`}
+            summary={a.state === 'loading' ? <Skeleton width={72} height={14} /> : a.state === 'error' ? '—' : `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`}
             actions={hasFilters ? <Button variant="ghost" size="sm" onClick={clearFilters}>Limpiar</Button> : undefined}
           >
             <FilterField label="Buscar"><Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Nombre o SKU" /></FilterField>
@@ -193,13 +196,26 @@ function CrudPage(a: CrudArgs) {
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </Select>
             </FilterField>
+            <FilterField label="Disponibilidad">
+              <Select value={availability} onChange={(e) => { setAvailability(e.target.value as 'all' | 'in' | 'out'); setPage(1); }}>
+                <option value="all">Todos</option>
+                <option value="in">Con stock</option>
+                <option value="out">Sin stock</option>
+              </Select>
+            </FilterField>
           </FilterBar>
         }
         columns={columns}
         rows={a.state === 'idle' ? pageRows : []}
         rowKey={(p) => p.id}
         loading={a.state === 'loading'}
-        error={a.state === 'error' ? <Alert variant="danger" title="No se pudo cargar el catálogo">Revisa la conexión e intenta de nuevo. <Button variant="outline" size="sm">Reintentar</Button></Alert> : undefined}
+        // The overlay is already role="alert" (red, centred): give it a STATE,
+        // not a second Alert. EmptyState with a danger icon + retry action.
+        error={a.state === 'error' ? (
+          <div style={{ color: 'var(--fg-default)' }}>
+            <EmptyState icon={<AlertTriangle size={28} />} title="No se pudo cargar el catálogo" description="Revisa la conexión e intenta de nuevo." action={<Button variant="outline" size="sm">Reintentar</Button>} />
+          </div>
+        ) : undefined}
         empty={emptyNode}
         selectable={a.selectable}
         selectedKeys={selected}
