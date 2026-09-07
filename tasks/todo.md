@@ -12,5 +12,5 @@
 - [x] T5 — Suite + build + tsc; Storybook a 1280 y 760: summary a 16px del borde y centrado en la banda de controles (36px) en ambos; a 760 los campos envuelven a 2 filas y el summary sigue alineado con la última.
 
 ## Review
-**Tests:** 1147 (2 nuevos). tsc limpio; lint solo warnings preexistentes (`label-has-for`). Build exit 0.
+**Tests:** 1147 (2 nuevos). tsc: 0 errores en los archivos de la rama (hay 1 error PREEXISTENTE en main en `Comments.stories.tsx`, fuera de esta rama); lint: 0 errores en la rama (2 errores preexistentes en el untracked `AppShellExplorations.stories.tsx`). Build exit 0.
 **Status:** commit local. PENDIENTE push + PR + release 3.7.0, aguardando OK. Después: migración de despachos (7 páginas) como PR aparte.

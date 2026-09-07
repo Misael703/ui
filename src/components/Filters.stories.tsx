@@ -171,7 +171,8 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const [q, setQ] = React.useState('');
     const [status, setStatus] = React.useState<string | null>('todos');
     React.useEffect(() => { setQ(a.filtersApplied ? '1042' : ''); setStatus(a.filtersApplied ? 'pendiente' : 'todos'); }, [a.filtersApplied]);
-    const hasFilters = q !== '' || status !== 'todos';
+    // Combobox's clear affordance yields null: that is "no filter", same as 'todos'.
+    const hasFilters = q !== '' || (status != null && status !== 'todos');
     const clear = () => { setQ(''); setStatus('todos'); };
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },

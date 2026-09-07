@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { CommentThread, AttachmentList } from './Comments';
+import { CommentThread, AttachmentList, type CommentItem } from './Comments';
 
 export default { title: 'Patterns/Comments', tags: ['autodocs'] } as Meta;
 
@@ -48,8 +48,8 @@ export const CommentThreadDemo: StoryObj = {
 export const CommentThreadInline: StoryObj = {
   name: 'CommentThread · Inline (chat-style)',
   render: () => {
-    const [empty, setEmpty] = React.useState<Array<{ id: string; author: { name: string }; body: React.ReactNode; timestamp: React.ReactNode; internal?: boolean }>>([]);
-    const [withHistory, setWithHistory] = React.useState([
+    const [empty, setEmpty] = React.useState<CommentItem[]>([]);
+    const [withHistory, setWithHistory] = React.useState<CommentItem[]>([
       { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente llamó, va a pasar a buscar el despacho a las 11:00.', timestamp: 'hace 10 min' },
       { id: '2', author: { name: 'Misael Ocas' }, body: 'Listo, dejo la guía firmada arriba del mostrador.', timestamp: 'hace 3 min' },
     ]);

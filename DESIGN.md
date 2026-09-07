@@ -134,7 +134,7 @@ Rule of thumb: if you would not drag it somewhere else as a thing, it is a
 section, not a card. Consumers who wrapped every block in a card (and patched
 a `card-flat` class to un-float sections) were compensating for a canvas that
 had to be very grey to make everything float; with canvas F and this rule, a
-page has one or two floating objects and breathes. Story: "Página sin cards".
+page has one or two floating objects and breathes. Story: Data Display/Card › "Playground · superficies en una página".
 
 **Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
 `--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,
