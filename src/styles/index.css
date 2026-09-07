@@ -4165,6 +4165,18 @@ button, input, select, textarea { box-sizing: border-box; }
   grid-template-columns: repeat(var(--filter-cols, 4), minmax(0, 1fr));
 }
 .filter-bar__actions { display: flex; align-items: flex-end; gap: var(--space-2); }
+/* `summary` (v3.7.0): the result count. `margin-left: auto` pushes it (and the
+   actions after it) to the end of the flex row — also on a wrapped line — and
+   the min-height matches the dense control so the text centres on the fields'
+   band, not on their labels. Quiet register: it is a readout, not a control. */
+.filter-bar__summary {
+  margin-left: auto; display: inline-flex; align-items: center;
+  min-height: var(--field-min-h, 36px); white-space: nowrap;
+  font-size: var(--text-sm); color: var(--fg-muted);
+}
+/* Inside a DataTable `toolbar` slot: the slot has no padding of its own
+   (TableToolbar brings its own), so the bar pads itself to the table's gutter. */
+.table-surface__bar > .filter-bar { padding: var(--space-3) 16px; }
 /* Combobox is inline-block min-width:220 by default; in a filter cell it must
    fill the cell, not impose its own width. */
 .filter-bar .combobox { min-width: 0; width: 100%; display: block; }

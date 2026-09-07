@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from '../src/components/Filters';
@@ -104,6 +106,33 @@ describe('FilterBar', () => {
     expect(container.querySelector('.filter-bar__fields .filter-field')).toBeInTheDocument();
   });
 
+  // `summary` (v3.7.0): the result count is not an action. It used to end up
+  // orphaned in a separate toolbar row (despachos: "12 órdenes" next to the
+  // view switcher); the rule is "a datum lives next to what produces it", so
+  // the count sits in the bar, right-aligned, at the fields' baseline — even
+  // when the fields grid wraps.
+  it('renders the summary slot only when provided, after the fields and before the actions', () => {
+    const { container, rerender } = render(
+      <FilterBar summary="12 órdenes" actions={<button type="button">Limpiar</button>}>
+        <FilterField label="Estado"><input /></FilterField>
+      </FilterBar>
+    );
+    const bar = container.querySelector('.filter-bar')!;
+    const kids = [...bar.children].map((c) => c.className);
+    expect(kids).toEqual(['filter-bar__fields', 'filter-bar__summary', 'filter-bar__actions']);
+    expect(bar.querySelector('.filter-bar__summary')).toHaveTextContent('12 órdenes');
+    rerender(<FilterBar><FilterField label="Estado"><input /></FilterField></FilterBar>);
+    expect(container.querySelector('.filter-bar__summary')).toBeNull();
+  });
+  it('CSS: the summary is pushed to the end of the row and centred on the dense control height', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const rule = css.match(/\.filter-bar__summary\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/margin-left:\s*auto/);
+    expect(rule).toMatch(/min-height:\s*var\(--field-min-h/);
+    // Inside a DataTable `toolbar` slot the bar gets its own padding (the slot
+    // has none; TableToolbar brings its own).
+    expect(css).toMatch(/\.table-surface__bar\s*>\s*\.filter-bar\s*\{[^}]*padding/);
+  });
   it('renders the actions slot only when provided', () => {
     const { container, rerender } = render(
       <FilterBar><span>f</span></FilterBar>

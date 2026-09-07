@@ -137,6 +137,14 @@ export function SortDropdown<T extends string = string>({
 // brand token, so forms elsewhere are untouched.
 
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Right-aligned, read-only slot for the RESULT of the filters — the row
+   * count ("12 órdenes"), a total. Sits at the fields' baseline, at the end of
+   * the row, and stays there when the fields grid wraps. Not an action:
+   * `actions` is for controls (Limpiar, Exportar); this is a datum, and a
+   * datum lives next to what produces it — the filters, not the view switcher.
+   */
+  summary?: React.ReactNode;
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
   actions?: React.ReactNode;
   /** Min column width (px) before the responsive grid wraps. Default 160. */
@@ -149,7 +157,7 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function FilterBar({
-  actions, minColWidth = 160, columns, className, children, style, ...rest
+  summary, actions, minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
   const gridVars = {
     ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
@@ -162,6 +170,7 @@ export function FilterBar({
       {...rest}
     >
       <div className="filter-bar__fields">{children}</div>
+      {summary != null && <div className="filter-bar__summary">{summary}</div>}
       {actions != null && <div className="filter-bar__actions">{actions}</div>}
     </div>
   );

@@ -5,6 +5,31 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] — 2026-09-07
+
+**Minor. `FilterBar summary` + la receta de página de listado.** Origen:
+estandarizar los filtros de las siete páginas CRUD de despachos, que arman a
+mano una Card con grilla de `FormField` (labels de formulario, controles de
+38px, conteo huérfano junto al switcher de vistas) — el "flex-cluster hecho a
+mano" que `FilterBar` existe para reemplazar.
+
+### Added
+- **`FilterBar summary`**: slot de solo lectura para el resultado de los
+  filtros (el conteo). Va al final de la fila, alineado a la banda de los
+  campos, y se queda ahí cuando la grilla envuelve. No es `actions`: un conteo
+  es un dato, y un dato vive junto a lo que lo produce.
+- **`.table-surface__bar > .filter-bar`** con padding propio: la barra ya se
+  puede meter directo en el `toolbar` del `DataTable`, apilada bajo un
+  `TableToolbar`, sin envoltorio.
+- Story **"Receta: página de listado"** (Patterns/Filters): `PageHeader` →
+  `DataTable toolbar={TableToolbar + FilterBar}` → filas, con switcher,
+  conteo en `summary` y "Limpiar" condicional. Reglas en `DESIGN.md`.
+
+### Notes
+- Despachos: reemplazar `Card` + `.ord-toolbar` + `.app-filter-grid` +
+  `FormField` por la receta en las siete páginas; `FormField` → `FilterField`;
+  las tres de flota comparten un `CatalogFilters` local sobre `FilterBar`.
+
 ## [3.6.1] — 2026-09-06
 
 ### Fixed
