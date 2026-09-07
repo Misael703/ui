@@ -20,6 +20,8 @@ export const esMessages: UiKitMessages = {
 
   // DataTable
   'table.empty': 'Sin datos',
+  'filterBar.more': 'Más filtros',
+  'filterBar.less': 'Menos filtros',
   'table.selectAll': 'Seleccionar todo',
   'table.selectRow': 'Seleccionar {label}',
   'table.rowAction': 'Ver {label}',

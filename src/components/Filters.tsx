@@ -149,7 +149,22 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   summary?: React.ReactNode;
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
   actions?: React.ReactNode;
-  /** Min column width (px) before the responsive grid wraps. Default 160. */
+  /**
+   * Collapse the bar to its first N fields (v3.7.0); the rest sit behind a
+   * "Más filtros" toggle in the trailing group. Use it when the full set
+   * wraps to a second line on desktop — the first N should be the filters
+   * people reach for daily, the search box first. Omit to show every field.
+   */
+  visibleCount?: number;
+  /**
+   * How many of the COLLAPSED fields currently hold a value. Shown as a badge
+   * on the toggle so an applied filter never hides silently; the bar cannot
+   * know this itself (it does not own the values).
+   */
+  hiddenActiveCount?: number;
+  /** Start expanded (uncontrolled; the toggle owns the state after mount). */
+  defaultExpanded?: boolean;
+  /** Min field width (px) before the row wraps; fields grow from it. Default 160. */
   minColWidth?: number;
   /**
    * Fixed column count instead of width-driven auto-fit. Use for a
@@ -159,8 +174,26 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function FilterBar({
-  summary, actions, minColWidth = 160, columns, className, children, style, ...rest
+  summary, actions, visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
+  minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
+  const t = useLocale();
+  const [expanded, setExpanded] = React.useState(defaultExpanded);
+  const all = React.Children.toArray(children);
+  const collapsible = visibleCount != null && visibleCount < all.length;
+  const shown = collapsible && !expanded ? all.slice(0, visibleCount) : all;
+  const toggle = collapsible ? (
+    <button
+      type="button"
+      className="filter-bar__toggle"
+      aria-expanded={expanded}
+      onClick={() => setExpanded((e) => !e)}
+    >
+      {expanded ? t['filterBar.less'] : t['filterBar.more']}
+      {!expanded && hiddenActiveCount > 0 && <span className="filter-bar__toggle-badge">{hiddenActiveCount}</span>}
+      {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+    </button>
+  ) : null;
   const gridVars = {
     ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
     ...style,
@@ -171,12 +204,14 @@ export function FilterBar({
       style={gridVars}
       {...rest}
     >
-      <div className="filter-bar__fields">{children}</div>
-      {/* One trailing group, so the count and the actions wrap TOGETHER: as
-          separate flex items the actions could drop to a new line while the
-          count stayed up with the fields — a readout split from its buttons. */}
-      {(summary != null || actions != null) && (
+      <div className="filter-bar__fields">{shown}</div>
+      {/* One trailing group, so the toggle, the count and the actions wrap
+          TOGETHER: as separate flex items the actions could drop to a new line
+          while the count stayed up with the fields — a readout split from its
+          buttons. */}
+      {(toggle != null || summary != null || actions != null) && (
         <div className="filter-bar__end">
+          {toggle}
           {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
               the only signal that it acted; role="status" announces it politely
               without stealing focus. Any node fits — a Skeleton while loading. */}

@@ -117,8 +117,11 @@ A table has one view; if an app adds its own view switching (board, agenda),
 that is the app's chrome above the table, not part of the recipe. Rules: one
 row on desktop, fields wrap by min width (160), never fixed per-field widths;
 dense labels (`FilterField`), not form labels; free-text search first,
-selectors next, date last; five visible fields as the cap, the rest behind
-"Más filtros" (a Drawer, which doubles as the mobile bar). Pages sharing the
+selectors next, date last; when the set wraps to a second desktop line, cap
+it with `visibleCount` (the first N are the daily filters, the rest behind the
+"Más filtros" toggle, badged with `hiddenActiveCount` so an applied filter
+never hides silently). Each line shares its width among its fields (flex-wrap,
+not an equal-column grid), so a wrapped pair fills the bar. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

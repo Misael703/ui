@@ -197,3 +197,57 @@ describe('FilterBar summary is a status message (v3.7.0)', () => {
     expect(s).toHaveTextContent('12 pedidos');
   });
 });
+
+/**
+ * v3.7.0 — two layout behaviours of the bar with MANY fields:
+ *  1. Rows fill. The fields box is a flex-wrap row (not an equal-column grid),
+ *     so a wrapped second line of two fields stretches across the bar instead
+ *     of leaving three empty grid cells. `columns` keeps the deterministic grid.
+ *  2. `visibleCount` collapses the rest behind a "Más filtros" toggle.
+ */
+describe('FilterBar fills rows and collapses extra fields', () => {
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  it('CSS: fields wrap as flex items that grow from the column minimum', () => {
+    const fields = css.match(/(^|\})\s*\.filter-bar__fields\s*\{([^}]*)\}/)?.[2] ?? '';
+    expect(fields).toMatch(/display:\s*flex/);
+    expect(fields).toMatch(/flex-wrap:\s*wrap/);
+    const field = css.match(/(^|\})\s*\.filter-field\s*\{([^}]*)\}/)?.[2] ?? '';
+    expect(field).toMatch(/flex:\s*1 1 var\(--filter-col-min/);
+    // fixed `columns` mode stays a grid
+    expect(css).toMatch(/\.filter-bar--fixed-cols\s+\.filter-bar__fields\s*\{[^}]*display:\s*grid/);
+  });
+  const four = [
+    <FilterField key="a" label="A"><input /></FilterField>,
+    <FilterField key="b" label="B"><input /></FilterField>,
+    <FilterField key="c" label="C"><input /></FilterField>,
+    <FilterField key="d" label="D"><input /></FilterField>,
+  ];
+  it('without visibleCount every field renders and there is no toggle', () => {
+    const { container } = render(<FilterBar>{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+  });
+  it('visibleCount shows the first N, the toggle expands and collapses the rest (aria-expanded)', () => {
+    const { container } = render(<FilterBar visibleCount={2}>{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+    const toggle = container.querySelector('.filter-bar__toggle') as HTMLButtonElement;
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveTextContent('Más filtros');
+    fireEvent.click(toggle);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle).toHaveTextContent('Menos filtros');
+    fireEvent.click(toggle);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+  });
+  it('visibleCount ≥ field count renders everything and no toggle', () => {
+    const { container } = render(<FilterBar visibleCount={4}>{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+  });
+  it('hiddenActiveCount badges the toggle so a collapsed applied filter is not invisible', () => {
+    const { container } = render(<FilterBar visibleCount={2} hiddenActiveCount={2}>{four}</FilterBar>);
+    expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('Más filtros');
+    expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('2');
+  });
+});

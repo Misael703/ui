@@ -23,6 +23,9 @@ export interface UiKitMessages {
 
   // DataTable
   'table.empty': string;
+  /** FilterBar `visibleCount` toggle (v3.7.0). */
+  'filterBar.more': string;
+  'filterBar.less': string;
   'table.selectAll': string;
   /** Template: "Seleccionar {label}" */
   'table.selectRow': string;

@@ -141,6 +141,7 @@ export const FilterBarDemo: StoryObj = {
 
 interface ListPageArgs {
   fields: number;
+  visibleCount: number;
   summary: boolean;
   filtersApplied: boolean;
   exportAction: boolean;
@@ -158,9 +159,10 @@ interface ListPageArgs {
 export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
   name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  args: { fields: 5, summary: true, filtersApplied: false, exportAction: true },
+  args: { fields: 7, visibleCount: 0, summary: true, filtersApplied: false, exportAction: true },
   argTypes: {
     fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
+    visibleCount: { control: { type: 'range', min: 0, max: 7, step: 1 }, description: '0 = todos visibles; N = colapsa el resto tras "Más filtros"' },
     summary: { control: 'boolean' },
     filtersApplied: { control: 'boolean' },
     exportAction: { control: 'boolean' },
@@ -201,7 +203,12 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
         <DataTable
           ariaLabel="Pedidos"
           toolbar={
-            <FilterBar summary={a.summary ? `${rows.length} pedidos` : undefined} actions={actions}>
+            <FilterBar
+              summary={a.summary ? `${rows.length} pedidos` : undefined}
+              actions={actions}
+              visibleCount={a.visibleCount > 0 ? a.visibleCount : undefined}
+              hiddenActiveCount={a.visibleCount > 0 && a.visibleCount < 2 && hasFilters ? 1 : 0}
+            >
               {allFields.slice(0, a.fields)}
             </FilterBar>
           }

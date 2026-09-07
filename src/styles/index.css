@@ -4161,11 +4161,17 @@ button, input, select, textarea { box-sizing: border-box; }
 .filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3) var(--space-4); }
 .filter-bar__fields {
   flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--filter-col-min, 160px), 1fr));
+  /* v3.7.0: a flex-wrap ROW, not an equal-column grid. With N fields wrapping
+     onto a second line, a grid left the trailing cells empty (two fields at
+     one-fifth width beside a blank three-fifths); flex lets each LINE share its
+     width among the fields it holds, so a wrapped pair stretches across the
+     bar. Cost: columns no longer align across lines — accepted, the bar is a
+     row of controls, not a table. `columns` keeps the deterministic grid. */
+  display: flex; flex-wrap: wrap;
   gap: var(--space-3) var(--space-4);
 }
 .filter-bar--fixed-cols .filter-bar__fields {
+  display: grid;
   grid-template-columns: repeat(var(--filter-cols, 4), minmax(0, 1fr));
 }
 .filter-bar__actions { display: flex; align-items: flex-end; gap: var(--space-2); }
@@ -4190,7 +4196,28 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Combobox is inline-block min-width:220 by default; in a filter cell it must
    fill the cell, not impose its own width. */
 .filter-bar .combobox { min-width: 0; width: 100%; display: block; }
-.filter-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.filter-field {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  /* Grow from the column minimum so every line fills the bar (see __fields). */
+  flex: 1 1 var(--filter-col-min, 160px);
+}
+/* `visibleCount` toggle: a quiet text button in the trailing group, with an
+   optional badge for applied filters that are currently collapsed. */
+.filter-bar__toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: var(--field-min-h, 36px); padding: 0 8px;
+  border: 0; background: transparent; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500;
+  color: var(--fg-muted); cursor: pointer; white-space: nowrap;
+}
+.filter-bar__toggle:hover { color: var(--fg-default); background: var(--bg-subtle); }
+.filter-bar__toggle:focus-visible { outline: none; box-shadow: var(--focus-ring-brand); }
+.filter-bar__toggle-badge {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--fill-brand); color: var(--fg-on-brand);
+  font-size: var(--text-2xs); font-weight: 600;
+}
 .filter-field__label {
   font-family: var(--font-body);
   font-size: var(--text-xs);

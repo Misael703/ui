@@ -28,6 +28,18 @@ mano" que `FilterBar` existe para reemplazar.
   al elemento enfocable en los cuatro (ya era así; ahora está pineado).
 - **Regla Select vs Combobox** en `DESIGN.md`: nativo para listas cortas y
   estáticas, Combobox para dinámicas o largas.
+- **`FilterBar visibleCount` + `hiddenActiveCount`**: colapsa la barra a sus
+  primeros N campos y pone el resto tras un toggle "Más filtros" /
+  "Menos filtros" (`aria-expanded`, claves de locale `filterBar.more/less`),
+  con badge de filtros aplicados escondidos. `defaultExpanded` para arrancar
+  abierto.
+
+### Changed
+- **`FilterBar`: las líneas llenan la barra.** Los campos pasan de una grilla
+  de columnas iguales a una fila flex-wrap (`flex: 1 1 160px`): una segunda
+  línea de dos campos se estira a todo el ancho en vez de dejar celdas
+  vacías. Las columnas ya no se alinean entre líneas, a propósito; `columns`
+  conserva la grilla fija.
 - Story **"Playground · CRUD"** (Patterns/CRUD): el ciclo completo de un
   recurso con estado local real — receta de listado, acciones por fila,
   selección con `BulkActionBar`, crear/editar en `Drawer` o `Modal` con
