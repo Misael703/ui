@@ -170,8 +170,15 @@ export function FilterBar({
       {...rest}
     >
       <div className="filter-bar__fields">{children}</div>
-      {summary != null && <div className="filter-bar__summary">{summary}</div>}
-      {actions != null && <div className="filter-bar__actions">{actions}</div>}
+      {/* One trailing group, so the count and the actions wrap TOGETHER: as
+          separate flex items the actions could drop to a new line while the
+          count stayed up with the fields — a readout split from its buttons. */}
+      {(summary != null || actions != null) && (
+        <div className="filter-bar__end">
+          {summary != null && <div className="filter-bar__summary">{summary}</div>}
+          {actions != null && <div className="filter-bar__actions">{actions}</div>}
+        </div>
+      )}
     </div>
   );
 }

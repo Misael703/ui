@@ -110,23 +110,28 @@ describe('FilterBar', () => {
   // park it in a separate toolbar row, orphaned from the filters; the rule is
   // "a datum lives next to what produces it", so the count sits in the bar,
   // right-aligned, at the fields' baseline — even when the fields grid wraps.
-  it('renders the summary slot only when provided, after the fields and before the actions', () => {
+  it('renders the summary only when provided, grouped with the actions in one trailing item after the fields', () => {
     const { container, rerender } = render(
       <FilterBar summary="12 órdenes" actions={<button type="button">Limpiar</button>}>
         <FilterField label="Estado"><input /></FilterField>
       </FilterBar>
     );
     const bar = container.querySelector('.filter-bar')!;
-    const kids = [...bar.children].map((c) => c.className);
-    expect(kids).toEqual(['filter-bar__fields', 'filter-bar__summary', 'filter-bar__actions']);
-    expect(bar.querySelector('.filter-bar__summary')).toHaveTextContent('12 órdenes');
+    expect([...bar.children].map((c) => c.className)).toEqual(['filter-bar__fields', 'filter-bar__end']);
+    const end = bar.querySelector('.filter-bar__end')!;
+    // Summary before actions inside the group: readout, then what acts on it.
+    expect([...end.children].map((c) => c.className)).toEqual(['filter-bar__summary', 'filter-bar__actions']);
+    expect(end.querySelector('.filter-bar__summary')).toHaveTextContent('12 órdenes');
     rerender(<FilterBar><FilterField label="Estado"><input /></FilterField></FilterBar>);
     expect(container.querySelector('.filter-bar__summary')).toBeNull();
+    // No summary and no actions → no empty trailing group either.
+    expect(container.querySelector('.filter-bar__end')).toBeNull();
   });
-  it('CSS: the summary is pushed to the end of the row and centred on the dense control height', () => {
+  it('CSS: the trailing group is pushed to the end of the row and the summary centres on the dense control height', () => {
     const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const end = css.match(/\.filter-bar__end\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(end).toMatch(/margin-left:\s*auto/);
     const rule = css.match(/\.filter-bar__summary\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(rule).toMatch(/margin-left:\s*auto/);
     expect(rule).toMatch(/min-height:\s*var\(--field-min-h/);
     // Inside a DataTable `toolbar` slot the bar gets its own padding (the slot
     // has none; TableToolbar brings its own).
