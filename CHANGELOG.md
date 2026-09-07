@@ -28,11 +28,23 @@ mano" que `FilterBar` existe para reemplazar.
   al elemento enfocable en los cuatro (ya era así; ahora está pineado).
 - **Regla Select vs Combobox** en `DESIGN.md`: nativo para listas cortas y
   estáticas, Combobox para dinámicas o largas.
+- Story **"Playground · CRUD"** (Patterns/CRUD): el ciclo completo de un
+  recurso con estado local real — receta de listado, acciones por fila,
+  selección con `BulkActionBar`, crear/editar en `Drawer` o `Modal` con
+  `FormField` y validación, confirmación de borrado, `Toast`, paginación y los
+  vacíos (sin datos, sin resultados, cargando, error). Controls: `rows`,
+  `editIn`, `state`, `selectable`.
 - Story **"Playground · página de listado"** (Patterns/Filters): `PageHeader` →
   `DataTable toolbar={<FilterBar/>}` → filas, con controls para cantidad de
   campos, conteo, filtros aplicados y acción de exportar. Reglas en
   `DESIGN.md` (una tabla tiene una vista; el switcher de vistas es chrome de la
   app, no parte de la receta).
+
+### Fixed
+- **`FormField` puede encoger dentro de un track de grid o una fila flex**
+  (`.form-field { min-width: 0 }`): su mínimo era el min-content del control
+  más ancho y desbordaba la celda (visto en un `Drawer` de 480px). Es el mismo
+  endurecimiento que ya tenía `.filter-field`.
 
 ### Changed
 - **Stories de composición genéricas.** "Fill height", "Ancha acotada con

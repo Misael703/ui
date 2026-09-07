@@ -274,7 +274,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .field--error .input:focus { box-shadow: var(--focus-ring-danger); }
 
 /* FormField (used by <FormField> component) */
-.form-field { display: flex; flex-direction: column; gap: 6px; }
+/* `min-width: 0` (v3.7.0): a column-flex box's default min-width is its
+   content's min-content, so a FormField inside a grid `1fr` track or a flex
+   row could not shrink below the widest control and overflowed its cell
+   (seen in a 480px Drawer). Same hardening `.filter-field` already carries. */
+.form-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .form-field__hint {
   font-size: var(--text-xs);
   color: var(--fg-subtle);

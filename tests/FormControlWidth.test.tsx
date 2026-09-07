@@ -51,3 +51,14 @@ describe('form-control width convention — fill by default', () => {
     expect(block('.number-input--block')).toMatch(/width:\s*100%/);
   });
 });
+
+// v3.7.0: a FormField must be able to shrink inside a grid `1fr` track or a
+// flex row. Its default min-width (min-content of the widest control) made it
+// overflow a 480px Drawer's form grid.
+describe('FormField shrinks inside constrained tracks', () => {
+  it('.form-field declares min-width: 0', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const rule = css.match(/\.form-field\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/min-width:\s*0/);
+  });
+});
