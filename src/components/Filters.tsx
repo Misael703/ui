@@ -142,7 +142,7 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
    * count ("12 órdenes"), a total. Sits at the fields' baseline, at the end of
    * the row, and stays there when the fields grid wraps. Not an action:
    * `actions` is for controls (Limpiar, Exportar); this is a datum, and a
-   * datum lives next to what produces it — the filters, not the view switcher.
+   * datum lives next to what produces it — the filters, not a toolbar row above.
    */
   summary?: React.ReactNode;
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */

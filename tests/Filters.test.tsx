@@ -106,11 +106,10 @@ describe('FilterBar', () => {
     expect(container.querySelector('.filter-bar__fields .filter-field')).toBeInTheDocument();
   });
 
-  // `summary` (v3.7.0): the result count is not an action. It used to end up
-  // orphaned in a separate toolbar row (despachos: "12 órdenes" next to the
-  // view switcher); the rule is "a datum lives next to what produces it", so
-  // the count sits in the bar, right-aligned, at the fields' baseline — even
-  // when the fields grid wraps.
+  // `summary` (v3.7.0): the result count is not an action. Consumers used to
+  // park it in a separate toolbar row, orphaned from the filters; the rule is
+  // "a datum lives next to what produces it", so the count sits in the bar,
+  // right-aligned, at the fields' baseline — even when the fields grid wraps.
   it('renders the summary slot only when provided, after the fields and before the actions', () => {
     const { container, rerender } = render(
       <FilterBar summary="12 órdenes" actions={<button type="button">Limpiar</button>}>

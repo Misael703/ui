@@ -166,6 +166,13 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     exportAction: { control: 'boolean' },
   },
   render: (a) => {
+    // Local filter state so the fields are live; the `filtersApplied` control
+    // seeds it (and "Limpiar" resets it), instead of freezing `defaultValue`s.
+    const [q, setQ] = React.useState('');
+    const [status, setStatus] = React.useState<string | null>('todos');
+    React.useEffect(() => { setQ(a.filtersApplied ? '1042' : ''); setStatus(a.filtersApplied ? 'pendiente' : 'todos'); }, [a.filtersApplied]);
+    const hasFilters = q !== '' || status !== 'todos';
+    const clear = () => { setQ(''); setStatus('todos'); };
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
       { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
@@ -173,17 +180,17 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     ];
     const opts = (vals: string[]) => vals.map((v) => ({ value: v.toLowerCase(), label: v }));
     const allFields = [
-      <FilterField key="q" label="Buscar"><Input defaultValue={a.filtersApplied ? '1042' : ''} placeholder="N° o cliente" /></FilterField>,
-      <FilterField key="status" label="Estado"><Combobox value={a.filtersApplied ? 'pendiente' : 'todos'} onChange={() => {}} searchable={false} options={opts(['Todos', 'Pendiente', 'Preparado', 'Entregado'])} /></FilterField>,
+      <FilterField key="q" label="Buscar"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="N° o cliente" /></FilterField>,
+      <FilterField key="status" label="Estado"><Combobox value={status} onChange={setStatus} searchable={false} options={opts(['Todos', 'Pendiente', 'Preparado', 'Entregado'])} /></FilterField>,
       <FilterField key="branch" label="Sucursal"><Combobox value={null} onChange={() => {}} placeholder="Todas" searchable={false} options={opts(['Casa matriz', 'Sucursal Sur'])} /></FilterField>,
       <FilterField key="seller" label="Vendedor"><Combobox value={null} onChange={() => {}} placeholder="Todos" options={opts(['Mesón 1', 'Mesón 2'])} /></FilterField>,
       <FilterField key="date" label="Fecha"><DatePicker value={null} onChange={() => {}} placeholder="Cualquiera" /></FilterField>,
       <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
       <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,
     ];
-    const actions = (a.filtersApplied || a.exportAction) ? (
+    const actions = (hasFilters || a.exportAction) ? (
       <>
-        {a.filtersApplied && <Button variant="ghost" size="sm">Limpiar</Button>}
+        {hasFilters && <Button variant="ghost" size="sm" onClick={clear}>Limpiar</Button>}
         {a.exportAction && <Button variant="outline" size="sm">Exportar</Button>}
       </>
     ) : undefined;
