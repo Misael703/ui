@@ -108,18 +108,19 @@ Not a `--focus-ring` colour: that name is the box-shadow family
 `--border-focus`.
 
 **List-page recipe (v3.7.0).** Every CRUD list is `PageHeader` (title +
-primary action) → `DataTable` with `toolbar` → rows. The toolbar stacks two
-bands on the table's own surface: `TableToolbar` for "how I see it" (view
-switcher, view actions) — present only when there is a switcher — and
-`FilterBar` for "what I see" (`FilterField`s, the result count in `summary`,
-"Limpiar" in `actions` only while a filter is applied). The count ALWAYS lives
-in `summary`: a datum sits next to what produces it. No Card around any of
-this. Rules: one row on desktop, fields wrap by min width (160), never fixed
-per-field widths; dense labels (`FilterField`), not form labels; free-text
-search first, selectors next, date last; five visible fields as the cap, the
-rest behind "Más filtros" (a Drawer, which doubles as the mobile bar). Pages
-sharing the same fields get a twenty-line local composition over `FilterBar`,
-not a kit component. Story: Patterns/Filters › "Playground · página de listado".
+primary action) → `DataTable` with `toolbar={<FilterBar/>}` → rows. The bar
+sits on the table's own surface and holds the `FilterField`s, the result count
+in `summary`, and in `actions` what operates on the result: "Limpiar" only
+while a filter is applied, "Exportar" if it exists. The count ALWAYS lives in
+`summary`: a datum sits next to what produces it. No Card around any of this.
+A table has one view; if an app adds its own view switching (board, agenda),
+that is the app's chrome above the table, not part of the recipe. Rules: one
+row on desktop, fields wrap by min width (160), never fixed per-field widths;
+dense labels (`FilterField`), not form labels; free-text search first,
+selectors next, date last; five visible fields as the cap, the rest behind
+"Más filtros" (a Drawer, which doubles as the mobile bar). Pages sharing the
+same fields get a twenty-line local composition over `FilterBar`, not a kit
+component. Story: Patterns/Filters › "Playground · página de listado".
 
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained

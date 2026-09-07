@@ -111,3 +111,9 @@ Northwind Builders; nunca nombres reales, columnas o copy de una app). Para prob
 comportan elementos al juntarse, un PLAYGROUND con controls o una story de composición con las
 variantes como args — no una story por caso. El caso concreto del consumidor se reproduce en
 scratch (story desechable sin commitear, o Playwright con overrides sobre la story genérica).
+[2026-09-07, mismo día] Context: al convertir la story de filtros en playground genérico dejé el
+switcher de vistas (Tabla/Tarjetas/Tablero) como parte de la "receta" y hasta lo escribí en
+DESIGN.md. Es el calco de despachos otra vez, disfrazado de regla. Usuario: "una tabla solo tiene
+una vista, vista de tabla, no la incluyas".
+→ Rule: antes de generalizar algo visto en un consumidor, preguntar si es propiedad del
+componente o decisión de esa app. Si solo existe en una app, no entra al kit ni a sus docs.

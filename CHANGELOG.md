@@ -19,12 +19,12 @@ mano" que `FilterBar` existe para reemplazar.
   campos, y se queda ahí cuando la grilla envuelve. No es `actions`: un conteo
   es un dato, y un dato vive junto a lo que lo produce.
 - **`.table-surface__bar > .filter-bar`** con padding propio: la barra ya se
-  puede meter directo en el `toolbar` del `DataTable`, apilada bajo un
-  `TableToolbar`, sin envoltorio.
+  puede meter directo en el `toolbar` del `DataTable`, sin envoltorio.
 - Story **"Playground · página de listado"** (Patterns/Filters): `PageHeader` →
-  `DataTable toolbar={TableToolbar + FilterBar}` → filas, con controls para
-  switcher, cantidad de campos, conteo y filtros aplicados. Reglas en
-  `DESIGN.md`.
+  `DataTable toolbar={<FilterBar/>}` → filas, con controls para cantidad de
+  campos, conteo, filtros aplicados y acción de exportar. Reglas en
+  `DESIGN.md` (una tabla tiene una vista; el switcher de vistas es chrome de la
+  app, no parte de la receta).
 
 ### Changed
 - **Stories de composición genéricas.** "Fill height", "Ancha acotada con

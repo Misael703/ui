@@ -5,9 +5,8 @@ import { Button } from './Button';
 import { Checkbox, Select, Input } from './Form';
 import { Slider } from './InputsExtra';
 import { Combobox, DatePicker } from './Pickers';
-import { DataTable, TableToolbar } from './DataTable';
+import { DataTable } from './DataTable';
 import { PageHeader } from './AppShell';
-import { SegmentedControl, SegmentedControlItem } from './Toggle';
 
 export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
@@ -141,36 +140,32 @@ export const FilterBarDemo: StoryObj = {
 };
 
 interface ListPageArgs {
-  viewSwitcher: boolean;
   fields: number;
   summary: boolean;
   filtersApplied: boolean;
-  viewAction: boolean;
+  exportAction: boolean;
 }
 
 /**
  * **Playground · página de listado.** La estructura estándar de un listado y
  * cómo se comportan sus piezas al juntarse: `PageHeader` → `DataTable` con
- * `toolbar` → filas. El `toolbar` apila `TableToolbar` ("cómo veo": switcher de
- * vistas y acciones de vista, solo si hay switcher) y `FilterBar` ("qué veo":
- * campos, conteo en `summary`, "Limpiar" en `actions` solo con filtros
- * aplicados). Sin Card: la tabla es la superficie. Sube `fields` a 7 para ver
- * cómo envuelve la grilla y dónde queda el conteo; quita el switcher para el
- * caso de un CRUD simple. Reglas completas en DESIGN.md › List-page recipe.
+ * `toolbar={<FilterBar/>}` → filas. La barra lleva los campos, el conteo en
+ * `summary` y en `actions` lo que opera sobre el resultado: "Limpiar" solo con
+ * filtros aplicados, "Exportar" si existe. Sin Card: la tabla es la
+ * superficie. Sube `fields` a 7 para ver cómo envuelve la grilla y dónde queda
+ * el conteo. Reglas completas en DESIGN.md › List-page recipe.
  */
 export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
   name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  args: { viewSwitcher: true, fields: 5, summary: true, filtersApplied: false, viewAction: true },
+  args: { fields: 5, summary: true, filtersApplied: false, exportAction: true },
   argTypes: {
-    viewSwitcher: { control: 'boolean' },
     fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
     summary: { control: 'boolean' },
     filtersApplied: { control: 'boolean' },
-    viewAction: { control: 'boolean' },
+    exportAction: { control: 'boolean' },
   },
   render: (a) => {
-    const [view, setView] = React.useState('table');
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
       { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
@@ -186,31 +181,21 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
       <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
       <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,
     ];
+    const actions = (a.filtersApplied || a.exportAction) ? (
+      <>
+        {a.filtersApplied && <Button variant="ghost" size="sm">Limpiar</Button>}
+        {a.exportAction && <Button variant="outline" size="sm">Exportar</Button>}
+      </>
+    ) : undefined;
     return (
       <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gap: 16, alignContent: 'start' }}>
         <PageHeader title="Pedidos" description="Ventas y entregas de la sucursal." actions={<Button>Nuevo pedido</Button>} />
         <DataTable
           ariaLabel="Pedidos"
           toolbar={
-            <>
-              {a.viewSwitcher && (
-                <TableToolbar>
-                  <SegmentedControl value={view} onChange={(v) => setView(v ?? 'table')} ariaLabel="Vista">
-                    <SegmentedControlItem value="table">Tabla</SegmentedControlItem>
-                    <SegmentedControlItem value="cards">Tarjetas</SegmentedControlItem>
-                    <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
-                  </SegmentedControl>
-                  <span className="grow" />
-                  {a.viewAction && <Button variant="outline" size="sm">Exportar</Button>}
-                </TableToolbar>
-              )}
-              <FilterBar
-                summary={a.summary ? `${rows.length} pedidos` : undefined}
-                actions={a.filtersApplied ? <Button variant="ghost" size="sm">Limpiar</Button> : undefined}
-              >
-                {allFields.slice(0, a.fields)}
-              </FilterBar>
-            </>
+            <FilterBar summary={a.summary ? `${rows.length} pedidos` : undefined} actions={actions}>
+              {allFields.slice(0, a.fields)}
+            </FilterBar>
           }
           rows={rows}
           rowKey={(r) => r.id}
