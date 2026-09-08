@@ -22,7 +22,8 @@ muestran los campos" vivía repartido en props implícitas (`visibleCount`,
     **se mide** (ResizeObserver; capacidad = `floor((barra − grupo final +
     gap) / (mínimo + gap))`) y colapsa SOLO si el set no cabe en una línea.
     `visibleCount` pasa a `number | 'auto'` (default `auto`): un número es un
-    tope, `auto` muestra los que quepan junto al grupo final (priority+).
+    tope, `auto` muestra los que quepan junto al grupo final (priority+),
+    nunca menos de dos (búsqueda + un selector siempre inline).
     Antes de medir (server, primer frame) muestra todo y pliega al montar.
   - `drawer`: los campos tras el embudo; **`pinned`** deja campos siempre en
     la barra (la búsqueda). El embudo va en el grupo final, junto a las

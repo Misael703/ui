@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from '../src/components/Filters';
 import { Combobox, DatePicker } from '../src/components/Pickers';
 import { DateRangePicker } from '../src/components/AdvancedPickers';
@@ -266,6 +266,28 @@ describe('FilterBar fills rows and collapses extra fields', () => {
     expect(container.querySelectorAll('.filter-field')).toHaveLength(3);
     expect(container.querySelector('.filter-bar__toggle')).not.toBeNull();
     restore();
+  });
+  it('collapse "auto" floors at two fields even when only one fits — 360px → 2 of 4', () => {
+    const restore = widths(360, 200);
+    const { container } = render(<FilterBar layout="collapse">{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+    restore();
+  });
+  it('re-measures on resize: the ResizeObserver callback re-derives the visible count', () => {
+    let cb: (() => void) | null = null;
+    const RO = class { constructor(fn: () => void) { cb = fn; } observe() {} disconnect() {} };
+    const prev = (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
+    (globalThis as { ResizeObserver?: unknown }).ResizeObserver = RO;
+    let restore = widths(640, 120);
+    const { container } = render(<FilterBar layout="collapse">{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(3);
+    restore();
+    restore = widths(1200, 120);
+    act(() => { cb?.(); });
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+    restore();
+    (globalThis as { ResizeObserver?: unknown }).ResizeObserver = prev;
   });
   it('unmeasured (server / first paint): everything shows, nothing folds', () => {
     const { container } = render(<FilterBar layout="collapse" visibleCount={2}>{four}</FilterBar>);

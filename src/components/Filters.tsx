@@ -204,7 +204,9 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
    * With `layout="collapse"`: how many fields stay inline when collapsed. A
    * number is a cap (the daily filters, search first) — the bar shows
    * `min(visibleCount, capacity)`; `'auto'` (default) shows as many as fit
-   * the first line next to the toggle, priority+ style.
+   * the first line next to the toggle, priority+ style, never fewer than two
+   * (a one-field bar next to a wide trailing group reads as broken; the
+   * second field wraps instead).
    */
   visibleCount?: number | 'auto';
   /**
@@ -321,7 +323,8 @@ export function FilterBar({
   const capacity = useFilterCapacity(barRef, endRef, minColWidth, mode === 'collapse' && !columns);
   const fits = capacity == null || capacity >= all.length;
   const cap = capacity == null ? all.length : Math.max(1, capacity);
-  const n = typeof visibleCount === 'number' ? Math.max(1, Math.min(visibleCount, cap)) : cap;
+  // `auto` floors at two: search + one selector always stay inline.
+  const n = typeof visibleCount === 'number' ? Math.max(1, Math.min(visibleCount, cap)) : Math.max(2, cap);
   const collapsible = mode === 'collapse' && !fits && n < all.length;
   const shown = collapsible && !expanded ? all.slice(0, n) : all;
   const hiddenKeys = new Set(collapsible && !expanded ? all.slice(n).map(childKey) : []);
