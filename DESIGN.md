@@ -137,7 +137,15 @@ too dense for cards keeps the table with `mobileLayout="table"` and marks the
 secondary columns `mobile: 'hidden'` (**priority columns**: identifier, name
 and state stay; the detail view carries the rest). Sorting has no header row
 in cards: when order matters on a phone, put an "Ordenar por" control in the
-toolbar. Pages sharing the
+toolbar. **Hierarchy in the bar:** the page's one primary action lives in the
+`PageHeader`; nothing in the filter bar is secondary. "Exportar", "Limpiar",
+"Filtros" are tertiary — `ghost sm`, with a lucide icon when the action has
+a universal glyph (`Filter` the funnel, `Download` for a file export; never
+the share-out arrow, which reads as "share"). On a desk the label stays
+("⤓ Exportar"); on a phone the same button collapses to its icon
+(`Button hideLabel="mobile"`), and the bar's own "Filtros" trigger is the
+funnel `IconButton` with the applied count overhanging it. Same icon at both
+widths; only the label drops. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

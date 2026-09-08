@@ -8,6 +8,7 @@ import { Combobox, DatePicker } from './Pickers';
 import { DataTable } from './DataTable';
 import { PageHeader } from './AppShell';
 import { Badge } from './Display';
+import { Download } from './Icons';
 
 export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
@@ -98,7 +99,10 @@ interface ListPageArgs {
  * cómo se comportan sus piezas al juntarse: `PageHeader` → `DataTable` con
  * `toolbar={<FilterBar/>}` → filas. La barra lleva los campos, el conteo en
  * `summary` y en `actions` lo que opera sobre el resultado: "Limpiar" solo con
- * filtros aplicados, "Exportar" si existe. Sin Card: la tabla es la
+ * filtros aplicados, "Exportar" si existe — ambas terciarias (`ghost sm`): la
+ * única primaria de la página vive en el `PageHeader`; en móvil "Exportar"
+ * colapsa a su ícono (`hideLabel="mobile"`) y "Filtros" es el embudo con el
+ * conteo encima. Sin Card: la tabla es la
  * superficie. Sube `fields` a 7 para ver cómo envuelve la grilla y dónde queda
  * el conteo. Reglas completas en DESIGN.md › List-page recipe.
  */
@@ -142,7 +146,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const actions = (hasFilters || a.exportAction) ? (
       <>
         {hasFilters && <Button variant="ghost" size="sm" onClick={clear}>Limpiar</Button>}
-        {a.exportAction && <Button variant="outline" size="sm">Exportar</Button>}
+        {a.exportAction && <Button variant="ghost" size="sm" iconLeft={<Download size={16} />} hideLabel="mobile">Exportar</Button>}
       </>
     ) : undefined;
     // minmax(0, 1fr): an implicit grid track is `auto` and would grow to the

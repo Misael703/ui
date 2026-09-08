@@ -40,6 +40,17 @@ mano" que `FilterBar` existe para reemplazar.
   comportamiento de escritorio. Hook interno `useMediaQuery` (no exportado).
   Claves de locale `filterBar.filters` / `filterBar.done`.
 
+- **`Button hideLabel`** (`true | 'mobile'`): el label queda en el DOM como
+  nombre accesible pero se recorta, y el botón se cuadra como `IconButton`;
+  `'mobile'` solo bajo 600px. Un `<Button iconLeft={<Download/>}
+  hideLabel="mobile">Exportar</Button>` lee "⤓ Exportar" en escritorio y "⤓"
+  en el teléfono sin lógica de breakpoint en el consumidor.
+- **Jerarquía en la barra de filtros** (DESIGN.md): la única primaria vive en
+  el `PageHeader`; Exportar / Limpiar / Filtros son terciarias (`ghost sm`),
+  con ícono lucide cuando hay glifo universal (`Filter` embudo, `Download`
+  para exportar a archivo). El trigger móvil de `FilterBar` pasa de un
+  `outline` con texto al embudo como `IconButton ghost` con el conteo de
+  aplicados montado en la esquina (nombre accesible "Filtros (n)").
 - **`Column.mobile`** en `DataTable`: rol de la columna bajo 600px —
   `'title' | 'status' | 'field' | 'actions' | 'hidden'`. En `cards` reparte la
   celda en la tarjeta (ver Changed); `'hidden'` no renderiza la columna

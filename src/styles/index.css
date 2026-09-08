@@ -108,6 +108,28 @@ button, input, select, textarea { box-sizing: border-box; }
 .btn--icon.btn--sm { width: 36px; }
 .btn--icon.btn--md { width: 38px; }
 .btn--icon.btn--lg { width: 44px; }
+/* `hideLabel` (v3.7.0): the label is clipped (still the accessible name) and
+   the button squares up like `.btn--icon`; `-mobile` only below 600px. */
+.btn--hide-label { padding: 0; aspect-ratio: 1; }
+.btn--hide-label.btn--xs { width: 28px; }
+.btn--hide-label.btn--sm { width: 36px; }
+.btn--hide-label.btn--md { width: 38px; }
+.btn--hide-label.btn--lg { width: 44px; }
+.btn--hide-label .btn__label {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .btn--hide-label-mobile { padding: 0; aspect-ratio: 1; }
+  .btn--hide-label-mobile.btn--xs { width: 28px; }
+  .btn--hide-label-mobile.btn--sm { width: 36px; }
+  .btn--hide-label-mobile.btn--md { width: 38px; }
+  .btn--hide-label-mobile.btn--lg { width: 44px; }
+  .btn--hide-label-mobile .btn__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
 .btn--block { display: flex; width: 100%; }
 
 /* variants */
@@ -4346,12 +4368,18 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Mobile drawer (v3.7.0): the fields stack full-width inside the sheet. */
 .filter-bar__sheet { display: grid; gap: var(--space-3); }
 .filter-bar__sheet .filter-field { flex: none; }
-.filter-bar__mobile-toggle { gap: 6px; }
 .filter-bar__toggle-badge {
   min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--fill-brand); color: var(--fg-on-brand);
   font-size: var(--text-2xs); font-weight: 600;
+}
+/* Mobile trigger: a tertiary icon button (the funnel); the applied count
+   overhangs its top-right corner like a notification badge. */
+.filter-bar__mobile-toggle { position: relative; flex-shrink: 0; }
+.filter-bar__mobile-toggle .filter-bar__toggle-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 16px; height: 16px; padding: 0 4px; line-height: 1;
 }
 .filter-field__label {
   font-family: var(--font-body);

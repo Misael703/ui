@@ -1,11 +1,11 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronDown, ChevronUp, X } from './Icons';
+import { ChevronDown, ChevronUp, X, Filter } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { Drawer } from './Overlay';
-import { Button } from './Button';
+import { Button, IconButton } from './Button';
 import { format } from '../locale/messages';
 
 // ---------- FilterPanel -------------------------------------------------
@@ -230,18 +230,19 @@ export function FilterBar({
         <>
           {/* Mobile: the fields move into a Drawer; the bar keeps a badged
               trigger so the applied-filter count never hides. */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="filter-bar__mobile-toggle"
-            aria-haspopup="dialog"
-            aria-expanded={sheetOpen}
-            onClick={() => setSheetOpen(true)}
-          >
-            {t['filterBar.filters']}
-            {activeCount > 0 && <span className="filter-bar__toggle-badge">{activeCount}</span>}
-          </Button>
+          <span className="filter-bar__mobile-toggle">
+            <IconButton
+              type="button"
+              variant="ghost"
+              size="sm"
+              icon={<Filter size={18} />}
+              aria-label={activeCount > 0 ? `${t['filterBar.filters']} (${activeCount})` : t['filterBar.filters']}
+              aria-haspopup="dialog"
+              aria-expanded={sheetOpen}
+              onClick={() => setSheetOpen(true)}
+            />
+            {activeCount > 0 && <span className="filter-bar__toggle-badge" aria-hidden="true">{activeCount}</span>}
+          </span>
           <Drawer
             open={sheetOpen}
             onClose={() => setSheetOpen(false)}

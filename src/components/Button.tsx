@@ -26,6 +26,16 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   iconRight?: React.ReactNode;
   fullWidth?: boolean;
   /**
+   * Collapse the button to its icon (v3.7.0): the label stays in the DOM as
+   * the accessible name but is visually clipped, and the button squares up
+   * like `IconButton`. `'mobile'` does it only below 600px — one `<Button
+   * iconLeft={<Download/>} hideLabel="mobile">Exportar</Button>` reads
+   * "⤓ Exportar" on a desk and "⤓" on a phone, with no breakpoint logic in
+   * the consumer. Pair it with `iconLeft` (or `iconRight`): a button with no
+   * icon and a hidden label is an empty square.
+   */
+  hideLabel?: boolean | 'mobile';
+  /**
    * Render as the provided single child element instead of `<button>`
    * (e.g. `next/link`'s `<a>`). The kit's classes, ref and handlers are
    * merged onto that element; `iconLeft`/`iconRight`/loading are preserved.
@@ -41,6 +51,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     iconLeft,
     iconRight,
     fullWidth = false,
+    hideLabel = false,
     className,
     disabled,
     children,
@@ -54,9 +65,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     `btn--${variant}`,
     `btn--${size}`,
     fullWidth && 'btn--block',
+    hideLabel === true && 'btn--hide-label',
+    hideLabel === 'mobile' && 'btn--hide-label-mobile',
     loading && 'is-loading',
     className
   );
+  const label = hideLabel ? <span className="btn__label">{children}</span> : children;
 
   if (asChild) {
     const blocked = disabled || loading;
@@ -72,7 +86,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
       >
         {loading && <span className="spinner spinner--current" aria-hidden="true" />}
         {!loading && iconLeft}
-        <Slottable>{children}</Slottable>
+        <Slottable>{label}</Slottable>
         {!loading && iconRight}
       </Slot>
     );
@@ -88,7 +102,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     >
       {loading && <span className="spinner spinner--current" aria-hidden="true" />}
       {!loading && iconLeft}
-      {children}
+      {label}
       {!loading && iconRight}
     </button>
   );

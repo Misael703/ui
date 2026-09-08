@@ -5,6 +5,7 @@ import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
 import { Modal } from './Overlay';
+import { Filter, Download } from './Icons';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
@@ -297,8 +298,8 @@ export const ConToolbar: StoryObj = {
         toolbar={
           <TableToolbar>
             <div className="grow"><Input placeholder="Buscar producto…" /></div>
-            <Button variant="outline" size="sm">Filtros</Button>
-            <Button size="sm">Exportar</Button>
+            <Button variant="ghost" size="sm" iconLeft={<Filter size={16} />} hideLabel="mobile">Filtros</Button>
+            <Button variant="ghost" size="sm" iconLeft={<Download size={16} />} hideLabel="mobile">Exportar</Button>
           </TableToolbar>
         }
         columns={[

@@ -287,9 +287,14 @@ describe('FilterBar mobile mode', () => {
     stubMedia(true);
     const { container, baseElement } = render(<FilterBar summary="3" activeCount={2} actions={<button type="button">Limpiar</button>}>{fields}</FilterBar>);
     expect(container.querySelectorAll('.filter-bar .filter-field')).toHaveLength(0);
-    const toggle = container.querySelector('.filter-bar__mobile-toggle') as HTMLButtonElement;
-    expect(toggle).toHaveTextContent('Filtros');
-    expect(toggle).toHaveTextContent('2');
+    // v3.7.0: a tertiary icon button (funnel) named "Filtros"; the applied
+    // count overhangs it as a badge (aria-hidden) and is folded into the name.
+    const wrap = container.querySelector('.filter-bar__mobile-toggle') as HTMLElement;
+    const toggle = wrap.querySelector('button') as HTMLButtonElement;
+    expect(toggle).toHaveAttribute('aria-label', 'Filtros (2)');
+    expect(toggle.querySelector('svg')).not.toBeNull();
+    expect(toggle.textContent).toBe('');
+    expect(wrap.querySelector('.filter-bar__toggle-badge')).toHaveTextContent('2');
     // summary and actions stay in the bar
     expect(container.querySelector('.filter-bar__summary')).toHaveTextContent('3');
     expect(screen.getByText('Limpiar')).toBeInTheDocument();
