@@ -7,7 +7,7 @@ import { Slider } from './InputsExtra';
 import { Combobox, DatePicker } from './Pickers';
 import { DataTable } from './DataTable';
 import { PageHeader } from './AppShell';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { Badge } from './Display';
 
 export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
@@ -144,6 +144,7 @@ interface ListPageArgs {
   fields: number;
   visibleCount: number;
   mobile: 'drawer' | 'inline';
+  mobileLayout: 'cards' | 'table';
   summary: boolean;
   filtersApplied: boolean;
   exportAction: boolean;
@@ -161,19 +162,17 @@ interface ListPageArgs {
 export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
   name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  args: { fields: 7, visibleCount: 0, mobile: 'drawer', summary: true, filtersApplied: false, exportAction: true },
+  args: { fields: 7, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true },
   argTypes: {
     fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
     visibleCount: { control: { type: 'range', min: 0, max: 7, step: 1 }, description: '0 = todos visibles; N = colapsa el resto tras "Más filtros"' },
     mobile: { control: 'inline-radio', options: ['drawer', 'inline'], description: 'Bajo 600px: Drawer con los campos (default) o inline. Angosta el canvas para verlo.' },
+    mobileLayout: { control: 'inline-radio', options: ['cards', 'table'], description: 'Bajo 600px: tarjetas por fila (default, `Column.mobile` reparte título/estado/campos) o tabla con columnas prioritarias (`mobile: "hidden"`).' },
     summary: { control: 'boolean' },
     filtersApplied: { control: 'boolean' },
     exportAction: { control: 'boolean' },
   },
   render: (a) => {
-    // On a phone the truncated Cliente column caps at 110px (`--table-cell-max`,
-    // read by `truncate`) so id · name · state fit 320px without sideways scroll.
-    const isMobile = useMediaQuery('(max-width: 600px)');
     // Local filter state so the fields are live; the `filtersApplied` control
     // seeds it (and "Limpiar" resets it), instead of freezing `defaultValue`s.
     const [q, setQ] = React.useState('');
@@ -206,7 +205,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     // minmax(0, 1fr): an implicit grid track is `auto` and would grow to the
     // table's max-content, pushing the page into horizontal scroll on a phone.
     return (
-      <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16, alignContent: 'start', ...(isMobile ? { ['--table-cell-max' as string]: '110px' } : {}) }}>
+      <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16, alignContent: 'start' }}>
         <PageHeader title="Pedidos" description="Ventas y entregas de la sucursal." actions={<Button>Nuevo pedido</Button>} />
         <DataTable
           ariaLabel="Pedidos"
@@ -224,14 +223,16 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
           }
           rows={rows}
           rowKey={(r) => r.id}
-          // Priority columns: on a phone the table keeps id · name · state;
-          // the secondary ones (`hideOnMobile`) live in the row's detail.
+          // Phone: cards by default — client as the title, state as the
+          // badge, the rest as label/value lines. `mobileLayout="table"` keeps
+          // the table and drops the secondary columns (`mobile: 'hidden'`).
+          mobileLayout={a.mobileLayout}
           columns={[
             { key: 'doc', header: 'N° pedido', width: 88 },
-            { key: 'client', header: 'Cliente', truncate: true },
-            { key: 'branch', header: 'Sucursal', hideOnMobile: true },
-            { key: 'date', header: 'Fecha', hideOnMobile: true },
-            { key: 'status', header: 'Estado' },
+            { key: 'client', header: 'Cliente', truncate: true, mobile: 'title' },
+            { key: 'branch', header: 'Sucursal', mobile: a.mobileLayout === 'table' ? 'hidden' : 'field' },
+            { key: 'date', header: 'Fecha', mobile: a.mobileLayout === 'table' ? 'hidden' : 'field' },
+            { key: 'status', header: 'Estado', mobile: 'status', accessor: (r) => <Badge variant={r.status === 'Entregado' ? 'success' : r.status === 'Preparado' ? 'info' : 'warning'}>{r.status}</Badge> },
           ]}
         />
       </div>

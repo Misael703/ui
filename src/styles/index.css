@@ -1251,52 +1251,154 @@ button, input, select, textarea { box-sizing: border-box; }
   z-index: 1;
 }
 
-/* Mobile card layout: below 600px, each row becomes a stacked card.
-   The thead is hidden because each cell carries its column label via
-   data-label, which the ::before pseudo-element surfaces inline. */
+/* Mobile card layout (`mobileLayout="cards"`, the default): below 600px each
+   row becomes a card with three zones, keyed off the `data-mobile` role the
+   component stamps on every cell (see `Column.mobile`):
+     header  — title (caption + value) · status (badge) · selection / expand
+     body    — one line per field: label left, value right, hairline between
+     footer  — actions, stretched to the card's width
+   Same DOM as the table (no second render path, no hydration mismatch): the
+   <tr> turns into a wrapping flex row and each zone orders itself. The
+   thead is hidden because each cell carries its column label via data-label,
+   surfaced by the ::before pseudo-element. Cards sit directly on the canvas,
+   so the wrap and the surface give up their own chrome here. */
 @media (max-width: 600px) {
-  .table-wrap--cards .table { border: 0; }
+  /* `.table-surface` is declared later in this file (same specificity), so
+     the cards override doubles the class to win the cascade. */
+  .table-wrap--cards,
+  .table-surface.table-surface--cards {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+  }
+  /* The toolbar loses the band's bottom rule and its inset: the filter chrome
+     floats on the canvas above the cards, flush with them. */
+  .table-surface.table-surface--cards > .table-surface__bar { border-bottom: 0; }
+  .table-surface.table-surface--cards > .table-surface__bar > .filter-bar { padding-inline: 0; }
+  .table-wrap--cards .table { border: 0; background: transparent; }
   .table-wrap--cards .table thead { display: none; }
   /* Footer cells lose their column geometry in card layout (no thead to
      align with) — hide them like the thead. */
   .table-wrap--cards .table tfoot { display: none; }
+  .table-wrap--cards .table tbody { display: grid; gap: var(--space-3); }
   .table-wrap--cards .table tr {
-    display: block;
-    margin-bottom: var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    border: 1px solid var(--border-on-canvas);
+    border-radius: var(--radius-lg);
     background: var(--bg-surface);
-    padding: var(--space-3);
+    overflow: hidden;
   }
   .table-wrap--cards .table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--space-3);
-    padding: var(--space-2) 0;
+    display: block;
+    flex: 0 0 100%;
+    min-width: 0;
     border: 0;
-    text-align: left !important;
+    padding: var(--space-2) var(--space-4);
     /* Cards stack vertically — the default nowrap/ellipsis would clip
        values here, so let card cells wrap and show in full. */
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
+  /* Alignment classes are desktop geometry; each zone sets its own below. */
+  .table-wrap--cards .table td.table__align-right > *,
+  .table-wrap--cards .table td.table__align-center > * { margin-inline: 0; }
   /* `truncate` columns lose their cap in card layout (cards already wrap and
      show the value in full). Overrides the var-based max-width; also drops the
      -webkit-box so the inline -webkit-line-clamp goes inert. */
   .table-wrap--cards .table__cell-clip { max-width: none; display: inline; white-space: normal; }
-  .table-wrap--cards .table td:not(:last-child) {
-    border-bottom: 1px solid var(--border-subtle);
+
+  /* ---- header zone: selection · expand · title · status --------------- */
+  .table-wrap--cards .table td[data-mobile="select"],
+  .table-wrap--cards .table td[data-mobile="expand"] {
+    flex: 0 0 auto;
+    order: -3;
+    padding-right: 0;
   }
-  .table-wrap--cards .table td[data-label]::before {
+  .table-wrap--cards .table td[data-mobile="title"] {
+    flex: 1 1 0;
+    order: -2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-block: var(--space-3);
+    text-align: left !important;
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--fg-default);
+    line-height: var(--leading-snug);
+  }
+  .table-wrap--cards .table td[data-mobile="title"][data-label]::before {
     content: attr(data-label);
+    font-size: var(--text-2xs);
     font-weight: 600;
     color: var(--fg-muted);
-    flex-shrink: 0;
     text-transform: var(--tt-label);
-    font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
+    line-height: 1.2;
+  }
+  .table-wrap--cards .table td[data-mobile="status"] {
+    flex: 0 0 auto;
+    order: -1;
+    padding-block: var(--space-3);
+    text-align: right !important;
+  }
+
+  /* ---- body zone: label left, value right ------------------------------ */
+  .table-wrap--cards .table td[data-mobile="field"] {
+    border-top: 1px solid var(--border-default);
+    text-align: right !important;
+  }
+  .table-wrap--cards .table td[data-mobile="field"][data-label]::before {
+    content: attr(data-label);
+    float: left;
+    margin-right: var(--space-3);
+    /* The label is UI text even when the cell is numeric (`.table__num` sets
+       the mono face on the <td>; only the value should wear it). */
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    text-transform: var(--tt-data);
+    letter-spacing: var(--tracking-snug);
+  }
+  /* A field cell that carries a stacked composite (name + `.cell-meta`)
+     keeps the value flush right as a block. */
+  .table-wrap--cards .table td[data-mobile="field"] > * { display: inline; }
+
+  /* ---- footer zone: actions stretched --------------------------------- */
+  .table-wrap--cards .table td[data-mobile="actions"] {
+    order: 1;
+    display: flex;
+    gap: var(--space-2);
+    border-top: 1px solid var(--border-default);
+    padding-block: var(--space-3);
+    text-align: left !important;
+  }
+  .table-wrap--cards .table td[data-mobile="actions"] > * {
+    display: flex;
+    flex: 1 1 0;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .table-wrap--cards .table td[data-mobile="actions"] .btn { flex: 1 1 0; }
+  /* A ghost action reads fine in a table cell (hover reveals it) but floats
+     in a card footer's whitespace: give it the control hairline here. */
+  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost { border-color: var(--border-control); }
+
+  /* Expanded detail: its own card right under the row. */
+  .table-wrap--cards .table tr.data-table__detail {
+    display: block;
+    margin-top: calc(-1 * var(--space-3) + 4px);
+  }
+  .table-wrap--cards .table tr.data-table__detail > td {
+    box-shadow: none;
+    background: var(--bg-subtle);
+    padding: var(--space-3) var(--space-4);
   }
 }
 .table th[aria-sort="ascending"] .data-table__sort,

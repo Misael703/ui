@@ -349,10 +349,12 @@ describe('DataTable', () => {
     expect(cells[1].getAttribute('data-label')).toBe('SKU');
   });
 
-  it('mobileLayout default is table — no cards class', () => {
-    const { container } = render(
+  it('mobileLayout defaults to cards (v3.7.0); "table" opts out', () => {
+    const { container, rerender } = render(
       <DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />
     );
+    expect(container.querySelector('.table-wrap--cards')).not.toBeNull();
+    rerender(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} mobileLayout="table" />);
     expect(container.querySelector('.table-wrap--cards')).toBeNull();
   });
 
@@ -616,20 +618,20 @@ describe('DataTable — column truncate (hard cap that never stretches the colum
 });
 
 /**
- * `Column.hideOnMobile` (v3.7.0): priority columns. On a phone a five-column
- * table either scrolls sideways (first columns vanish) or explodes into
- * key/value cards (three screens for three rows). The scalable answer keeps
- * the TABLE and drops the secondary columns below 600px — the detail view
- * carries the rest. jsdom has no matchMedia; stubbed per test.
+ * `Column.mobile` (v3.7.0): the cell's zone in the mobile card (title /
+ * status / field / actions) or `hidden`. Zones are stamped as `data-mobile`
+ * on every cell at every width — the CSS keys off them below 600px — while
+ * `hidden` removes the column (header + cells) only while the mobile query
+ * matches. jsdom has no matchMedia; stubbed per test.
  */
-describe('Column.hideOnMobile', () => {
+describe('Column.mobile', () => {
   const stub = (matches: boolean) => Object.defineProperty(window, 'matchMedia', {
     configurable: true, writable: true,
     value: (media: string) => ({ matches, media, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false }),
   });
   const colsM = [
     { key: 'name', header: 'Nombre' },
-    { key: 'sku', header: 'SKU', hideOnMobile: true },
+    { key: 'sku', header: 'SKU', mobile: 'hidden' as const },
     { key: 'stock', header: 'Stock' },
   ];
   it('wide: every column renders', () => {
@@ -637,11 +639,64 @@ describe('Column.hideOnMobile', () => {
     render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
     expect(screen.getByText('SKU')).toBeInTheDocument();
   });
-  it('narrow: the flagged column is dropped from header and cells', () => {
+  it('narrow: the hidden column is dropped from header and cells (both layouts)', () => {
     stub(true);
-    const { container } = render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
+    const { container, rerender } = render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
     expect(screen.queryByText('SKU')).toBeNull();
     expect(container.querySelectorAll('thead th')).toHaveLength(2);
     expect(container.querySelector('tbody tr')!.querySelectorAll('td')).toHaveLength(2);
+    rerender(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} mobileLayout="table" />);
+    expect(screen.queryByText('SKU')).toBeNull();
+    expect(container.querySelectorAll('thead th')).toHaveLength(2);
+  });
+  it('stamps data-mobile zones at every width: first plain column is the title, the rest fields', () => {
+    stub(false);
+    const { container } = render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
+    const tds = container.querySelector('tbody tr')!.querySelectorAll('td');
+    expect(tds[0].getAttribute('data-mobile')).toBe('title');
+    // wide: a `hidden` column still renders, stamped with its role (inert until the query matches)
+    expect(tds[1].getAttribute('data-mobile')).toBe('hidden');
+    expect(tds[2].getAttribute('data-mobile')).toBe('field');
+  });
+  it('explicit roles win; a status/actions column never becomes the title by position', () => {
+    stub(false);
+    const colsR = [
+      { key: 'state', header: 'Estado', mobile: 'status' as const },
+      { key: 'name', header: 'Nombre' },
+      { key: 'sku', header: 'SKU', mobile: 'title' as const },
+      { key: 'ops', header: '', mobile: 'actions' as const, accessor: () => <button type="button">Editar</button> },
+    ];
+    const { container } = render(<DataTable columns={colsR} rows={rows} rowKey={(r) => r.id} selectable />);
+    const tds = container.querySelector('tbody tr')!.querySelectorAll('td');
+    expect(tds[0].getAttribute('data-mobile')).toBe('select');
+    expect(tds[1].getAttribute('data-mobile')).toBe('status');
+    expect(tds[2].getAttribute('data-mobile')).toBe('field');
+    expect(tds[3].getAttribute('data-mobile')).toBe('title');
+    expect(tds[4].getAttribute('data-mobile')).toBe('actions');
+  });
+  it('without an explicit title, the first non-special column is the title', () => {
+    stub(false);
+    const colsR = [
+      { key: 'state', header: 'Estado', mobile: 'status' as const },
+      { key: 'name', header: 'Nombre' },
+    ];
+    const { container } = render(<DataTable columns={colsR} rows={rows} rowKey={(r) => r.id} />);
+    const tds = container.querySelector('tbody tr')!.querySelectorAll('td');
+    expect(tds[0].getAttribute('data-mobile')).toBe('status');
+    expect(tds[1].getAttribute('data-mobile')).toBe('title');
+  });
+  it('cards CSS: zones order themselves and the card drops the wrap chrome', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    const block = css.match(/\/\* Mobile card layout[\s\S]*?@media \(max-width: 600px\) \{([\s\S]*?)\n\}\n/)?.[1] ?? '';
+    expect(block).toMatch(/\.table-wrap--cards \.table tr \{[^}]*display:\s*flex/);
+    expect(block).toMatch(/\.table-wrap--cards \.table tr \{[^}]*flex-wrap:\s*wrap/);
+    expect(block).toMatch(/td\[data-mobile="title"\] \{[^}]*order:\s*-2/);
+    expect(block).toMatch(/td\[data-mobile="status"\] \{[^}]*order:\s*-1/);
+    expect(block).toMatch(/td\[data-mobile="actions"\] \{[^}]*order:\s*1/);
+    expect(block).toMatch(/td\[data-mobile="title"\]\[data-label\]::before \{[^}]*content:\s*attr\(data-label\)/);
+    expect(block).toMatch(/td\[data-mobile="field"\]\[data-label\]::before \{[^}]*float:\s*left/);
+    // cards on the canvas: the wrap AND the toolbar'd surface lose border/bg
+    expect(block).toMatch(/\.table-wrap--cards,\s*\.table-surface\.table-surface--cards \{[^}]*border:\s*0/);
+    expect(block).toMatch(/\.table-wrap--cards \.table tr \{[^}]*border:\s*1px solid var\(--border-on-canvas\)/);
   });
 });

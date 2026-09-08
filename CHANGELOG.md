@@ -40,13 +40,34 @@ mano" que `FilterBar` existe para reemplazar.
   comportamiento de escritorio. Hook interno `useMediaQuery` (no exportado).
   Claves de locale `filterBar.filters` / `filterBar.done`.
 
-- **`Column.hideOnMobile`** en `DataTable`: columnas prioritarias. Bajo 600px la
-  columna marcada no se renderiza (header ni celdas): la tabla sigue siendo
-  tabla con las dos o tres columnas que importan, y el detalle de la fila
-  lleva el resto. Es la respuesta escalable para listados en teléfono; el modo
-  `cards` queda para tablas que se leen como fichas.
+- **`Column.mobile`** en `DataTable`: rol de la columna bajo 600px —
+  `'title' | 'status' | 'field' | 'actions' | 'hidden'`. En `cards` reparte la
+  celda en la tarjeta (ver Changed); `'hidden'` no renderiza la columna
+  (header ni celdas) en ninguno de los dos layouts: con `mobileLayout="table"`
+  son las **columnas prioritarias** (quedan identificador · nombre · estado y
+  el detalle de la fila lleva el resto). Sin `title` explícito, la primera
+  columna normal es el título (una de estado o acciones nunca lo es por
+  posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
 
 ### Changed
+- **Cards mobile rehechas y por default.** `mobileLayout` pasa a `'cards'`:
+  bajo 600px cada fila es una tarjeta con tres zonas según `Column.mobile` —
+  cabecera (título en registro display con la etiqueta de la columna como
+  caption encima, badge de estado a la derecha, checkbox de selección y
+  expand a la izquierda), cuerpo (una línea por campo, etiqueta a la izquierda
+  y valor a la derecha, hairline entre líneas) y pie (acciones estiradas a lo
+  ancho). Antes cada celda era una línea "etiqueta: valor" idéntica a la
+  siguiente: el id, el nombre, el estado y los botones pesaban igual y no
+  había nada que leer de un vistazo. Mismo DOM que la tabla (flex-wrap sobre
+  el `tr`, `order` por zona), así que no hay segunda rama de render ni
+  desajuste de hidratación. Las tarjetas van directo sobre el canvas
+  (`--border-on-canvas`): el wrap y el `table-surface` con toolbar sueltan su
+  borde y fondo bajo el breakpoint (`.table-surface--cards`). El detalle
+  expandido es su propia tarjeta pegada a la fila. `mobileLayout="table"`
+  conserva la tabla con scroll horizontal.
+- **Virtualización y cards.** El gate `virtualizeRows` ignoraba el modo
+  `cards` a secas; con el default nuevo habría apagado la virtualización en
+  todo viewport. Ahora se apaga solo mientras la query mobile coincide.
 - **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de
   columnas iguales y entran al flujo flex-wrap de la barra (`display:
   contents` en la caja de campos, `flex: 1 1 160px` por campo): una segunda

@@ -128,13 +128,14 @@ function CrudPage(a: CrudArgs) {
 
   const columns: Column<Product>[] = [
     { key: 'name', header: 'Producto', accessor: (p) => <><span>{p.name}</span><span className="cell-meta">{p.sku}</span></> },
-    { key: 'category', header: 'Categoría', hideOnMobile: true, accessor: (p) => <Badge variant="neutral">{p.category}</Badge> },
+    { key: 'category', header: 'Categoría', accessor: (p) => <Badge variant="neutral">{p.category}</Badge> },
     { key: 'stock', header: 'Stock', numeric: true, accessor: (p) => (p.stock === 0 ? <Badge variant="danger">Sin stock</Badge> : p.stock) },
-    { key: 'price', header: 'Precio', numeric: true, hideOnMobile: true, accessor: (p) => money(p.price) },
-    // Row actions are desktop chrome; on a phone the column goes and the row
-    // itself opens the editor (onRowClick), where Eliminar also lives.
+    { key: 'price', header: 'Precio', numeric: true, accessor: (p) => money(p.price) },
+    // On a phone the row is a card: name (+ sku) is the title, the other
+    // columns are label/value lines and the actions stretch across the footer
+    // (`mobile: 'actions'`). The row itself also opens the editor (onRowClick);
     // `data-row-interactive` keeps these buttons from activating the row.
-    { key: 'actions', header: '', align: 'right', width: 150, hideOnMobile: true, accessor: (p) => (
+    { key: 'actions', header: '', align: 'right', width: 150, mobile: 'actions', accessor: (p) => (
       <span style={{ display: 'inline-flex', gap: 4 }}>
         <Button variant="ghost" size="sm" data-row-interactive onClick={() => openEdit(p)}>Editar</Button>
         <Button variant="ghost" size="sm" data-row-interactive onClick={() => setConfirm({ ids: [p.id], label: p.name })}>Eliminar</Button>

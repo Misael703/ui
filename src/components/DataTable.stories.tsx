@@ -557,26 +557,37 @@ export const FilaDensaDeFiltros: StoryObj = {
   ),
 };
 
-/** Card layout en mobile: a partir de <600px cada fila se renderiza como
- * una tarjeta con label + value. Usa el viewport mobile en Storybook para verlo. */
+/** Card layout en mobile (default): bajo 600px cada fila es una tarjeta con
+ * tres zonas según `Column.mobile` — cabecera (título con caption + estado +
+ * checkbox), cuerpo (label · valor) y pie (acciones a lo ancho). Mismo DOM que
+ * la tabla. Usa el viewport mobile en Storybook para verlo. */
 export const CardLayoutMobile: StoryObj = {
   parameters: {
     viewport: { defaultViewport: 'mobile1' },
   },
-  render: () => (
-    <DataTable
-      mobileLayout="cards"
-      rows={rows}
-      rowKey={(r) => r.id}
-      ariaLabel="Productos"
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-        { key: 'stock', header: 'Stock', align: 'right' },
-        { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-      ]}
-    />
-  ),
+  render: () => {
+    const [sel, setSel] = React.useState<Set<string>>(new Set());
+    return (
+      <div style={{ background: 'var(--bg-canvas)', padding: 16 }}>
+        <DataTable
+          rows={rows}
+          rowKey={(r) => r.id}
+          ariaLabel="Productos"
+          selectable
+          selectedKeys={sel}
+          onSelectionChange={setSel}
+          onRowClick={() => {}}
+          columns={[
+            { key: 'name', header: 'Producto', mobile: 'title' },
+            { key: 'sku', header: 'SKU' },
+            { key: 'stock', header: 'Stock', align: 'right', mobile: 'status', accessor: (r) => (r.stock === 0 ? <Badge variant="danger">Sin stock</Badge> : <Badge variant="success">{r.stock} en stock</Badge>) },
+            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+            { key: 'actions', header: '', align: 'right', mobile: 'actions', accessor: () => <Button variant="outline" size="sm" data-row-interactive>Ver detalle</Button> },
+          ]}
+        />
+      </div>
+    );
+  },
 };
 
 /** TablePagination con page-size selector y rango de filas. */
@@ -684,7 +695,7 @@ interface DataTablePlaygroundArgs {
 
 /** Playground interactivo: alterna `stickyHeader`/`selectable`/`loading`/`mobileLayout`. */
 export const DataTablePlayground: StoryObj = {
-  args: { stickyHeader: false, selectable: false, loading: false, mobileLayout: 'table' },
+  args: { stickyHeader: false, selectable: false, loading: false, mobileLayout: 'cards' },
   argTypes: {
     stickyHeader: { control: 'boolean' },
     selectable: { control: 'boolean' },

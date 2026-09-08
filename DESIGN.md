@@ -126,11 +126,18 @@ bar swaps the fields for a "Filtros" button (badged with `activeCount`) that
 opens a Drawer holding the same fields, stacked — `mobile="drawer"` by default;
 summary and actions stay in the bar. Inline expansion is for desktop, where
 filter and result stay in view together; the drawer is the mobile answer, not
-a desktop alternative. The table itself keeps two or three **priority
-columns** on a phone (`Column.hideOnMobile` on the rest: identifier, name and
-state stay; the detail view carries the secondary fields) — not sideways
-scroll, and not key/value cards, which turn three rows into three screens.
-Pages sharing the
+a desktop alternative. **The table becomes cards on a phone** (`mobileLayout`
+defaults to `'cards'`): a card is not a row turned sideways but three zones
+with a hierarchy, and `Column.mobile` says where each column lands — `title`
+(the name, with the column header as a caption), `status` (the badge, top
+right), `field` (label left, value right, one hairline per line), `actions`
+(the footer, stretched). Same DOM as the table; the cards sit directly on the
+canvas, so the wrap and the toolbar's surface drop their border there. A list
+too dense for cards keeps the table with `mobileLayout="table"` and marks the
+secondary columns `mobile: 'hidden'` (**priority columns**: identifier, name
+and state stay; the detail view carries the rest). Sorting has no header row
+in cards: when order matters on a phone, put an "Ordenar por" control in the
+toolbar. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

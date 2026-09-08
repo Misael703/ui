@@ -167,8 +167,15 @@ describe('DataTable virtualizeRows (integración)', () => {
     restore();
   });
 
-  it('mobileLayout="cards" desactiva la virtualización', () => {
+  it('mobileLayout="cards" desactiva la virtualización SOLO bajo el breakpoint mobile', () => {
     const restore = mockClientHeight(320);
+    // jsdom has no matchMedia: stub it so the mobile query matches. Wide
+    // viewports keep virtualizing with the (default) cards layout.
+    const prev = window.matchMedia;
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true, writable: true,
+      value: (media: string) => ({ matches: true, media, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false }),
+    });
     const { container } = render(
       <DataTable
         columns={COLS}
@@ -180,6 +187,7 @@ describe('DataTable virtualizeRows (integración)', () => {
       />
     );
     expect(container.querySelectorAll('tbody tr')).toHaveLength(200);
+    Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: prev });
     restore();
   });
 });

@@ -56,12 +56,14 @@ interface DataTableRowProps<T> {
   onToggleExpand?: (k: string) => void;
   expandLabel?: string;
   detailId?: string;
+  /** Key of the column that becomes the card title (see `Column.mobile`). */
+  mobileTitleKey?: string;
 }
 
 function DataTableRowImpl<T>({
   row, rowK, selected, selectable, selectAriaLabel, columns, onToggle,
   href, onActivate, actionLabel, renderRow,
-  expandable, expanded, onToggleExpand, expandLabel, detailId,
+  expandable, expanded, onToggleExpand, expandLabel, detailId, mobileTitleKey,
 }: DataTableRowProps<T>) {
   const interactive = !renderRow && (!!href || !!onActivate);
 
@@ -92,7 +94,7 @@ function DataTableRowImpl<T>({
   const cells = (
     <>
       {selectable && (
-        <td className={cx(interactive && 'data-table__cell--above')}>
+        <td className={cx(interactive && 'data-table__cell--above')} data-mobile="select">
           <Checkbox
             checked={selected}
             onChange={() => onToggle(rowK)}
@@ -101,7 +103,7 @@ function DataTableRowImpl<T>({
         </td>
       )}
       {expandable && (
-        <td className={cx(interactive && 'data-table__cell--above')}>
+        <td className={cx(interactive && 'data-table__cell--above')} data-mobile="expand">
           <button
             type="button"
             className="data-table__expand-btn"
@@ -121,13 +123,15 @@ function DataTableRowImpl<T>({
         const value = c.accessor
           ? c.accessor(row)
           : (row as Record<string, unknown>)[c.key] as React.ReactNode;
-        // data-label is consumed by the .data-table--cards CSS to surface
+        // data-label is consumed by the .table-wrap--cards CSS to surface
         // the column header as an inline label on each row when the table
         // collapses to a card layout on narrow viewports. Non-string
         // headers (e.g. JSX) can't be projected through `attr()` so we
         // omit the attribute and the cell renders without a visible label.
         const label = typeof c.header === 'string' ? c.header : undefined;
         const clampLines = typeof c.truncate === 'number' ? c.truncate : undefined;
+        // Card zone for this cell (`mobileLayout="cards"` CSS keys off it).
+        const mobileRole = c.key === mobileTitleKey ? 'title' : (c.mobile ?? 'field');
         return (
           <td
             key={c.key}
@@ -143,6 +147,7 @@ function DataTableRowImpl<T>({
             )}
             style={{ textAlign: align }}
             data-label={label}
+            data-mobile={mobileRole}
             // Full value on hover — only when it's a primitive string; a JSX
             // cell manages its own title (the kit can't stringify an arbitrary
             // node). Set only while truncating, so non-truncated cells are
@@ -223,17 +228,26 @@ export interface Column<T> {
    */
   numeric?: boolean;
   /**
-   * Priority columns (v3.7.0): drop this column below 600px (the kit's
-   * mobile breakpoint). On a phone a wide table either scrolls sideways (the
-   * first columns vanish) or explodes into key/value cards (three screens
-   * for three rows); keeping the TABLE with only the two or three columns
-   * that matter — the identifier, the name, the state — is what scales, and
-   * the row's detail view carries the rest. Combine with `rowHref` /
-   * `onRowClick` so every hidden field is one tap away. Hidden columns are
-   * also excluded from `ColumnToggle`-driven `hiddenColumnKeys` math (they are
-   * simply not rendered while the query matches).
+   * Role of this column below 600px (the kit's mobile breakpoint, v3.7.0).
+   * In `mobileLayout="cards"` (the default) each row is a card with three
+   * zones, and the role says where the cell lands:
+   * - `'title'`: the card header, left — the value in the display register
+   *   with the column header as a small caption above it. At most one; when
+   *   no column claims it, the first non-special column is the title.
+   * - `'status'`: the card header, right — for a `Badge` / state pill. No
+   *   caption: the badge speaks for itself.
+   * - `'field'` (default): the card body — one line per column, label left,
+   *   value right, hairline between lines.
+   * - `'actions'`: the card footer, full width — the consumer's row actions
+   *   (mark them `data-row-interactive` when the row is also clickable).
+   * - `'hidden'`: not rendered at all while the query matches — header and
+   *   cells — in BOTH layouts. In `mobileLayout="table"` this is the
+   *   "priority columns" mode: keep the two or three that matter and let the
+   *   row's detail (`rowHref` / `onRowClick`) carry the rest.
+   * Hidden columns are also excluded from `ColumnToggle`-driven
+   * `hiddenColumnKeys` math (they are simply not rendered).
    */
-  hideOnMobile?: boolean;
+  mobile?: 'title' | 'status' | 'field' | 'actions' | 'hidden';
   /**
    * Aggregate cell for this column (a total, a count, a "Total" label).
    * When ANY column sets it, the table renders a `<tfoot>` row styled like
@@ -337,10 +351,17 @@ export interface DataTableProps<T> {
   fillHeight?: boolean;
   /**
    * Layout for narrow viewports (`<600px`):
-   * - `'table'` (default): the table scrolls horizontally inside its wrapper.
-   * - `'cards'`: each row collapses to a stacked card with the column
-   *   header as an inline label per cell. Requires string `header` values
-   *   for the labels to appear; non-string headers render without a label.
+   * - `'cards'` (default, v3.7.0): each row becomes a card — header (title +
+   *   status + selection), body (label/value lines), footer (actions) — per
+   *   `Column.mobile`. The table's own chrome (border, header band) goes; the
+   *   cards sit directly on the canvas. Labels come from string `header`
+   *   values; a non-string header renders the cell without a label. Sorting
+   *   is unreachable here (no header row): offer an "Ordenar por" control in
+   *   the toolbar when order matters on a phone.
+   * - `'table'`: the table stays a table and scrolls horizontally inside its
+   *   wrapper. Pair with `Column.mobile: 'hidden'` for priority columns.
+   * The same DOM serves both — the switch is CSS on the wrapper plus a
+   * `data-mobile` role per cell — so there is no hydration mismatch.
    */
   mobileLayout?: 'table' | 'cards';
   /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
@@ -459,7 +480,7 @@ export function DataTable<T>({
   columns: allColumns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'table',
+  empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'cards',
   ariaLabel, rowLabel, className,
   density = 'compact', rowHref, onRowClick, renderRow, toolbar,
   renderExpanded, expandedKeys, onExpandedChange,
@@ -471,8 +492,14 @@ export function DataTable<T>({
   // pre-filter so header/cells/footer/colSpans stay in sync for free.
   const isMobile = useMediaQuery(MOBILE_QUERY);
   const columns = React.useMemo(
-    () => allColumns.filter((c) => !(hiddenColumnKeys?.has(c.key)) && !(isMobile && c.hideOnMobile)),
+    () => allColumns.filter((c) => !(hiddenColumnKeys?.has(c.key)) && !(isMobile && c.mobile === 'hidden')),
     [allColumns, hiddenColumnKeys, isMobile]
+  );
+  // Card title: the explicit `mobile: 'title'` column, else the first plain
+  // one (a status / actions column never becomes the title by position).
+  const mobileTitleKey = React.useMemo(
+    () => (columns.find((c) => c.mobile === 'title') ?? columns.find((c) => c.mobile == null || c.mobile === 'field'))?.key,
+    [columns]
   );
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));
@@ -550,7 +577,7 @@ export function DataTable<T>({
   // actually true (see the prop's JSDoc). When the gate is off the hook is
   // inert and returns the full range, so there is ONE render path below.
   const virtual =
-    virtualizeRows != null && bounded && !expandable && mobileLayout !== 'cards';
+    virtualizeRows != null && bounded && !expandable && !(isMobile && mobileLayout === 'cards');
   const vrange = useVirtualRows(scrollRef, {
     count: rows.length,
     rowHeight: virtualizeRows?.rowHeight ?? 1,
@@ -678,6 +705,7 @@ export function DataTable<T>({
                     onToggleExpand={toggleExpand}
                     expandLabel={format(t['table.expandRow'], { label })}
                     detailId={detailId}
+                    mobileTitleKey={mobileTitleKey}
                   />
                   {expanded && (
                     <tr className="data-table__detail">
@@ -796,7 +824,7 @@ export function DataTable<T>({
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
   return toolbar == null ? wrap : (
-    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill')}>
+    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill', mobileLayout === 'cards' && 'table-surface--cards')}>
       <div className="table-surface__bar">{toolbar}</div>
       {wrap}
     </div>
