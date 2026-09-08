@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField } from './Filters';
+import { FilterPanel, FilterSection, BulkActionBar, SortDropdown, FilterBar, FilterField, type ToolbarAction } from './Filters';
 import { Button } from './Button';
 import { Checkbox, Select, Input } from './Form';
 import { Slider } from './InputsExtra';
@@ -84,6 +84,12 @@ export const SortDropdownDemo: StoryObj = {
   },
 };
 
+// Hoisted out of render: an element created during a render carries a fiber
+// `_owner`, and Storybook's JSX source decorator (Show code) walks nested
+// plain objects/arrays recursively — a fiber inside is circular and blows the
+// stack. Module-scope elements have no owner.
+const EXPORT_ACTIONS: ToolbarAction[] = [{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }];
+
 interface ListPageArgs {
   fields: number;
   visibleCount: number;
@@ -166,7 +172,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
               activeCount={(q !== '' ? 1 : 0) + (status != null && status !== 'todos' ? 1 : 0)}
               // Exportar may leave the bar on a phone (it goes behind "⋯");
               // Limpiar stays in `actions` because it is contextual.
-              overflow={a.exportAction ? [{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }] : undefined}
+              overflow={a.exportAction ? EXPORT_ACTIONS : undefined}
             >
               {allFields.slice(0, a.fields)}
             </FilterBar>

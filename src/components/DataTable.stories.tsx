@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle, type Column } from './DataTable';
+import type { ToolbarAction } from './ToolbarActions';
 import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
@@ -158,6 +159,11 @@ export const ConVisibilidadDeColumnas: StoryObj = {
  * combinar una toolbar con un DataTable; no los envuelvas a mano en tu
  * propio contenedor bordeado (eso reintroduce la costura).
  */
+// Hoisted: an element created inside render carries a fiber `_owner`, and
+// Storybook's JSX source decorator recurses into nested arrays/objects — a
+// fiber there is circular (stack overflow). Module scope has no owner.
+const EXPORT_ACTIONS: ToolbarAction[] = [{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }];
+
 export const ConToolbar: StoryObj = {
   render: () => {
     const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
@@ -168,7 +174,7 @@ export const ConToolbar: StoryObj = {
         sort={sort}
         onSortChange={setSort}
         toolbar={
-          <TableToolbar overflow={[{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }]}>
+          <TableToolbar overflow={EXPORT_ACTIONS}>
             <div className="grow"><Input placeholder="Buscar producto…" /></div>
             <Button variant="ghost" size="sm" iconLeft={<Filter size={16} />} hideLabel="mobile">Filtros</Button>
           </TableToolbar>
