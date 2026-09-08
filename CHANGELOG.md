@@ -64,9 +64,13 @@ mano" que `FilterBar` existe para reemplazar.
   resumen dentro de la misma superficie (un solo borde para toolbar, tabla y
   paginación, un divisor entre cada uno). En cards pierde su caja como el
   toolbar. La superficie ahora existe con `toolbar` o `footer`. Dentro del
-  footer el paginador sube al registro de control (36px, como los campos de
-  la barra de arriba). La receta usa rango + páginas con tamaño fijo; el
-  selector de filas por página queda para reportes.
+  footer la zona queda a la altura de una fila (44px). La receta usa rango +
+  páginas con tamaño fijo; el selector de filas por página queda para
+  reportes.
+- **`Pagination` con slots fijos**: `2 · siblings + 5` posiciones, así el
+  paginador no cambia de ancho al moverse. Página 1 de 11 lee
+  `1 2 3 4 5 … 11`; la 6, `1 … 5 6 7 … 11`; la 11, `1 … 7 8 9 10 11`. Antes
+  la página 1 leía `1 2 … 11`.
 - **Playground · página de listado**: controls nuevos `sort`, `rowActions`
   (inline: lápiz + basurero · menu: kebab con tres acciones · none) y
   `pagination` (inside = `footer` · outside · none). Regla que demuestra:

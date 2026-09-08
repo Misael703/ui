@@ -133,3 +133,29 @@ describe('NumberInput size (v3.5.0)', () => {
     expect(field).toMatch(/min-width:\s*64px/);
   });
 });
+
+describe('Pagination page list keeps a fixed number of slots (v3.7.0)', () => {
+  const labels = () => screen.getAllByRole('button').map((b) => b.textContent?.trim()).filter((t) => t && /^\d+$/.test(t));
+  const ellipses = () => document.querySelectorAll('.pagination__ellipsis').length;
+  it('page 1 of 11: 1 2 3 4 5 … 11', () => {
+    render(<Pagination page={1} pageSize={10} total={110} onPageChange={() => {}} />);
+    expect(labels()).toEqual(['1', '2', '3', '4', '5', '11']);
+    expect(ellipses()).toBe(1);
+  });
+  it('page 6 of 11: 1 … 5 6 7 … 11', () => {
+    render(<Pagination page={6} pageSize={10} total={110} onPageChange={() => {}} />);
+    expect(labels()).toEqual(['1', '5', '6', '7', '11']);
+    expect(ellipses()).toBe(2);
+  });
+  it('page 11 of 11: 1 … 7 8 9 10 11', () => {
+    render(<Pagination page={11} pageSize={10} total={110} onPageChange={() => {}} />);
+    expect(labels()).toEqual(['1', '7', '8', '9', '10', '11']);
+    expect(ellipses()).toBe(1);
+  });
+  it('7 pages or fewer: every page, no ellipsis', () => {
+    render(<Pagination page={3} pageSize={10} total={70} onPageChange={() => {}} />);
+    expect(labels()).toEqual(['1', '2', '3', '4', '5', '6', '7']);
+    expect(ellipses()).toBe(0);
+  });
+});
+
