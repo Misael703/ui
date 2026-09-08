@@ -49,6 +49,13 @@ mano" que `FilterBar` existe para reemplazar.
   columna normal es el título (una de estado o acciones nunca lo es por
   posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
 
+### Removed
+- Story **"Gold Standard"** (DataTable, v1.14.0): era la tabla "Órdenes de
+  despacho" calcada del consumidor, dentro de una Card. Contradecía la regla
+  de stories genéricas y la receta sin Card. Lo que demostraba lo cubren
+  "Con toolbar" y el playground de listado; los defaults que fijó siguen
+  pineados en `tests/GoldStandard.test.tsx`.
+
 ### Changed
 - **Cards mobile rehechas y por default.** `mobileLayout` pasa a `'cards'`:
   bajo 600px cada fila es una tarjeta con tres zonas según `Column.mobile` —
