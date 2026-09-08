@@ -201,7 +201,12 @@ function CrudPage(a: CrudArgs) {
         toolbar={
           <FilterBar
             summary={a.state === 'loading' ? <Skeleton width={72} height={14} /> : a.state === 'error' ? '—' : `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`}
-            actions={hasFilters ? <Button variant="ghost" size="sm" onClick={clearFilters}>Limpiar</Button> : undefined}
+            applied={[
+              ...(q !== '' ? [{ key: 'q', label: 'Buscar', value: q, onRemove: () => setQ('') }] : []),
+              ...(category !== 'all' ? [{ key: 'category', label: 'Categoría', value: category, onRemove: () => setCategory('all') }] : []),
+              ...(availability !== 'all' ? [{ key: 'availability', label: 'Disponibilidad', value: availability === 'in' ? 'Con stock' : 'Sin stock', onRemove: () => setAvailability('all') }] : []),
+            ]}
+            onClearAll={clearFilters}
           >
             <FilterField label="Buscar"><Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Nombre o SKU" /></FilterField>
             <FilterField label="Categoría">

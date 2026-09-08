@@ -146,8 +146,6 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const [q, setQ] = React.useState('');
     const [status, setStatus] = React.useState<string | null>('todos');
     React.useEffect(() => { setQ(a.filtersApplied ? '1042' : ''); setStatus(a.filtersApplied ? 'pendiente' : 'todos'); }, [a.filtersApplied]);
-    // Combobox's clear affordance yields null: that is "no filter", same as 'todos'.
-    const hasFilters = q !== '' || (status != null && status !== 'todos');
     const clear = () => { setQ(''); setStatus('todos'); };
     const applied = [
       ...(q !== '' ? [{ key: 'q', label: 'Buscar', value: q, onRemove: () => setQ('') }] : []),
@@ -173,12 +171,6 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
       <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
       <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,
     ];
-    const actions = (hasFilters || a.exportAction) ? (
-      <>
-        {hasFilters && <Button variant="ghost" size="sm" onClick={clear}>Limpiar</Button>}
-
-      </>
-    ) : undefined;
     // minmax(0, 1fr): an implicit grid track is `auto` and would grow to the
     // table's max-content, pushing the page into horizontal scroll on a phone.
     return (
@@ -189,7 +181,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
           toolbar={
             <FilterBar
               summary={a.summary ? `${rows.length} pedidos` : undefined}
-              actions={actions}
+              onClearAll={clear}
               layout={a.layout}
               visibleCount={a.visibleCount}
               mobileLayout={a.barMobile}

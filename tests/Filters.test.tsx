@@ -302,6 +302,18 @@ describe('FilterBar applied chips (v3.8.0)', () => {
     expect(onRemove).toHaveBeenCalledTimes(1);
     expect(chips[1].querySelector('button')).toBeNull();
   });
+  it('onClearAll: a "Limpiar" at the end of the chips (only while something is applied) and in the drawer footer', () => {
+    const onClearAll = vi.fn();
+    const applied = [{ key: 'a', label: 'Estado', value: 'Pendiente' }];
+    const { container, unmount } = render(<FilterBar applied={applied} onClearAll={onClearAll}><div /></FilterBar>);
+    const clear = container.querySelector('.filter-bar__applied .filter-bar__clear') as HTMLButtonElement;
+    expect(clear).toHaveTextContent('Limpiar');
+    fireEvent.click(clear);
+    expect(onClearAll).toHaveBeenCalledTimes(1);
+    unmount();
+    const r = render(<FilterBar applied={[]} onClearAll={onClearAll}><div /></FilterBar>);
+    expect(r.container.querySelector('.filter-bar__clear')).toBeNull();
+  });
   it('no chips row when nothing is applied', () => {
     const { container } = render(<FilterBar applied={[]}><div /></FilterBar>);
     expect(container.querySelector('.filter-bar__applied')).toBeNull();
@@ -322,7 +334,7 @@ describe('FilterBar layout="drawer" on a desk (v3.8.0)', () => {
   it('pinned fields stay in the bar; the rest open behind the funnel, badged from `applied`', () => {
     stubMedia(false);
     const { container, baseElement } = render(
-      <FilterBar layout="drawer" applied={[{ key: 'b', label: 'Zona', value: 'Norte' }]} pinned={<FilterField key="q" label="Buscar"><input /></FilterField>}>
+      <FilterBar layout="drawer" applied={[{ key: 'b', label: 'Zona', value: 'Norte' }]} onClearAll={() => {}} pinned={<FilterField key="q" label="Buscar"><input /></FilterField>}>
         <FilterField key="a" label="Estado"><input /></FilterField>
         <FilterField key="b" label="Zona"><input /></FilterField>
       </FilterBar>
@@ -335,6 +347,9 @@ describe('FilterBar layout="drawer" on a desk (v3.8.0)', () => {
     fireEvent.click(btn);
     expect(baseElement.querySelector('.drawer')!.querySelectorAll('.filter-field')).toHaveLength(2);
     expect(container.querySelector('.filter-bar__applied')).toHaveTextContent('Zona: Norte');
+    // the drawer footer carries Limpiar next to Listo
+    const footerBtns = [...baseElement.querySelectorAll('.drawer__footer button')].map((b) => b.textContent?.trim());
+    expect(footerBtns).toEqual(['Limpiar', 'Listo']);
   });
   it('warns once when drawer hides the state with no `applied`', () => {
     stubMedia(false);

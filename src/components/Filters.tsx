@@ -220,6 +220,13 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
    * not own them — so the consumer lists them. Required with `'drawer'`.
    */
   applied?: AppliedFilter[];
+  /**
+   * Clear every filter (v3.8.0). The bar owns the "Limpiar" affordance and
+   * puts it where the filters are: at the end of the applied chips (only
+   * while something is applied) and in the drawer's footer next to "Listo".
+   * Consumers no longer hand-roll a Limpiar in `actions`.
+   */
+  onClearAll?: () => void;
   /** @deprecated 3.8.0 — derived from `applied`. Kept as a fallback badge count for the toggle. */
   hiddenActiveCount?: number;
   /** Start expanded (uncontrolled; the toggle owns the state after mount). */
@@ -284,7 +291,7 @@ const childKey = (el: React.ReactNode): string | null =>
 
 export function FilterBar({
   summary, actions, overflow, sort, sortOn = 'mobile',
-  layout, mobileLayout, visibleCount = 'auto', pinned, applied,
+  layout, mobileLayout, visibleCount = 'auto', pinned, applied, onClearAll,
   hiddenActiveCount = 0, defaultExpanded = false,
   mobile, activeCount = 0,
   minColWidth = 160, columns, className, children, style, ...rest
@@ -374,7 +381,12 @@ export function FilterBar({
             open={sheetOpen}
             onClose={() => setSheetOpen(false)}
             title={t['filterBar.filters']}
-            footer={<Button onClick={() => setSheetOpen(false)}>{t['filterBar.done']}</Button>}
+            footer={
+              <>
+                {onClearAll != null && <Button variant="ghost" onClick={onClearAll}>{t['filters.clear']}</Button>}
+                <Button onClick={() => setSheetOpen(false)}>{t['filterBar.done']}</Button>
+              </>
+            }
           >
             <div className="filter-bar__sheet fields--dense">{all}</div>
           </Drawer>
@@ -415,6 +427,9 @@ export function FilterBar({
               {a.label}{a.value != null && <>: {a.value}</>}
             </Chip>
           ))}
+          {onClearAll != null && (
+            <Button type="button" variant="ghost" size="xs" className="filter-bar__clear" onClick={onClearAll}>{t['filters.clear']}</Button>
+          )}
         </div>
       )}
     </div>

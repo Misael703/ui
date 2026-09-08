@@ -128,7 +128,9 @@ with `pinned` keeping the search box in the bar — for many filters, or
 filters used rarely against the table. Hidden fields hide their values, so
 `applied` (removable chips under the bar, "Estado: Pendiente ×") is the
 honest counterpart: the badges on the funnel and the toggle derive from it,
-and `drawer` without it warns. Below 600px the same choice is
+and `drawer` without it warns. `onClearAll` gives the bar its "Limpiar",
+placed where the filters are (after the chips, and in the drawer footer);
+`actions` is for what is not a filter. Below 600px the same choice is
 `mobileLayout`, `drawer` by default (an expanded bar on a phone pushes the
 table off-screen);
 summary and actions stay in the bar. **The table becomes cards on a phone** (`mobileLayout`

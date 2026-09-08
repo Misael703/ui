@@ -33,7 +33,11 @@ muestran los campos" vivía repartido en props implícitas (`visibleCount`,
   `FilterField`), así un filtro aplicado nunca se esconde en silencio.
   `layout="drawer"` sin `applied` avisa por consola una vez: esconder los
   campos sin mostrar los valores es un error de uso. Clave de locale
-  `filterBar.applied`.
+  `filterBar.applied`. Los chips van en registro micro (24px).
+- **`onClearAll`**: la barra es dueña de "Limpiar" y lo pone donde están los
+  filtros — al final de los chips (solo mientras hay algo aplicado) y en el
+  pie del drawer junto a "Listo". `actions` queda para lo que no es del
+  filtro (Exportar).
 - Playground · página de listado: controls `layout`, `visibleCount`
   (`auto` | 1–5) y `barMobile`; los filtros aplicados salen como chips.
 
