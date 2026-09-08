@@ -98,8 +98,8 @@ export const SuperficiesPlayground: StoryObj<SurfacesArgs> = {
           </div>
           <Button>Confirmar</Button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: a.objectCard ? '2fr 1fr' : '1fr', gap: 16, alignItems: 'start' }}>
-          <div style={{ display: 'grid', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: a.objectCard ? 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' : 'minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16 }}>
             {section}
             {a.table && (
               <DataTable

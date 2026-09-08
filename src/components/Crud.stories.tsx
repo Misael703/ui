@@ -173,7 +173,7 @@ function CrudPage(a: CrudArgs) {
   const editorTitle = editing?.id ? 'Editar producto' : 'Nuevo producto';
 
   return (
-    <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gap: 16, alignContent: 'start' }}>
+    <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16, alignContent: 'start' }}>
       <PageHeader title="Productos" description="Catálogo de la sucursal." actions={<Button onClick={openCreate}>Nuevo producto</Button>} />
 
       {a.selectable && selected.size > 0 && (
@@ -184,6 +184,7 @@ function CrudPage(a: CrudArgs) {
 
       <DataTable
         ariaLabel="Productos"
+        mobileLayout="cards"
         toolbar={
           <FilterBar
             summary={a.state === 'loading' ? <Skeleton width={72} height={14} /> : a.state === 'error' ? '—' : `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`}

@@ -199,11 +199,14 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
         {a.exportAction && <Button variant="outline" size="sm">Exportar</Button>}
       </>
     ) : undefined;
+    // minmax(0, 1fr): an implicit grid track is `auto` and would grow to the
+    // table's max-content, pushing the page into horizontal scroll on a phone.
     return (
-      <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gap: 16, alignContent: 'start' }}>
+      <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16, alignContent: 'start' }}>
         <PageHeader title="Pedidos" description="Ventas y entregas de la sucursal." actions={<Button>Nuevo pedido</Button>} />
         <DataTable
           ariaLabel="Pedidos"
+          mobileLayout="cards"
           toolbar={
             <FilterBar
               summary={a.summary ? `${rows.length} pedidos` : undefined}
