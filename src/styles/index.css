@@ -4451,6 +4451,10 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Applied chips (v3.8.0): a full-width line under the fields, whatever the
    layout hides. */
 .filter-bar__applied { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+/* Applied chips read as a readout under the controls, not as controls: the
+   micro register (24px, text-xs), the dense field label's size. */
+.filter-bar__applied .chip { padding: 3px 10px; font-size: var(--text-xs); gap: 4px; min-height: 24px; }
+.filter-bar__applied .chip__close { width: 14px; height: 14px; }
 /* Pinned fields next to the funnel in drawer layout share the line. */
 .filter-bar--drawer .filter-bar__pinned { display: contents; }
 .filter-bar__drawer-toggle .filter-bar__toggle-badge {

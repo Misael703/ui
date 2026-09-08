@@ -309,6 +309,8 @@ describe('FilterBar applied chips (v3.8.0)', () => {
   it('CSS: the chips row takes the full width and wraps', () => {
     const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
     expect(css).toMatch(/\.filter-bar__applied \{[^}]*flex:\s*1 1 100%/);
+    // micro register: the chips are a readout, smaller than the controls
+    expect(css).toMatch(/\.filter-bar__applied \.chip \{[^}]*font-size:\s*var\(--text-xs\)/);
   });
 });
 
