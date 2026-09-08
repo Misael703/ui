@@ -5,6 +5,54 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] — 2026-09-08
+
+**Minor. `FilterBar layout`: cuánto escondes, como decisión explícita.**
+Origen: `visibleCount` colapsaba aunque el set completo cupiera en una línea
+("Más filtros" revelaba campos que tenían espacio de sobra), y el "cómo se
+muestran los campos" vivía repartido en props implícitas (`visibleCount`,
+`mobile`, `activeCount`).
+
+### Added
+- **`FilterBar layout`** (`'inline' | 'collapse' | 'drawer'`, default
+  `inline`) y **`mobileLayout`** (mismos valores, default `drawer`): la
+  escala "cuánto escondes", independiente del breakpoint.
+  - `inline`: todos los campos, envuelven. Cero clics, todo a la vista.
+  - `collapse`: los primeros N inline y el resto tras "Más filtros". La barra
+    **se mide** (ResizeObserver; capacidad = `floor((barra − grupo final +
+    gap) / (mínimo + gap))`) y colapsa SOLO si el set no cabe en una línea.
+    `visibleCount` pasa a `number | 'auto'` (default `auto`): un número es un
+    tope, `auto` muestra los que quepan junto al grupo final (priority+),
+    nunca menos de dos (búsqueda + un selector siempre inline).
+    Antes de medir (server, primer frame) muestra todo y pliega al montar.
+  - `drawer`: los campos tras el embudo; **`pinned`** deja campos siempre en
+    la barra (la búsqueda). El embudo va en el grupo final, junto a las
+    acciones (Limpiar · embudo · Exportar), en escritorio y en teléfono.
+- **`applied: AppliedFilter[]`** (`{ key, label, value, onRemove }`): fila de
+  `Chip`s descartables bajo los campos ("Estado: Pendiente ×"), a todo ancho.
+  Los badges del embudo y del toggle se derivan de ella (`key` = el `key` del
+  `FilterField`), así un filtro aplicado nunca se esconde en silencio.
+  `layout="drawer"` sin `applied` avisa por consola una vez: esconder los
+  campos sin mostrar los valores es un error de uso. Clave de locale
+  `filterBar.applied`. Los chips van en registro micro (24px).
+- **`onClearAll`**: la barra es dueña de "Limpiar" y lo pone donde están los
+  filtros — al final de los chips (solo mientras hay algo aplicado) y en el
+  pie del drawer junto a "Listo". `actions` queda para lo que no es del
+  filtro (Exportar).
+- Playground · página de listado: controls `layout`, `visibleCount`
+  (`auto` | 1–5) y `barMobile`; los filtros aplicados salen como chips.
+
+### Deprecated (siguen funcionando un ciclo)
+- `visibleCount` sin `layout` ⇒ `layout="collapse"`.
+- `mobile` ⇒ `mobileLayout` (`'inline'` conserva el layout de escritorio).
+- `activeCount` / `hiddenActiveCount` ⇒ derivados de `applied`; se usan solo
+  cuando no hay `applied`.
+
+### Changed
+- El trigger del drawer se llama `.filter-bar__drawer-toggle` (antes
+  `__mobile-toggle`): ya no es solo móvil. `data-layout` en la barra expone
+  el modo efectivo.
+
 ## [3.7.0] — 2026-09-08
 
 **Minor. `FilterBar summary` + la receta de página de listado.** Origen:

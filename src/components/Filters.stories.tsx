@@ -97,8 +97,9 @@ const SORT_OPTIONS = [{ value: 'recent', label: 'Más recientes' }, { value: 'cl
 
 interface ListPageArgs {
   fields: number;
-  visibleCount: number;
-  mobile: 'drawer' | 'inline';
+  layout: 'inline' | 'collapse' | 'drawer';
+  visibleCount: 'auto' | 1 | 2 | 3 | 4 | 5;
+  barMobile: 'drawer' | 'inline' | 'collapse';
   mobileLayout: 'cards' | 'table';
   summary: boolean;
   filtersApplied: boolean;
@@ -116,18 +117,21 @@ interface ListPageArgs {
  * filtros aplicados; "Exportar" va en `overflow` — ambas terciarias (`ghost
  * sm`): la única primaria de la página vive en el `PageHeader`; en móvil
  * "Exportar" se esconde tras el menú "⋯" y "Filtros" es el embudo con el
- * conteo encima. Sin Card: la tabla es la
+ * conteo encima. `layout` recorre la escala "cuánto escondes" (inline →
+ * collapse → drawer) y `applied` pinta los valores como chips descartables,
+ * la única forma honesta de esconder campos. Sin Card: la tabla es la
  * superficie. Sube `fields` a 7 para ver cómo envuelve la grilla y dónde queda
  * el conteo. Reglas completas en DESIGN.md › List-page recipe.
  */
 export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
   name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  args: { fields: 7, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' },
+  args: { fields: 7, layout: 'inline', visibleCount: 'auto', barMobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' },
   argTypes: {
     fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
-    visibleCount: { control: { type: 'range', min: 0, max: 7, step: 1 }, description: '0 = todos visibles; N = colapsa el resto tras "Más filtros"' },
-    mobile: { control: 'inline-radio', options: ['drawer', 'inline'], description: 'Bajo 600px: Drawer con los campos (default) o inline. Angosta el canvas para verlo.' },
+    layout: { control: 'inline-radio', options: ['inline', 'collapse', 'drawer'], description: 'Escala "cuánto escondes": inline (todo, envuelve) · collapse (los primeros N, SOLO si el set no cabe en una línea) · drawer (todo tras el embudo; Buscar queda pinned; los aplicados se ven como chips)' },
+    visibleCount: { control: 'inline-radio', options: ['auto', 1, 2, 3, 4, 5], description: 'Con collapse: auto = los que quepan junto al grupo final; N = tope' },
+    barMobile: { control: 'inline-radio', options: ['drawer', 'inline', 'collapse'], description: 'La misma elección bajo 600px (FilterBar mobileLayout). Angosta el canvas para verlo.' },
     mobileLayout: { control: 'inline-radio', options: ['cards', 'table'], description: 'Bajo 600px: tarjetas por fila (default, `Column.mobile` reparte título/estado/campos) o tabla con columnas prioritarias (`mobile: "hidden"`).' },
     summary: { control: 'boolean' },
     filtersApplied: { control: 'boolean' },
@@ -142,9 +146,11 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const [q, setQ] = React.useState('');
     const [status, setStatus] = React.useState<string | null>('todos');
     React.useEffect(() => { setQ(a.filtersApplied ? '1042' : ''); setStatus(a.filtersApplied ? 'pendiente' : 'todos'); }, [a.filtersApplied]);
-    // Combobox's clear affordance yields null: that is "no filter", same as 'todos'.
-    const hasFilters = q !== '' || (status != null && status !== 'todos');
     const clear = () => { setQ(''); setStatus('todos'); };
+    const applied = [
+      ...(q !== '' ? [{ key: 'q', label: 'Buscar', value: q, onRemove: () => setQ('') }] : []),
+      ...(status != null && status !== 'todos' ? [{ key: 'status', label: 'Estado', value: status[0].toUpperCase() + status.slice(1), onRemove: () => setStatus('todos') }] : []),
+    ];
     const [sortBy, setSortBy] = React.useState('recent');
     const [page, setPage] = React.useState(1);
     // Fixed page size: range + pager, no rows-per-page selector (the list
@@ -165,12 +171,6 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
       <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
       <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,
     ];
-    const actions = (hasFilters || a.exportAction) ? (
-      <>
-        {hasFilters && <Button variant="ghost" size="sm" onClick={clear}>Limpiar</Button>}
-
-      </>
-    ) : undefined;
     // minmax(0, 1fr): an implicit grid track is `auto` and would grow to the
     // table's max-content, pushing the page into horizontal scroll on a phone.
     return (
@@ -181,17 +181,21 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
           toolbar={
             <FilterBar
               summary={a.summary ? `${rows.length} pedidos` : undefined}
-              actions={actions}
-              visibleCount={a.visibleCount > 0 ? a.visibleCount : undefined}
-              hiddenActiveCount={a.visibleCount > 0 && a.visibleCount < 2 && hasFilters ? 1 : 0}
-              mobile={a.mobile}
-              activeCount={(q !== '' ? 1 : 0) + (status != null && status !== 'todos' ? 1 : 0)}
+              onClearAll={clear}
+              layout={a.layout}
+              visibleCount={a.visibleCount}
+              mobileLayout={a.barMobile}
+              // The applied values as chips: removable, and the source of the
+              // badges on the funnel / "Más filtros" (never a hand-kept count).
+              applied={applied}
+              // Drawer: the search box stays in the bar, the rest go behind the funnel.
+              pinned={a.layout === 'drawer' || a.barMobile === 'drawer' ? allFields[0] : undefined}
               // Exportar may leave the bar on a phone (it goes behind "⋯");
               // Limpiar stays in `actions` because it is contextual.
               overflow={a.exportAction ? EXPORT_ACTIONS : undefined}
               sort={a.sort ? { value: sortBy, options: SORT_OPTIONS, onChange: setSortBy } : undefined}
             >
-              {allFields.slice(0, a.fields)}
+              {a.layout === 'drawer' ? allFields.slice(1, a.fields) : allFields.slice(0, a.fields)}
             </FilterBar>
           }
           footer={a.pagination === 'inside' ? pager : undefined}
@@ -245,5 +249,5 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
 export const ListadoCompleto: StoryObj<ListPageArgs> = {
   ...PaginaDeListadoPlayground,
   name: 'Listado completo (composición)',
-  args: { fields: 5, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'menu', pagination: 'inside' },
+  args: { fields: 5, layout: 'inline', visibleCount: 'auto', barMobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'menu', pagination: 'inside' },
 };

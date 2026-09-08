@@ -31,6 +31,8 @@ export interface UiKitMessages {
   'filterBar.done': string;
   /** Accessible name of the "⋯" overflow trigger in toolbars (v3.7.0). */
   'toolbar.more': string;
+  /** Accessible name of the applied-filters chips row (v3.8.0). */
+  'filterBar.applied': string;
   'table.selectAll': string;
   /** Template: "Seleccionar {label}" */
   'table.selectRow': string;
