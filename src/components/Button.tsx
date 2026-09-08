@@ -8,6 +8,7 @@ export type ButtonVariant =
   | 'secondary'
   | 'outline'
   | 'ghost'
+  | 'ghost-danger'
   | 'subtle'
   | 'danger'
   | 'success'
@@ -31,10 +32,12 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
    * like `IconButton`. `'mobile'` does it only below 600px — one `<Button
    * iconLeft={<Download/>} hideLabel="mobile">Exportar</Button>` reads
    * "⤓ Exportar" on a desk and "⤓" on a phone, with no breakpoint logic in
-   * the consumer. Pair it with `iconLeft` (or `iconRight`): a button with no
-   * icon and a hidden label is an empty square.
+   * the consumer. `'desktop'` is the mirror: icon-only in a dense table row,
+   * icon + label in the roomy footer of a mobile card. Pair it with
+   * `iconLeft` (or `iconRight`): a button with no icon and a hidden label is
+   * an empty square.
    */
-  hideLabel?: boolean | 'mobile';
+  hideLabel?: boolean | 'mobile' | 'desktop';
   /**
    * Render as the provided single child element instead of `<button>`
    * (e.g. `next/link`'s `<a>`). The kit's classes, ref and handlers are
@@ -67,6 +70,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     fullWidth && 'btn--block',
     hideLabel === true && 'btn--hide-label',
     hideLabel === 'mobile' && 'btn--hide-label-mobile',
+    hideLabel === 'desktop' && 'btn--hide-label-desktop',
     loading && 'is-loading',
     className
   );

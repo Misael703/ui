@@ -145,7 +145,14 @@ the share-out arrow, which reads as "share"). On a desk the label stays
 ("⤓ Exportar"); on a phone the same button collapses to its icon
 (`Button hideLabel="mobile"`), and the bar's own "Filtros" trigger is the
 funnel `IconButton` with the applied count overhanging it. Same icon at both
-widths; only the label drops. Pages sharing the
+widths; only the label drops. Actions that may leave the bar on a phone
+(Exportar) go to `overflow` as data — inline tertiary buttons on a desk, a
+"⋯" `Menu` below 600px (`TableToolbar` and `FilterBar` share it); Limpiar
+stays in `actions` because it is contextual. **Row actions** follow the same
+rule the other way round: a pencil (`Edit`) and a bin (`Trash`) as ghost `xs`
+icon-only in the table row (`hideLabel="desktop"`), both neutral — the bin
+is `ghost-danger`, red only on hover, the confirm dialog is the real guard —
+and icon + label stretched in the mobile card's footer. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

@@ -119,6 +119,17 @@ button, input, select, textarea { box-sizing: border-box; }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }
+@media (min-width: 601px) {
+  .btn--hide-label-desktop { padding: 0; aspect-ratio: 1; }
+  .btn--hide-label-desktop.btn--xs { width: 28px; }
+  .btn--hide-label-desktop.btn--sm { width: 36px; }
+  .btn--hide-label-desktop.btn--md { width: 38px; }
+  .btn--hide-label-desktop.btn--lg { width: 44px; }
+  .btn--hide-label-desktop .btn__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
 @media (max-width: 600px) {
   .btn--hide-label-mobile { padding: 0; aspect-ratio: 1; }
   .btn--hide-label-mobile.btn--xs { width: 28px; }
@@ -164,6 +175,11 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default);
 }
 .btn--ghost:hover:not(:disabled) { background: var(--bg-subtle); }
+/* Destructive tertiary (v3.7.0): neutral at rest — a red glyph on every row
+   is noise — red on hover/focus. The real guard is the confirm dialog. */
+.btn--ghost-danger { background: transparent; color: var(--fg-default); }
+.btn--ghost-danger:hover:not(:disabled),
+.btn--ghost-danger:focus-visible { color: var(--color-danger); background: var(--color-red-50); }
 
 .btn--subtle {
   background: var(--bg-subtle);
@@ -1435,10 +1451,13 @@ button, input, select, textarea { box-sizing: border-box; }
     gap: var(--space-2);
     margin: 0;
   }
-  .table-wrap--cards .table td[data-mobile="actions"] .btn { flex: 1 1 0; }
+  /* Footer actions stretch and get a touch-sized height even when the row
+     version is `xs` (28px is fine for a pointer, not for a thumb). */
+  .table-wrap--cards .table td[data-mobile="actions"] .btn { flex: 1 1 0; min-height: 36px; }
   /* A ghost action reads fine in a table cell (hover reveals it) but floats
      in a card footer's whitespace: give it the control hairline here. */
-  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost { border-color: var(--border-control); }
+  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost,
+  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost-danger { border-color: var(--border-control); }
 
   /* Expanded detail: its own card right under the row. */
   .table-wrap--cards .table tr.data-table__detail {
@@ -1520,6 +1539,14 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--bg-surface);
 }
 .table-toolbar > .grow { flex: 1 1 200px; min-width: 0; }
+/* On a phone the search shares the row with the funnel and the "⋯" menu:
+   a 200px basis wraps at 320px, 120px keeps the three on one line. */
+@media (max-width: 600px) {
+  .table-toolbar > .grow,
+  .table-toolbar > .input,
+  .table-toolbar > .input-wrap,
+  .table-toolbar > .select { flex-basis: 120px; }
+}
 /* Inputs as direct children of toolbars grow but never overlap siblings. */
 .table-toolbar > .input,
 .table-toolbar > .input-wrap,

@@ -8,6 +8,7 @@ import { Button } from './Button';
 import { useVirtualRows } from '../hooks/useVirtualRows';
 import { useScrollEdges } from '../hooks/useScrollEdges';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { ToolbarActions, type ToolbarAction } from './ToolbarActions';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
 
@@ -985,9 +986,22 @@ export function TablePagination({
 // ---------- TableToolbar -------------------------------------------------
 // Barra superior que se compone arriba (o dentro de un wrapper) de un DataTable.
 // Cualquier hijo con className "grow" se expande para empujar las acciones al lado.
-export const TableToolbar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  function TableToolbar({ className, ...rest }, ref) {
-    return <div ref={ref} className={cx('table-toolbar', className)} {...rest} />;
+export interface TableToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Actions that may leave the bar on a phone (v3.7.0): inline tertiary
+   * buttons (ghost `sm` + icon) above 600px, a "⋯" menu below. Rendered after
+   * `children`, so a `.grow` child pushes them to the end.
+   */
+  overflow?: ToolbarAction[];
+}
+export const TableToolbar = React.forwardRef<HTMLDivElement, TableToolbarProps>(
+  function TableToolbar({ className, overflow, children, ...rest }, ref) {
+    return (
+      <div ref={ref} className={cx('table-toolbar', className)} {...rest}>
+        {children}
+        {overflow != null && <ToolbarActions actions={overflow} />}
+      </div>
+    );
   }
 );
 

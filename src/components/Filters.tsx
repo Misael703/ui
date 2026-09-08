@@ -6,6 +6,8 @@ import { useLocale } from '../locale/LocaleProvider';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { Drawer } from './Overlay';
 import { Button, IconButton } from './Button';
+import { ToolbarActions, type ToolbarAction } from './ToolbarActions';
+export type { ToolbarAction } from './ToolbarActions';
 import { format } from '../locale/messages';
 
 // ---------- FilterPanel -------------------------------------------------
@@ -153,6 +155,13 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
   actions?: React.ReactNode;
   /**
+   * Actions that may leave the bar on a phone (v3.7.0). Above 600px they
+   * render inline after `actions` as tertiary buttons (ghost `sm` + icon);
+   * below, they collapse into a "⋯" menu. Put Exportar here; keep Limpiar in
+   * `actions` — it is contextual and must stay visible when filters apply.
+   */
+  overflow?: ToolbarAction[];
+  /**
    * Collapse the bar to its first N fields (v3.7.0); the rest sit behind a
    * "Más filtros" toggle in the trailing group. Use it when the full set
    * wraps to a second line on desktop — the first N should be the filters
@@ -193,7 +202,7 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 const MOBILE_QUERY = '(max-width: 600px)';
 
 export function FilterBar({
-  summary, actions, visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
+  summary, actions, overflow, visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
   mobile = 'drawer', activeCount = 0,
   minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
@@ -259,14 +268,19 @@ export function FilterBar({
           TOGETHER: as separate flex items the actions could drop to a new line
           while the count stayed up with the fields — a readout split from its
           buttons. */}
-      {(toggle != null || summary != null || actions != null) && (
+      {(toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0)) && (
         <div className="filter-bar__end">
           {toggle}
           {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
               the only signal that it acted; role="status" announces it politely
               without stealing focus. Any node fits — a Skeleton while loading. */}
           {summary != null && <div className="filter-bar__summary" role="status">{summary}</div>}
-          {actions != null && <div className="filter-bar__actions">{actions}</div>}
+          {(actions != null || (overflow != null && overflow.length > 0)) && (
+            <div className="filter-bar__actions">
+              {actions}
+              {overflow != null && <ToolbarActions actions={overflow} />}
+            </div>
+          )}
         </div>
       )}
     </div>

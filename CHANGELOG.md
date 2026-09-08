@@ -45,6 +45,19 @@ mano" que `FilterBar` existe para reemplazar.
   `'mobile'` solo bajo 600px. Un `<Button iconLeft={<Download/>}
   hideLabel="mobile">Exportar</Button>` lee "⤓ Exportar" en escritorio y "⤓"
   en el teléfono sin lógica de breakpoint en el consumidor.
+- **`overflow` en `TableToolbar` y `FilterBar`** (`ToolbarAction[]`: label,
+  icon, onSelect, disabled, destructive): acciones como DATOS para que el kit
+  las pinte de dos formas — inline como terciarias (ghost `sm` + ícono) sobre
+  600px, y tras un botón "⋯" que abre el `Menu` del kit por debajo (patrón
+  priority+ / overflow menu). Exportar va ahí; Limpiar sigue en `actions`
+  porque es contextual. Clave de locale `toolbar.more` ("Más opciones"). La
+  búsqueda del toolbar baja su base a 120px bajo 600px para que búsqueda,
+  embudo y "⋯" quepan en 320px en una línea.
+- **`Button hideLabel="desktop"`** (espejo de `"mobile"`) y **variante
+  `ghost-danger`** (neutra en reposo, roja al hover/foco): acciones por fila
+  como lápiz y basurero ghost `xs` de 28px en la tabla, y "✎ Editar" /
+  "🗑 Eliminar" estirados en el pie de la tarjeta móvil, con un solo botón por
+  acción. En el pie, los botones toman 36px de alto (objetivo táctil).
 - **Jerarquía en la barra de filtros** (DESIGN.md): la única primaria vive en
   el `PageHeader`; Exportar / Limpiar / Filtros son terciarias (`ghost sm`),
   con ícono lucide cuando hay glifo universal (`Filter` embudo, `Download`

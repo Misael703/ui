@@ -5,7 +5,7 @@ import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
 import { Modal } from './Overlay';
-import { Filter, Download } from './Icons';
+import { Filter, Download, Edit, Trash } from './Icons';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
@@ -296,10 +296,9 @@ export const ConToolbar: StoryObj = {
         sort={sort}
         onSortChange={setSort}
         toolbar={
-          <TableToolbar>
+          <TableToolbar overflow={[{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }]}>
             <div className="grow"><Input placeholder="Buscar producto…" /></div>
             <Button variant="ghost" size="sm" iconLeft={<Filter size={16} />} hideLabel="mobile">Filtros</Button>
-            <Button variant="ghost" size="sm" iconLeft={<Download size={16} />} hideLabel="mobile">Exportar</Button>
           </TableToolbar>
         }
         columns={[
@@ -439,8 +438,8 @@ export const ColumnaAccionAlineada: StoryObj = {
           key: 'acc', header: 'Acciones', align: 'right', mobile: 'actions',
           accessor: () => (
             <span style={{ display: 'inline-flex', gap: 8 }} data-row-interactive>
-              <Button size="sm" variant="outline">Editar</Button>
-              <Button size="sm" variant="danger">Borrar</Button>
+              <Button size="xs" variant="ghost" iconLeft={<Edit size={14} />} hideLabel="desktop">Editar</Button>
+              <Button size="xs" variant="ghost-danger" iconLeft={<Trash size={14} />} hideLabel="desktop">Borrar</Button>
             </span>
           ),
         },

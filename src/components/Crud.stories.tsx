@@ -8,7 +8,7 @@ import { FormField, Input, Select } from './Form';
 import { NumberInput, EmptyState } from './Inputs';
 import { Modal, Drawer } from './Overlay';
 import { Badge, Skeleton } from './Display';
-import { AlertTriangle } from './Icons';
+import { AlertTriangle, Edit, Trash } from './Icons';
 import { ToastProvider, useToast } from './Toast';
 
 export default { title: 'Patterns/CRUD', tags: ['autodocs'] } as Meta;
@@ -135,10 +135,12 @@ function CrudPage(a: CrudArgs) {
     // columns are label/value lines and the actions stretch across the footer
     // (`mobile: 'actions'`). The row itself also opens the editor (onRowClick);
     // `data-row-interactive` keeps these buttons from activating the row.
-    { key: 'actions', header: '', align: 'right', width: 150, mobile: 'actions', accessor: (p) => (
+    // Icon-only on the desk (28px, the row stays compact), icon + label in
+    // the roomy footer of the mobile card: `hideLabel="desktop"`.
+    { key: 'actions', header: '', align: 'right', width: 72, mobile: 'actions', accessor: (p) => (
       <span style={{ display: 'inline-flex', gap: 4 }}>
-        <Button variant="ghost" size="sm" data-row-interactive onClick={() => openEdit(p)}>Editar</Button>
-        <Button variant="ghost" size="sm" data-row-interactive onClick={() => setConfirm({ ids: [p.id], label: p.name })}>Eliminar</Button>
+        <Button variant="ghost" size="xs" iconLeft={<Edit size={14} />} hideLabel="desktop" data-row-interactive onClick={() => openEdit(p)}>Editar</Button>
+        <Button variant="ghost-danger" size="xs" iconLeft={<Trash size={14} />} hideLabel="desktop" data-row-interactive onClick={() => setConfirm({ ids: [p.id], label: p.name })}>Eliminar</Button>
       </span>
     ) },
   ];
