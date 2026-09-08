@@ -25,7 +25,8 @@ muestran los campos" vivía repartido en props implícitas (`visibleCount`,
     tope, `auto` muestra los que quepan junto al grupo final (priority+).
     Antes de medir (server, primer frame) muestra todo y pliega al montar.
   - `drawer`: los campos tras el embudo; **`pinned`** deja campos siempre en
-    la barra (la búsqueda).
+    la barra (la búsqueda). El embudo va en el grupo final, junto a las
+    acciones (Limpiar · embudo · Exportar), en escritorio y en teléfono.
 - **`applied: AppliedFilter[]`** (`{ key, label, value, onRemove }`): fila de
   `Chip`s descartables bajo los campos ("Estado: Pendiente ×"), a todo ancho.
   Los badges del embudo y del toggle se derivan de ella (`key` = el `key` del

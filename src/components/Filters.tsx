@@ -354,7 +354,7 @@ export function FilterBar({
     ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
     ...style,
   } as React.CSSProperties;
-  const hasEnd = toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || (sortEl != null && !narrow);
+  const hasEnd = toggle != null || drawerTrigger != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || (sortEl != null && !narrow);
   return (
     <div
       ref={barRef}
@@ -365,9 +365,9 @@ export function FilterBar({
     >
       {mode === 'drawer' ? (
         <>
-          {drawerTrigger}
-          {/* Pinned fields stay in the bar; on a phone the sort control sits
-              by the funnel and the trailing group wraps under it. */}
+          {/* Pinned fields stay in the bar; the funnel sits in the trailing
+              group with the other actions. On a phone the sort control shares
+              the line and the trailing group wraps under it. */}
           {pinned != null && <div className="filter-bar__fields filter-bar__pinned">{pinned}</div>}
           {narrow && sortEl}
           <Drawer
@@ -397,9 +397,10 @@ export function FilterBar({
               the only signal that it acted; role="status" announces it politely
               without stealing focus. Any node fits — a Skeleton while loading. */}
           {summary != null && <div className="filter-bar__summary" role="status">{summary}</div>}
-          {(actions != null || (overflow != null && overflow.length > 0)) && (
+          {(actions != null || drawerTrigger != null || (overflow != null && overflow.length > 0)) && (
             <div className="filter-bar__actions">
               {actions}
+              {drawerTrigger}
               {overflow != null && <ToolbarActions actions={overflow} />}
             </div>
           )}

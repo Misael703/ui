@@ -327,7 +327,8 @@ describe('FilterBar layout="drawer" on a desk (v3.8.0)', () => {
     );
     expect(container.querySelectorAll('.filter-bar__pinned .filter-field')).toHaveLength(1);
     expect(container.querySelectorAll('.filter-bar > .filter-bar__fields:not(.filter-bar__pinned)')).toHaveLength(0);
-    const btn = container.querySelector('.filter-bar__drawer-toggle button') as HTMLButtonElement;
+    // the funnel sits in the trailing group with the other actions (right side)
+    const btn = container.querySelector('.filter-bar__end .filter-bar__actions .filter-bar__drawer-toggle button') as HTMLButtonElement;
     expect(btn).toHaveAttribute('aria-label', 'Filtros (1)');
     fireEvent.click(btn);
     expect(baseElement.querySelector('.drawer')!.querySelectorAll('.filter-field')).toHaveLength(2);
