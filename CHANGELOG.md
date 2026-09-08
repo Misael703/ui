@@ -50,11 +50,23 @@ mano" que `FilterBar` existe para reemplazar.
   posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
 
 ### Removed
-- Story **"Gold Standard"** (DataTable, v1.14.0): era la tabla "Órdenes de
-  despacho" calcada del consumidor, dentro de una Card. Contradecía la regla
-  de stories genéricas y la receta sin Card. Lo que demostraba lo cubren
-  "Con toolbar" y el playground de listado; los defaults que fijó siguen
-  pineados en `tests/GoldStandard.test.tsx`.
+- **Barrido de stories calcadas del consumidor.** Regla: el Storybook enseña
+  el kit con un dominio de muestra genérico (ferretería, Northwind Builders,
+  pedido #1042, persona de muestra "Satoru Gojo"), nunca pantallas ni copy
+  de una app. Fuera: **"Gold Standard"** (DataTable, v1.14.0: la tabla
+  "Órdenes de despacho" dentro de una Card; sus defaults siguen pineados en
+  `tests/GoldStandard.test.tsx`, y lo que mostraba lo cubren "Con toolbar" y
+  el playground de listado); **Timeline #1 / #8 / #9 / #10** (la orden
+  1415231 de despachos) → fusionadas en **"Playground · ciclo de un pedido"**
+  (controls: eventos 0–5, payload, tipos, densidad, completado);
+  **"Sin datos · tabla ancha"** (13 columnas del reporte de despachos) → el
+  playground de región de scroll acepta `rows: 0`; **`FilterBarDemo`**
+  (Camión / Chofer) → lo cubre el playground de listado. Identidad real
+  (nombre, correos, handle) reemplazada por la persona de muestra en AppShell,
+  Avatar, UserCell, HoverCard, UserMenu y Comments; copy de despachos /
+  cobros / Bsale reemplazado por copy genérico en Topbar-only, BulkActionBar,
+  Tooltip largo, view switcher, Modal, Proportion, TransferList, Badge
+  registers y Paleta de comandos.
 
 ### Changed
 - **Cards mobile rehechas y por default.** `mobileLayout` pasa a `'cards'`:

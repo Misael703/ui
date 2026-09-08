@@ -54,7 +54,7 @@ export const BulkActionBarDemo: StoryObj = {
         </Button>
         <div style={{ width: '100%' }}>
           <BulkActionBar selectedCount={count} onClear={() => setCount(0)}>
-            <Button variant="outline" size="sm">Marcar como despachados</Button>
+            <Button variant="outline" size="sm">Marcar como enviados</Button>
             <Button variant="ghost" size="sm">Imprimir</Button>
             <Button variant="danger" size="sm">Eliminar</Button>
           </BulkActionBar>
@@ -79,63 +79,6 @@ export const SortDropdownDemo: StoryObj = {
           { value: 'urgent', label: 'Urgentes primero' },
         ]}
       />
-    );
-  },
-};
-
-/**
- * FilterBar: la barra horizontal densa SOBRE una tabla (contraparte del
- * FilterPanel vertical). Mezcla Select / Input / Combobox y todos quedan a
- * la misma altura (36px vía `.fields--dense`), grilla pareja y responsiva,
- * label en registro quieto. Reemplaza el flex-cluster hecho a mano.
- */
-export const FilterBarDemo: StoryObj = {
-  render: () => {
-    const [estado, setEstado] = React.useState('all');
-    const [orden, setOrden] = React.useState('');
-    const [camion, setCamion] = React.useState<string | null>('all');
-    const [chofer, setChofer] = React.useState<string | null>('all');
-    return (
-      <div style={{ maxWidth: 1040 }}>
-        <FilterBar actions={<Button variant="outline" size="sm">Limpiar</Button>}>
-          <FilterField label="Estado">
-            <Select value={estado} onChange={(e) => setEstado(e.target.value)}>
-              <option value="all">Todos</option>
-              <option value="pending">Pendiente</option>
-              <option value="issued">Emitido</option>
-              <option value="delivered">Entregado</option>
-            </Select>
-          </FilterField>
-          <FilterField label="N° orden">
-            <Input value={orden} onChange={(e) => setOrden(e.target.value)} placeholder="Ej. 0010453" />
-          </FilterField>
-          <FilterField label="Cliente">
-            <Input placeholder="Buscar…" />
-          </FilterField>
-          <FilterField label="Camión">
-            <Combobox
-              value={camion}
-              onChange={setCamion}
-              options={[
-                { value: 'all', label: 'Todos' },
-                { value: 'GHJ-12', label: 'GHJ-12' },
-                { value: 'KLM-90', label: 'KLM-90' },
-              ]}
-            />
-          </FilterField>
-          <FilterField label="Chofer">
-            <Combobox
-              value={chofer}
-              onChange={setChofer}
-              options={[
-                { value: 'all', label: 'Todos' },
-                { value: 'r-pizarro', label: 'Rodrigo Pizarro' },
-                { value: 'h-salas', label: 'Hernán Salas' },
-              ]}
-            />
-          </FilterField>
-        </FilterBar>
-      </div>
     );
   },
 };

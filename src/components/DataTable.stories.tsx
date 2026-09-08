@@ -277,48 +277,6 @@ export const SinDatosCustom: StoryObj = {
 };
 
 /**
- * Tabla MÁS ANCHA que el viewport + estado vacío: el mensaje queda anclado
- * y centrado en el área visible (overlay hermano de la tabla, fuera del
- * track de scroll horizontal), mientras el header sigue scrolleable para
- * comunicar la forma de la tabla. Antes el empty se estiraba al ancho
- * intrínseco de la tabla y se centraba fuera de pantalla.
- */
-export const SinDatosTablaAncha: StoryObj = {
-  render: () => (
-    <div style={{ maxWidth: 720 }}>
-      <DataTable
-        rows={[]}
-        rowKey={(r: { id: string }) => r.id}
-        ariaLabel="Despachos"
-        empty={
-          <div>
-            <strong style={{ display: 'block', marginBottom: 4 }}>Sin despachos en el período</strong>
-            <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
-              No hay despachos emitidos entre las fechas elegidas. Prueba con otro rango.
-            </span>
-          </div>
-        }
-        columns={[
-          { key: 'fecha', header: 'Fecha' },
-          { key: 'hora', header: 'Hora' },
-          { key: 'usuario', header: 'Usuario' },
-          { key: 'tipo', header: 'Tipo de despacho' },
-          { key: 'zona', header: 'Zona operativa' },
-          { key: 'comuna', header: 'Comuna' },
-          { key: 'cliente', header: 'Cliente' },
-          { key: 'rut', header: 'RUT cliente' },
-          { key: 'tipoDoc', header: 'Tipo documento' },
-          { key: 'numDoc', header: 'N° documento' },
-          { key: 'guia', header: 'N° guía' },
-          { key: 'chofer', header: 'Chofer' },
-          { key: 'patente', header: 'Patente camión' },
-        ]}
-      />
-    </div>
-  ),
-};
-
-/**
  * Toolbar / filter zone + DataTable en UNA superficie redondeada. Se pasa
  * por el prop `toolbar`: el DataTable **posee** la superficie
  * (borde+radio+overflow), la toolbar queda clipeada al radio, hay UNA sola
@@ -760,7 +718,11 @@ interface ScrollRegionArgs {
  * sticky header se pega al scroller interno y las **pistas de borde**
  * (`has-more-{left,right,down}`) marcan hacia dónde queda contenido — antes de
  * 3.2.0 no se veían en modo acotado. Sube `columns` a 16 para el scroll
- * horizontal; `rows` a 400 + `virtualize` para el windowing.
+ * horizontal; `rows` a 400 + `virtualize` para el windowing; `rows` a 0 para el
+ * vacío de una tabla más ancha que el viewport: el mensaje queda anclado y
+ * centrado en el área visible (overlay hermano de la tabla, fuera del track
+ * de scroll horizontal) mientras el header sigue scrolleable para comunicar la
+ * forma de la tabla.
  */
 export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
   name: 'Playground · región de scroll (fillHeight / maxHeight)',
@@ -768,7 +730,7 @@ export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
   argTypes: {
     mode: { control: 'inline-radio', options: ['fillHeight', 'maxHeight'] },
     columns: { control: { type: 'range', min: 3, max: 16, step: 1 } },
-    rows: { control: 'inline-radio', options: [12, 60, 400] },
+    rows: { control: 'inline-radio', options: [0, 12, 60, 400] },
     containerHeight: { control: 'inline-radio', options: [360, 520, 720] },
     toolbar: { control: 'boolean' },
     pagination: { control: 'boolean' },
@@ -798,8 +760,16 @@ export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
           virtualizeRows={a.virtualize ? { rowHeight: 31 } : undefined}
           toolbar={a.toolbar ? <TableToolbar><Input placeholder="Buscar producto" /></TableToolbar> : undefined}
           ariaLabel="Inventario"
+          empty={
+            <div>
+              <strong style={{ display: 'block', marginBottom: 4 }}>Sin movimientos en el período</strong>
+              <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
+                No hay registros entre las fechas elegidas. Prueba con otro rango.
+              </span>
+            </div>
+          }
         />
-        {a.pagination && <TablePagination page={page} pageSize={a.rows} total={a.rows * 3} onPageChange={setPage} />}
+        {a.pagination && a.rows > 0 && <TablePagination page={page} pageSize={a.rows} total={a.rows * 3} onPageChange={setPage} />}
       </div>
     );
   },

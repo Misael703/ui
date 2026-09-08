@@ -59,8 +59,8 @@ export const ConIconos: StoryObj = {
   render: () => (
     <Strip>
       <UserMenu
-        name="Misael Ocas"
-        role="Dueño · El Alba"
+        name="Satoru Gojo"
+        role="Administrador · Northwind"
         items={[
           { label: 'Mi perfil', icon: <User size={16} /> },
           { label: 'Facturación', icon: <CreditCard size={16} /> },
@@ -145,7 +145,7 @@ export const Compacto: StoryObj = {
       }}><Bell size={18} /></button>
       <UserMenu
         compact
-        name="Misael Ocas"
+        name="Satoru Gojo"
         role="Administrador"
         items={[
           { label: 'Mi perfil', icon: <User size={16} /> },

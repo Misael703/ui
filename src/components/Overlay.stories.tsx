@@ -54,7 +54,7 @@ export const ModalGridDosColumnas: StoryObj = {
     return (
       <>
         <Button onClick={() => setO(true)}>Abrir Modal</Button>
-        <Modal open={o} onClose={() => setO(false)} title="Editar chofer" size="md">
+        <Modal open={o} onClose={() => setO(false)} title="Editar contacto" size="md">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             {['Nombre', 'RUT', 'Patente asignada', 'Teléfono de contacto largo', 'Email', 'Licencia clase'].map((l) => (
               <label key={l} style={{ display: 'grid', gap: 4, minWidth: 0 }}>

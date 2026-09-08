@@ -58,7 +58,7 @@ export const TransferListDemo: StoryObj = {
       { id: 'p3', label: 'Eliminar pedidos' },
       { id: 'p4', label: 'Ver reportes' },
       { id: 'p5', label: 'Administrar usuarios', disabled: true },
-      { id: 'p6', label: 'Configurar despacho' },
+      { id: 'p6', label: 'Configurar envío' },
     ];
     const [selected, setSelected] = React.useState<TransferItem[]>([allItems[0], allItems[3]]);
     return (

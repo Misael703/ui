@@ -272,7 +272,7 @@ export const Badges: StoryObj = {
 /**
  * Registros de Badge (post-1.10.0). **Default = data-chip quieto**: sentence
  * case, texto tintado, sin borde duro — lee como metadato en una tabla densa
- * (status, tipo, "Clase A4", un precio). `tone="label"` = micro-label de
+ * (status, tipo, "Categoría A", un precio). `tone="label"` = micro-label de
  * marca: la textura en mayúsculas para eyebrows / kickers / tags cortos.
  * Escena canónica: la columna de dato usa el default; los tags de marca
  * optan por `tone="label"`.
@@ -295,7 +295,7 @@ export const BadgeRegisters: StoryObj = {
                 <td style={{ padding: '8px 12px', fontVariantNumeric: 'tabular-nums' }}>{n}</td>
                 <td style={{ padding: '8px 12px' }}><Badge>{tipo}</Badge></td>
                 <td style={{ padding: '8px 12px' }}><Badge variant={v as 'success'}>{estado}</Badge></td>
-                <td style={{ padding: '8px 12px' }}><Badge variant="neutral">Clase A4</Badge></td>
+                <td style={{ padding: '8px 12px' }}><Badge variant="neutral">Categoría A</Badge></td>
               </tr>
             ))}
           </tbody>
