@@ -117,16 +117,21 @@ A table has one view; if an app adds its own view switching (board, agenda),
 that is the app's chrome above the table, not part of the recipe. Rules: one
 row on desktop, fields wrap by min width (160), never fixed per-field widths;
 dense labels (`FilterField`), not form labels; free-text search first,
-selectors next, date last; when the set wraps to a second desktop line, cap
-it with `visibleCount` (the first N are the daily filters, the rest behind the
-"Más filtros" toggle, badged with `hiddenActiveCount` so an applied filter
-never hides silently). Each line shares its width among its fields (flex-wrap,
-not an equal-column grid), so a wrapped pair fills the bar. Below 600px the
-bar swaps the fields for a "Filtros" button (badged with `activeCount`) that
-opens a Drawer holding the same fields, stacked — `mobile="drawer"` by default;
-summary and actions stay in the bar. Inline expansion is for desktop, where
-filter and result stay in view together; the drawer is the mobile answer, not
-a desktop alternative. **The table becomes cards on a phone** (`mobileLayout`
+selectors next, date last. **How much to hide (v3.8.0)** is `layout`, a
+scale with a cost per step: `inline` (default) shows every field and wraps —
+zero clicks, every value in view, right until the set wraps; `collapse`
+keeps the first N inline (`visibleCount`: a number is a cap for the daily
+filters, `'auto'` fills the first line) and the rest behind "Más filtros" —
+the bar measures itself and folds ONLY when the whole set does not fit one
+line, a set that fits shows whole; `drawer` puts the fields behind the funnel
+with `pinned` keeping the search box in the bar — for many filters, or
+filters used rarely against the table. Hidden fields hide their values, so
+`applied` (removable chips under the bar, "Estado: Pendiente ×") is the
+honest counterpart: the badges on the funnel and the toggle derive from it,
+and `drawer` without it warns. Below 600px the same choice is
+`mobileLayout`, `drawer` by default (an expanded bar on a phone pushes the
+table off-screen);
+summary and actions stay in the bar. **The table becomes cards on a phone** (`mobileLayout`
 defaults to `'cards'`): a card is not a row turned sideways but three zones
 with a hierarchy, and `Column.mobile` says where each column lands — `title`
 (the name, with the column header as a caption), `status` (the badge, top

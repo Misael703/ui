@@ -223,13 +223,31 @@ describe('FilterBar fills rows and collapses extra fields', () => {
     <FilterField key="c" label="C"><input /></FilterField>,
     <FilterField key="d" label="D"><input /></FilterField>,
   ];
-  it('without visibleCount every field renders and there is no toggle', () => {
+  // jsdom lays nothing out: fake the bar's inner width (clientWidth) and the
+  // trailing group's width (offsetWidth). Capacity = floor((bar − end + gap) / (160 + gap)), gap 16.
+  const widths = (bar: number, end = 0) => {
+    const cw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+    const ow = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, get() { return (this as HTMLElement).classList.contains('filter-bar') ? bar : 0; } });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get() { return (this as HTMLElement).classList.contains('filter-bar__end') ? end : 0; } });
+    return () => { if (cw) Object.defineProperty(HTMLElement.prototype, 'clientWidth', cw); if (ow) Object.defineProperty(HTMLElement.prototype, 'offsetWidth', ow); };
+  };
+  it('layout="inline" (default): every field renders and there is no toggle', () => {
     const { container } = render(<FilterBar>{four}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
     expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+    expect(container.querySelector('.filter-bar')).toHaveAttribute('data-layout', 'inline');
   });
-  it('visibleCount shows the first N, the toggle expands and collapses the rest (aria-expanded)', () => {
-    const { container } = render(<FilterBar visibleCount={2}>{four}</FilterBar>);
+  it('collapse only folds when the set does NOT fit one line: 1200px fits four fields → all shown, no toggle', () => {
+    const restore = widths(1200, 120);
+    const { container } = render(<FilterBar layout="collapse" visibleCount={2}>{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+    restore();
+  });
+  it('collapse with a number: 640px holds three, the cap of 2 wins → first 2, toggle expands and collapses (aria-expanded)', () => {
+    const restore = widths(640, 120);
+    const { container } = render(<FilterBar layout="collapse" visibleCount={2}>{four}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
     const toggle = container.querySelector('.filter-bar__toggle') as HTMLButtonElement;
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -240,26 +258,92 @@ describe('FilterBar fills rows and collapses extra fields', () => {
     expect(toggle).toHaveTextContent('Menos filtros');
     fireEvent.click(toggle);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
+    restore();
   });
-  it('visibleCount ≥ field count renders everything and no toggle', () => {
-    const { container } = render(<FilterBar visibleCount={4}>{four}</FilterBar>);
+  it('collapse "auto" (default): shows as many as fit next to the trailing group — 640px → 3 of 4', () => {
+    const restore = widths(640, 120);
+    const { container } = render(<FilterBar layout="collapse">{four}</FilterBar>);
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(3);
+    expect(container.querySelector('.filter-bar__toggle')).not.toBeNull();
+    restore();
+  });
+  it('unmeasured (server / first paint): everything shows, nothing folds', () => {
+    const { container } = render(<FilterBar layout="collapse" visibleCount={2}>{four}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
     expect(container.querySelector('.filter-bar__toggle')).toBeNull();
   });
-  it('hiddenActiveCount badges the toggle so a collapsed applied filter is not invisible', () => {
+  it('3.7.0 compat: visibleCount alone means layout="collapse"; hiddenActiveCount still badges the toggle', () => {
+    const restore = widths(640, 120);
     const { container } = render(<FilterBar visibleCount={2} hiddenActiveCount={2}>{four}</FilterBar>);
-    expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('Más filtros');
+    expect(container.querySelector('.filter-bar')).toHaveAttribute('data-layout', 'collapse');
     expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('2');
+    restore();
+  });
+  it('the toggle badge derives from `applied`: only chips whose key is hidden count', () => {
+    const restore = widths(640, 120);
+    const applied = [{ key: 'a', label: 'A', value: '1' }, { key: 'c', label: 'C', value: '3' }, { key: 'd', label: 'D', value: '4' }];
+    const { container } = render(<FilterBar layout="collapse" visibleCount={2} applied={applied}>{four}</FilterBar>);
+    expect(container.querySelector('.filter-bar__toggle')).toHaveTextContent('2');
+    restore();
   });
 });
 
-/**
- * Mobile (v3.7.0): below 600px an expanded bar becomes a column of fields that
- * pushes the table off-screen. `mobile="drawer"` (default) swaps the inline
- * fields for a "Filtros" button — badged with `activeCount` — that opens a
- * Drawer holding the same FilterFields; summary and actions stay in the bar.
- * jsdom has no matchMedia: it is stubbed per test to pick the branch.
- */
+describe('FilterBar applied chips (v3.8.0)', () => {
+  it('renders one removable chip per applied filter ("Label: value ×"), full-width under the fields', () => {
+    const onRemove = vi.fn();
+    const applied = [{ key: 'a', label: 'Estado', value: 'Pendiente', onRemove }, { key: 'b', label: 'Zona', value: 'Norte' }];
+    const { container } = render(<FilterBar applied={applied}><FilterField key="a" label="Estado"><input /></FilterField></FilterBar>);
+    const row = container.querySelector('.filter-bar__applied') as HTMLElement;
+    expect(row).toHaveAttribute('aria-label', 'Filtros aplicados');
+    const chips = row.querySelectorAll('.chip');
+    expect(chips).toHaveLength(2);
+    expect(chips[0]).toHaveTextContent('Estado: Pendiente');
+    fireEvent.click(chips[0].querySelector('button')!);
+    expect(onRemove).toHaveBeenCalledTimes(1);
+    expect(chips[1].querySelector('button')).toBeNull();
+  });
+  it('no chips row when nothing is applied', () => {
+    const { container } = render(<FilterBar applied={[]}><div /></FilterBar>);
+    expect(container.querySelector('.filter-bar__applied')).toBeNull();
+  });
+  it('CSS: the chips row takes the full width and wraps', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    expect(css).toMatch(/\.filter-bar__applied \{[^}]*flex:\s*1 1 100%/);
+  });
+});
+
+describe('FilterBar layout="drawer" on a desk (v3.8.0)', () => {
+  const stubMedia = (matches: boolean) => Object.defineProperty(window, 'matchMedia', {
+    configurable: true, writable: true,
+    value: (media: string) => ({ matches, media, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false }),
+  });
+  it('pinned fields stay in the bar; the rest open behind the funnel, badged from `applied`', () => {
+    stubMedia(false);
+    const { container, baseElement } = render(
+      <FilterBar layout="drawer" applied={[{ key: 'b', label: 'Zona', value: 'Norte' }]} pinned={<FilterField key="q" label="Buscar"><input /></FilterField>}>
+        <FilterField key="a" label="Estado"><input /></FilterField>
+        <FilterField key="b" label="Zona"><input /></FilterField>
+      </FilterBar>
+    );
+    expect(container.querySelectorAll('.filter-bar__pinned .filter-field')).toHaveLength(1);
+    expect(container.querySelectorAll('.filter-bar > .filter-bar__fields:not(.filter-bar__pinned)')).toHaveLength(0);
+    const btn = container.querySelector('.filter-bar__drawer-toggle button') as HTMLButtonElement;
+    expect(btn).toHaveAttribute('aria-label', 'Filtros (1)');
+    fireEvent.click(btn);
+    expect(baseElement.querySelector('.drawer')!.querySelectorAll('.filter-field')).toHaveLength(2);
+    expect(container.querySelector('.filter-bar__applied')).toHaveTextContent('Zona: Norte');
+  });
+  it('warns once when drawer hides the state with no `applied`', () => {
+    stubMedia(false);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<FilterBar layout="drawer"><div /></FilterBar>);
+    render(<FilterBar layout="drawer"><div /></FilterBar>);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(/applied/);
+    warn.mockRestore();
+  });
+});
+
 describe('FilterBar mobile mode', () => {
   const stubMedia = (matches: boolean) => {
     const listeners = new Set<() => void>();
@@ -281,7 +365,7 @@ describe('FilterBar mobile mode', () => {
     stubMedia(false);
     const { container } = render(<FilterBar summary="3">{fields}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
-    expect(container.querySelector('.filter-bar__mobile-toggle')).toBeNull();
+    expect(container.querySelector('.filter-bar__drawer-toggle')).toBeNull();
   });
   it('narrow viewport: a badged "Filtros" button replaces the fields and opens a Drawer with them', () => {
     stubMedia(true);
@@ -289,7 +373,7 @@ describe('FilterBar mobile mode', () => {
     expect(container.querySelectorAll('.filter-bar .filter-field')).toHaveLength(0);
     // v3.7.0: a tertiary icon button (funnel) named "Filtros"; the applied
     // count overhangs it as a badge (aria-hidden) and is folded into the name.
-    const wrap = container.querySelector('.filter-bar__mobile-toggle') as HTMLElement;
+    const wrap = container.querySelector('.filter-bar__drawer-toggle') as HTMLElement;
     const toggle = wrap.querySelector('button') as HTMLButtonElement;
     expect(toggle).toHaveAttribute('aria-label', 'Filtros (2)');
     expect(toggle.querySelector('svg')).not.toBeNull();
@@ -304,10 +388,13 @@ describe('FilterBar mobile mode', () => {
     expect(drawer!.querySelectorAll('.filter-field')).toHaveLength(2);
     expect(screen.getByLabelText('Zona')).toBeInTheDocument();
   });
-  it('mobile="inline" keeps the fields inline on a narrow viewport', () => {
+  it('mobileLayout="inline" keeps the fields inline on a narrow viewport (and the 3.7.0 `mobile` prop still maps)', () => {
     stubMedia(true);
-    const { container } = render(<FilterBar mobile="inline">{fields}</FilterBar>);
+    const { container, unmount } = render(<FilterBar mobileLayout="inline">{fields}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(2);
-    expect(container.querySelector('.filter-bar__mobile-toggle')).toBeNull();
+    expect(container.querySelector('.filter-bar__drawer-toggle')).toBeNull();
+    unmount();
+    const r = render(<FilterBar mobile="inline">{fields}</FilterBar>);
+    expect(r.container.querySelectorAll('.filter-field')).toHaveLength(2);
   });
 });

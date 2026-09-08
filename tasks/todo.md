@@ -1,22 +1,15 @@
-# UI Kit v3.7.0 — `FilterBar summary` + receta de página de listado
+# UI Kit v3.8.0 — `FilterBar layout` (inline · collapse · drawer) + chips de aplicados
 
-**Origen:** estandarizar filtros de las 7 páginas CRUD de despachos (Card + `.app-filter-grid` + `FormField` hechos a mano). Decisión con revisión de un segundo agente: `summary` para el conteo (no es acción); switcher en `TableToolbar` arriba ("cómo veo") y `FilterBar` abajo ("qué veo"); conteo SIEMPRE en `summary`.
-**Branch:** `feat/filterbar-summary` (local; push/PR/release con OK explícito).
+**Origen:** `visibleCount` colapsaba aunque el set cupiera en una línea (captura 2026-09-08); y el "cómo se muestran los campos" estaba repartido en props implícitas (`visibleCount`, `mobile`, `activeCount`). Decisión: modos de primera clase, general (no para un consumidor).
+**Branch:** `feat/filterbar-layouts` desde main (3.7.0). Push/PR/release con OK explícito.
 
 ## Tareas
-- [x] T1 — Test rojo: slot `summary` (orden fields → summary → actions; solo si se provee); CSS `margin-left:auto` + `min-height: var(--field-min-h)`; padding de `.table-surface__bar > .filter-bar`.
-- [x] T2 — `FilterBar summary` + CSS; padding dentro del toolbar del DataTable.
-- [x] T3 — Story `Playground · página de listado` (Patterns/Filters) con controls (switcher, campos 2–7, conteo, filtros aplicados).
-- [x] T3b — REGLA nueva del usuario: stories genéricas, nunca calcadas de capturas del consumidor. Reemplazadas "Fill height" + "Ancha acotada con toolbar" → `Playground · región de scroll`, "Página sin cards" → `Playground · superficies en una página`. Lección en tasks/lessons.md.
-- [x] T4 — DESIGN.md (List-page recipe) + CHANGELOG 3.7.0 + bump.
-- [x] T5 — Suite + build + tsc; Storybook a 1280 y 760: summary a 16px del borde y centrado en la banda de controles (36px) en ambos; a 760 los campos envuelven a 2 filas y el summary sigue alineado con la última.
-
-- [x] T6 — Revisión pre-auditoría: summary+actions envuelven juntos (`.filter-bar__end`), `role="status"`, tests de nombre accesible (Select/Combobox/DatePicker/DateRangePicker), regla Select vs Combobox, Combobox null = sin filtro, puntero DESIGN.md, tipo preexistente en Comments.stories.
-- [x] T7 — `Playground · CRUD` (Patterns/CRUD) con estado local real; destapó `.form-field` sin `min-width: 0` (overflow en Drawer de 480px) → fix + test.
-- [x] T8 — Cards mobile bien hechas (decisión 2026-09-08: "para mobile prefiero cards, siempre"). `Column.mobile: 'title'|'status'|'field'|'actions'|'hidden'` reemplaza `hideOnMobile` (no publicado); `mobileLayout` default → `'cards'`; tarjeta = cabecera (título con caption + estado + checkbox) / cuerpo (label izq · valor der, hairlines) / pie (acciones a lo ancho); mismo DOM, `data-mobile` por celda + CSS grid/flex bajo 600px; surface y wrap sueltan el chrome (cards sobre canvas). Gate de virtualización pasa a `isMobile && cards` (antes `cards` a secas: con el default nuevo mataba la virtualización siempre). Tests, stories (listado, CRUD, CardLayoutMobile, playground), DESIGN.md, CHANGELOG. Fuera: "Ordenar por" en móvil (follow-up).
+- [x] T1 — Medición de capacidad: hook interno `useFilterCapacity` (ResizeObserver sobre la barra + grupo final; `floor((bar − end + gap) / (min + gap))`). Tests con RO stubeado.
+- [x] T2 — `layout: 'inline' | 'collapse' | 'drawer'` (default inline) y `mobileLayout` (default drawer). `collapse`: `visibleCount` número | `'auto'`, colapsa SOLO si el set no cabe; con número, `min(visibleCount, capacidad)`. `drawer`: campos tras el embudo; slot `pinned` siempre visible.
+- [x] T3 — `applied: AppliedFilter[]` ({ key, label, value, onRemove }) → fila de `Chip`s descartables bajo los campos; badge del embudo y del toggle derivados de `applied` (fallback a `activeCount`/`hiddenActiveCount` deprecados). Dev warning: `layout="drawer"` sin `applied`.
+- [x] T4 — Deprecaciones compatibles: `visibleCount` sin `layout` ⇒ `collapse`; `mobile` ⇒ `mobileLayout`; `activeCount`/`hiddenActiveCount` si no hay `applied`. Tests de compat.
+- [x] T5 — Playground de listado: controls `layout`, `mobileLayout`, `visibleCount` (auto | 1–7), `applied` (chips). Story compuesta sin cambios de forma.
+- [x] T6 — DESIGN.md (escala "cuánto escondes": inline → collapse → drawer+pinned; drawer exige applied), CHANGELOG 3.8.0, bump package.json, tests, tsc, lint, build, Chromium 320/390/1100.
 
 ## Review
-**Tests:** 1167 (T8: +14). tsc: 0 errores en los archivos de la rama (hay 1 error PREEXISTENTE en main en `Comments.stories.tsx`, fuera de esta rama); lint: 0 errores en la rama (2 errores preexistentes en el untracked `AppShellExplorations.stories.tsx`). Build exit 0.
-**T8 verificado:** Chromium 390/320 light+dark en CardLayoutMobile, listado y CRUD: 0 overflow, zonas en orden, wrap y surface sin borde bajo 600px; label de campo numérico en DM Sans. Hallazgo: `--border-subtle` NO existe como token (las hairlines de las cards viejas nunca se pintaron); las nuevas usan `--border-default`. `.desc-list__value` también lo usa (preexistente, sin tocar). El ajuste `--table-cell-max` rechazado había quedado en 6186738 → removido aquí.
-**Cierre 2026-09-08 (T8–T14):** cards mobile con `Column.mobile` roles y default; virtualización gana a cards; barrido de stories del consumidor (Gold Standard, timelines despachos, tabla ancha, FilterBarDemo) + persona Satoru Gojo; jerarquía terciaria (`hideLabel`, `ghost-danger`, embudo, `overflow` ⋯, lápiz/basurero); `--sticky-inset`; playground de props de DataTable; `FilterBar sort`; `DataTable footer`; paginación con slots fijos; story "Listado completo". 1189 tests, tsc 0, lint 0 errores, build OK.
-**Status:** push + PR autorizados 2026-09-08 ("dale sube todo"). Release/publish pendiente de OK. Después: migración de despachos (7 páginas) como PR aparte; chips de filtros aplicados pendiente.
+1197 tests, tsc 0, lint 0 errores. Chromium 1100/700/1600/320: inline envuelve; collapse auto muestra los que caben y re-mide al redimensionar (4 → 1 → 6 campos); collapse con tope 2 y 4 campos que caben muestra los 4 sin toggle (el caso reportado); drawer con Buscar pinned + embudo badgeado + chips; móvil drawer con chips. Chips en registro neutro (el azul sólido competía con la primaria). Pendiente OK para push/PR/release 3.8.0.

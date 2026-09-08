@@ -6,6 +6,7 @@ import { useLocale } from '../locale/LocaleProvider';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { Drawer } from './Overlay';
 import { Button, IconButton } from './Button';
+import { Chip } from './Display';
 import { ToolbarActions, type ToolbarAction } from './ToolbarActions';
 export type { ToolbarAction } from './ToolbarActions';
 import { format } from '../locale/messages';
@@ -141,6 +142,16 @@ export function SortDropdown<T extends string = string>({
 // deliberately quiet label register — without mutating the global `--tt-label`
 // brand token, so forms elsewhere are untouched.
 
+export type FilterBarLayout = 'inline' | 'collapse' | 'drawer';
+
+/** One applied filter, for the chips row (v3.8.0). `key` matches the `key` of the FilterField it belongs to. */
+export interface AppliedFilter {
+  key: string;
+  label: React.ReactNode;
+  value?: React.ReactNode;
+  onRemove?: () => void;
+}
+
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Right-aligned, read-only slot for the RESULT of the filters — the row
@@ -170,33 +181,52 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   sort?: SortDropdownProps;
   sortOn?: 'mobile' | 'always';
   /**
-   * Collapse the bar to its first N fields (v3.7.0); the rest sit behind a
-   * "Más filtros" toggle in the trailing group. Use it when the full set
-   * wraps to a second line on desktop — the first N should be the filters
-   * people reach for daily, the search box first. Omit to show every field.
+   * How the fields show above 600px (v3.8.0) — the "how much do you hide"
+   * scale, each step with a cost:
+   * - `'inline'` (default): every field, wrapping when the row is full. Zero
+   *   clicks, every applied value in view. Right until the set wraps.
+   * - `'collapse'`: the first N fields inline, the rest behind a "Más
+   *   filtros" toggle. N comes from `visibleCount`. The bar MEASURES itself
+   *   and collapses only when the full set does not fit one line — a set
+   *   that fits shows whole and has no toggle.
+   * - `'drawer'`: the fields live behind the funnel button; `pinned` keeps
+   *   some in the bar (the search box). Applied state is invisible here, so
+   *   `applied` (the chips row) is required — a dev warning says so.
+   * Omitting `layout` with a `visibleCount` means `'collapse'` (3.7.0 compat).
    */
-  visibleCount?: number;
+  layout?: FilterBarLayout;
   /**
-   * How many of the COLLAPSED fields currently hold a value. Shown as a badge
-   * on the toggle so an applied filter never hides silently; the bar cannot
-   * know this itself (it does not own the values).
+   * The same choice below 600px. Default `'drawer'`: an expanded bar on a
+   * phone is a column of fields that pushes the table off-screen.
    */
+  mobileLayout?: FilterBarLayout;
+  /**
+   * With `layout="collapse"`: how many fields stay inline when collapsed. A
+   * number is a cap (the daily filters, search first) — the bar shows
+   * `min(visibleCount, capacity)`; `'auto'` (default) shows as many as fit
+   * the first line next to the toggle, priority+ style.
+   */
+  visibleCount?: number | 'auto';
+  /**
+   * With `layout="drawer"`: fields that stay in the bar (typically the
+   * search box). Everything in `children` goes behind the funnel.
+   */
+  pinned?: React.ReactNode;
+  /**
+   * The filters currently holding a value (v3.8.0). Rendered as a row of
+   * removable chips under the fields ("Estado: Pendiente ×"), and used to
+   * derive the badges on the funnel and the "Más filtros" toggle (an applied
+   * filter never hides silently). The bar cannot know the values — it does
+   * not own them — so the consumer lists them. Required with `'drawer'`.
+   */
+  applied?: AppliedFilter[];
+  /** @deprecated 3.8.0 — derived from `applied`. Kept as a fallback badge count for the toggle. */
   hiddenActiveCount?: number;
   /** Start expanded (uncontrolled; the toggle owns the state after mount). */
   defaultExpanded?: boolean;
-  /**
-   * Below 600px (the kit's mobile breakpoint) an expanded bar is a column of
-   * fields that pushes the table off-screen. `'drawer'` (default) swaps the
-   * inline fields for a "Filtros" button that opens a Drawer holding the same
-   * FilterFields (stacked, full width); `summary` and `actions` stay in the
-   * bar. `'inline'` keeps the desktop behaviour everywhere.
-   */
+  /** @deprecated 3.8.0 — use `mobileLayout`. */
   mobile?: 'drawer' | 'inline';
-  /**
-   * How many filters currently hold a value — the badge on the mobile
-   * "Filtros" button (the drawer hides ALL fields, so this is the total).
-   * The bar cannot know it: it does not own the values.
-   */
+  /** @deprecated 3.8.0 — derived from `applied`. Kept as a fallback badge count for the funnel. */
   activeCount?: number;
   /** Min field width (px) before the row wraps; fields grow from it. Default 160. */
   minColWidth?: number;
@@ -209,20 +239,88 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const MOBILE_QUERY = '(max-width: 600px)';
 
+/**
+ * How many `minColWidth` fields fit on the bar's first line next to the
+ * trailing group: `floor((bar − end + gap) / (min + gap))`. `null` until the
+ * bar has a measured width (server render, jsdom): the caller treats null as
+ * "everything fits" so the first paint shows every field and collapses on
+ * mount rather than the other way round. Re-measures on resize.
+ */
+function useFilterCapacity(
+  barRef: React.RefObject<HTMLDivElement | null>,
+  endRef: React.RefObject<HTMLDivElement | null>,
+  minColWidth: number,
+  enabled: boolean,
+): number | null {
+  const [capacity, setCapacity] = React.useState<number | null>(null);
+  const measure = React.useCallback(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+    const cs = getComputedStyle(bar);
+    const inner = bar.clientWidth - parseFloat(cs.paddingLeft || '0') - parseFloat(cs.paddingRight || '0');
+    if (!(inner > 0)) { setCapacity(null); return; }
+    const gap = parseFloat(cs.columnGap || '') || 16;
+    const end = endRef.current?.offsetWidth ?? 0;
+    const n = Math.floor((inner - end + gap) / (minColWidth + gap));
+    setCapacity((prev) => (prev === n ? prev : n));
+  }, [barRef, endRef, minColWidth]);
+  React.useLayoutEffect(() => {
+    if (!enabled) return;
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => measure());
+    if (barRef.current) ro.observe(barRef.current);
+    if (endRef.current) ro.observe(endRef.current);
+    return () => ro.disconnect();
+  }, [enabled, measure, barRef, endRef]);
+  return enabled ? capacity : null;
+}
+
+let warnedDrawerWithoutApplied = false;
+
+/** React keys from `Children.toArray` carry a ".$" prefix; strip it to compare with `AppliedFilter.key`. */
+const childKey = (el: React.ReactNode): string | null =>
+  React.isValidElement(el) && el.key != null ? String(el.key).replace(/^\.\$/, '') : null;
+
 export function FilterBar({
-  summary, actions, overflow, sort, sortOn = 'mobile', visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
-  mobile = 'drawer', activeCount = 0,
+  summary, actions, overflow, sort, sortOn = 'mobile',
+  layout, mobileLayout, visibleCount = 'auto', pinned, applied,
+  hiddenActiveCount = 0, defaultExpanded = false,
+  mobile, activeCount = 0,
   minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
   const t = useLocale();
   const [expanded, setExpanded] = React.useState(defaultExpanded);
   const [sheetOpen, setSheetOpen] = React.useState(false);
-  const isMobile = useMediaQuery(MOBILE_QUERY) && mobile === 'drawer';
   const narrow = useMediaQuery(MOBILE_QUERY);
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const endRef = React.useRef<HTMLDivElement>(null);
+
+  // Effective layout: 3.7.0 props map onto the modes (visibleCount alone
+  // meant "collapse"; `mobile` was the phone choice).
+  const deskLayout: FilterBarLayout = layout ?? (typeof visibleCount === 'number' ? 'collapse' : 'inline');
+  const phoneLayout: FilterBarLayout = mobileLayout ?? (mobile === 'inline' ? deskLayout : 'drawer');
+  const mode: FilterBarLayout = narrow ? phoneLayout : deskLayout;
+
+  if (mode === 'drawer' && applied == null && !warnedDrawerWithoutApplied) {
+    warnedDrawerWithoutApplied = true;
+    console.warn('[FilterBar] layout="drawer" hides the applied state: pass `applied` so the values show as chips.');
+  }
+
   const sortEl = sort != null && (sortOn === 'always' || narrow) ? <SortDropdown {...sort} className={cx('filter-bar__sort', sort.className)} /> : null;
   const all = React.Children.toArray(children);
-  const collapsible = !isMobile && visibleCount != null && visibleCount < all.length;
-  const shown = collapsible && !expanded ? all.slice(0, visibleCount) : all;
+
+  // Collapse: measure, and only fold when the whole set does not fit.
+  const capacity = useFilterCapacity(barRef, endRef, minColWidth, mode === 'collapse' && !columns);
+  const fits = capacity == null || capacity >= all.length;
+  const cap = capacity == null ? all.length : Math.max(1, capacity);
+  const n = typeof visibleCount === 'number' ? Math.max(1, Math.min(visibleCount, cap)) : cap;
+  const collapsible = mode === 'collapse' && !fits && n < all.length;
+  const shown = collapsible && !expanded ? all.slice(0, n) : all;
+  const hiddenKeys = new Set(collapsible && !expanded ? all.slice(n).map(childKey) : []);
+  const hiddenBadge = applied != null ? applied.filter((a) => hiddenKeys.has(a.key)).length : hiddenActiveCount;
+  const appliedCount = applied != null ? applied.length : activeCount;
+
   const toggle = collapsible ? (
     <button
       type="button"
@@ -231,40 +329,47 @@ export function FilterBar({
       onClick={() => setExpanded((e) => !e)}
     >
       {expanded ? t['filterBar.less'] : t['filterBar.more']}
-      {!expanded && hiddenActiveCount > 0 && <span className="filter-bar__toggle-badge">{hiddenActiveCount}</span>}
+      {!expanded && hiddenBadge > 0 && <span className="filter-bar__toggle-badge">{hiddenBadge}</span>}
       {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
     </button>
   ) : null;
+
+  const drawerTrigger = mode === 'drawer' ? (
+    <span className="filter-bar__drawer-toggle">
+      <IconButton
+        type="button"
+        variant="ghost"
+        size="sm"
+        icon={<Filter size={18} />}
+        aria-label={appliedCount > 0 ? `${t['filterBar.filters']} (${appliedCount})` : t['filterBar.filters']}
+        aria-haspopup="dialog"
+        aria-expanded={sheetOpen}
+        onClick={() => setSheetOpen(true)}
+      />
+      {appliedCount > 0 && <span className="filter-bar__toggle-badge" aria-hidden="true">{appliedCount}</span>}
+    </span>
+  ) : null;
+
   const gridVars = {
     ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
     ...style,
   } as React.CSSProperties;
+  const hasEnd = toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || (sortEl != null && !narrow);
   return (
     <div
-      className={cx('filter-bar', 'fields--dense', columns ? 'filter-bar--fixed-cols' : undefined, className)}
+      ref={barRef}
+      className={cx('filter-bar', 'fields--dense', columns ? 'filter-bar--fixed-cols' : undefined, `filter-bar--${mode}`, className)}
       style={gridVars}
+      data-layout={mode}
       {...rest}
     >
-      {isMobile ? (
+      {mode === 'drawer' ? (
         <>
-          {/* Mobile: the fields move into a Drawer; the bar keeps a badged
-              trigger so the applied-filter count never hides. */}
-          <span className="filter-bar__mobile-toggle">
-            <IconButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              icon={<Filter size={18} />}
-              aria-label={activeCount > 0 ? `${t['filterBar.filters']} (${activeCount})` : t['filterBar.filters']}
-              aria-haspopup="dialog"
-              aria-expanded={sheetOpen}
-              onClick={() => setSheetOpen(true)}
-            />
-            {activeCount > 0 && <span className="filter-bar__toggle-badge" aria-hidden="true">{activeCount}</span>}
-          </span>
-          {/* On a phone the sort control sits next to the funnel and stretches;
-              the trailing group (count · actions · ⋯) wraps under it. */}
-          {sortEl}
+          {drawerTrigger}
+          {/* Pinned fields stay in the bar; on a phone the sort control sits
+              by the funnel and the trailing group wraps under it. */}
+          {pinned != null && <div className="filter-bar__fields filter-bar__pinned">{pinned}</div>}
+          {narrow && sortEl}
           <Drawer
             open={sheetOpen}
             onClose={() => setSheetOpen(false)}
@@ -275,16 +380,19 @@ export function FilterBar({
           </Drawer>
         </>
       ) : (
-        <div className="filter-bar__fields">{shown}</div>
+        <>
+          <div className="filter-bar__fields">{shown}</div>
+          {narrow && sortEl}
+        </>
       )}
       {/* One trailing group, so the toggle, the count and the actions wrap
           TOGETHER: as separate flex items the actions could drop to a new line
           while the count stayed up with the fields — a readout split from its
           buttons. */}
-      {(toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || sortEl != null) && (
-        <div className="filter-bar__end">
+      {hasEnd && (
+        <div ref={endRef} className="filter-bar__end">
           {toggle}
-          {!isMobile && sortEl}
+          {!narrow && sortEl}
           {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
               the only signal that it acted; role="status" announces it politely
               without stealing focus. Any node fits — a Skeleton while loading. */}
@@ -295,6 +403,17 @@ export function FilterBar({
               {overflow != null && <ToolbarActions actions={overflow} />}
             </div>
           )}
+        </div>
+      )}
+      {/* Applied chips: the values in one glance, removable, whatever the
+          layout hides. Full-width line under the fields. */}
+      {applied != null && applied.length > 0 && (
+        <div className="filter-bar__applied" aria-label={t['filterBar.applied']}>
+          {applied.map((a) => (
+            <Chip key={a.key} onRemove={a.onRemove}>
+              {a.label}{a.value != null && <>: {a.value}</>}
+            </Chip>
+          ))}
         </div>
       )}
     </div>
