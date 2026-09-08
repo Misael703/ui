@@ -1277,6 +1277,29 @@ button, input, select, textarea { box-sizing: border-box; }
      floats on the canvas above the cards, flush with them. */
   .table-surface.table-surface--cards > .table-surface__bar { border-bottom: 0; }
   .table-surface.table-surface--cards > .table-surface__bar > .filter-bar { padding-inline: 0; }
+  .table-surface.table-surface--cards > .table-surface__bar > .table-toolbar {
+    background: transparent;
+    border-bottom: 0;
+    padding-inline: 0;
+  }
+  /* Bounded modes (`maxHeight` / `fillHeight`) are a desktop device: a scroll
+     box of cards clips them mid-card. Cards flow with the page instead — the
+     component also drops the inline max-height while the query matches. */
+  .table-wrap--cards .table-wrap__scroll { overflow: visible; }
+  .table-wrap--cards.table-wrap--fill,
+  .table-surface.table-surface--cards.table-surface--fill {
+    display: block;
+    flex: none;
+    height: auto;
+  }
+  /* Empty / error states have no surface to sit on once the wrap is gone:
+     the overlay becomes a card of its own. */
+  .table-wrap--cards .data-table__overlay {
+    border: 1px solid var(--border-on-canvas);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    padding: var(--space-6) var(--space-4);
+  }
   .table-wrap--cards .table { border: 0; background: transparent; }
   .table-wrap--cards .table thead { display: none; }
   /* Footer cells lose their column geometry in card layout (no thead to
@@ -1366,9 +1389,14 @@ button, input, select, textarea { box-sizing: border-box; }
     text-transform: var(--tt-data);
     letter-spacing: var(--tracking-snug);
   }
-  /* A field cell that carries a stacked composite (name + `.cell-meta`)
-     keeps the value flush right as a block. */
-  .table-wrap--cards .table td[data-mobile="field"] > * { display: inline; }
+  /* Long-text columns (`truncate`) read badly ragged-left under a floated
+     label: stack the label above the value, left-aligned. */
+  .table-wrap--cards .table td[data-mobile="field"]:has(> .table__cell-clip) { text-align: left !important; }
+  .table-wrap--cards .table td[data-mobile="field"]:has(> .table__cell-clip)[data-label]::before {
+    float: none;
+    display: block;
+    margin: 0 0 2px;
+  }
 
   /* ---- footer zone: actions stretched --------------------------------- */
   .table-wrap--cards .table td[data-mobile="actions"] {

@@ -698,5 +698,17 @@ describe('Column.mobile', () => {
     // cards on the canvas: the wrap AND the toolbar'd surface lose border/bg
     expect(block).toMatch(/\.table-wrap--cards,\s*\.table-surface\.table-surface--cards \{[^}]*border:\s*0/);
     expect(block).toMatch(/\.table-wrap--cards \.table tr \{[^}]*border:\s*1px solid var\(--border-on-canvas\)/);
+    // a toolbar inside the cards surface loses its own box; bounded modes flow
+    expect(block).toMatch(/> \.table-toolbar \{[^}]*background:\s*transparent/);
+    expect(block).toMatch(/\.table-wrap--cards \.table-wrap__scroll \{[^}]*overflow:\s*visible/);
+    expect(block).toMatch(/\.table-wrap--cards\.table-wrap--fill,[^{]*\{[^}]*height:\s*auto/);
+    expect(block).toMatch(/\.table-wrap--cards \.data-table__overlay \{[^}]*border-radius/);
+  });
+  it('cards on a phone drop the inline maxHeight (no scroll box of cards); the table keeps it', () => {
+    stub(true);
+    const { container, rerender } = render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} maxHeight={200} />);
+    expect((container.querySelector('.table-wrap__scroll') as HTMLElement).style.maxHeight).toBe('');
+    rerender(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} maxHeight={200} mobileLayout="table" />);
+    expect((container.querySelector('.table-wrap__scroll') as HTMLElement).style.maxHeight).toBe('200px');
   });
 });

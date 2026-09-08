@@ -5,6 +5,7 @@ import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
 import { Modal } from './Overlay';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
 
@@ -476,7 +477,7 @@ export const ColumnaAccionAlineada: StoryObj = {
         { key: 'name', header: 'Producto' },
         { key: 'sku', header: 'SKU' },
         {
-          key: 'acc', header: 'Acciones', align: 'right',
+          key: 'acc', header: 'Acciones', align: 'right', mobile: 'actions',
           accessor: () => (
             <span style={{ display: 'inline-flex', gap: 8 }} data-row-interactive>
               <Button size="sm" variant="outline">Editar</Button>
@@ -763,13 +764,13 @@ export const GoldStandard: StoryObj = {
               { key: 'doc', header: 'N° documento', accessor: (r) => (
                 <><span className="cell-mono">{r.doc}</span><span className="cell-meta">{r.eco}</span></>
               ) },
-              { key: 'cliente', header: 'Cliente', accessor: (r) => (
+              { key: 'cliente', header: 'Cliente', mobile: 'title', accessor: (r) => (
                 <><span>{r.cliente}</span><span className="cell-meta cell-mono">{r.rut}</span></>
               ) },
               { key: 'dir', header: 'Dirección', accessor: (r) => <div className="cell-wrap" style={{ maxWidth: 220 }}>{r.dir}</div> },
               { key: 'fecha', header: 'Fecha', accessor: (r) => <span className="cell-mono">{r.fecha}</span> },
               { key: 'tipo', header: 'Tipo', accessor: (r) => <Badge>{r.tipo}</Badge> },
-              { key: 'estado', header: 'Estado', accessor: (r) => <Badge variant={estadoVariant(r.estado)} dot>{r.estado}</Badge> },
+              { key: 'estado', header: 'Estado', mobile: 'status', accessor: (r) => <Badge variant={estadoVariant(r.estado)} dot>{r.estado}</Badge> },
               { key: 'clase', header: 'Clase', accessor: (r) => <Badge variant="neutral">{r.clase}</Badge> },
             ]}
           />
@@ -827,8 +828,11 @@ export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
     const cols = React.useMemo(() => makeWideCols(a.columns), [a.columns]);
     const data = React.useMemo(() => makeWideRows(a.rows, a.columns), [a.rows, a.columns]);
     const [page, setPage] = React.useState(1);
+    const isMobile = useMediaQuery('(max-width: 600px)');
     return (
-      <div style={{ height: a.containerHeight, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
+      // The fixed-height container stands in for a page's `100dvh` column; on a
+      // phone the table is cards and flows with the page, so the box goes.
+      <div style={{ height: isMobile ? 'auto' : a.containerHeight, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <strong>Inventario</strong>
           <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Contenedor de {a.containerHeight}px · {a.mode}</span>

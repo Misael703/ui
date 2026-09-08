@@ -813,7 +813,8 @@ export function DataTable<T>({
           <div
             ref={scrollRef}
             className={cx('table-wrap__scroll', stuck && 'is-stuck')}
-            style={maxHeight != null ? { maxHeight } : undefined}
+            // Cards flow with the page: no inner scroll box on a phone.
+            style={maxHeight != null && !(cardsLayout && isMobile) ? { maxHeight } : undefined}
           >
             {elevatable && <div ref={sentinelRef} className="table-wrap__sentinel" aria-hidden="true" />}
             {tableEl}

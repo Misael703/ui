@@ -65,6 +65,15 @@ mano" que `FilterBar` existe para reemplazar.
   borde y fondo bajo el breakpoint (`.table-surface--cards`). El detalle
   expandido es su propia tarjeta pegada a la fila. `mobileLayout="table"`
   conserva la tabla con scroll horizontal.
+- **Cards: pasada por todas las stories con tabla.** Un `TableToolbar` en el
+  `toolbar` pierde su caja (fondo, regla, inset) bajo el breakpoint y flota
+  sobre el canvas con las tarjetas; `maxHeight` / `fillHeight` no aplican en
+  cards (una caja de scroll de tarjetas las corta a la mitad: fluyen con la
+  página, el max-height inline se omite mientras la query coincide); los
+  estados vacío / error se vuelven una tarjeta propia; una columna
+  `truncate` (texto largo) apila la etiqueta sobre el valor en vez de dejar
+  el valor ragged a la derecha; un composite nombre + `.cell-meta` vuelve a
+  apilarse. Stories con columna de acciones o de estado llevan su rol.
 - **Virtualización gana a las cards.** Antes `mobileLayout="cards"` apagaba
   `virtualizeRows`; con cards por default eso volvía 5.000 filas en 5.000
   tarjetas en el teléfono. Las tarjetas no se ventanean (altura no uniforme)
