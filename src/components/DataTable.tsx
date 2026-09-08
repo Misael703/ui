@@ -459,6 +459,13 @@ export interface DataTableProps<T> {
    */
   toolbar?: React.ReactNode;
   /**
+   * Footer zone that shares the table's surface (v3.7.0) — the mirror of
+   * `toolbar`, for `TablePagination` or a summary line: one bordered box
+   * holds toolbar, table and pagination, with one divider between each.
+   * In `cards` on a phone it loses its box like the toolbar does.
+   */
+  footer?: React.ReactNode;
+  /**
    * Surface chrome mode. Default `'card'`: the table draws its own
    * border + radius (and `--table-elevation` if set), the standalone
    * surface. `'flush'`: drops that chrome so the table sits clean inside
@@ -486,7 +493,7 @@ export function DataTable<T>({
   selectable, selectedKeys, onSelectionChange,
   empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'cards',
   ariaLabel, rowLabel, className,
-  density = 'compact', rowHref, onRowClick, renderRow, toolbar,
+  density = 'compact', rowHref, onRowClick, renderRow, toolbar, footer,
   renderExpanded, expandedKeys, onExpandedChange,
   hiddenColumnKeys, virtualizeRows,
   surface = 'card',
@@ -831,10 +838,11 @@ export function DataTable<T>({
   // DataTable owns the single rounded+clipped+bordered surface; the inner
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
-  return toolbar == null ? wrap : (
+  return toolbar == null && footer == null ? wrap : (
     <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill', cardsLayout && 'table-surface--cards')}>
-      <div className="table-surface__bar">{toolbar}</div>
+      {toolbar != null && <div className="table-surface__bar">{toolbar}</div>}
       {wrap}
+      {footer != null && <div className="table-surface__footer">{footer}</div>}
     </div>
   );
 }

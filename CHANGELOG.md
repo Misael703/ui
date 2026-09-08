@@ -52,7 +52,22 @@ mano" que `FilterBar` existe para reemplazar.
   priority+ / overflow menu). Exportar va ahí; Limpiar sigue en `actions`
   porque es contextual. Clave de locale `toolbar.more` ("Más opciones"). La
   búsqueda del toolbar baja su base a 120px bajo 600px para que búsqueda,
-  embudo y "⋯" quepan en 320px en una línea.
+  embudo y "⋯" quepan en 320px en una línea; la `FilterBar` dentro del
+  toolbar en modo tabla aprieta su inset a 12px y el gap del grupo final
+  por la misma razón.
+- **`FilterBar sort` + `sortOn`** (`'mobile'` default | `'always'`): en cards no
+  hay `thead`, así que el sort de cabecera desaparece en teléfono; la barra
+  renderiza un `SortDropdown` en su grupo final (bajo 600px por default; en
+  escritorio ordena la cabecera). En teléfono el control pierde su label
+  visible (sigue siendo el nombre accesible) para caber en la línea.
+- **`DataTable footer`**: espejo de `toolbar` — `TablePagination` o un
+  resumen dentro de la misma superficie (un solo borde para toolbar, tabla y
+  paginación, un divisor entre cada uno). En cards pierde su caja como el
+  toolbar. La superficie ahora existe con `toolbar` o `footer`.
+- **Playground · página de listado**: controls nuevos `sort`, `rowActions`
+  (inline: lápiz + basurero · menu: kebab con tres acciones · none) y
+  `pagination` (inside = `footer` · outside · none). Regla que demuestra:
+  hasta dos acciones por fila van inline, desde tres, kebab.
 - **`Button hideLabel="desktop"`** (espejo de `"mobile"`) y **variante
   `ghost-danger`** (neutra en reposo, roja al hover/foco): acciones por fila
   como lápiz y basurero ghost `xs` de 28px en la tabla, y "✎ Editar" /
@@ -74,6 +89,8 @@ mano" que `FilterBar` existe para reemplazar.
   posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
 
 ### Removed
+- **DataTable · "Fila densa de filtros"**: inputs y selects a mano con un
+  botón "Filtrar" primario, el patrón que la receta de `FilterBar` reemplazó.
 - **DataTable: diez stories de un solo valor → "Playground · DataTable".**
   Densidad, Cargando, Sin datos, Sin datos custom, Con error, Fila
   interactiva, Tabla sobre Card, Elevada sobre canvas, Con totales y Con

@@ -162,6 +162,14 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   overflow?: ToolbarAction[];
   /**
+   * Sort control for the bar (v3.7.0). On a phone the table is cards and
+   * has no header row, so header sorting is unreachable: the bar renders a
+   * `SortDropdown` in its trailing group. `sortOn` says when — `'mobile'`
+   * (default, below 600px only: on a desk the header sorts) or `'always'`.
+   */
+  sort?: SortDropdownProps;
+  sortOn?: 'mobile' | 'always';
+  /**
    * Collapse the bar to its first N fields (v3.7.0); the rest sit behind a
    * "Más filtros" toggle in the trailing group. Use it when the full set
    * wraps to a second line on desktop — the first N should be the filters
@@ -202,7 +210,7 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 const MOBILE_QUERY = '(max-width: 600px)';
 
 export function FilterBar({
-  summary, actions, overflow, visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
+  summary, actions, overflow, sort, sortOn = 'mobile', visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
   mobile = 'drawer', activeCount = 0,
   minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
@@ -210,6 +218,8 @@ export function FilterBar({
   const [expanded, setExpanded] = React.useState(defaultExpanded);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const isMobile = useMediaQuery(MOBILE_QUERY) && mobile === 'drawer';
+  const narrow = useMediaQuery(MOBILE_QUERY);
+  const sortEl = sort != null && (sortOn === 'always' || narrow) ? <SortDropdown {...sort} className={cx('filter-bar__sort', sort.className)} /> : null;
   const all = React.Children.toArray(children);
   const collapsible = !isMobile && visibleCount != null && visibleCount < all.length;
   const shown = collapsible && !expanded ? all.slice(0, visibleCount) : all;
@@ -252,6 +262,9 @@ export function FilterBar({
             />
             {activeCount > 0 && <span className="filter-bar__toggle-badge" aria-hidden="true">{activeCount}</span>}
           </span>
+          {/* On a phone the sort control sits next to the funnel and stretches;
+              the trailing group (count · actions · ⋯) wraps under it. */}
+          {sortEl}
           <Drawer
             open={sheetOpen}
             onClose={() => setSheetOpen(false)}
@@ -268,9 +281,10 @@ export function FilterBar({
           TOGETHER: as separate flex items the actions could drop to a new line
           while the count stayed up with the fields — a readout split from its
           buttons. */}
-      {(toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0)) && (
+      {(toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || sortEl != null) && (
         <div className="filter-bar__end">
           {toggle}
+          {!isMobile && sortEl}
           {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
               the only signal that it acted; role="status" announces it politely
               without stealing focus. Any node fits — a Skeleton while loading. */}

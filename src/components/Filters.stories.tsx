@@ -8,7 +8,10 @@ import { Combobox, DatePicker } from './Pickers';
 import { DataTable } from './DataTable';
 import { PageHeader } from './AppShell';
 import { Badge } from './Display';
-import { Download } from './Icons';
+import { Download, Edit, Trash, MoreVertical } from './Icons';
+import { Menu } from './Display2';
+import { IconButton } from './Button';
+import { TablePagination } from './DataTable';
 
 export default { title: 'Patterns/Filters', tags: ['autodocs'] } as Meta;
 
@@ -89,6 +92,8 @@ export const SortDropdownDemo: StoryObj = {
 // plain objects/arrays recursively — a fiber inside is circular and blows the
 // stack. Module-scope elements have no owner.
 const EXPORT_ACTIONS: ToolbarAction[] = [{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }];
+const ICON = { download: <Download size={16} />, edit: <Edit size={16} />, trash: <Trash size={16} />, editXs: <Edit size={14} />, trashXs: <Trash size={14} />, more: <MoreVertical size={18} /> };
+const SORT_OPTIONS = [{ value: 'recent', label: 'Más recientes' }, { value: 'client', label: 'Cliente A–Z' }, { value: 'status', label: 'Estado' }];
 
 interface ListPageArgs {
   fields: number;
@@ -98,6 +103,9 @@ interface ListPageArgs {
   summary: boolean;
   filtersApplied: boolean;
   exportAction: boolean;
+  sort: boolean;
+  rowActions: 'inline' | 'menu' | 'none';
+  pagination: 'inside' | 'outside' | 'none';
 }
 
 /**
@@ -115,7 +123,7 @@ interface ListPageArgs {
 export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
   name: 'Playground · página de listado',
   parameters: { layout: 'fullscreen' },
-  args: { fields: 7, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true },
+  args: { fields: 7, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' },
   argTypes: {
     fields: { control: { type: 'range', min: 2, max: 7, step: 1 } },
     visibleCount: { control: { type: 'range', min: 0, max: 7, step: 1 }, description: '0 = todos visibles; N = colapsa el resto tras "Más filtros"' },
@@ -124,6 +132,9 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     summary: { control: 'boolean' },
     filtersApplied: { control: 'boolean' },
     exportAction: { control: 'boolean' },
+    sort: { control: 'boolean', description: '`FilterBar sort`: SortDropdown en la barra, por default solo bajo 600px (sin thead en cards)' },
+    rowActions: { control: 'inline-radio', options: ['inline', 'menu', 'none'], description: 'Hasta 2 acciones: lápiz y basurero inline · 3 o más: menú kebab' },
+    pagination: { control: 'inline-radio', options: ['inside', 'outside', 'none'], description: 'inside = `DataTable footer` (misma superficie) · outside = TablePagination debajo' },
   },
   render: (a) => {
     // Local filter state so the fields are live; the `filtersApplied` control
@@ -134,6 +145,8 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     // Combobox's clear affordance yields null: that is "no filter", same as 'todos'.
     const hasFilters = q !== '' || (status != null && status !== 'todos');
     const clear = () => { setQ(''); setStatus('todos'); };
+    const [sortBy, setSortBy] = React.useState('recent');
+    const [page, setPage] = React.useState(1);
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
       { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
@@ -173,12 +186,16 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
               // Exportar may leave the bar on a phone (it goes behind "⋯");
               // Limpiar stays in `actions` because it is contextual.
               overflow={a.exportAction ? EXPORT_ACTIONS : undefined}
+              sort={a.sort ? { value: sortBy, options: SORT_OPTIONS, onChange: setSortBy } : undefined}
             >
               {allFields.slice(0, a.fields)}
             </FilterBar>
           }
+          footer={a.pagination === 'inside' ? <TablePagination page={page} pageSize={10} total={256} onPageChange={setPage} /> : undefined}
           rows={rows}
           rowKey={(r) => r.id}
+          onRowClick={a.rowActions === 'menu' ? () => {} : undefined}
+          rowLabel={(r) => r.client}
           // Phone: cards by default — client as the title, state as the
           // badge, the rest as label/value lines. `mobileLayout="table"` keeps
           // the table and drops the secondary columns (`mobile: 'hidden'`).
@@ -189,8 +206,26 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
             { key: 'branch', header: 'Sucursal', mobile: a.mobileLayout === 'table' ? 'hidden' : 'field' },
             { key: 'date', header: 'Fecha', mobile: a.mobileLayout === 'table' ? 'hidden' : 'field' },
             { key: 'status', header: 'Estado', mobile: 'status', accessor: (r) => <Badge variant={r.status === 'Entregado' ? 'success' : r.status === 'Preparado' ? 'info' : 'warning'}>{r.status}</Badge> },
+            // Row actions: up to two go inline (pencil + bin, icon-only on a
+            // desk, labelled in the card footer); three or more go behind a
+            // kebab Menu — on a phone the row itself opens the detail.
+            ...(a.rowActions === 'inline' ? [{ key: 'actions', header: '', align: 'right' as const, width: 72, mobile: 'actions' as const, accessor: () => (
+              <span style={{ display: 'inline-flex', gap: 4 }} data-row-interactive>
+                <Button size="xs" variant="ghost" iconLeft={ICON.editXs} hideLabel="desktop">Editar</Button>
+                <Button size="xs" variant="ghost-danger" iconLeft={ICON.trashXs} hideLabel="desktop">Eliminar</Button>
+              </span>
+            ) }] : a.rowActions === 'menu' ? [{ key: 'actions', header: '', align: 'right' as const, width: 48, mobile: 'hidden' as const, accessor: () => (
+              <span data-row-interactive>
+                <Menu align="end" trigger={<IconButton variant="ghost" size="sm" icon={ICON.more} aria-label="Más acciones" />} items={[
+                  { label: 'Descargar', icon: ICON.download },
+                  { label: 'Editar', icon: ICON.edit },
+                  { label: 'Eliminar', icon: ICON.trash, destructive: true },
+                ]} />
+              </span>
+            ) }] : []),
           ]}
         />
+        {a.pagination === 'outside' && <TablePagination page={page} pageSize={10} total={256} onPageChange={setPage} />}
       </div>
     );
   },

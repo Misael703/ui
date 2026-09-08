@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { TableToolbar } from '../src/components/DataTable';
+import { TableToolbar, DataTable, TablePagination } from '../src/components/DataTable';
 import { FilterBar } from '../src/components/Filters';
 import { Button } from '../src/components/Button';
 
@@ -80,3 +80,53 @@ describe('Button hideLabel="desktop" + ghost-danger (v3.7.0)', () => {
     expect(css).toMatch(/@media \(max-width: 600px\) \{\s*\.table-toolbar > \.grow,[\s\S]*?flex-basis:\s*120px/);
   });
 });
+
+describe('FilterBar sort (v3.7.0)', () => {
+  const sort = { value: 'recent', options: [{ value: 'recent', label: 'Más recientes' }, { value: 'client', label: 'Cliente' }], onChange: () => {} };
+  it('default sortOn="mobile": nothing on a wide viewport, a SortDropdown on a narrow one', () => {
+    stub(false);
+    const { container, unmount } = render(<FilterBar sort={sort}><div /></FilterBar>);
+    expect(container.querySelector('.filter-bar__sort')).toBeNull();
+    unmount();
+    stub(true);
+    const r = render(<FilterBar sort={sort}><div /></FilterBar>);
+    // on a phone it sits next to the funnel (first line), not in the trailing group
+    const el = r.container.querySelector('.filter-bar > .filter-bar__sort');
+    expect(el).not.toBeNull();
+    expect(r.container.querySelector('.filter-bar__end .filter-bar__sort')).toBeNull();
+    expect(screen.getByRole('combobox', { name: /Ordenar/ })).toHaveValue('recent');
+  });
+  it('sortOn="always" renders it on a desk too', () => {
+    stub(false);
+    const { container } = render(<FilterBar sort={sort} sortOn="always"><div /></FilterBar>);
+    expect(container.querySelector('.filter-bar__end .filter-bar__sort')).not.toBeNull();
+  });
+});
+
+describe('DataTable footer slot (v3.7.0)', () => {
+  it('footer alone builds the surface with a footer zone (no toolbar bar)', () => {
+    const { container } = render(<DataTableFooterProbe />);
+    expect(container.querySelector('.table-surface')).not.toBeNull();
+    expect(container.querySelector('.table-surface__bar')).toBeNull();
+    expect(container.querySelector('.table-surface > .table-surface__footer')).toHaveTextContent('1–10 de 256');
+  });
+  it('CSS: footer divider + inset; cards drop it; the phone bar tightens', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    expect(css).toMatch(/\.table-surface__footer \{[^}]*border-top:\s*1px solid var\(--border-default\)/);
+    expect(css).toMatch(/\.table-surface\.table-surface--cards > \.table-surface__footer \{[^}]*border-top:\s*0/);
+    expect(css).toMatch(/@media \(max-width: 600px\) \{\s*\.table-surface__bar > \.filter-bar \{[^}]*padding-inline:\s*var\(--space-3\)/);
+    expect(css).toMatch(/\.filter-bar__sort \.sort-dropdown__label \{[^}]*clip-path/);
+  });
+});
+
+function DataTableFooterProbe() {
+  return (
+    <DataTable
+      columns={[{ key: 'name', header: 'Nombre' }]}
+      rows={[{ id: '1', name: 'A' }]}
+      rowKey={(r) => r.id}
+      footer={<TablePagination page={1} pageSize={10} total={256} onPageChange={() => {}} />}
+    />
+  );
+}
+

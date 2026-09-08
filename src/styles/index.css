@@ -1319,6 +1319,7 @@ button, input, select, textarea { box-sizing: border-box; }
      floats on the canvas above the cards, flush with them. */
   .table-surface.table-surface--cards > .table-surface__bar { border-bottom: 0; }
   .table-surface.table-surface--cards > .table-surface__bar > .filter-bar { padding-inline: 0; }
+  .table-surface.table-surface--cards > .table-surface__footer { border-top: 0; padding-inline: 0; }
   .table-surface.table-surface--cards > .table-surface__bar > .table-toolbar {
     background: transparent;
     border-bottom: 0;
@@ -1582,6 +1583,9 @@ button, input, select, textarea { box-sizing: border-box; }
   box-shadow: var(--table-elevation, none);
 }
 .table-surface__bar { border-bottom: 1px solid var(--border-default); }
+/* Footer zone (v3.7.0): pagination / summary inside the same surface. The
+   TablePagination inside keeps its own block padding; the zone adds the inset. */
+.table-surface__footer { border-top: 1px solid var(--border-default); padding: 0 16px; }
 /* The inner wrap defers ALL chrome to the surface — including the shadow,
    so the elevation lands once on the outer surface, not twice. */
 .table-surface > .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
@@ -4377,6 +4381,22 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Inside a DataTable `toolbar` slot: the slot has no padding of its own
    (TableToolbar brings its own), so the bar pads itself to the table's gutter. */
 .table-surface__bar > .filter-bar { padding: var(--space-3) 16px; }
+/* Phone, table layout: the bar keeps its box but tightens so funnel · count ·
+   Limpiar · ⋯ hold one line at 320px. */
+@media (max-width: 600px) {
+  .table-surface__bar > .filter-bar { padding-inline: var(--space-3); }
+  .filter-bar__end { gap: var(--space-2); }
+  /* The sort control drops its label on a phone (still the accessible name
+     — it is the <label> wrapping the select), sits by the funnel and takes
+     the rest of the line; the trailing group wraps under it. */
+  .filter-bar__sort { flex: 1 1 140px; min-width: 0; max-width: 260px; }
+  .filter-bar__sort .sort-dropdown__select { width: 100%; min-width: 0; }
+  .filter-bar__sort .sort-dropdown__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+.filter-bar__sort { position: relative; }
 /* Combobox is inline-block min-width:220 by default; in a filter cell it must
    fill the cell, not impose its own width. */
 .filter-bar .combobox { min-width: 0; width: 100%; display: block; }

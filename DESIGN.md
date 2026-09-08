@@ -152,7 +152,13 @@ stays in `actions` because it is contextual. **Row actions** follow the same
 rule the other way round: a pencil (`Edit`) and a bin (`Trash`) as ghost `xs`
 icon-only in the table row (`hideLabel="desktop"`), both neutral — the bin
 is `ghost-danger`, red only on hover, the confirm dialog is the real guard —
-and icon + label stretched in the mobile card's footer. Pages sharing the
+and icon + label stretched in the mobile card's footer. Up to two row
+actions go inline; from three, a kebab `Menu` (`IconButton` + `MoreVertical`)
+and on a phone the row itself opens the detail. Cards have no header row, so
+`FilterBar sort` puts a `SortDropdown` in the bar below 600px (`sortOn`
+`'mobile'` by default; the header sorts on a desk). Pagination belongs to the
+table's surface: `DataTable footer={<TablePagination/>}` — one bordered box
+for toolbar, rows and pagination, one divider between each. Pages sharing the
 same fields get a twenty-line local composition over `FilterBar`, not a kit
 component. **Select vs Combobox in a filter cell:** native `Select` for a
 short, static list (a status enum, a handful of zones); `Combobox` for a

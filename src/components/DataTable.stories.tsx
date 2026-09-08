@@ -269,23 +269,6 @@ export const ColumnaAccionAlineada: StoryObj = {
   ),
 };
 
-/** P5i — fila densa de filtros: `.fields--dense` baja los controles a 36px
- * para que ~7 filtros no envuelvan en desktop (el target táctil de 44px
- * sigue siendo el default fuera de este contenedor). */
-export const FilaDensaDeFiltros: StoryObj = {
-  render: () => (
-    <div className="fields--dense" style={{ display: 'flex', gap: 8, flexWrap: 'nowrap' }}>
-      <Input placeholder="Buscar" />
-      <Select defaultValue=""><option value="">Bodega</option><option>Central</option></Select>
-      <Select defaultValue=""><option value="">Estado</option><option>Activo</option></Select>
-      <Select defaultValue=""><option value="">Categoría</option><option>Herramientas</option></Select>
-      <Input type="date" />
-      <Input type="date" />
-      <Button>Filtrar</Button>
-    </div>
-  ),
-};
-
 /** Card layout en mobile (default): bajo 600px cada fila es una tarjeta con
  * tres zonas según `Column.mobile` — cabecera (título con caption + estado +
  * checkbox), cuerpo (label · valor) y pie (acciones a lo ancho). Mismo DOM que
