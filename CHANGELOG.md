@@ -63,7 +63,10 @@ mano" que `FilterBar` existe para reemplazar.
 - **`DataTable footer`**: espejo de `toolbar` — `TablePagination` o un
   resumen dentro de la misma superficie (un solo borde para toolbar, tabla y
   paginación, un divisor entre cada uno). En cards pierde su caja como el
-  toolbar. La superficie ahora existe con `toolbar` o `footer`.
+  toolbar. La superficie ahora existe con `toolbar` o `footer`. Dentro del
+  footer el paginador sube al registro de control (36px, como los campos de
+  la barra de arriba). La receta usa la paginación completa: selector de
+  filas por página + rango + páginas.
 - **Playground · página de listado**: controls nuevos `sort`, `rowActions`
   (inline: lápiz + basurero · menu: kebab con tres acciones · none) y
   `pagination` (inside = `footer` · outside · none). Regla que demuestra:

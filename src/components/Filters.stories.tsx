@@ -147,6 +147,9 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const clear = () => { setQ(''); setStatus('todos'); };
     const [sortBy, setSortBy] = React.useState('recent');
     const [page, setPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(25);
+    // Full pagination (v3.7.0 recipe): rows-per-page selector + range + pager.
+    const pager = <TablePagination page={page} pageSize={pageSize} total={256} onPageChange={setPage} onPageSizeChange={(s) => { setPageSize(s); setPage(1); }} />;
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
       { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
@@ -191,7 +194,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
               {allFields.slice(0, a.fields)}
             </FilterBar>
           }
-          footer={a.pagination === 'inside' ? <TablePagination page={page} pageSize={10} total={256} onPageChange={setPage} /> : undefined}
+          footer={a.pagination === 'inside' ? pager : undefined}
           rows={rows}
           rowKey={(r) => r.id}
           onRowClick={a.rowActions === 'menu' ? () => {} : undefined}
@@ -225,7 +228,7 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
             ) }] : []),
           ]}
         />
-        {a.pagination === 'outside' && <TablePagination page={page} pageSize={10} total={256} onPageChange={setPage} />}
+        {a.pagination === 'outside' && pager}
       </div>
     );
   },

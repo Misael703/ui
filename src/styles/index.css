@@ -1102,6 +1102,12 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--text-sm); color: var(--fg-muted);
 }
 .table-pagination__size .select { width: auto; min-width: 0; }
+/* Phone: each part takes its own line — rows-per-page (label left, select
+   right), then the range, then the pager. */
+@media (max-width: 600px) {
+  .table-pagination > * { flex: 1 1 100%; }
+  .table-pagination__size { justify-content: space-between; }
+}
 @media (max-width: 600px) {
   .table-pagination { justify-content: center; }
 }
@@ -1586,6 +1592,11 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Footer zone (v3.7.0): pagination / summary inside the same surface. The
    TablePagination inside keeps its own block padding; the zone adds the inset. */
 .table-surface__footer { border-top: 1px solid var(--border-default); padding: 0 16px; }
+/* Inside the table's surface the pager sits in the control register (36px,
+   like the filter bar's controls above it), not the 32px inline default. */
+.table-surface__footer .pagination__btn { min-width: 36px; height: 36px; font-size: var(--text-data); }
+.table-surface__footer .pagination { gap: 6px; font-size: var(--text-data); }
+.table-surface__footer .table-pagination { padding-block: 12px; }
 /* The inner wrap defers ALL chrome to the surface — including the shadow,
    so the elevation lands once on the outer surface, not twice. */
 .table-surface > .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
