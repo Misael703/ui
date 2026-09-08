@@ -171,6 +171,9 @@ mano" que `FilterBar` existe para reemplazar.
   app, no parte de la receta).
 
 ### Fixed
+- **`Pagination` en teléfono**: el rango "1–10 de 256" se partía en tres
+  líneas al apretarse contra los botones; ahora no se parte y el paginador
+  envuelve debajo bajo 600px.
 - **Sticky header dentro de un scroller con padding** (Modal, Drawer): el
   header se pegaba al borde de CONTENIDO del body (24px más abajo del borde
   visible) y las filas pasaban a la vista por la banda del padding. Nuevo
