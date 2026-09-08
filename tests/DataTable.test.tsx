@@ -614,3 +614,34 @@ describe('DataTable — column truncate (hard cap that never stretches the colum
     expect(tableCss).toMatch(/\.table-wrap--cards \.table__cell-clip \{[^}]*max-width:\s*none/);
   });
 });
+
+/**
+ * `Column.hideOnMobile` (v3.7.0): priority columns. On a phone a five-column
+ * table either scrolls sideways (first columns vanish) or explodes into
+ * key/value cards (three screens for three rows). The scalable answer keeps
+ * the TABLE and drops the secondary columns below 600px — the detail view
+ * carries the rest. jsdom has no matchMedia; stubbed per test.
+ */
+describe('Column.hideOnMobile', () => {
+  const stub = (matches: boolean) => Object.defineProperty(window, 'matchMedia', {
+    configurable: true, writable: true,
+    value: (media: string) => ({ matches, media, onchange: null, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false }),
+  });
+  const colsM = [
+    { key: 'name', header: 'Nombre' },
+    { key: 'sku', header: 'SKU', hideOnMobile: true },
+    { key: 'stock', header: 'Stock' },
+  ];
+  it('wide: every column renders', () => {
+    stub(false);
+    render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
+    expect(screen.getByText('SKU')).toBeInTheDocument();
+  });
+  it('narrow: the flagged column is dropped from header and cells', () => {
+    stub(true);
+    const { container } = render(<DataTable columns={colsM} rows={rows} rowKey={(r) => r.id} />);
+    expect(screen.queryByText('SKU')).toBeNull();
+    expect(container.querySelectorAll('thead th')).toHaveLength(2);
+    expect(container.querySelector('tbody tr')!.querySelectorAll('td')).toHaveLength(2);
+  });
+});

@@ -7,8 +7,12 @@ import { Popover } from './Popover';
 import { Button } from './Button';
 import { useVirtualRows } from '../hooks/useVirtualRows';
 import { useScrollEdges } from '../hooks/useScrollEdges';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
+
+/* The kit's mobile breakpoint — the same 600px `mobileLayout="cards"` uses in CSS. */
+const MOBILE_QUERY = '(max-width: 600px)';
 
 // Truncation wrapper style: the column width is passed as a CSS variable (not
 // an inline `max-width`) so the `mobileLayout="cards"` reset can override it —
@@ -218,6 +222,18 @@ export interface Column<T> {
    * (monospace + tabular alignment) and right-align by default.
    */
   numeric?: boolean;
+  /**
+   * Priority columns (v3.7.0): drop this column below 600px (the kit's
+   * mobile breakpoint). On a phone a wide table either scrolls sideways (the
+   * first columns vanish) or explodes into key/value cards (three screens
+   * for three rows); keeping the TABLE with only the two or three columns
+   * that matter — the identifier, the name, the state — is what scales, and
+   * the row's detail view carries the rest. Combine with `rowHref` /
+   * `onRowClick` so every hidden field is one tap away. Hidden columns are
+   * also excluded from `ColumnToggle`-driven `hiddenColumnKeys` math (they are
+   * simply not rendered while the query matches).
+   */
+  hideOnMobile?: boolean;
   /**
    * Aggregate cell for this column (a total, a count, a "Total" label).
    * When ANY column sets it, the table renders a `<tfoot>` row styled like
@@ -453,9 +469,10 @@ export function DataTable<T>({
   const t = useLocale();
   // Everything below sees only the visible columns; hiding is a pure
   // pre-filter so header/cells/footer/colSpans stay in sync for free.
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const columns = React.useMemo(
-    () => (hiddenColumnKeys?.size ? allColumns.filter((c) => !hiddenColumnKeys.has(c.key)) : allColumns),
-    [allColumns, hiddenColumnKeys]
+    () => allColumns.filter((c) => !(hiddenColumnKeys?.has(c.key)) && !(isMobile && c.hideOnMobile)),
+    [allColumns, hiddenColumnKeys, isMobile]
   );
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));

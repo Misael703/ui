@@ -128,13 +128,16 @@ function CrudPage(a: CrudArgs) {
 
   const columns: Column<Product>[] = [
     { key: 'name', header: 'Producto', accessor: (p) => <><span>{p.name}</span><span className="cell-meta">{p.sku}</span></> },
-    { key: 'category', header: 'Categoría', accessor: (p) => <Badge variant="neutral">{p.category}</Badge> },
+    { key: 'category', header: 'Categoría', hideOnMobile: true, accessor: (p) => <Badge variant="neutral">{p.category}</Badge> },
     { key: 'stock', header: 'Stock', numeric: true, accessor: (p) => (p.stock === 0 ? <Badge variant="danger">Sin stock</Badge> : p.stock) },
-    { key: 'price', header: 'Precio', numeric: true, accessor: (p) => money(p.price) },
-    { key: 'actions', header: '', align: 'right', width: 150, accessor: (p) => (
+    { key: 'price', header: 'Precio', numeric: true, hideOnMobile: true, accessor: (p) => money(p.price) },
+    // Row actions are desktop chrome; on a phone the column goes and the row
+    // itself opens the editor (onRowClick), where Eliminar also lives.
+    // `data-row-interactive` keeps these buttons from activating the row.
+    { key: 'actions', header: '', align: 'right', width: 150, hideOnMobile: true, accessor: (p) => (
       <span style={{ display: 'inline-flex', gap: 4 }}>
-        <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>Editar</Button>
-        <Button variant="ghost" size="sm" onClick={() => setConfirm({ ids: [p.id], label: p.name })}>Eliminar</Button>
+        <Button variant="ghost" size="sm" data-row-interactive onClick={() => openEdit(p)}>Editar</Button>
+        <Button variant="ghost" size="sm" data-row-interactive onClick={() => setConfirm({ ids: [p.id], label: p.name })}>Eliminar</Button>
       </span>
     ) },
   ];
@@ -169,7 +172,15 @@ function CrudPage(a: CrudArgs) {
       </div>
     </div>
   );
-  const editorFooter = <><Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button><Button onClick={save}>{editing?.id ? 'Guardar cambios' : 'Crear producto'}</Button></>;
+  const editorFooter = (
+    <>
+      {editing?.id && (
+        <Button variant="ghost" onClick={() => { const p = items.find((x) => x.id === editing.id); setEditing(null); if (p) setConfirm({ ids: [p.id], label: p.name }); }} style={{ marginRight: 'auto', color: 'var(--color-danger)' }}>Eliminar</Button>
+      )}
+      <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
+      <Button onClick={save}>{editing?.id ? 'Guardar cambios' : 'Crear producto'}</Button>
+    </>
+  );
   const editorTitle = editing?.id ? 'Editar producto' : 'Nuevo producto';
 
   return (
@@ -184,7 +195,6 @@ function CrudPage(a: CrudArgs) {
 
       <DataTable
         ariaLabel="Productos"
-        mobileLayout="cards"
         toolbar={
           <FilterBar
             summary={a.state === 'loading' ? <Skeleton width={72} height={14} /> : a.state === 'error' ? '—' : `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`}
@@ -209,6 +219,7 @@ function CrudPage(a: CrudArgs) {
         columns={columns}
         rows={a.state === 'idle' ? pageRows : []}
         rowKey={(p) => p.id}
+        onRowClick={openEdit}
         loading={a.state === 'loading'}
         // The overlay is already role="alert" (red, centred): give it a STATE,
         // not a second Alert. EmptyState with a danger icon + retry action.

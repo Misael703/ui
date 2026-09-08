@@ -40,6 +40,12 @@ mano" que `FilterBar` existe para reemplazar.
   comportamiento de escritorio. Hook interno `useMediaQuery` (no exportado).
   Claves de locale `filterBar.filters` / `filterBar.done`.
 
+- **`Column.hideOnMobile`** en `DataTable`: columnas prioritarias. Bajo 600px la
+  columna marcada no se renderiza (header ni celdas): la tabla sigue siendo
+  tabla con las dos o tres columnas que importan, y el detalle de la fila
+  lleva el resto. Es la respuesta escalable para listados en teléfono; el modo
+  `cards` queda para tablas que se leen como fichas.
+
 ### Changed
 - **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de
   columnas iguales y entran al flujo flex-wrap de la barra (`display:
