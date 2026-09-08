@@ -74,6 +74,16 @@ mano" que `FilterBar` existe para reemplazar.
   posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
 
 ### Removed
+- **DataTable: diez stories de un solo valor → "Playground · DataTable".**
+  Densidad, Cargando, Sin datos, Sin datos custom, Con error, Fila
+  interactiva, Tabla sobre Card, Elevada sobre canvas, Con totales y Con
+  expansión eran, cada una, un valor de una prop; ahora son controls de un
+  playground (`state`, `density`, `surface`, `selectable`, `interactive`,
+  `expandable`, `totals`, `stickyHeader`, `bounded`, `mobileLayout`) y su
+  doc vive en la story. Quedan las que enseñan una capacidad con forma
+  propia (Básica, Truncado, Virtualizada, Con toolbar, Visibilidad de
+  columnas, Columna acción, Card Layout Mobile, Región de scroll, Sticky en
+  Modal, paginación, Accordion, Breadcrumbs).
 - **Barrido de stories calcadas del consumidor.** Regla: el Storybook enseña
   el kit con un dominio de muestra genérico (ferretería, Northwind Builders,
   pedido #1042, persona de muestra "Satoru Gojo"), nunca pantallas ni copy

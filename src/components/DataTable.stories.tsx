@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle } from './DataTable';
+import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle, type Column } from './DataTable';
 import { Badge, Card, CardBody } from './Display';
 import { Input, Select } from './Form';
 import { Button } from './Button';
@@ -150,134 +150,6 @@ export const ConVisibilidadDeColumnas: StoryObj = {
 };
 
 /**
- * **Expansión de filas** (v1.48.0): `renderExpanded` agrega la columna de
- * chevron; el panel abierto es un `<tr>` extra que abarca todas las columnas,
- * recostado sobre la banda gris del header. Controlado igual que la
- * selección (`expandedKeys`/`onExpandedChange`). El toggle es un `<button>`
- * real con `aria-expanded` + `aria-controls`.
- */
-export const ConExpansion: StoryObj = {
-  render: () => {
-    const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['1']));
-    return (
-      <DataTable
-        rows={rows}
-        rowKey={(r) => r.id}
-        expandedKeys={expanded}
-        onExpandedChange={setExpanded}
-        renderExpanded={(r) => (
-          <div style={{ display: 'grid', gap: 4, fontSize: 'var(--text-sm)' }}>
-            <strong>{r.name}</strong>
-            <span>SKU {r.sku} · {r.stock} unidades en bodega central</span>
-            <span>Último movimiento: hace 3 días</span>
-          </div>
-        )}
-        columns={[
-          { key: 'name', header: 'Producto' },
-          { key: 'sku', header: 'SKU' },
-          { key: 'stock', header: 'Stock', numeric: true },
-        ]}
-      />
-    );
-  },
-};
-
-/**
- * **Fila de totales** (v1.47.0): `Column.footer` renderiza un `<tfoot>` con
- * la banda gris del header pero registro de dato (peso 600) — los totales
- * son datos, no labels. Con `maxHeight` el footer queda fijo al fondo del
- * scroll box (sticky bottom), espejo del sticky header: los totales siguen
- * visibles mientras las filas scrollean. El kit NO suma por ti: las rows
- * pueden ser una página del server y el total de página ≠ total del
- * dataset — el agregado lo trae el consumer.
- */
-export const ConTotales: StoryObj = {
-  render: () => {
-    const many = Array.from({ length: 20 }, (_, i) => ({
-      id: String(i + 1),
-      name: `Producto ${i + 1}`,
-      sku: `SKU-${100 + i}`,
-      stock: (i * 7) % 30,
-      price: 9990 + i * 5000,
-    }));
-    const totalStock = many.reduce((s, r) => s + r.stock, 0);
-    const totalPrice = many.reduce((s, r) => s + r.price, 0);
-    return (
-      <DataTable
-        rows={many}
-        rowKey={(r) => r.id}
-        stickyHeader
-        maxHeight={320}
-        columns={[
-          { key: 'name', header: 'Producto', footer: 'Total (20 productos)' },
-          { key: 'sku', header: 'SKU' },
-          { key: 'stock', header: 'Stock', numeric: true, footer: totalStock },
-          { key: 'price', header: 'Precio', numeric: true,
-            accessor: (r) => `$${r.price.toLocaleString('es-CL')}`,
-            footer: `$${totalPrice.toLocaleString('es-CL')}` },
-        ]}
-      />
-    );
-  },
-};
-
-/** Estado vacío: pasa `rows={[]}`. Muestra el mensaje por defecto o el `empty` slot. */
-export const SinDatos: StoryObj = {
-  render: () => (
-    <DataTable
-      rows={[]}
-      rowKey={(r: { id: string }) => r.id}
-      ariaLabel="Productos"
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-        { key: 'stock', header: 'Stock', align: 'right' },
-      ]}
-    />
-  ),
-};
-
-/** Estado de carga: skeleton de 5 filas mientras `loading=true`. */
-export const Cargando: StoryObj = {
-  render: () => (
-    <DataTable
-      loading
-      rows={[]}
-      rowKey={(r: { id: string }) => r.id}
-      ariaLabel="Productos"
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-        { key: 'stock', header: 'Stock', align: 'right' },
-      ]}
-    />
-  ),
-};
-
-/** Empty slot custom: pasa un nodo arbitrario via `empty`. */
-export const SinDatosCustom: StoryObj = {
-  render: () => (
-    <DataTable
-      rows={[]}
-      rowKey={(r: { id: string }) => r.id}
-      ariaLabel="Productos"
-      empty={
-        <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-          <strong style={{ display: 'block', marginBottom: 4 }}>Sin productos en este filtro</strong>
-          <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
-            Ajusta los filtros o limpia la búsqueda para ver más resultados.
-          </span>
-        </div>
-      }
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-      ]}
-    />
-  ),
-};
-
-/**
  * Toolbar / filter zone + DataTable en UNA superficie redondeada. Se pasa
  * por el prop `toolbar`: el DataTable **posee** la superficie
  * (borde+radio+overflow), la toolbar queda clipeada al radio, hay UNA sola
@@ -310,24 +182,6 @@ export const ConToolbar: StoryObj = {
       />
     );
   },
-};
-
-/** Estado de error: pasa `error` para mostrar un mensaje rojo con `role="alert"`. */
-
-export const ConError: StoryObj = {
-  render: () => (
-    <DataTable
-      rows={[]}
-      rowKey={(r: { id: string }) => r.id}
-      ariaLabel="Productos"
-      error="No pudimos cargar los productos. Reintenta en unos segundos."
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-        { key: 'stock', header: 'Stock', align: 'right' },
-      ]}
-    />
-  ),
 };
 
 /** Sticky header: el thead queda visible al scrollear el body. El propio
@@ -384,45 +238,6 @@ export const StickyHeaderEnModal: StoryObj = {
   },
 };
 
-/** P1 — fila navegable. El kit renderiza un `<a>`/`<button>` real estirado:
- * operable por teclado, con nombre para lector de pantalla y foco visible en
- * la fila. Markup de tabla válido (sin role hack en `<tr>`). */
-export const FilaInteractiva: StoryObj = {
-  render: () => (
-    <DataTable
-      rows={rows}
-      rowKey={(r) => r.id}
-      rowLabel={(r) => r.name}
-      ariaLabel="Productos"
-      rowHref={(r) => `#/productos/${r.id}`}
-      columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
-        { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-      ]}
-    />
-  ),
-};
-
-/** P5a — densidad legible POR DEFAULT (arriba) vs `density="comfortable"`
- * (abajo, el layout previo a 1.10.0 que envolvía a 2 líneas). */
-export const Densidad: StoryObj = {
-  render: () => {
-    const cols = [
-      { key: 'name', header: 'Producto' },
-      { key: 'sku', header: 'SKU' },
-      { key: 'stock', header: 'Stock', align: 'right' as const },
-      { key: 'price', header: 'Precio', align: 'right' as const, accessor: (r: typeof rows[number]) => `$${r.price.toLocaleString('es-CL')}` },
-    ];
-    return (
-      <div style={{ display: 'grid', gap: 24 }}>
-        <DataTable rows={rows} rowKey={(r) => r.id} ariaLabel="Compact" columns={cols} />
-        <DataTable rows={rows} rowKey={(r) => r.id} ariaLabel="Comfortable" density="comfortable" columns={cols} />
-      </div>
-    );
-  },
-};
-
 /** P5h — columna de acción `align:'right'` con un nodo React (flex de
  * botones): ahora se alinea de verdad (antes flotaba a la izquierda). */
 export const ColumnaAccionAlineada: StoryObj = {
@@ -445,59 +260,6 @@ export const ColumnaAccionAlineada: StoryObj = {
         },
       ]}
     />
-  ),
-};
-
-/** P2 — DataTable dentro de un Card: el wrap es dueño de su borde/radio y
- * el header sigue la esquina redondeada → sin notch. */
-/**
- * **Embebida en Card** — pasa `surface="flush"` para que el DataTable no
- * dibuje su propio borde/radio dentro de la Card (que ya posee la
- * superficie). Sin `flush` se ve el doble borde y el radio anidado.
- */
-export const TablaSobreCard: StoryObj = {
-  render: () => (
-    <Card>
-      <CardBody>
-        <DataTable
-          surface="flush"
-          rows={rows}
-          rowKey={(r) => r.id}
-          ariaLabel="Productos"
-          columns={[
-            { key: 'name', header: 'Producto' },
-            { key: 'sku', header: 'SKU' },
-            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-          ]}
-        />
-      </CardBody>
-    </Card>
-  ),
-};
-
-/**
- * **Elevada sobre canvas tintado** — un DataTable standalone es FLAT por
- * default. Sobre un canvas tintado se funde con el fondo. Subí
- * `--table-elevation` a una sombra real (aquí `var(--shadow-card)`) en un
- * ancestro y el kit la aplica a `.table-wrap` y `.table-surface` sin tocar
- * selectores internos — la misma sombra que usa `<Card>`, elevación
- * consistente entre superficies.
- */
-export const ElevadaSobreCanvas: StoryObj = {
-  name: 'Elevada sobre canvas tintado (--table-elevation)',
-  render: () => (
-    <div style={{ background: 'var(--bg-canvas, #eef1f5)', padding: 32, ['--table-elevation' as string]: 'var(--shadow-card)' }}>
-      <DataTable
-        rows={rows}
-        rowKey={(r) => r.id}
-        ariaLabel="Productos"
-        columns={[
-          { key: 'name', header: 'Producto' },
-          { key: 'sku', header: 'SKU' },
-          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-        ]}
-      />
-    </div>
   ),
 };
 
@@ -648,43 +410,132 @@ export const BreadcrumbsBasico: StoryObj = {
 };
 
 interface DataTablePlaygroundArgs {
-  stickyHeader: boolean;
+  state: 'rows' | 'empty' | 'emptyCustom' | 'loading' | 'error';
+  density: 'compact' | 'comfortable';
+  surface: 'standalone' | 'card' | 'elevated';
   selectable: boolean;
-  loading: boolean;
-  mobileLayout: 'table' | 'cards';
+  interactive: boolean;
+  expandable: boolean;
+  totals: boolean;
+  stickyHeader: boolean;
+  bounded: boolean;
+  mobileLayout: 'cards' | 'table';
 }
 
-/** Playground interactivo: alterna `stickyHeader`/`selectable`/`loading`/`mobileLayout`. */
-export const DataTablePlayground: StoryObj = {
-  args: { stickyHeader: false, selectable: false, loading: false, mobileLayout: 'cards' },
+/**
+ * **Playground · DataTable.** Las props de la tabla combinadas en un solo
+ * lugar (antes, una story por valor).
+ *
+ * - **`state`**: `rows={[]}` muestra el vacío por defecto o el slot `empty`
+ *   (overlay hermano de la tabla, anclado y centrado en el área visible, con
+ *   el header aún scrolleable para comunicar la forma); `loading` pinta un
+ *   skeleton de 5 filas; `error` toma precedencia sobre todo y va en
+ *   `role="alert"`.
+ * - **`density`**: `compact` es el default legible (v1.10.0); `comfortable`
+ *   es el registro previo, más alto por fila.
+ * - **`surface`**: una tabla standalone es FLAT por default y dueña de su
+ *   borde/radio; sobre un canvas tintado sube `--table-elevation` en un
+ *   ancestro (aquí `var(--shadow-card)`) y el kit la aplica al wrap y al
+ *   surface — la misma sombra que `<Card>`. Dentro de una Card pasa
+ *   `surface="flush"`: sin él se ve doble borde y radio anidado.
+ * - **`selectable`**: "seleccionar todo" opera sobre las filas presentes (una
+ *   página del server = la página, no el dataset).
+ * - **`interactive`**: fila navegable con `rowHref` — un `<a>` real estirado,
+ *   operable por teclado, con nombre de lector de pantalla (`rowLabel`) y foco
+ *   visible en la fila; markup de tabla válido, sin role hack en `<tr>`.
+ * - **`expandable`**: `renderExpanded` agrega la columna del chevron; el
+ *   panel es un `<tr>` extra a todo lo ancho, controlado igual que la
+ *   selección (`expandedKeys` / `onExpandedChange`).
+ * - **`totals`**: `Column.footer` renderiza un `<tfoot>` con la banda del
+ *   header pero registro de dato; con `bounded` queda fijo al fondo del
+ *   scroll box, espejo del sticky header. El kit NO suma por ti (el total de
+ *   página ≠ total del dataset).
+ * - **`stickyHeader` / `bounded`**: el header se pega al scroller más cercano
+ *   — el interno con `maxHeight`, o uno externo (Modal, página) sin él.
+ * - **`mobileLayout`**: cards (default) o tabla bajo 600px; angosta el canvas.
+ */
+export const DataTablePlayground: StoryObj<DataTablePlaygroundArgs> = {
+  name: 'Playground · DataTable',
+  args: { state: 'rows', density: 'compact', surface: 'standalone', selectable: false, interactive: false, expandable: false, totals: false, stickyHeader: false, bounded: false, mobileLayout: 'cards' },
   argTypes: {
-    stickyHeader: { control: 'boolean' },
+    state: { control: 'inline-radio', options: ['rows', 'empty', 'emptyCustom', 'loading', 'error'] },
+    density: { control: 'inline-radio', options: ['compact', 'comfortable'] },
+    surface: { control: 'inline-radio', options: ['standalone', 'card', 'elevated'], description: 'standalone = flat con borde propio · card = dentro de <Card> con surface="flush" · elevated = --table-elevation sobre canvas tintado' },
     selectable: { control: 'boolean' },
-    loading: { control: 'boolean' },
-    mobileLayout: { control: 'inline-radio', options: ['table', 'cards'] },
+    interactive: { control: 'boolean', description: 'rowHref: la fila es un link real' },
+    expandable: { control: 'boolean' },
+    totals: { control: 'boolean', description: 'Column.footer (sticky bottom con bounded)' },
+    stickyHeader: { control: 'boolean' },
+    bounded: { control: 'boolean', description: 'maxHeight 320: scroll interno' },
+    mobileLayout: { control: 'inline-radio', options: ['cards', 'table'] },
   },
-  render: (args) => {
-    const a = args as unknown as DataTablePlaygroundArgs;
+  render: (a) => {
+    type Row = { id: string; name: string; sku: string; stock: number; price: number };
+    const many = React.useMemo<Row[]>(() => Array.from({ length: 20 }, (_, i) => ({
+      id: String(i + 1),
+      name: `Producto ${i + 1}`,
+      sku: `SKU-${100 + i}`,
+      stock: (i * 7) % 30,
+      price: 9990 + i * 5000,
+    })), []);
+    const data = a.state === 'rows' ? many : [];
     const [sel, setSel] = React.useState<Set<string>>(new Set());
-    return (
+    const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['1']));
+    const money = (n: number) => `$${n.toLocaleString('es-CL')}`;
+    const totalStock = many.reduce((s, r) => s + r.stock, 0);
+    const totalPrice = many.reduce((s, r) => s + r.price, 0);
+    const columns: Column<Row>[] = [
+      { key: 'name', header: 'Producto', mobile: 'title', footer: a.totals ? 'Total (20 productos)' : undefined },
+      { key: 'sku', header: 'SKU' },
+      { key: 'stock', header: 'Stock', numeric: true, footer: a.totals ? totalStock : undefined },
+      { key: 'price', header: 'Precio', numeric: true, accessor: (r) => money(r.price), footer: a.totals ? money(totalPrice) : undefined },
+    ];
+    const table = (
       <DataTable
-        rows={rows}
+        rows={data}
         rowKey={(r) => r.id}
+        rowLabel={(r) => r.name}
         ariaLabel="Productos"
-        stickyHeader={a.stickyHeader}
+        columns={columns}
+        density={a.density}
+        surface={a.surface === 'card' ? 'flush' : 'card'}
         selectable={a.selectable}
-        loading={a.loading}
-        mobileLayout={a.mobileLayout}
         selectedKeys={sel}
         onSelectionChange={setSel}
-        columns={[
-          { key: 'name', header: 'Producto' },
-          { key: 'sku', header: 'SKU' },
-          { key: 'stock', header: 'Stock', align: 'right' },
-          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-        ]}
+        rowHref={a.interactive ? (r) => `#/productos/${r.id}` : undefined}
+        renderExpanded={a.expandable ? (r) => (
+          <div style={{ display: 'grid', gap: 4, fontSize: 'var(--text-sm)' }}>
+            <strong>{r.name}</strong>
+            <span>SKU {r.sku} · {r.stock} unidades en bodega central</span>
+            <span>Último movimiento: hace 3 días</span>
+          </div>
+        ) : undefined}
+        expandedKeys={expanded}
+        onExpandedChange={setExpanded}
+        stickyHeader={a.stickyHeader}
+        maxHeight={a.bounded ? 320 : undefined}
+        mobileLayout={a.mobileLayout}
+        loading={a.state === 'loading'}
+        error={a.state === 'error' ? 'No pudimos cargar los productos. Reintenta en unos segundos.' : undefined}
+        empty={a.state === 'emptyCustom' ? (
+          <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+            <strong style={{ display: 'block', marginBottom: 4 }}>Sin productos en este filtro</strong>
+            <span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>
+              Ajusta los filtros o limpia la búsqueda para ver más resultados.
+            </span>
+          </div>
+        ) : undefined}
       />
     );
+    if (a.surface === 'card') return <Card><CardBody>{table}</CardBody></Card>;
+    if (a.surface === 'elevated') {
+      return (
+        <div style={{ background: 'var(--bg-canvas, #eef1f5)', padding: 32, ['--table-elevation' as string]: 'var(--shadow-card)' }}>
+          {table}
+        </div>
+      );
+    }
+    return table;
   },
 };
 
