@@ -144,6 +144,12 @@ mano" que `FilterBar` existe para reemplazar.
   app, no parte de la receta).
 
 ### Fixed
+- **Sticky header dentro de un scroller con padding** (Modal, Drawer): el
+  header se pegaba al borde de CONTENIDO del body (24px más abajo del borde
+  visible) y las filas pasaban a la vista por la banda del padding. Nuevo
+  `--sticky-inset` que el scroller declara con su padding; el header se pega
+  al borde visible (`top: calc(-1 * var(--sticky-inset, 0px))`). Modal y
+  Drawer lo declaran; una columna de página con padding puede hacer lo mismo.
 - **`FormField` puede encoger dentro de un track de grid o una fila flex**
   (`.form-field { min-width: 0 }`): su mínimo era el min-content del control
   más ancho y desbordaba la celda (visto en un `Drawer` de 480px). Es el mismo

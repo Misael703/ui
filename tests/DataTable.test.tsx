@@ -712,3 +712,20 @@ describe('Column.mobile', () => {
     expect((container.querySelector('.table-wrap__scroll') as HTMLElement).style.maxHeight).toBe('200px');
   });
 });
+
+/**
+ * Sticky header inside a padded outer scroller (v3.7.0). A Modal body has
+ * 24px of padding: `top: 0` sticks the header at the content edge and rows
+ * scroll visibly through the padding band above it. The scroller declares
+ * `--sticky-inset` and the header sticks at the visible top.
+ */
+describe('stickyHeader in a padded scroller', () => {
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+  it('the sticky offset reads --sticky-inset (default 0)', () => {
+    expect(css).toMatch(/\.table-wrap--sticky \.table thead th \{[^}]*top:\s*calc\(-1 \* var\(--sticky-inset, 0px\)\)/);
+  });
+  it('Modal and Drawer bodies declare their padding as the inset', () => {
+    expect(css).toMatch(/\.modal__body \{[^}]*--sticky-inset:\s*24px/);
+    expect(css).toMatch(/\.drawer__body \{[^}]*--sticky-inset:\s*24px/);
+  });
+});

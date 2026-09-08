@@ -1183,7 +1183,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .table-wrap--sticky:not(.table-wrap--scroll) { overflow: visible; }
 .table-wrap--sticky .table thead th {
   position: sticky;
-  top: 0;
+  /* `--sticky-inset` (v3.7.0): a padded outer scroller (Modal / Drawer body,
+     a page content column) sticks the header at its CONTENT edge, so rows
+     scroll visibly through the padding band above it. The scroller declares
+     its padding here and the header sticks at the visible top instead. */
+  top: calc(-1 * var(--sticky-inset, 0px));
   z-index: 1;
   /* Keep the grey band (`--bg-subtle`), not white. A sticky header only
      needs an OPAQUE fill so body rows don't show through on scroll —
@@ -1632,7 +1636,7 @@ button, input, select, textarea { box-sizing: border-box; }
    ugly horizontal scrollbar. Clip on x, scroll only on y; `min-width:0`
    lets a flex/grid child (e.g. a 2-col form) reflow instead of forcing a
    blowout the consumer never asked for. */
-.modal__body { padding: 24px; overflow-x: hidden; overflow-y: auto; min-width: 0; }
+.modal__body { padding: 24px; overflow-x: hidden; overflow-y: auto; min-width: 0; --sticky-inset: 24px; }
 .modal__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
@@ -1676,7 +1680,7 @@ button, input, select, textarea { box-sizing: border-box; }
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
-.drawer__body { flex: 1; overflow-y: auto; padding: 24px; }
+.drawer__body { flex: 1; overflow-y: auto; padding: 24px; --sticky-inset: 24px; }
 .drawer__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
