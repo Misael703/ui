@@ -65,8 +65,8 @@ mano" que `FilterBar` existe para reemplazar.
   paginación, un divisor entre cada uno). En cards pierde su caja como el
   toolbar. La superficie ahora existe con `toolbar` o `footer`. Dentro del
   footer el paginador sube al registro de control (36px, como los campos de
-  la barra de arriba). La receta usa la paginación completa: selector de
-  filas por página + rango + páginas.
+  la barra de arriba). La receta usa rango + páginas con tamaño fijo; el
+  selector de filas por página queda para reportes.
 - **Playground · página de listado**: controls nuevos `sort`, `rowActions`
   (inline: lápiz + basurero · menu: kebab con tres acciones · none) y
   `pagination` (inside = `footer` · outside · none). Regla que demuestra:

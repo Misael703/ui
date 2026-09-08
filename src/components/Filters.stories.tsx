@@ -147,9 +147,9 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     const clear = () => { setQ(''); setStatus('todos'); };
     const [sortBy, setSortBy] = React.useState('recent');
     const [page, setPage] = React.useState(1);
-    const [pageSize, setPageSize] = React.useState(25);
-    // Full pagination (v3.7.0 recipe): rows-per-page selector + range + pager.
-    const pager = <TablePagination page={page} pageSize={pageSize} total={256} onPageChange={setPage} onPageSizeChange={(s) => { setPageSize(s); setPage(1); }} />;
+    // Fixed page size: range + pager, no rows-per-page selector (the list
+    // page decides its size; the selector is for data-heavy reports).
+    const pager = <TablePagination page={page} pageSize={25} total={256} onPageChange={setPage} />;
     const rows = [
       { id: '1042', doc: '1042', client: 'Northwind Builders', branch: 'Casa matriz', date: '8 jul 2026', status: 'Pendiente' },
       { id: '1043', doc: '1043', client: 'Constructora Norte', branch: 'Sucursal Sur', date: '9 jul 2026', status: 'Preparado' },
