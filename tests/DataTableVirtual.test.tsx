@@ -167,10 +167,9 @@ describe('DataTable virtualizeRows (integración)', () => {
     restore();
   });
 
-  it('mobileLayout="cards" desactiva la virtualización SOLO bajo el breakpoint mobile', () => {
+  it('virtualizeRows gana a las cards: en mobile sigue ventaneando y la tabla sigue siendo tabla', () => {
     const restore = mockClientHeight(320);
-    // jsdom has no matchMedia: stub it so the mobile query matches. Wide
-    // viewports keep virtualizing with the (default) cards layout.
+    // jsdom has no matchMedia: stub it so the mobile query matches.
     const prev = window.matchMedia;
     Object.defineProperty(window, 'matchMedia', {
       configurable: true, writable: true,
@@ -186,7 +185,9 @@ describe('DataTable virtualizeRows (integración)', () => {
         mobileLayout="cards"
       />
     );
-    expect(container.querySelectorAll('tbody tr')).toHaveLength(200);
+    // windowed (spacers + a handful of rows), not 200 cards
+    expect(container.querySelectorAll('tbody tr').length).toBeLessThan(60);
+    expect(container.querySelector('.table-wrap--cards')).toBeNull();
     Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: prev });
     restore();
   });

@@ -65,9 +65,12 @@ mano" que `FilterBar` existe para reemplazar.
   borde y fondo bajo el breakpoint (`.table-surface--cards`). El detalle
   expandido es su propia tarjeta pegada a la fila. `mobileLayout="table"`
   conserva la tabla con scroll horizontal.
-- **Virtualización y cards.** El gate `virtualizeRows` ignoraba el modo
-  `cards` a secas; con el default nuevo habría apagado la virtualización en
-  todo viewport. Ahora se apaga solo mientras la query mobile coincide.
+- **Virtualización gana a las cards.** Antes `mobileLayout="cards"` apagaba
+  `virtualizeRows`; con cards por default eso volvía 5.000 filas en 5.000
+  tarjetas en el teléfono. Las tarjetas no se ventanean (altura no uniforme)
+  y un dataset ventaneado es por definición demasiado grande para
+  renderizarlo entero, así que una tabla virtualizada sigue siendo tabla bajo
+  600px; se combina con `mobile: 'hidden'` para las columnas secundarias.
 - **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de
   columnas iguales y entran al flujo flex-wrap de la barra (`display:
   contents` en la caja de campos, `flex: 1 1 160px` por campo): una segunda

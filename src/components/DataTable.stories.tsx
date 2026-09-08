@@ -76,9 +76,11 @@ export const TruncadoPorColumna: StoryObj = {
 /**
  * **Virtualización** (v1.51.0): `virtualizeRows` ventanea 5.000 filas a
  * ~30 nodos DOM con spacers pixel-exactos. Requiere `maxHeight` y alturas
- * uniformes — se auto-desactiva con `renderExpanded` o `cards`. La
- * selección opera sobre el dataset completo (solo el DOM se ventanea).
- * El sticky header + footer de totales conviven con el windowing.
+ * uniformes — se auto-desactiva con `renderExpanded`. En móvil sigue siendo
+ * tabla (las cards no se ventanean; 5.000 tarjetas no es una opción): SKU se
+ * esconde con `mobile: 'hidden'`. La selección opera sobre el dataset
+ * completo (solo el DOM se ventanea). El sticky header + footer de totales
+ * conviven con el windowing.
  */
 export const Virtualizada: StoryObj = {
   render: () => {
@@ -102,7 +104,7 @@ export const Virtualizada: StoryObj = {
         onSelectionChange={setSel}
         columns={[
           { key: 'name', header: 'Producto', footer: 'Total (5.000)' },
-          { key: 'sku', header: 'SKU' },
+          { key: 'sku', header: 'SKU', mobile: 'hidden' },
           { key: 'price', header: 'Precio', numeric: true,
             accessor: (r) => `$${r.price.toLocaleString('es-CL')}`,
             footer: `$${total.toLocaleString('es-CL')}` },

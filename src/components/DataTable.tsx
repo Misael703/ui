@@ -360,6 +360,7 @@ export interface DataTableProps<T> {
    *   the toolbar when order matters on a phone.
    * - `'table'`: the table stays a table and scrolls horizontally inside its
    *   wrapper. Pair with `Column.mobile: 'hidden'` for priority columns.
+   *   Forced whenever `virtualizeRows` is set (see that prop).
    * The same DOM serves both — the switch is CSS on the wrapper plus a
    * `data-mobile` role per cell — so there is no hydration mismatch.
    */
@@ -436,8 +437,10 @@ export interface DataTableProps<T> {
    * two pixel-exact spacers. Requires `maxHeight` (the bounded scroller is
    * the measuring viewport) and UNIFORM row heights — it silently disables
    * itself when combined with `renderExpanded` (detail panels change row
-   * heights) or `mobileLayout="cards"` (cards re-flow every row), because
-   * a correct full render beats a broken windowed one. Selection,
+   * heights), because a correct full render beats a broken windowed one.
+   * Cards cannot be windowed either, so a virtualized table STAYS A TABLE
+   * below 600px regardless of `mobileLayout` (a windowed dataset is too big
+   * to render as cards); mark secondary columns `mobile: 'hidden'`. Selection,
    * select-all and sorting keep operating on the FULL `rows` array — only
    * the DOM is windowed. Prefer server pagination when you have it; this
    * is for the genuinely client-side big list.
@@ -576,8 +579,11 @@ export function DataTable<T>({
   // Row windowing — gated to the combinations where fixed-height math is
   // actually true (see the prop's JSDoc). When the gate is off the hook is
   // inert and returns the full range, so there is ONE render path below.
-  const virtual =
-    virtualizeRows != null && bounded && !expandable && !(isMobile && mobileLayout === 'cards');
+  const virtual = virtualizeRows != null && bounded && !expandable;
+  // Cards cannot be windowed (their height is not uniform), and a windowed
+  // dataset is by definition too big to render whole: a virtualized table
+  // stays a table on a phone. Pair it with `Column.mobile: 'hidden'`.
+  const cardsLayout = mobileLayout === 'cards' && virtualizeRows == null;
   const vrange = useVirtualRows(scrollRef, {
     count: rows.length,
     rowHeight: virtualizeRows?.rowHeight ?? 1,
@@ -794,7 +800,7 @@ export function DataTable<T>({
         stickyHeader && 'table-wrap--sticky',
         bounded && 'table-wrap--scroll',
         fillHeight && 'table-wrap--fill',
-        mobileLayout === 'cards' && 'table-wrap--cards',
+        cardsLayout && 'table-wrap--cards',
         surface === 'flush' && toolbar == null && 'table-wrap--flush',
         edges.left && 'has-more-left',
         edges.right && 'has-more-right',
@@ -824,7 +830,7 @@ export function DataTable<T>({
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
   return toolbar == null ? wrap : (
-    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill', mobileLayout === 'cards' && 'table-surface--cards')}>
+    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill', cardsLayout && 'table-surface--cards')}>
       <div className="table-surface__bar">{toolbar}</div>
       {wrap}
     </div>
