@@ -5,6 +5,17 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.1] — 2026-09-08
+
+### Changed
+- **`DateRangePicker` vacío**: el trigger muestra el formato de fecha como
+  placeholder en registro muted ("dd-mm-aaaa", según `format`) en vez de
+  "Seleccionar rango"; enseña la forma del valor y cabe en una celda de
+  filtro de 138px sin envolver a dos líneas (el label recorta con elipsis si
+  aun así no cabe). El nombre
+  accesible sigue siendo "Seleccionar rango" (`aria-label` mientras está
+  vacío).
+
 ## [3.8.0] — 2026-09-08
 
 **Minor. `FilterBar layout`: cuánto escondes, como decisión explícita.**

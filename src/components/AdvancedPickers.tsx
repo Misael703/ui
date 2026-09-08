@@ -508,14 +508,18 @@ export function DateRangePicker({
   };
 
   // Show the active preset's name (like Bsale) when one is applied; otherwise the
-  // date range, or the placeholder when empty.
+  // date range. Empty: the FORMAT as a muted placeholder ("dd-mm-aaaa", v3.8.1) —
+  // it teaches the shape of the value and fits a 138px filter cell where a
+  // two-date hint would clip; the accessible name stays "Seleccionar rango" via
+  // aria-label.
+  const empty = !displayed.from;
   const label = appliedPreset && displayed.from
     ? appliedPreset
     : displayed.from
       ? displayed.to
         ? `${formatDate(displayed.from, fmt)} → ${formatDate(displayed.to, fmt)}`
         : `${formatDate(displayed.from, fmt)} → …`
-      : locale['picker.selectRange'];
+      : dateFormatPlaceholder(fmt);
 
   const renderMonth = (offset: number) => {
     const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
@@ -605,9 +609,10 @@ export function DateRangePicker({
         onClick={toggleOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-label={empty ? locale['picker.selectRange'] : undefined}
       >
         <span className="daterange__icon" aria-hidden="true"><CalendarIcon size={16} /></span>
-        <span>{label}</span>
+        <span className={cx('daterange__label', empty && 'daterange__label--placeholder')}>{label}</span>
       </button>
       {open && (
         <Portal>

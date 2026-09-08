@@ -2939,7 +2939,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange__trigger {
   width: 100%;
   display: inline-flex; align-items: center; gap: 8px;
-  height: var(--field-min-h); padding: 0 14px;
+  /* 10px inset (was 14): with the 16px icon and its gap, "dd-mm-aaaa" fits a
+     138px filter cell at text-sm with 4px to spare instead of clipping. */
+  height: var(--field-min-h); padding: 0 10px;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -2953,7 +2955,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .daterange.is-disabled { opacity: 0.55; pointer-events: none; }
 /* inline-flex so the span collapses to the 16px icon (not the ~20px line-box),
    keeping the calendar icon centered with the label instead of baseline-shifted. */
-.daterange__icon { color: var(--fg-muted); display: inline-flex; align-items: center; }
+.daterange__icon { color: var(--fg-muted); display: inline-flex; align-items: center; flex-shrink: 0; }
+/* The label never wraps the trigger to two lines: it clips with an ellipsis in
+   a narrow cell. Empty = the date format in the muted register. */
+.daterange__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.daterange__label--placeholder { color: var(--fg-muted); }
 .daterange__popover {
   position: absolute; top: calc(100% + 6px); left: 0;
   z-index: var(--z-tooltip);
