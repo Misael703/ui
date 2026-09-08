@@ -1,24 +1,22 @@
-# UI Kit v3.6.0 — `--border-on-canvas`: canto legible para el inset sobre el canvas F
+# UI Kit v3.7.0 — `FilterBar summary` + receta de página de listado
 
-**Origen:** despachos migró a 3.5.0 y adoptó `Card variant="inset"`; el inset casi no se distingue del canvas (1.09:1, ΔL .028, sin borde ni sombra). Medición del consumidor en El Alba light. Pedido consumer-driven, minor.
-**Branch:** `feat/border-on-canvas` (local; PR/push solo con OK explícito).
-
-## Decisiones
-- Token `--border-on-canvas` DERIVADO: `color-mix(in oklab, var(--color-primary) P%, var(--bg-canvas))` — light P=18%, dark P=30% (en dark el inset es más claro que el canvas y un 14% cae en la luminancia del inset: 1.02:1). Definido en el base (light + dark); El Alba lo hereda resolviendo contra su propio primary/canvas (sin override = sin trampa de cascada). Pinneado en los 4 mapas.
-- `.card--inset`: `border-color: var(--border-on-canvas)`; header/footer del inset también usan el token (un solo tinte de hairline por panel; border-default sobre subtle era 1.18:1).
-- Umbral del test: ≥ 1.3:1 vs canvas y ≥ 1.2:1 vs subtle (el canto separa ambos lados); justificado en el test.
+**Origen:** estandarizar filtros de las 7 páginas CRUD de despachos (Card + `.app-filter-grid` + `FormField` hechos a mano). Decisión con revisión de un segundo agente: `summary` para el conteo (no es acción); switcher en `TableToolbar` arriba ("cómo veo") y `FilterBar` abajo ("qué veo"); conteo SIEMPRE en `summary`.
+**Branch:** `feat/filterbar-summary` (local; push/PR/release con OK explícito).
 
 ## Tareas
-- [x] T0 — Capturas ANTES (main) de `Card · inset vs card` y `Página sin cards`, 4 combos.
-- [x] T1 — Test rojo en `ContrastDark.test` (tiene evalColor con color-mix; mapas light+dark, ambos presets).
-- [x] T2 — Tokens base light+dark; CSS `.card--inset` + header/footer.
-- [x] T3 — Stories (notas), DESIGN.md (semantic tokens + When to card), CHANGELOG 3.6.0 + bump.
-- [x] T4 — Suite + build; capturas DESPUÉS; comparativa para el usuario. Commit local. Sin push.
+- [x] T1 — Test rojo: slot `summary` (orden fields → summary → actions; solo si se provee); CSS `margin-left:auto` + `min-height: var(--field-min-h)`; padding de `.table-surface__bar > .filter-bar`.
+- [x] T2 — `FilterBar summary` + CSS; padding dentro del toolbar del DataTable.
+- [x] T3 — Story `Playground · página de listado` (Patterns/Filters) con controls (switcher, campos 2–7, conteo, filtros aplicados).
+- [x] T3b — REGLA nueva del usuario: stories genéricas, nunca calcadas de capturas del consumidor. Reemplazadas "Fill height" + "Ancha acotada con toolbar" → `Playground · región de scroll`, "Página sin cards" → `Playground · superficies en una página`. Lección en tasks/lessons.md.
+- [x] T4 — DESIGN.md (List-page recipe) + CHANGELOG 3.7.0 + bump.
+- [x] T5 — Suite + build + tsc; Storybook a 1280 y 760: summary a 16px del borde y centrado en la banda de controles (36px) en ambos; a 760 los campos envuelven a 2 filas y el summary sigue alineado con la última.
+
+- [x] T6 — Revisión pre-auditoría: summary+actions envuelven juntos (`.filter-bar__end`), `role="status"`, tests de nombre accesible (Select/Combobox/DatePicker/DateRangePicker), regla Select vs Combobox, Combobox null = sin filtro, puntero DESIGN.md, tipo preexistente en Comments.stories.
+- [x] T7 — `Playground · CRUD` (Patterns/CRUD) con estado local real; destapó `.form-field` sin `min-width: 0` (overflow en Drawer de 480px) → fix + test.
+- [x] T8 — Cards mobile bien hechas (decisión 2026-09-08: "para mobile prefiero cards, siempre"). `Column.mobile: 'title'|'status'|'field'|'actions'|'hidden'` reemplaza `hideOnMobile` (no publicado); `mobileLayout` default → `'cards'`; tarjeta = cabecera (título con caption + estado + checkbox) / cuerpo (label izq · valor der, hairlines) / pie (acciones a lo ancho); mismo DOM, `data-mobile` por celda + CSS grid/flex bajo 600px; surface y wrap sueltan el chrome (cards sobre canvas). Gate de virtualización pasa a `isMobile && cards` (antes `cards` a secas: con el default nuevo mataba la virtualización siempre). Tests, stories (listado, CRUD, CardLayoutMobile, playground), DESIGN.md, CHANGELOG. Fuera: "Ordenar por" en móvil (follow-up).
 
 ## Review
-**Desvío respecto al pedido, justificado:** el token NO se duplica en el preset El Alba. Es derivado (`color-mix` de `--color-primary` sobre `--bg-canvas`), así que El Alba lo resuelve contra su propio navy y canvas sin override; al no tocarlo en su `:root` light, tampoco hay trampa de cascada con el bloque dark del base. Pinneado en los 4 mapas (base/El Alba × light/dark).
-**Medición final (WCAG vs canvas / vs inset):** genérico light `#ccc1af` 1.37 / 1.63; El Alba light `#bccce7` 1.41 / 1.53; genérico dark `#49423b` 1.80 / 1.47; El Alba dark `#323e55` 1.71 / 1.38. Umbrales del test: ≥ 1.3 / ≥ 1.2.
-**Header/footer del inset:** pasan a `--border-on-canvas` (border-default sobre subtle era 1.18:1; un solo tinte por panel).
-**Tests:** suite completa verde; `CardElevation.test` re-apuntado (pineaba `transparent` desde 3.4.0). Build exit 0, token presente en dist.
-**Visual:** capturas antes/después en scratch (inset + página, El Alba y genérico, light y dark).
-**Status:** commit local en `feat/border-on-canvas`. SIN push ni PR hasta OK explícito (cuerpo de PR listo en scratch).
+**Tests:** 1167 (T8: +14). tsc: 0 errores en los archivos de la rama (hay 1 error PREEXISTENTE en main en `Comments.stories.tsx`, fuera de esta rama); lint: 0 errores en la rama (2 errores preexistentes en el untracked `AppShellExplorations.stories.tsx`). Build exit 0.
+**T8 verificado:** Chromium 390/320 light+dark en CardLayoutMobile, listado y CRUD: 0 overflow, zonas en orden, wrap y surface sin borde bajo 600px; label de campo numérico en DM Sans. Hallazgo: `--border-subtle` NO existe como token (las hairlines de las cards viejas nunca se pintaron); las nuevas usan `--border-default`. `.desc-list__value` también lo usa (preexistente, sin tocar). El ajuste `--table-cell-max` rechazado había quedado en 6186738 → removido aquí.
+**Cierre 2026-09-08 (T8–T14):** cards mobile con `Column.mobile` roles y default; virtualización gana a cards; barrido de stories del consumidor (Gold Standard, timelines despachos, tabla ancha, FilterBarDemo) + persona Satoru Gojo; jerarquía terciaria (`hideLabel`, `ghost-danger`, embudo, `overflow` ⋯, lápiz/basurero); `--sticky-inset`; playground de props de DataTable; `FilterBar sort`; `DataTable footer`; paginación con slots fijos; story "Listado completo". 1189 tests, tsc 0, lint 0 errores, build OK.
+**Status:** push + PR autorizados 2026-09-08 ("dale sube todo"). Release/publish pendiente de OK. Después: migración de despachos (7 páginas) como PR aparte; chips de filtros aplicados pendiente.

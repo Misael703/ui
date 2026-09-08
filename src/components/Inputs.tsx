@@ -77,17 +77,23 @@ export interface PaginationProps {
   className?: string;
 }
 
+/**
+ * Page numbers to show. A FIXED number of slots (`2 * siblings + 5`: first,
+ * last, the current window, and up to two ellipses) so the pager keeps its
+ * width as the page changes: near an edge the window slides instead of
+ * shrinking — page 1 of 11 with `siblings=1` reads `1 2 3 4 5 … 11`, page 6
+ * reads `1 … 5 6 7 … 11`, page 11 reads `1 … 7 8 9 10 11`.
+ */
 function pageList(current: number, total: number, siblings: number): (number | '...')[] {
   if (total <= 1) return [1];
   const range = (s: number, e: number) => Array.from({ length: e - s + 1 }, (_, i) => s + i);
-  const start = Math.max(2, current - siblings);
-  const end = Math.min(total - 1, current + siblings);
-  const out: (number | '...')[] = [1];
-  if (start > 2) out.push('...');
-  out.push(...range(start, end));
-  if (end < total - 1) out.push('...');
-  if (total > 1) out.push(total);
-  return out;
+  const slots = 2 * siblings + 5;
+  if (total <= slots) return range(1, total);
+  const leftEdge = 1 + 2 * siblings + 2;   // pages shown at the start before the ellipsis kicks in
+  const rightEdge = total - 2 * siblings - 2;
+  if (current <= 1 + siblings + 1) return [...range(1, leftEdge), '...', total];
+  if (current >= total - siblings - 1) return [1, '...', ...range(rightEdge, total)];
+  return [1, '...', ...range(current - siblings, current + siblings), '...', total];
 }
 
 export function Pagination({ page, pageSize, total, onPageChange, siblings = 1, className }: PaginationProps) {

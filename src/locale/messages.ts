@@ -23,6 +23,14 @@ export interface UiKitMessages {
 
   // DataTable
   'table.empty': string;
+  /** FilterBar `visibleCount` toggle (v3.7.0). */
+  'filterBar.more': string;
+  'filterBar.less': string;
+  /** FilterBar mobile drawer (v3.7.0): trigger label and sheet title / close. */
+  'filterBar.filters': string;
+  'filterBar.done': string;
+  /** Accessible name of the "⋯" overflow trigger in toolbars (v3.7.0). */
+  'toolbar.more': string;
   'table.selectAll': string;
   /** Template: "Seleccionar {label}" */
   'table.selectRow': string;

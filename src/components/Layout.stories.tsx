@@ -82,7 +82,7 @@ export const TooltipLargo: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 24px' }}>
       <Tooltip
-        label="Por cada chofer en el rango (por fecha de entrega): entregas hechas y tiempo en ruta promedio (desde que el despacho sale hasta que se entrega). Solo envíos con chofer; ordenado por volumen. No mostramos % a tiempo: el cumplimiento de fecha es un objetivo aparte."
+        label="Por cada vendedor en el rango (por fecha de cierre): ventas concretadas y tiempo promedio hasta el cierre, desde el primer contacto hasta la venta. Solo oportunidades con vendedor asignado; ordenado por volumen, de mayor a menor."
         side="bottom"
       >
         <Button variant="ghost">Operación de entrega</Button>

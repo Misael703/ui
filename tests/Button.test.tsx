@@ -113,3 +113,29 @@ describe('IconButton', () => {
     expect(btn.querySelector('.spinner--current')).toBeTruthy();
   });
 });
+
+describe('Button hideLabel (v3.7.0)', () => {
+  it('true: wraps the label in .btn__label and squares the button (btn--hide-label)', () => {
+    render(<Button iconLeft={<svg data-testid="ico" />} hideLabel>Exportar</Button>);
+    const btn = screen.getByRole('button', { name: 'Exportar' });
+    expect(btn).toHaveClass('btn--hide-label');
+    expect(btn.querySelector('.btn__label')).toHaveTextContent('Exportar');
+    expect(screen.getByTestId('ico')).toBeInTheDocument();
+  });
+  it('"mobile": only the mobile modifier, label wrapped', () => {
+    render(<Button hideLabel="mobile">Exportar</Button>);
+    const btn = screen.getByRole('button', { name: 'Exportar' });
+    expect(btn).toHaveClass('btn--hide-label-mobile');
+    expect(btn).not.toHaveClass('btn--hide-label');
+  });
+  it('default: children render bare (byte-identical to before)', () => {
+    render(<Button>Exportar</Button>);
+    expect(screen.getByRole('button').querySelector('.btn__label')).toBeNull();
+  });
+  it('CSS: the clipped label keeps the accessible name; the mobile variant lives under the 600px query', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    expect(css).toMatch(/\.btn--hide-label \.btn__label \{[^}]*clip-path:\s*inset\(50%\)/);
+    expect(css).toMatch(/@media \(max-width: 600px\) \{\s*\.btn--hide-label-mobile \{[^}]*aspect-ratio:\s*1/);
+    expect(css).toMatch(/\.btn--hide-label\.btn--sm \{[^}]*width:\s*36px/);
+  });
+});

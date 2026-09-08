@@ -99,3 +99,24 @@ local commits). Push/PR/merge/release each need the user's explicit go for
 THIS change — a prior "dale un bump" in the same session is consumed by that
 release and does not carry forward. Default posture after implementing:
 verify, screenshot, report, wait.
+
+[2026-09-07] Context: durante una semana de pedidos consumer-driven (despachos) creé stories
+calcadas de las capturas del usuario: "Fill height" con las 16 columnas del XLSX de despachos y
+el título "Detalle de despachos", "Página sin cards" con "Orden #1042 · Nairely Perez", "Receta:
+página de listado" con "Órdenes de despacho · Trazabilidad desde la venta en Bsale". El usuario:
+"deja de crear stories adaptadas a las screenshots que te paso, son de un caso en específico y me
+manchas el storybook completo".
+→ Rule: las stories del kit son GENÉRICAS (dominio de muestra del kit: Taladro, Pedido #1042,
+Northwind Builders; nunca nombres reales, columnas o copy de una app). Para probar cómo se
+comportan elementos al juntarse, un PLAYGROUND con controls o una story de composición con las
+variantes como args — no una story por caso. El caso concreto del consumidor se reproduce en
+scratch (story desechable sin commitear, o Playwright con overrides sobre la story genérica).
+[2026-09-07, mismo día] Context: al convertir la story de filtros en playground genérico dejé el
+switcher de vistas (Tabla/Tarjetas/Tablero) como parte de la "receta" y hasta lo escribí en
+DESIGN.md. Es el calco de despachos otra vez, disfrazado de regla. Usuario: "una tabla solo tiene
+una vista, vista de tabla, no la incluyas".
+→ Rule: antes de generalizar algo visto en un consumidor, preguntar si es propiedad del
+componente o decisión de esa app. Si solo existe en una app, no entra al kit ni a sus docs.
+
+[2026-09-08] Context: la story "Playground · página de listado" se rompió (RangeError: Maximum call stack, `safeSortObject`) al pasar `overflow={[{ icon: <Download/> }]}` creado dentro de `render`. Un elemento creado en render lleva `_owner` (fiber, circular); el jsx decorator de @storybook/react (Show code) recorre arrays/objetos anidados en props y no reconoce el elemento dentro del objeto → recursión infinita. Lo detecté tarde porque el barrido anterior midió `rowH: 0` y no lo leí. → Rule: en stories, los arrays/objetos de props que contengan elementos React (`icon: <X/>`) van hoisted a module scope (sin owner). Y en cada barrido con Playwright, un `rows: 0` o `hasX: false` inesperado se investiga, no se anota.
+

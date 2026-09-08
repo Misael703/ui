@@ -36,7 +36,7 @@ const sections: NavSection[] = [
       { id: 'home', label: 'Inicio', icon: <Home size={18} />, href: '/inicio' },
       { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={18} />, href: '/pedidos', badge: 12 },
       { id: 'productos', label: 'Productos', icon: <Package size={18} />, href: '/productos' },
-      { id: 'despacho', label: 'Despacho', icon: <Truck size={18} />, href: '/despacho' },
+      { id: 'envios', label: 'Envíos', icon: <Truck size={18} />, href: '/envios' },
       { id: 'reportes', label: 'Reportes', icon: <FileText size={18} />, defaultOpen: true, children: [
         { id: 'r-ventas', label: 'Ventas', href: '/reportes/ventas' },
         { id: 'r-stock', label: 'Stock', href: '/reportes/stock' },
@@ -58,7 +58,7 @@ const ROUTE_IN_GROUP = '/reportes/stock';
 
 /* Page title per route, so the content area visibly changes with the nav. */
 const ROUTE_TITLES: Record<string, string> = {
-  '/inicio': 'Inicio', '/pedidos': 'Pedidos', '/productos': 'Productos', '/despacho': 'Despacho',
+  '/inicio': 'Inicio', '/pedidos': 'Pedidos', '/productos': 'Productos', '/envios': 'Envíos',
   '/reportes/ventas': 'Reporte de ventas', '/reportes/stock': 'Reporte de stock', '/reportes/margen': 'Reporte de margen',
   '/clientes': 'Clientes', '/configuracion': 'Configuración',
 };
@@ -121,7 +121,7 @@ const USER_ITEMS = [
   { label: 'Cerrar sesión', danger: true },
 ];
 const DemoUserMenu = ({ compact = false }: { compact?: boolean }) => (
-  <UserMenu name="Misael Ocas" role="Administrador" items={USER_ITEMS} compact={compact} />
+  <UserMenu name="Satoru Gojo" role="Administrador" items={USER_ITEMS} compact={compact} />
 );
 
 /* Single shell used by the Playground. Mirrors the recommended
@@ -299,11 +299,11 @@ export const TopbarOnlyNoNav: StoryObj = {
       <AppShell
         header={{
           left: <Logo variant="horizontal" bg="auto" height={26} />,
-          right: <span style={{ color: 'var(--fg-muted)', fontSize: 13 }}>Cobros Khipu · Mesón</span>,
+          right: <span style={{ color: 'var(--fg-muted)', fontSize: 13 }}>Punto de venta · Caja 2</span>,
         }}
       >
         <div style={{ padding: 24 }}>
-          <PageHeader title="Nuevo cobro" description="Flujo plano — el shell es solo el header sobre el contenido (sin sidebar)" />
+          <PageHeader title="Nueva venta" description="Flujo plano — el shell es solo el header sobre el contenido (sin sidebar)" />
           <div style={{ marginTop: 16, border: '1px dashed var(--border-default)', borderRadius: 12, height: 360 }} />
         </div>
       </AppShell>

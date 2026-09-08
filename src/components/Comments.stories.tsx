@@ -1,14 +1,14 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { CommentThread, AttachmentList } from './Comments';
+import { CommentThread, AttachmentList, type CommentItem } from './Comments';
 
 export default { title: 'Patterns/Comments', tags: ['autodocs'] } as Meta;
 
 export const CommentThreadDemo: StoryObj = {
   render: () => {
     const [comments, setComments] = React.useState([
-      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente pidió adelantar el despacho a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
-      { id: '2', author: { name: 'Misael Ocas' }, body: 'Confirmé con bodega, va incluida la guía de despacho actualizada.', timestamp: 'ayer', internal: true },
+      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente pidió adelantar la entrega a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
+      { id: '2', author: { name: 'Satoru Gojo' }, body: 'Confirmé con bodega, va incluida la guía actualizada.', timestamp: 'ayer', internal: true },
     ]);
     return (
       <div style={{ maxWidth: 600 }}>
@@ -48,10 +48,10 @@ export const CommentThreadDemo: StoryObj = {
 export const CommentThreadInline: StoryObj = {
   name: 'CommentThread · Inline (chat-style)',
   render: () => {
-    const [empty, setEmpty] = React.useState<Array<{ id: string; author: { name: string }; body: React.ReactNode; timestamp: React.ReactNode; internal?: boolean }>>([]);
-    const [withHistory, setWithHistory] = React.useState([
-      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente llamó, va a pasar a buscar el despacho a las 11:00.', timestamp: 'hace 10 min' },
-      { id: '2', author: { name: 'Misael Ocas' }, body: 'Listo, dejo la guía firmada arriba del mostrador.', timestamp: 'hace 3 min' },
+    const [empty, setEmpty] = React.useState<CommentItem[]>([]);
+    const [withHistory, setWithHistory] = React.useState<CommentItem[]>([
+      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente llamó, va a pasar a buscar el pedido a las 11:00.', timestamp: 'hace 10 min' },
+      { id: '2', author: { name: 'Satoru Gojo' }, body: 'Listo, dejo la guía firmada arriba del mostrador.', timestamp: 'hace 3 min' },
     ]);
     const append = (set: typeof setEmpty) => (body: string) =>
       set((c) => [...c, { id: String(c.length + 1), author: { name: 'Tú' }, body, timestamp: 'ahora' }]);
@@ -73,9 +73,9 @@ export const CommentThreadInline: StoryObj = {
 export const AttachmentListDemo: StoryObj = {
   render: () => {
     const [files, setFiles] = React.useState([
-      { id: '1', name: 'cotizacion-1042.pdf', size: '245 KB', uploadedBy: 'Misael Ocas', uploadedAt: 'hace 2h', url: '#' },
-      { id: '2', name: 'foto-despacho.jpg', size: '1.2 MB', uploadedBy: 'Bodega Norte', uploadedAt: 'hace 30min', url: '#' },
-      { id: '3', name: 'guia-despacho.pdf', size: '89 KB', uploadedBy: 'Patricia Rojas', uploadedAt: 'hace 5min', url: '#' },
+      { id: '1', name: 'cotizacion-1042.pdf', size: '245 KB', uploadedBy: 'Satoru Gojo', uploadedAt: 'hace 2h', url: '#' },
+      { id: '2', name: 'foto-entrega.jpg', size: '1.2 MB', uploadedBy: 'Bodega Norte', uploadedAt: 'hace 30min', url: '#' },
+      { id: '3', name: 'guia-1042.pdf', size: '89 KB', uploadedBy: 'Patricia Rojas', uploadedAt: 'hace 5min', url: '#' },
     ]);
     return (
       <div style={{ maxWidth: 480 }}>

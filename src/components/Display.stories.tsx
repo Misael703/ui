@@ -52,67 +52,88 @@ export const CardInset: StoryObj = {
   ),
 };
 
+interface SurfacesArgs {
+  sectionAs: 'inset' | 'card' | 'plain';
+  objectCard: boolean;
+  table: boolean;
+}
+
 /**
- * **Página sin cards** — el patrón de consumo recomendado (2026-09-06). El
- * contenido va directo sobre el canvas: la tabla se dibuja sola (tiene borde,
- * radio y elevación propios), lo agrupado va en un `inset`, y la card flotante
- * queda solo para el objeto que se lee como unidad (aquí, el resumen). Antes
- * cada bloque era una card y el canvas tenía que ser muy gris para que
- * "flotaran"; con canvas F (3.4.0) y este patrón, la página respira.
+ * **Playground · superficies en una página.** Cómo se comportan las tres formas
+ * de colocar contenido sobre el canvas al juntarse: una **sección** (grupo de
+ * campos) como `inset`, como card flotante o plana sin envoltorio; una **card
+ * de objeto** (algo que se lee como unidad); y una **tabla** directa sobre la
+ * página, que dibuja su propia superficie. Regla "When to card" (DESIGN.md):
+ * card = objeto autocontenido; inset = sección; la tabla nunca va dentro de
+ * ninguna. Cambia `sectionAs` para ver por qué una sección en card compite con
+ * la card del objeto y aplana la jerarquía.
  */
-export const PaginaSinCards: StoryObj = {
-  name: 'Página sin cards (patrón recomendado)',
+export const SuperficiesPlayground: StoryObj<SurfacesArgs> = {
+  name: 'Playground · superficies en una página',
   parameters: { layout: 'fullscreen' },
-  render: () => (
-    <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700 }}>Orden #1042</div>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg-muted)' }}>Creada hoy 09:26 · Nairely Perez</div>
-        </div>
-        <Button>Despachar</Button>
+  args: { sectionAs: 'inset', objectCard: true, table: true },
+  argTypes: {
+    sectionAs: { control: 'inline-radio', options: ['inset', 'card', 'plain'] },
+    objectCard: { control: 'boolean' },
+    table: { control: 'boolean' },
+  },
+  render: (a) => {
+    const fields = (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 'var(--text-sm)' }}>
+        <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
+        <div><div style={{ color: 'var(--fg-muted)' }}>Sucursal</div><div>Casa matriz</div></div>
+        <div><div style={{ color: 'var(--fg-muted)' }}>Entrega</div><div>Retiro en tienda</div></div>
+        <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Mesón 2</div></div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gap: 16 }}>
-          <Card variant="inset">
-            <CardHeader>Cliente y entrega</CardHeader>
-            <CardBody>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 'var(--text-sm)' }}>
-                <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
-                <div><div style={{ color: 'var(--fg-muted)' }}>Comuna</div><div>Colina · Local</div></div>
-                <div><div style={{ color: 'var(--fg-muted)' }}>Ventana</div><div>Mañana AM</div></div>
-                <div><div style={{ color: 'var(--fg-muted)' }}>Chofer</div><div>Por asignar</div></div>
-              </div>
-            </CardBody>
-          </Card>
-          <DataTable
-            ariaLabel="Ítems"
-            rows={[
-              { id: '1', name: 'Cemento 25 kg', qty: 40, picked: 40 },
-              { id: '2', name: 'Fierro 12 mm × 6 m', qty: 30, picked: 12 },
-              { id: '3', name: 'Malla acma', qty: 6, picked: 0 },
-            ]}
-            rowKey={(r) => r.id}
-            columns={[
-              { key: 'name', header: 'Producto' },
-              { key: 'qty', header: 'Pedido', numeric: true },
-              { key: 'picked', header: 'Armado', numeric: true },
-            ]}
-          />
+    );
+    const section = a.sectionAs === 'plain'
+      ? <div style={{ display: 'grid', gap: 8 }}><strong style={{ fontSize: 'var(--text-sm)' }}>Cliente y entrega</strong>{fields}</div>
+      : <Card variant={a.sectionAs === 'inset' ? 'inset' : 'card'}><CardHeader>Cliente y entrega</CardHeader><CardBody>{fields}</CardBody></Card>;
+    return (
+      <div style={{ background: 'var(--bg-canvas)', minHeight: '100vh', padding: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700 }}>Pedido #1042</div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--fg-muted)' }}>Creado hoy · 14 ítems</div>
+          </div>
+          <Button>Confirmar</Button>
         </div>
-        <Card>
-          <CardHeader>Resumen</CardHeader>
-          <CardBody>
-            <div style={{ display: 'grid', gap: 6, fontSize: 'var(--text-sm)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Ítems</span><strong>3</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Armado</span><strong>52 / 76</strong></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Estado</span><Badge variant="warning">Pendiente</Badge></div>
-            </div>
-          </CardBody>
-        </Card>
+        <div style={{ display: 'grid', gridTemplateColumns: a.objectCard ? 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' : 'minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16 }}>
+            {section}
+            {a.table && (
+              <DataTable
+                ariaLabel="Ítems"
+                rows={[
+                  { id: '1', name: 'Cemento 25 kg', qty: 40, ready: 40 },
+                  { id: '2', name: 'Fierro 12 mm × 6 m', qty: 30, ready: 12 },
+                  { id: '3', name: 'Malla acma', qty: 6, ready: 0 },
+                ]}
+                rowKey={(r) => r.id}
+                columns={[
+                  { key: 'name', header: 'Producto' },
+                  { key: 'qty', header: 'Pedido', numeric: true },
+                  { key: 'ready', header: 'Preparado', numeric: true },
+                ]}
+              />
+            )}
+          </div>
+          {a.objectCard && (
+            <Card>
+              <CardHeader>Resumen</CardHeader>
+              <CardBody>
+                <div style={{ display: 'grid', gap: 6, fontSize: 'var(--text-sm)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Ítems</span><strong>3</strong></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Preparado</span><strong>52 / 76</strong></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Estado</span><Badge variant="warning">Pendiente</Badge></div>
+                </div>
+              </CardBody>
+            </Card>
+          )}
+        </div>
       </div>
-    </div>
-  ),
+    );
+  },
 };
 
 export const CardConAccent: StoryObj = {
@@ -251,7 +272,7 @@ export const Badges: StoryObj = {
 /**
  * Registros de Badge (post-1.10.0). **Default = data-chip quieto**: sentence
  * case, texto tintado, sin borde duro — lee como metadato en una tabla densa
- * (status, tipo, "Clase A4", un precio). `tone="label"` = micro-label de
+ * (status, tipo, "Categoría A", un precio). `tone="label"` = micro-label de
  * marca: la textura en mayúsculas para eyebrows / kickers / tags cortos.
  * Escena canónica: la columna de dato usa el default; los tags de marca
  * optan por `tone="label"`.
@@ -274,7 +295,7 @@ export const BadgeRegisters: StoryObj = {
                 <td style={{ padding: '8px 12px', fontVariantNumeric: 'tabular-nums' }}>{n}</td>
                 <td style={{ padding: '8px 12px' }}><Badge>{tipo}</Badge></td>
                 <td style={{ padding: '8px 12px' }}><Badge variant={v as 'success'}>{estado}</Badge></td>
-                <td style={{ padding: '8px 12px' }}><Badge variant="neutral">Clase A4</Badge></td>
+                <td style={{ padding: '8px 12px' }}><Badge variant="neutral">Categoría A</Badge></td>
               </tr>
             ))}
           </tbody>

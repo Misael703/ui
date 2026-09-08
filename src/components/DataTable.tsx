@@ -7,8 +7,13 @@ import { Popover } from './Popover';
 import { Button } from './Button';
 import { useVirtualRows } from '../hooks/useVirtualRows';
 import { useScrollEdges } from '../hooks/useScrollEdges';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { ToolbarActions, type ToolbarAction } from './ToolbarActions';
 import { useLocale } from '../locale/LocaleProvider';
 import { format } from '../locale/messages';
+
+/* The kit's mobile breakpoint — the same 600px `mobileLayout="cards"` uses in CSS. */
+const MOBILE_QUERY = '(max-width: 600px)';
 
 // Truncation wrapper style: the column width is passed as a CSS variable (not
 // an inline `max-width`) so the `mobileLayout="cards"` reset can override it —
@@ -52,12 +57,14 @@ interface DataTableRowProps<T> {
   onToggleExpand?: (k: string) => void;
   expandLabel?: string;
   detailId?: string;
+  /** Key of the column that becomes the card title (see `Column.mobile`). */
+  mobileTitleKey?: string;
 }
 
 function DataTableRowImpl<T>({
   row, rowK, selected, selectable, selectAriaLabel, columns, onToggle,
   href, onActivate, actionLabel, renderRow,
-  expandable, expanded, onToggleExpand, expandLabel, detailId,
+  expandable, expanded, onToggleExpand, expandLabel, detailId, mobileTitleKey,
 }: DataTableRowProps<T>) {
   const interactive = !renderRow && (!!href || !!onActivate);
 
@@ -88,7 +95,7 @@ function DataTableRowImpl<T>({
   const cells = (
     <>
       {selectable && (
-        <td className={cx(interactive && 'data-table__cell--above')}>
+        <td className={cx(interactive && 'data-table__cell--above')} data-mobile="select">
           <Checkbox
             checked={selected}
             onChange={() => onToggle(rowK)}
@@ -97,7 +104,7 @@ function DataTableRowImpl<T>({
         </td>
       )}
       {expandable && (
-        <td className={cx(interactive && 'data-table__cell--above')}>
+        <td className={cx(interactive && 'data-table__cell--above')} data-mobile="expand">
           <button
             type="button"
             className="data-table__expand-btn"
@@ -117,13 +124,15 @@ function DataTableRowImpl<T>({
         const value = c.accessor
           ? c.accessor(row)
           : (row as Record<string, unknown>)[c.key] as React.ReactNode;
-        // data-label is consumed by the .data-table--cards CSS to surface
+        // data-label is consumed by the .table-wrap--cards CSS to surface
         // the column header as an inline label on each row when the table
         // collapses to a card layout on narrow viewports. Non-string
         // headers (e.g. JSX) can't be projected through `attr()` so we
         // omit the attribute and the cell renders without a visible label.
         const label = typeof c.header === 'string' ? c.header : undefined;
         const clampLines = typeof c.truncate === 'number' ? c.truncate : undefined;
+        // Card zone for this cell (`mobileLayout="cards"` CSS keys off it).
+        const mobileRole = c.key === mobileTitleKey ? 'title' : (c.mobile ?? 'field');
         return (
           <td
             key={c.key}
@@ -139,6 +148,7 @@ function DataTableRowImpl<T>({
             )}
             style={{ textAlign: align }}
             data-label={label}
+            data-mobile={mobileRole}
             // Full value on hover — only when it's a primitive string; a JSX
             // cell manages its own title (the kit can't stringify an arbitrary
             // node). Set only while truncating, so non-truncated cells are
@@ -218,6 +228,27 @@ export interface Column<T> {
    * (monospace + tabular alignment) and right-align by default.
    */
   numeric?: boolean;
+  /**
+   * Role of this column below 600px (the kit's mobile breakpoint, v3.7.0).
+   * In `mobileLayout="cards"` (the default) each row is a card with three
+   * zones, and the role says where the cell lands:
+   * - `'title'`: the card header, left — the value in the display register
+   *   with the column header as a small caption above it. At most one; when
+   *   no column claims it, the first non-special column is the title.
+   * - `'status'`: the card header, right — for a `Badge` / state pill. No
+   *   caption: the badge speaks for itself.
+   * - `'field'` (default): the card body — one line per column, label left,
+   *   value right, hairline between lines.
+   * - `'actions'`: the card footer, full width — the consumer's row actions
+   *   (mark them `data-row-interactive` when the row is also clickable).
+   * - `'hidden'`: not rendered at all while the query matches — header and
+   *   cells — in BOTH layouts. In `mobileLayout="table"` this is the
+   *   "priority columns" mode: keep the two or three that matter and let the
+   *   row's detail (`rowHref` / `onRowClick`) carry the rest.
+   * Hidden columns are also excluded from `ColumnToggle`-driven
+   * `hiddenColumnKeys` math (they are simply not rendered).
+   */
+  mobile?: 'title' | 'status' | 'field' | 'actions' | 'hidden';
   /**
    * Aggregate cell for this column (a total, a count, a "Total" label).
    * When ANY column sets it, the table renders a `<tfoot>` row styled like
@@ -321,10 +352,18 @@ export interface DataTableProps<T> {
   fillHeight?: boolean;
   /**
    * Layout for narrow viewports (`<600px`):
-   * - `'table'` (default): the table scrolls horizontally inside its wrapper.
-   * - `'cards'`: each row collapses to a stacked card with the column
-   *   header as an inline label per cell. Requires string `header` values
-   *   for the labels to appear; non-string headers render without a label.
+   * - `'cards'` (default, v3.7.0): each row becomes a card — header (title +
+   *   status + selection), body (label/value lines), footer (actions) — per
+   *   `Column.mobile`. The table's own chrome (border, header band) goes; the
+   *   cards sit directly on the canvas. Labels come from string `header`
+   *   values; a non-string header renders the cell without a label. Sorting
+   *   is unreachable here (no header row): offer an "Ordenar por" control in
+   *   the toolbar when order matters on a phone.
+   * - `'table'`: the table stays a table and scrolls horizontally inside its
+   *   wrapper. Pair with `Column.mobile: 'hidden'` for priority columns.
+   *   Forced whenever `virtualizeRows` is set (see that prop).
+   * The same DOM serves both — the switch is CSS on the wrapper plus a
+   * `data-mobile` role per cell — so there is no hydration mismatch.
    */
   mobileLayout?: 'table' | 'cards';
   /** Accessible name announced by screen readers (e.g. "Pedidos abiertos"). */
@@ -399,8 +438,10 @@ export interface DataTableProps<T> {
    * two pixel-exact spacers. Requires `maxHeight` (the bounded scroller is
    * the measuring viewport) and UNIFORM row heights — it silently disables
    * itself when combined with `renderExpanded` (detail panels change row
-   * heights) or `mobileLayout="cards"` (cards re-flow every row), because
-   * a correct full render beats a broken windowed one. Selection,
+   * heights), because a correct full render beats a broken windowed one.
+   * Cards cannot be windowed either, so a virtualized table STAYS A TABLE
+   * below 600px regardless of `mobileLayout` (a windowed dataset is too big
+   * to render as cards); mark secondary columns `mobile: 'hidden'`. Selection,
    * select-all and sorting keep operating on the FULL `rows` array — only
    * the DOM is windowed. Prefer server pagination when you have it; this
    * is for the genuinely client-side big list.
@@ -417,6 +458,13 @@ export interface DataTableProps<T> {
    * legacy sibling pattern (`<TableToolbar/><DataTable/>`) still works.
    */
   toolbar?: React.ReactNode;
+  /**
+   * Footer zone that shares the table's surface (v3.7.0) — the mirror of
+   * `toolbar`, for `TablePagination` or a summary line: one bordered box
+   * holds toolbar, table and pagination, with one divider between each.
+   * In `cards` on a phone it loses its box like the toolbar does.
+   */
+  footer?: React.ReactNode;
   /**
    * Surface chrome mode. Default `'card'`: the table draws its own
    * border + radius (and `--table-elevation` if set), the standalone
@@ -443,9 +491,9 @@ export function DataTable<T>({
   columns: allColumns, rows, rowKey,
   sort, onSortChange,
   selectable, selectedKeys, onSelectionChange,
-  empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'table',
+  empty, error, loading, stickyHeader, maxHeight, fillHeight, mobileLayout = 'cards',
   ariaLabel, rowLabel, className,
-  density = 'compact', rowHref, onRowClick, renderRow, toolbar,
+  density = 'compact', rowHref, onRowClick, renderRow, toolbar, footer,
   renderExpanded, expandedKeys, onExpandedChange,
   hiddenColumnKeys, virtualizeRows,
   surface = 'card',
@@ -453,9 +501,16 @@ export function DataTable<T>({
   const t = useLocale();
   // Everything below sees only the visible columns; hiding is a pure
   // pre-filter so header/cells/footer/colSpans stay in sync for free.
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const columns = React.useMemo(
-    () => (hiddenColumnKeys?.size ? allColumns.filter((c) => !hiddenColumnKeys.has(c.key)) : allColumns),
-    [allColumns, hiddenColumnKeys]
+    () => allColumns.filter((c) => !(hiddenColumnKeys?.has(c.key)) && !(isMobile && c.mobile === 'hidden')),
+    [allColumns, hiddenColumnKeys, isMobile]
+  );
+  // Card title: the explicit `mobile: 'title'` column, else the first plain
+  // one (a status / actions column never becomes the title by position).
+  const mobileTitleKey = React.useMemo(
+    () => (columns.find((c) => c.mobile === 'title') ?? columns.find((c) => c.mobile == null || c.mobile === 'field'))?.key,
+    [columns]
   );
   const allSelected = selectable && rows.length > 0 && rows.every((r) => selectedKeys?.has(rowKey(r)));
   const someSelected = selectable && !allSelected && rows.some((r) => selectedKeys?.has(rowKey(r)));
@@ -532,8 +587,11 @@ export function DataTable<T>({
   // Row windowing — gated to the combinations where fixed-height math is
   // actually true (see the prop's JSDoc). When the gate is off the hook is
   // inert and returns the full range, so there is ONE render path below.
-  const virtual =
-    virtualizeRows != null && bounded && !expandable && mobileLayout !== 'cards';
+  const virtual = virtualizeRows != null && bounded && !expandable;
+  // Cards cannot be windowed (their height is not uniform), and a windowed
+  // dataset is by definition too big to render whole: a virtualized table
+  // stays a table on a phone. Pair it with `Column.mobile: 'hidden'`.
+  const cardsLayout = mobileLayout === 'cards' && virtualizeRows == null;
   const vrange = useVirtualRows(scrollRef, {
     count: rows.length,
     rowHeight: virtualizeRows?.rowHeight ?? 1,
@@ -661,6 +719,7 @@ export function DataTable<T>({
                     onToggleExpand={toggleExpand}
                     expandLabel={format(t['table.expandRow'], { label })}
                     detailId={detailId}
+                    mobileTitleKey={mobileTitleKey}
                   />
                   {expanded && (
                     <tr className="data-table__detail">
@@ -749,7 +808,7 @@ export function DataTable<T>({
         stickyHeader && 'table-wrap--sticky',
         bounded && 'table-wrap--scroll',
         fillHeight && 'table-wrap--fill',
-        mobileLayout === 'cards' && 'table-wrap--cards',
+        cardsLayout && 'table-wrap--cards',
         surface === 'flush' && toolbar == null && 'table-wrap--flush',
         edges.left && 'has-more-left',
         edges.right && 'has-more-right',
@@ -762,7 +821,8 @@ export function DataTable<T>({
           <div
             ref={scrollRef}
             className={cx('table-wrap__scroll', stuck && 'is-stuck')}
-            style={maxHeight != null ? { maxHeight } : undefined}
+            // Cards flow with the page: no inner scroll box on a phone.
+            style={maxHeight != null && !(cardsLayout && isMobile) ? { maxHeight } : undefined}
           >
             {elevatable && <div ref={sentinelRef} className="table-wrap__sentinel" aria-hidden="true" />}
             {tableEl}
@@ -778,10 +838,11 @@ export function DataTable<T>({
   // DataTable owns the single rounded+clipped+bordered surface; the inner
   // .table-wrap defers its border/radius (CSS) and stays the scroll/sticky
   // context, so existing behaviour is untouched.
-  return toolbar == null ? wrap : (
-    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill')}>
-      <div className="table-surface__bar">{toolbar}</div>
+  return toolbar == null && footer == null ? wrap : (
+    <div className={cx('table-surface', surface === 'flush' && 'table-surface--flush', fillHeight && 'table-surface--fill', cardsLayout && 'table-surface--cards')}>
+      {toolbar != null && <div className="table-surface__bar">{toolbar}</div>}
       {wrap}
+      {footer != null && <div className="table-surface__footer">{footer}</div>}
     </div>
   );
 }
@@ -933,9 +994,22 @@ export function TablePagination({
 // ---------- TableToolbar -------------------------------------------------
 // Barra superior que se compone arriba (o dentro de un wrapper) de un DataTable.
 // Cualquier hijo con className "grow" se expande para empujar las acciones al lado.
-export const TableToolbar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  function TableToolbar({ className, ...rest }, ref) {
-    return <div ref={ref} className={cx('table-toolbar', className)} {...rest} />;
+export interface TableToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Actions that may leave the bar on a phone (v3.7.0): inline tertiary
+   * buttons (ghost `sm` + icon) above 600px, a "⋯" menu below. Rendered after
+   * `children`, so a `.grow` child pushes them to the end.
+   */
+  overflow?: ToolbarAction[];
+}
+export const TableToolbar = React.forwardRef<HTMLDivElement, TableToolbarProps>(
+  function TableToolbar({ className, overflow, children, ...rest }, ref) {
+    return (
+      <div ref={ref} className={cx('table-toolbar', className)} {...rest}>
+        {children}
+        {overflow != null && <ToolbarActions actions={overflow} />}
+      </div>
+    );
   }
 );
 

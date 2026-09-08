@@ -108,6 +108,39 @@ button, input, select, textarea { box-sizing: border-box; }
 .btn--icon.btn--sm { width: 36px; }
 .btn--icon.btn--md { width: 38px; }
 .btn--icon.btn--lg { width: 44px; }
+/* `hideLabel` (v3.7.0): the label is clipped (still the accessible name) and
+   the button squares up like `.btn--icon`; `-mobile` only below 600px. */
+.btn--hide-label { padding: 0; aspect-ratio: 1; }
+.btn--hide-label.btn--xs { width: 28px; }
+.btn--hide-label.btn--sm { width: 36px; }
+.btn--hide-label.btn--md { width: 38px; }
+.btn--hide-label.btn--lg { width: 44px; }
+.btn--hide-label .btn__label {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+@media (min-width: 601px) {
+  .btn--hide-label-desktop { padding: 0; aspect-ratio: 1; }
+  .btn--hide-label-desktop.btn--xs { width: 28px; }
+  .btn--hide-label-desktop.btn--sm { width: 36px; }
+  .btn--hide-label-desktop.btn--md { width: 38px; }
+  .btn--hide-label-desktop.btn--lg { width: 44px; }
+  .btn--hide-label-desktop .btn__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+@media (max-width: 600px) {
+  .btn--hide-label-mobile { padding: 0; aspect-ratio: 1; }
+  .btn--hide-label-mobile.btn--xs { width: 28px; }
+  .btn--hide-label-mobile.btn--sm { width: 36px; }
+  .btn--hide-label-mobile.btn--md { width: 38px; }
+  .btn--hide-label-mobile.btn--lg { width: 44px; }
+  .btn--hide-label-mobile .btn__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
 .btn--block { display: flex; width: 100%; }
 
 /* variants */
@@ -142,6 +175,11 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default);
 }
 .btn--ghost:hover:not(:disabled) { background: var(--bg-subtle); }
+/* Destructive tertiary (v3.7.0): neutral at rest — a red glyph on every row
+   is noise — red on hover/focus. The real guard is the confirm dialog. */
+.btn--ghost-danger { background: transparent; color: var(--fg-default); }
+.btn--ghost-danger:hover:not(:disabled),
+.btn--ghost-danger:focus-visible { color: var(--color-danger); background: var(--color-red-50); }
 
 .btn--subtle {
   background: var(--bg-subtle);
@@ -274,7 +312,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .field--error .input:focus { box-shadow: var(--focus-ring-danger); }
 
 /* FormField (used by <FormField> component) */
-.form-field { display: flex; flex-direction: column; gap: 6px; }
+/* `min-width: 0` (v3.7.0): a column-flex box's default min-width is its
+   content's min-content, so a FormField inside a grid `1fr` track or a flex
+   row could not shrink below the widest control and overflowed its cell
+   (seen in a 480px Drawer). Same hardening `.filter-field` already carries. */
+.form-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .form-field__hint {
   font-size: var(--text-xs);
   color: var(--fg-subtle);
@@ -1060,6 +1102,12 @@ button, input, select, textarea { box-sizing: border-box; }
   font-size: var(--text-sm); color: var(--fg-muted);
 }
 .table-pagination__size .select { width: auto; min-width: 0; }
+/* Phone: each part takes its own line — rows-per-page (label left, select
+   right), then the range, then the pager. */
+@media (max-width: 600px) {
+  .table-pagination > * { flex: 1 1 100%; }
+  .table-pagination__size { justify-content: space-between; }
+}
 @media (max-width: 600px) {
   .table-pagination { justify-content: center; }
 }
@@ -1141,7 +1189,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .table-wrap--sticky:not(.table-wrap--scroll) { overflow: visible; }
 .table-wrap--sticky .table thead th {
   position: sticky;
-  top: 0;
+  /* `--sticky-inset` (v3.7.0): a padded outer scroller (Modal / Drawer body,
+     a page content column) sticks the header at its CONTENT edge, so rows
+     scroll visibly through the padding band above it. The scroller declares
+     its padding here and the header sticks at the visible top instead. */
+  top: calc(-1 * var(--sticky-inset, 0px));
   z-index: 1;
   /* Keep the grey band (`--bg-subtle`), not white. A sticky header only
      needs an OPAQUE fill so body rows don't show through on scroll —
@@ -1247,52 +1299,186 @@ button, input, select, textarea { box-sizing: border-box; }
   z-index: 1;
 }
 
-/* Mobile card layout: below 600px, each row becomes a stacked card.
-   The thead is hidden because each cell carries its column label via
-   data-label, which the ::before pseudo-element surfaces inline. */
+/* Mobile card layout (`mobileLayout="cards"`, the default): below 600px each
+   row becomes a card with three zones, keyed off the `data-mobile` role the
+   component stamps on every cell (see `Column.mobile`):
+     header  — title (caption + value) · status (badge) · selection / expand
+     body    — one line per field: label left, value right, hairline between
+     footer  — actions, stretched to the card's width
+   Same DOM as the table (no second render path, no hydration mismatch): the
+   <tr> turns into a wrapping flex row and each zone orders itself. The
+   thead is hidden because each cell carries its column label via data-label,
+   surfaced by the ::before pseudo-element. Cards sit directly on the canvas,
+   so the wrap and the surface give up their own chrome here. */
 @media (max-width: 600px) {
-  .table-wrap--cards .table { border: 0; }
+  /* `.table-surface` is declared later in this file (same specificity), so
+     the cards override doubles the class to win the cascade. */
+  .table-wrap--cards,
+  .table-surface.table-surface--cards {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+  }
+  /* The toolbar loses the band's bottom rule and its inset: the filter chrome
+     floats on the canvas above the cards, flush with them. */
+  .table-surface.table-surface--cards > .table-surface__bar { border-bottom: 0; }
+  .table-surface.table-surface--cards > .table-surface__bar > .filter-bar { padding-inline: 0; }
+  .table-surface.table-surface--cards > .table-surface__footer { border-top: 0; padding-inline: 0; }
+  .table-surface.table-surface--cards > .table-surface__bar > .table-toolbar {
+    background: transparent;
+    border-bottom: 0;
+    padding-inline: 0;
+  }
+  /* Bounded modes (`maxHeight` / `fillHeight`) are a desktop device: a scroll
+     box of cards clips them mid-card. Cards flow with the page instead — the
+     component also drops the inline max-height while the query matches. */
+  .table-wrap--cards .table-wrap__scroll { overflow: visible; }
+  .table-wrap--cards.table-wrap--fill,
+  .table-surface.table-surface--cards.table-surface--fill {
+    display: block;
+    flex: none;
+    height: auto;
+  }
+  /* Empty / error states have no surface to sit on once the wrap is gone:
+     the overlay becomes a card of its own. */
+  .table-wrap--cards .data-table__overlay {
+    border: 1px solid var(--border-on-canvas);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    padding: var(--space-6) var(--space-4);
+  }
+  .table-wrap--cards .table { border: 0; background: transparent; }
   .table-wrap--cards .table thead { display: none; }
   /* Footer cells lose their column geometry in card layout (no thead to
      align with) — hide them like the thead. */
   .table-wrap--cards .table tfoot { display: none; }
+  .table-wrap--cards .table tbody { display: grid; gap: var(--space-3); }
   .table-wrap--cards .table tr {
-    display: block;
-    margin-bottom: var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    border: 1px solid var(--border-on-canvas);
+    border-radius: var(--radius-lg);
     background: var(--bg-surface);
-    padding: var(--space-3);
+    overflow: hidden;
   }
   .table-wrap--cards .table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--space-3);
-    padding: var(--space-2) 0;
+    display: block;
+    flex: 0 0 100%;
+    min-width: 0;
     border: 0;
-    text-align: left !important;
+    padding: var(--space-2) var(--space-4);
     /* Cards stack vertically — the default nowrap/ellipsis would clip
        values here, so let card cells wrap and show in full. */
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
+  /* Alignment classes are desktop geometry; each zone sets its own below. */
+  .table-wrap--cards .table td.table__align-right > *,
+  .table-wrap--cards .table td.table__align-center > * { margin-inline: 0; }
   /* `truncate` columns lose their cap in card layout (cards already wrap and
      show the value in full). Overrides the var-based max-width; also drops the
      -webkit-box so the inline -webkit-line-clamp goes inert. */
   .table-wrap--cards .table__cell-clip { max-width: none; display: inline; white-space: normal; }
-  .table-wrap--cards .table td:not(:last-child) {
-    border-bottom: 1px solid var(--border-subtle);
+
+  /* ---- header zone: selection · expand · title · status --------------- */
+  .table-wrap--cards .table td[data-mobile="select"],
+  .table-wrap--cards .table td[data-mobile="expand"] {
+    flex: 0 0 auto;
+    order: -3;
+    padding-right: 0;
   }
-  .table-wrap--cards .table td[data-label]::before {
+  .table-wrap--cards .table td[data-mobile="title"] {
+    flex: 1 1 0;
+    order: -2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-block: var(--space-3);
+    text-align: left !important;
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--fg-default);
+    line-height: var(--leading-snug);
+  }
+  .table-wrap--cards .table td[data-mobile="title"][data-label]::before {
     content: attr(data-label);
+    font-size: var(--text-2xs);
     font-weight: 600;
     color: var(--fg-muted);
-    flex-shrink: 0;
     text-transform: var(--tt-label);
-    font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
+    line-height: 1.2;
+  }
+  .table-wrap--cards .table td[data-mobile="status"] {
+    flex: 0 0 auto;
+    order: -1;
+    padding-block: var(--space-3);
+    text-align: right !important;
+  }
+
+  /* ---- body zone: label left, value right ------------------------------ */
+  .table-wrap--cards .table td[data-mobile="field"] {
+    border-top: 1px solid var(--border-default);
+    text-align: right !important;
+  }
+  .table-wrap--cards .table td[data-mobile="field"][data-label]::before {
+    content: attr(data-label);
+    float: left;
+    margin-right: var(--space-3);
+    /* The label is UI text even when the cell is numeric (`.table__num` sets
+       the mono face on the <td>; only the value should wear it). */
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    text-transform: var(--tt-data);
+    letter-spacing: var(--tracking-snug);
+  }
+  /* Long-text columns (`truncate`) read badly ragged-left under a floated
+     label: stack the label above the value, left-aligned. */
+  .table-wrap--cards .table td[data-mobile="field"]:has(> .table__cell-clip) { text-align: left !important; }
+  .table-wrap--cards .table td[data-mobile="field"]:has(> .table__cell-clip)[data-label]::before {
+    float: none;
+    display: block;
+    margin: 0 0 2px;
+  }
+
+  /* ---- footer zone: actions stretched --------------------------------- */
+  .table-wrap--cards .table td[data-mobile="actions"] {
+    order: 1;
+    display: flex;
+    gap: var(--space-2);
+    border-top: 1px solid var(--border-default);
+    padding-block: var(--space-3);
+    text-align: left !important;
+  }
+  .table-wrap--cards .table td[data-mobile="actions"] > * {
+    display: flex;
+    flex: 1 1 0;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  /* Footer actions stretch and get a touch-sized height even when the row
+     version is `xs` (28px is fine for a pointer, not for a thumb). */
+  .table-wrap--cards .table td[data-mobile="actions"] .btn { flex: 1 1 0; min-height: 36px; }
+  /* A ghost action reads fine in a table cell (hover reveals it) but floats
+     in a card footer's whitespace: give it the control hairline here. */
+  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost,
+  .table-wrap--cards .table td[data-mobile="actions"] .btn--ghost-danger { border-color: var(--border-control); }
+
+  /* Expanded detail: its own card right under the row. */
+  .table-wrap--cards .table tr.data-table__detail {
+    display: block;
+    margin-top: calc(-1 * var(--space-3) + 4px);
+  }
+  .table-wrap--cards .table tr.data-table__detail > td {
+    box-shadow: none;
+    background: var(--bg-subtle);
+    padding: var(--space-3) var(--space-4);
   }
 }
 .table th[aria-sort="ascending"] .data-table__sort,
@@ -1364,6 +1550,14 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--bg-surface);
 }
 .table-toolbar > .grow { flex: 1 1 200px; min-width: 0; }
+/* On a phone the search shares the row with the funnel and the "⋯" menu:
+   a 200px basis wraps at 320px, 120px keeps the three on one line. */
+@media (max-width: 600px) {
+  .table-toolbar > .grow,
+  .table-toolbar > .input,
+  .table-toolbar > .input-wrap,
+  .table-toolbar > .select { flex-basis: 120px; }
+}
 /* Inputs as direct children of toolbars grow but never overlap siblings. */
 .table-toolbar > .input,
 .table-toolbar > .input-wrap,
@@ -1395,6 +1589,16 @@ button, input, select, textarea { box-sizing: border-box; }
   box-shadow: var(--table-elevation, none);
 }
 .table-surface__bar { border-bottom: 1px solid var(--border-default); }
+/* Footer zone (v3.7.0): pagination / summary inside the same surface. The
+   TablePagination inside keeps its own block padding; the zone adds the inset. */
+.table-surface__footer { border-top: 1px solid var(--border-default); padding: 0 16px; }
+/* Inside the table's surface the pager sits in the control register (36px,
+   like the filter bar's controls above it), not the 32px inline default. */
+/* Inside the table's surface the footer zone stays row-sized: the pager keeps
+   its 32px buttons, the zone adds 6px above and below (44px, the height of a
+   row with a badge) and the text takes the data size. */
+.table-surface__footer .pagination { gap: 6px; font-size: var(--text-data); }
+.table-surface__footer .table-pagination { padding-block: 6px; }
 /* The inner wrap defers ALL chrome to the surface — including the shadow,
    so the elevation lands once on the outer surface, not twice. */
 .table-surface > .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
@@ -1449,7 +1653,7 @@ button, input, select, textarea { box-sizing: border-box; }
    ugly horizontal scrollbar. Clip on x, scroll only on y; `min-width:0`
    lets a flex/grid child (e.g. a 2-col form) reflow instead of forcing a
    blowout the consumer never asked for. */
-.modal__body { padding: 24px; overflow-x: hidden; overflow-y: auto; min-width: 0; }
+.modal__body { padding: 24px; overflow-x: hidden; overflow-y: auto; min-width: 0; --sticky-inset: 24px; }
 .modal__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
@@ -1493,7 +1697,7 @@ button, input, select, textarea { box-sizing: border-box; }
   letter-spacing: var(--tracking-tight);
   margin: 0;
 }
-.drawer__body { flex: 1; overflow-y: auto; padding: 24px; }
+.drawer__body { flex: 1; overflow-y: auto; padding: 24px; --sticky-inset: 24px; }
 .drawer__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
@@ -1965,6 +2169,13 @@ button, input, select, textarea { box-sizing: border-box; }
   display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-body); font-size: var(--text-sm);
   color: var(--fg-muted);
+}
+/* The range text never squeezes into three lines; on a phone the pager wraps
+   under it instead (the nav already wraps its items). */
+.pagination__info { white-space: nowrap; }
+@media (max-width: 600px) {
+  .pagination { flex-wrap: wrap; row-gap: var(--space-2); }
+  .pagination__info { flex: 1 1 100%; }
 }
 .pagination__info { margin-right: 12px; color: var(--fg-muted); }
 .pagination__btn {
@@ -4156,19 +4367,91 @@ button, input, select, textarea { box-sizing: border-box; }
    field grid grows and the actions slot hugs the right edge. */
 .filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3) var(--space-4); }
 .filter-bar__fields {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--filter-col-min, 160px), 1fr));
-  gap: var(--space-3) var(--space-4);
+  /* v3.7.0: the fields join the bar's OWN flex-wrap flow (`display: contents`)
+     instead of living in an equal-column grid box. Two effects: each line
+     shares its width among the fields it holds, so a wrapped pair stretches
+     across the bar instead of sitting beside empty grid cells; and the
+     trailing group (toggle · count · actions) shares the LAST line with the
+     fields, which shrink to make room, instead of dropping to a line of its
+     own. Cost: columns no longer align across lines — accepted, the bar is a
+     row of controls, not a table. `columns` keeps the deterministic grid. */
+  display: contents;
 }
 .filter-bar--fixed-cols .filter-bar__fields {
+  display: grid; flex: 1 1 auto;
   grid-template-columns: repeat(var(--filter-cols, 4), minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
 }
 .filter-bar__actions { display: flex; align-items: flex-end; gap: var(--space-2); }
+/* Trailing group (v3.7.0): summary + actions travel as ONE flex item, so when
+   the row wraps they land together at the end of a line — never the count up
+   with the fields and the buttons alone below. `margin-left: auto` keeps the
+   group at the row's end, also on a wrapped line. */
+.filter-bar__end {
+  margin-left: auto; display: flex; align-items: flex-end; gap: var(--space-3);
+}
+/* `summary`: the result count. The min-height matches the dense control so the
+   text centres on the fields' band, not on their labels. Quiet register: it is
+   a readout, not a control. */
+.filter-bar__summary {
+  display: inline-flex; align-items: center;
+  min-height: var(--field-min-h, 36px); white-space: nowrap;
+  font-size: var(--text-sm); color: var(--fg-muted);
+}
+/* Inside a DataTable `toolbar` slot: the slot has no padding of its own
+   (TableToolbar brings its own), so the bar pads itself to the table's gutter. */
+.table-surface__bar > .filter-bar { padding: var(--space-3) 16px; }
+/* Phone, table layout: the bar keeps its box but tightens so funnel · count ·
+   Limpiar · ⋯ hold one line at 320px. */
+@media (max-width: 600px) {
+  .table-surface__bar > .filter-bar { padding-inline: var(--space-3); }
+  .filter-bar__end { gap: var(--space-2); }
+  /* The sort control drops its label on a phone (still the accessible name
+     — it is the <label> wrapping the select), sits by the funnel and takes
+     the rest of the line; the trailing group wraps under it. */
+  .filter-bar__sort { flex: 1 1 140px; min-width: 0; max-width: 260px; }
+  .filter-bar__sort .sort-dropdown__select { width: 100%; min-width: 0; }
+  .filter-bar__sort .sort-dropdown__label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+.filter-bar__sort { position: relative; }
 /* Combobox is inline-block min-width:220 by default; in a filter cell it must
    fill the cell, not impose its own width. */
 .filter-bar .combobox { min-width: 0; width: 100%; display: block; }
-.filter-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.filter-field {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  /* Grow from the column minimum so every line fills the bar (see __fields). */
+  flex: 1 1 var(--filter-col-min, 160px);
+}
+/* `visibleCount` toggle: a quiet text button in the trailing group, with an
+   optional badge for applied filters that are currently collapsed. */
+.filter-bar__toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: var(--field-min-h, 36px); padding: 0 8px;
+  border: 0; background: transparent; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500;
+  color: var(--fg-muted); cursor: pointer; white-space: nowrap;
+}
+.filter-bar__toggle:hover { color: var(--fg-default); background: var(--bg-subtle); }
+.filter-bar__toggle:focus-visible { outline: none; box-shadow: var(--focus-ring-brand); }
+/* Mobile drawer (v3.7.0): the fields stack full-width inside the sheet. */
+.filter-bar__sheet { display: grid; gap: var(--space-3); }
+.filter-bar__sheet .filter-field { flex: none; }
+.filter-bar__toggle-badge {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--fill-brand); color: var(--fg-on-brand);
+  font-size: var(--text-2xs); font-weight: 600;
+}
+/* Mobile trigger: a tertiary icon button (the funnel); the applied count
+   overhangs its top-right corner like a notification badge. */
+.filter-bar__mobile-toggle { position: relative; flex-shrink: 0; }
+.filter-bar__mobile-toggle .filter-bar__toggle-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 16px; height: 16px; padding: 0 4px; line-height: 1;
+}
 .filter-field__label {
   font-family: var(--font-body);
   font-size: var(--text-xs);

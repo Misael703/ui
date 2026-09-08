@@ -84,7 +84,7 @@ export const RangoReporte: StoryObj = {
   name: 'Rango de fechas · Reportes (showInputs + monthDropdown)',
   render: () => {
     const [r, setR] = React.useState<DateRange>({ from: startOfMonth(new Date()), to: new Date() });
-    // The full Bsale-style preset set; the trigger shows the preset name when one
+    // The full preset set; the trigger shows the preset name when one
     // is active (and falls back to the date range for a custom selection).
     return (
       <DateRangePicker
@@ -144,7 +144,7 @@ export const PaletaDeComandos: StoryObj = {
             { id: '1', label: 'Crear pedido', group: 'Acciones', shortcut: '⌘N', onRun: () => alert('Crear') },
             { id: '2', label: 'Buscar producto', group: 'Acciones', shortcut: '⌘P', onRun: () => alert('Buscar') },
             { id: '3', label: 'Ir a clientes', group: 'Navegación', onRun: () => alert('Clientes') },
-            { id: '4', label: 'Ir a despachos', group: 'Navegación', onRun: () => alert('Despachos') },
+            { id: '4', label: 'Ir a pedidos', group: 'Navegación', onRun: () => alert('Pedidos') },
           ]}
         />
       </>

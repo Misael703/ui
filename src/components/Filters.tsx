@@ -1,8 +1,13 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { ChevronDown, ChevronUp, X } from './Icons';
+import { ChevronDown, ChevronUp, X, Filter } from './Icons';
 import { useLocale } from '../locale/LocaleProvider';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { Drawer } from './Overlay';
+import { Button, IconButton } from './Button';
+import { ToolbarActions, type ToolbarAction } from './ToolbarActions';
+export type { ToolbarAction } from './ToolbarActions';
 import { format } from '../locale/messages';
 
 // ---------- FilterPanel -------------------------------------------------
@@ -137,9 +142,63 @@ export function SortDropdown<T extends string = string>({
 // brand token, so forms elsewhere are untouched.
 
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Right-aligned, read-only slot for the RESULT of the filters — the row
+   * count ("12 pedidos"), a total, or a Skeleton while it loads. Sits at the
+   * fields' baseline, at the end of the row, and wraps together with `actions`.
+   * Rendered as a live region (`role="status"`), so a screen reader hears the
+   * new count when a filter changes — the only signal that the filter acted.
+   * Not an action: `actions` is for controls (Limpiar, Exportar); this is a
+   * datum, and a datum lives next to what produces it.
+   */
+  summary?: React.ReactNode;
   /** Right-aligned slot for row-level actions (e.g. clear-all, export). */
   actions?: React.ReactNode;
-  /** Min column width (px) before the responsive grid wraps. Default 160. */
+  /**
+   * Actions that may leave the bar on a phone (v3.7.0). Above 600px they
+   * render inline after `actions` as tertiary buttons (ghost `sm` + icon);
+   * below, they collapse into a "⋯" menu. Put Exportar here; keep Limpiar in
+   * `actions` — it is contextual and must stay visible when filters apply.
+   */
+  overflow?: ToolbarAction[];
+  /**
+   * Sort control for the bar (v3.7.0). On a phone the table is cards and
+   * has no header row, so header sorting is unreachable: the bar renders a
+   * `SortDropdown` in its trailing group. `sortOn` says when — `'mobile'`
+   * (default, below 600px only: on a desk the header sorts) or `'always'`.
+   */
+  sort?: SortDropdownProps;
+  sortOn?: 'mobile' | 'always';
+  /**
+   * Collapse the bar to its first N fields (v3.7.0); the rest sit behind a
+   * "Más filtros" toggle in the trailing group. Use it when the full set
+   * wraps to a second line on desktop — the first N should be the filters
+   * people reach for daily, the search box first. Omit to show every field.
+   */
+  visibleCount?: number;
+  /**
+   * How many of the COLLAPSED fields currently hold a value. Shown as a badge
+   * on the toggle so an applied filter never hides silently; the bar cannot
+   * know this itself (it does not own the values).
+   */
+  hiddenActiveCount?: number;
+  /** Start expanded (uncontrolled; the toggle owns the state after mount). */
+  defaultExpanded?: boolean;
+  /**
+   * Below 600px (the kit's mobile breakpoint) an expanded bar is a column of
+   * fields that pushes the table off-screen. `'drawer'` (default) swaps the
+   * inline fields for a "Filtros" button that opens a Drawer holding the same
+   * FilterFields (stacked, full width); `summary` and `actions` stay in the
+   * bar. `'inline'` keeps the desktop behaviour everywhere.
+   */
+  mobile?: 'drawer' | 'inline';
+  /**
+   * How many filters currently hold a value — the badge on the mobile
+   * "Filtros" button (the drawer hides ALL fields, so this is the total).
+   * The bar cannot know it: it does not own the values.
+   */
+  activeCount?: number;
+  /** Min field width (px) before the row wraps; fields grow from it. Default 160. */
   minColWidth?: number;
   /**
    * Fixed column count instead of width-driven auto-fit. Use for a
@@ -148,9 +207,34 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   columns?: number;
 }
 
+const MOBILE_QUERY = '(max-width: 600px)';
+
 export function FilterBar({
-  actions, minColWidth = 160, columns, className, children, style, ...rest
+  summary, actions, overflow, sort, sortOn = 'mobile', visibleCount, hiddenActiveCount = 0, defaultExpanded = false,
+  mobile = 'drawer', activeCount = 0,
+  minColWidth = 160, columns, className, children, style, ...rest
 }: FilterBarProps): React.JSX.Element {
+  const t = useLocale();
+  const [expanded, setExpanded] = React.useState(defaultExpanded);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const isMobile = useMediaQuery(MOBILE_QUERY) && mobile === 'drawer';
+  const narrow = useMediaQuery(MOBILE_QUERY);
+  const sortEl = sort != null && (sortOn === 'always' || narrow) ? <SortDropdown {...sort} className={cx('filter-bar__sort', sort.className)} /> : null;
+  const all = React.Children.toArray(children);
+  const collapsible = !isMobile && visibleCount != null && visibleCount < all.length;
+  const shown = collapsible && !expanded ? all.slice(0, visibleCount) : all;
+  const toggle = collapsible ? (
+    <button
+      type="button"
+      className="filter-bar__toggle"
+      aria-expanded={expanded}
+      onClick={() => setExpanded((e) => !e)}
+    >
+      {expanded ? t['filterBar.less'] : t['filterBar.more']}
+      {!expanded && hiddenActiveCount > 0 && <span className="filter-bar__toggle-badge">{hiddenActiveCount}</span>}
+      {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+    </button>
+  ) : null;
   const gridVars = {
     ...(columns ? { '--filter-cols': String(columns) } : { '--filter-col-min': `${minColWidth}px` }),
     ...style,
@@ -161,8 +245,58 @@ export function FilterBar({
       style={gridVars}
       {...rest}
     >
-      <div className="filter-bar__fields">{children}</div>
-      {actions != null && <div className="filter-bar__actions">{actions}</div>}
+      {isMobile ? (
+        <>
+          {/* Mobile: the fields move into a Drawer; the bar keeps a badged
+              trigger so the applied-filter count never hides. */}
+          <span className="filter-bar__mobile-toggle">
+            <IconButton
+              type="button"
+              variant="ghost"
+              size="sm"
+              icon={<Filter size={18} />}
+              aria-label={activeCount > 0 ? `${t['filterBar.filters']} (${activeCount})` : t['filterBar.filters']}
+              aria-haspopup="dialog"
+              aria-expanded={sheetOpen}
+              onClick={() => setSheetOpen(true)}
+            />
+            {activeCount > 0 && <span className="filter-bar__toggle-badge" aria-hidden="true">{activeCount}</span>}
+          </span>
+          {/* On a phone the sort control sits next to the funnel and stretches;
+              the trailing group (count · actions · ⋯) wraps under it. */}
+          {sortEl}
+          <Drawer
+            open={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            title={t['filterBar.filters']}
+            footer={<Button onClick={() => setSheetOpen(false)}>{t['filterBar.done']}</Button>}
+          >
+            <div className="filter-bar__sheet fields--dense">{all}</div>
+          </Drawer>
+        </>
+      ) : (
+        <div className="filter-bar__fields">{shown}</div>
+      )}
+      {/* One trailing group, so the toggle, the count and the actions wrap
+          TOGETHER: as separate flex items the actions could drop to a new line
+          while the count stayed up with the fields — a readout split from its
+          buttons. */}
+      {(toggle != null || summary != null || actions != null || (overflow != null && overflow.length > 0) || sortEl != null) && (
+        <div className="filter-bar__end">
+          {toggle}
+          {!isMobile && sortEl}
+          {/* A status message (WCAG 4.1.3): when a filter changes, the new count is
+              the only signal that it acted; role="status" announces it politely
+              without stealing focus. Any node fits — a Skeleton while loading. */}
+          {summary != null && <div className="filter-bar__summary" role="status">{summary}</div>}
+          {(actions != null || (overflow != null && overflow.length > 0)) && (
+            <div className="filter-bar__actions">
+              {actions}
+              {overflow != null && <ToolbarActions actions={overflow} />}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

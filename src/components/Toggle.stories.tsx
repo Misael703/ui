@@ -69,20 +69,20 @@ export const SegmentedControlDemo: StoryObj = {
 };
 
 /**
- * **View switcher con iconos** — `SegmentedControlItem` acepta `icon`. Caso de
- * despachos: 5 layouts (Tabla / Agenda / Zona / Tarjetas / Tablero). Arriba con
+ * **View switcher con iconos** — `SegmentedControlItem` acepta `icon`. Cinco
+ * vistas de un mismo recurso (Lista / Calendario / Mapa / Grilla / Tablero). Arriba con
  * icono + label; abajo icon-only (cada segmento con `aria-label` para el nombre
  * accesible, ya que el icono es decorativo).
  */
 export const ViewSwitcherIcons: StoryObj = {
   name: 'SegmentedControl · view switcher (iconos)',
   render: () => {
-    const [view, setView] = React.useState<string | null>('table');
+    const [view, setView] = React.useState<string | null>('list');
     const views = [
-      { value: 'table', label: 'Tabla', icon: <Rows3 size={16} /> },
-      { value: 'agenda', label: 'Agenda', icon: <CalendarDays size={16} /> },
-      { value: 'zone', label: 'Zona', icon: <Map size={16} /> },
-      { value: 'cards', label: 'Tarjetas', icon: <LayoutGrid size={16} /> },
+      { value: 'list', label: 'Lista', icon: <Rows3 size={16} /> },
+      { value: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} /> },
+      { value: 'map', label: 'Mapa', icon: <Map size={16} /> },
+      { value: 'grid', label: 'Grilla', icon: <LayoutGrid size={16} /> },
       { value: 'board', label: 'Tablero', icon: <Columns3 size={16} /> },
     ];
     return (

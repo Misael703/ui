@@ -113,7 +113,7 @@ export const Proportion: StoryObj = {
   render: () => (
     <div style={col}>
       <ProportionBar
-        ariaLabel="estado de cobros"
+        ariaLabel="estado de pedidos"
         segments={[
           { label: 'Pagado', value: 62 },
           { label: 'Pendiente', value: 28 },

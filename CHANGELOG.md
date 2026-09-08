@@ -5,6 +5,206 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] — 2026-09-08
+
+**Minor. `FilterBar summary` + la receta de página de listado.** Origen:
+estandarizar los filtros de las siete páginas CRUD de despachos, que arman a
+mano una Card con grilla de `FormField` (labels de formulario, controles de
+38px, conteo huérfano junto al switcher de vistas) — el "flex-cluster hecho a
+mano" que `FilterBar` existe para reemplazar.
+
+### Added
+- **`FilterBar summary`**: slot de solo lectura para el resultado de los
+  filtros (el conteo). Va al final de la fila, alineado a la banda de los
+  campos, y se queda ahí cuando la grilla envuelve. No es `actions`: un conteo
+  es un dato, y un dato vive junto a lo que lo produce.
+- **`.table-surface__bar > .filter-bar`** con padding propio: la barra ya se
+  puede meter directo en el `toolbar` del `DataTable`, sin envoltorio.
+- **`summary` es una live region** (`role="status"`): al cambiar un filtro, el
+  conteo nuevo es la única señal de que el filtro actuó; se anuncia sin robar
+  el foco. Acepta cualquier nodo, p. ej. un `Skeleton` mientras carga.
+- **Tests de nombre accesible en `FilterField`** para Select, Combobox,
+  DatePicker y DateRangePicker: el `id` que inyecta por `cloneElement` llega
+  al elemento enfocable en los cuatro (ya era así; ahora está pineado).
+- **Regla Select vs Combobox** en `DESIGN.md`: nativo para listas cortas y
+  estáticas, Combobox para dinámicas o largas.
+- **`FilterBar visibleCount` + `hiddenActiveCount`**: colapsa la barra a sus
+  primeros N campos y pone el resto tras un toggle "Más filtros" /
+  "Menos filtros" (`aria-expanded`, claves de locale `filterBar.more/less`),
+  con badge de filtros aplicados escondidos. `defaultExpanded` para arrancar
+  abierto.
+- **`FilterBar mobile="drawer"` (default) + `activeCount`**: bajo 600px la
+  barra reemplaza los campos por un botón "Filtros" con badge de aplicados
+  que abre un `Drawer` con los mismos `FilterField` apilados a todo el ancho;
+  conteo y acciones se quedan en la barra. `mobile="inline"` conserva el
+  comportamiento de escritorio. Hook interno `useMediaQuery` (no exportado).
+  Claves de locale `filterBar.filters` / `filterBar.done`.
+
+- **`Button hideLabel`** (`true | 'mobile'`): el label queda en el DOM como
+  nombre accesible pero se recorta, y el botón se cuadra como `IconButton`;
+  `'mobile'` solo bajo 600px. Un `<Button iconLeft={<Download/>}
+  hideLabel="mobile">Exportar</Button>` lee "⤓ Exportar" en escritorio y "⤓"
+  en el teléfono sin lógica de breakpoint en el consumidor.
+- **`overflow` en `TableToolbar` y `FilterBar`** (`ToolbarAction[]`: label,
+  icon, onSelect, disabled, destructive): acciones como DATOS para que el kit
+  las pinte de dos formas — inline como terciarias (ghost `sm` + ícono) sobre
+  600px, y tras un botón "⋯" que abre el `Menu` del kit por debajo (patrón
+  priority+ / overflow menu). Exportar va ahí; Limpiar sigue en `actions`
+  porque es contextual. Clave de locale `toolbar.more` ("Más opciones"). La
+  búsqueda del toolbar baja su base a 120px bajo 600px para que búsqueda,
+  embudo y "⋯" quepan en 320px en una línea; la `FilterBar` dentro del
+  toolbar en modo tabla aprieta su inset a 12px y el gap del grupo final
+  por la misma razón.
+- **`FilterBar sort` + `sortOn`** (`'mobile'` default | `'always'`): en cards no
+  hay `thead`, así que el sort de cabecera desaparece en teléfono; la barra
+  renderiza un `SortDropdown` en su grupo final (bajo 600px por default; en
+  escritorio ordena la cabecera). En teléfono el control pierde su label
+  visible (sigue siendo el nombre accesible) para caber en la línea.
+- **`DataTable footer`**: espejo de `toolbar` — `TablePagination` o un
+  resumen dentro de la misma superficie (un solo borde para toolbar, tabla y
+  paginación, un divisor entre cada uno). En cards pierde su caja como el
+  toolbar. La superficie ahora existe con `toolbar` o `footer`. Dentro del
+  footer la zona queda a la altura de una fila (44px). La receta usa rango +
+  páginas con tamaño fijo; el selector de filas por página queda para
+  reportes.
+- **`Pagination` con slots fijos**: `2 · siblings + 5` posiciones, así el
+  paginador no cambia de ancho al moverse. Página 1 de 11 lee
+  `1 2 3 4 5 … 11`; la 6, `1 … 5 6 7 … 11`; la 11, `1 … 7 8 9 10 11`. Antes
+  la página 1 leía `1 2 … 11`.
+- **Playground · página de listado**: controls nuevos `sort`, `rowActions`
+  (inline: lápiz + basurero · menu: kebab con tres acciones · none) y
+  `pagination` (inside = `footer` · outside · none). Regla que demuestra:
+  hasta dos acciones por fila van inline, desde tres, kebab.
+- **`Button hideLabel="desktop"`** (espejo de `"mobile"`) y **variante
+  `ghost-danger`** (neutra en reposo, roja al hover/foco): acciones por fila
+  como lápiz y basurero ghost `xs` de 28px en la tabla, y "✎ Editar" /
+  "🗑 Eliminar" estirados en el pie de la tarjeta móvil, con un solo botón por
+  acción. En el pie, los botones toman 36px de alto (objetivo táctil).
+- **Jerarquía en la barra de filtros** (DESIGN.md): la única primaria vive en
+  el `PageHeader`; Exportar / Limpiar / Filtros son terciarias (`ghost sm`),
+  con ícono lucide cuando hay glifo universal (`Filter` embudo, `Download`
+  para exportar a archivo). El trigger móvil de `FilterBar` pasa de un
+  `outline` con texto al embudo como `IconButton ghost` con el conteo de
+  aplicados montado en la esquina (nombre accesible "Filtros (n)").
+- **`Column.mobile`** en `DataTable`: rol de la columna bajo 600px —
+  `'title' | 'status' | 'field' | 'actions' | 'hidden'`. En `cards` reparte la
+  celda en la tarjeta (ver Changed); `'hidden'` no renderiza la columna
+  (header ni celdas) en ninguno de los dos layouts: con `mobileLayout="table"`
+  son las **columnas prioritarias** (quedan identificador · nombre · estado y
+  el detalle de la fila lleva el resto). Sin `title` explícito, la primera
+  columna normal es el título (una de estado o acciones nunca lo es por
+  posición). Cada celda lleva `data-mobile` con su zona, a todo ancho.
+
+### Removed
+- **DataTable · "Fila densa de filtros"**: inputs y selects a mano con un
+  botón "Filtrar" primario, el patrón que la receta de `FilterBar` reemplazó.
+- **DataTable: diez stories de un solo valor → "Playground · DataTable".**
+  Densidad, Cargando, Sin datos, Sin datos custom, Con error, Fila
+  interactiva, Tabla sobre Card, Elevada sobre canvas, Con totales y Con
+  expansión eran, cada una, un valor de una prop; ahora son controls de un
+  playground (`state`, `density`, `surface`, `selectable`, `interactive`,
+  `expandable`, `totals`, `stickyHeader`, `bounded`, `mobileLayout`) y su
+  doc vive en la story. Quedan las que enseñan una capacidad con forma
+  propia (Básica, Truncado, Virtualizada, Con toolbar, Visibilidad de
+  columnas, Columna acción, Card Layout Mobile, Región de scroll, Sticky en
+  Modal, paginación, Accordion, Breadcrumbs).
+- **Barrido de stories calcadas del consumidor.** Regla: el Storybook enseña
+  el kit con un dominio de muestra genérico (ferretería, Northwind Builders,
+  pedido #1042, persona de muestra "Satoru Gojo"), nunca pantallas ni copy
+  de una app. Fuera: **"Gold Standard"** (DataTable, v1.14.0: la tabla
+  "Órdenes de despacho" dentro de una Card; sus defaults siguen pineados en
+  `tests/GoldStandard.test.tsx`, y lo que mostraba lo cubren "Con toolbar" y
+  el playground de listado); **Timeline #1 / #8 / #9 / #10** (la orden
+  1415231 de despachos) → fusionadas en **"Playground · ciclo de un pedido"**
+  (controls: eventos 0–5, payload, tipos, densidad, completado);
+  **"Sin datos · tabla ancha"** (13 columnas del reporte de despachos) → el
+  playground de región de scroll acepta `rows: 0`; **`FilterBarDemo`**
+  (Camión / Chofer) → lo cubre el playground de listado. Identidad real
+  (nombre, correos, handle) reemplazada por la persona de muestra en AppShell,
+  Avatar, UserCell, HoverCard, UserMenu y Comments; copy de despachos /
+  cobros / Bsale reemplazado por copy genérico en Topbar-only, BulkActionBar,
+  Tooltip largo, view switcher, Modal, Proportion, TransferList, Badge
+  registers y Paleta de comandos.
+
+### Changed
+- **Cards mobile rehechas y por default.** `mobileLayout` pasa a `'cards'`:
+  bajo 600px cada fila es una tarjeta con tres zonas según `Column.mobile` —
+  cabecera (título en registro display con la etiqueta de la columna como
+  caption encima, badge de estado a la derecha, checkbox de selección y
+  expand a la izquierda), cuerpo (una línea por campo, etiqueta a la izquierda
+  y valor a la derecha, hairline entre líneas) y pie (acciones estiradas a lo
+  ancho). Antes cada celda era una línea "etiqueta: valor" idéntica a la
+  siguiente: el id, el nombre, el estado y los botones pesaban igual y no
+  había nada que leer de un vistazo. Mismo DOM que la tabla (flex-wrap sobre
+  el `tr`, `order` por zona), así que no hay segunda rama de render ni
+  desajuste de hidratación. Las tarjetas van directo sobre el canvas
+  (`--border-on-canvas`): el wrap y el `table-surface` con toolbar sueltan su
+  borde y fondo bajo el breakpoint (`.table-surface--cards`). El detalle
+  expandido es su propia tarjeta pegada a la fila. `mobileLayout="table"`
+  conserva la tabla con scroll horizontal.
+- **Cards: pasada por todas las stories con tabla.** Un `TableToolbar` en el
+  `toolbar` pierde su caja (fondo, regla, inset) bajo el breakpoint y flota
+  sobre el canvas con las tarjetas; `maxHeight` / `fillHeight` no aplican en
+  cards (una caja de scroll de tarjetas las corta a la mitad: fluyen con la
+  página, el max-height inline se omite mientras la query coincide); los
+  estados vacío / error se vuelven una tarjeta propia; una columna
+  `truncate` (texto largo) apila la etiqueta sobre el valor en vez de dejar
+  el valor ragged a la derecha; un composite nombre + `.cell-meta` vuelve a
+  apilarse. Stories con columna de acciones o de estado llevan su rol.
+- **Virtualización gana a las cards.** Antes `mobileLayout="cards"` apagaba
+  `virtualizeRows`; con cards por default eso volvía 5.000 filas en 5.000
+  tarjetas en el teléfono. Las tarjetas no se ventanean (altura no uniforme)
+  y un dataset ventaneado es por definición demasiado grande para
+  renderizarlo entero, así que una tabla virtualizada sigue siendo tabla bajo
+  600px; se combina con `mobile: 'hidden'` para las columnas secundarias.
+- **`FilterBar`: las líneas llenan la barra.** Los campos dejan la grilla de
+  columnas iguales y entran al flujo flex-wrap de la barra (`display:
+  contents` en la caja de campos, `flex: 1 1 160px` por campo): una segunda
+  línea de dos campos se estira a todo el ancho en vez de dejar celdas
+  vacías, y el grupo final (toggle · conteo · acciones) comparte la última
+  línea con los campos, que le hacen espacio, en vez de caer a una línea
+  propia. Las columnas ya no se alinean entre líneas, a propósito; `columns`
+  conserva la grilla fija.
+- Story **"Playground · CRUD"** (Patterns/CRUD): el ciclo completo de un
+  recurso con estado local real — receta de listado, acciones por fila,
+  selección con `BulkActionBar`, crear/editar en `Drawer` o `Modal` con
+  `FormField` y validación, confirmación de borrado, `Toast`, paginación y los
+  vacíos (sin datos, sin resultados, cargando, error). Controls: `rows`,
+  `editIn`, `state`, `selectable`.
+- Story **"Playground · página de listado"** (Patterns/Filters): `PageHeader` →
+  `DataTable toolbar={<FilterBar/>}` → filas, con controls para cantidad de
+  campos, conteo, filtros aplicados y acción de exportar. Reglas en
+  `DESIGN.md` (una tabla tiene una vista; el switcher de vistas es chrome de la
+  app, no parte de la receta).
+
+### Fixed
+- **`Pagination` en teléfono**: el rango "1–10 de 256" se partía en tres
+  líneas al apretarse contra los botones; ahora no se parte y el paginador
+  envuelve debajo bajo 600px.
+- **Sticky header dentro de un scroller con padding** (Modal, Drawer): el
+  header se pegaba al borde de CONTENIDO del body (24px más abajo del borde
+  visible) y las filas pasaban a la vista por la banda del padding. Nuevo
+  `--sticky-inset` que el scroller declara con su padding; el header se pega
+  al borde visible (`top: calc(-1 * var(--sticky-inset, 0px))`). Modal y
+  Drawer lo declaran; una columna de página con padding puede hacer lo mismo.
+- **`FormField` puede encoger dentro de un track de grid o una fila flex**
+  (`.form-field { min-width: 0 }`): su mínimo era el min-content del control
+  más ancho y desbordaba la celda (visto en un `Drawer` de 480px). Es el mismo
+  endurecimiento que ya tenía `.filter-field`.
+
+### Changed
+- **Stories de composición genéricas.** "Fill height", "Ancha acotada con
+  toolbar" y "Página sin cards" (3.2.0/3.4.0) estaban calcadas de pantallas de
+  un consumidor; se reemplazan por dos playgrounds con controls: "Playground ·
+  región de scroll (fillHeight / maxHeight)" (DataTable) y "Playground ·
+  superficies en una página" (Card). Regla: las stories son genéricas y las
+  combinaciones se prueban con controls, no con una story por caso.
+
+### Notes
+- Despachos: reemplazar `Card` + `.ord-toolbar` + `.app-filter-grid` +
+  `FormField` por la receta en las siete páginas; `FormField` → `FilterField`;
+  las tres de flota comparten un `CatalogFilters` local sobre `FilterBar`.
+
 ## [3.6.1] — 2026-09-06
 
 ### Fixed

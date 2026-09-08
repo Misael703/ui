@@ -107,6 +107,69 @@ Not a `--focus-ring` colour: that name is the box-shadow family
 (`--focus-ring-{brand,accent,danger}`); a focus *outline colour* is
 `--border-focus`.
 
+**List-page recipe (v3.7.0).** Every CRUD list is `PageHeader` (title +
+primary action) → `DataTable` with `toolbar={<FilterBar/>}` → rows. The bar
+sits on the table's own surface and holds the `FilterField`s, the result count
+in `summary`, and in `actions` what operates on the result: "Limpiar" only
+while a filter is applied, "Exportar" if it exists. The count ALWAYS lives in
+`summary`: a datum sits next to what produces it. No Card around any of this.
+A table has one view; if an app adds its own view switching (board, agenda),
+that is the app's chrome above the table, not part of the recipe. Rules: one
+row on desktop, fields wrap by min width (160), never fixed per-field widths;
+dense labels (`FilterField`), not form labels; free-text search first,
+selectors next, date last; when the set wraps to a second desktop line, cap
+it with `visibleCount` (the first N are the daily filters, the rest behind the
+"Más filtros" toggle, badged with `hiddenActiveCount` so an applied filter
+never hides silently). Each line shares its width among its fields (flex-wrap,
+not an equal-column grid), so a wrapped pair fills the bar. Below 600px the
+bar swaps the fields for a "Filtros" button (badged with `activeCount`) that
+opens a Drawer holding the same fields, stacked — `mobile="drawer"` by default;
+summary and actions stay in the bar. Inline expansion is for desktop, where
+filter and result stay in view together; the drawer is the mobile answer, not
+a desktop alternative. **The table becomes cards on a phone** (`mobileLayout`
+defaults to `'cards'`): a card is not a row turned sideways but three zones
+with a hierarchy, and `Column.mobile` says where each column lands — `title`
+(the name, with the column header as a caption), `status` (the badge, top
+right), `field` (label left, value right, one hairline per line), `actions`
+(the footer, stretched). Same DOM as the table; the cards sit directly on the
+canvas, so the wrap and the toolbar's surface drop their border there. A list
+too dense for cards keeps the table with `mobileLayout="table"` and marks the
+secondary columns `mobile: 'hidden'` (**priority columns**: identifier, name
+and state stay; the detail view carries the rest). Sorting has no header row
+in cards: when order matters on a phone, put an "Ordenar por" control in the
+toolbar. **Hierarchy in the bar:** the page's one primary action lives in the
+`PageHeader`; nothing in the filter bar is secondary. "Exportar", "Limpiar",
+"Filtros" are tertiary — `ghost sm`, with a lucide icon when the action has
+a universal glyph (`Filter` the funnel, `Download` for a file export; never
+the share-out arrow, which reads as "share"). On a desk the label stays
+("⤓ Exportar"); on a phone the same button collapses to its icon
+(`Button hideLabel="mobile"`), and the bar's own "Filtros" trigger is the
+funnel `IconButton` with the applied count overhanging it. Same icon at both
+widths; only the label drops. Actions that may leave the bar on a phone
+(Exportar) go to `overflow` as data — inline tertiary buttons on a desk, a
+"⋯" `Menu` below 600px (`TableToolbar` and `FilterBar` share it); Limpiar
+stays in `actions` because it is contextual. **Row actions** follow the same
+rule the other way round: a pencil (`Edit`) and a bin (`Trash`) as ghost `xs`
+icon-only in the table row (`hideLabel="desktop"`), both neutral — the bin
+is `ghost-danger`, red only on hover, the confirm dialog is the real guard —
+and icon + label stretched in the mobile card's footer. Up to two row
+actions go inline; from three, a kebab `Menu` (`IconButton` + `MoreVertical`)
+and on a phone the row itself opens the detail. Cards have no header row, so
+`FilterBar sort` puts a `SortDropdown` in the bar below 600px (`sortOn`
+`'mobile'` by default; the header sorts on a desk). Pagination belongs to the
+table's surface: `DataTable footer={<TablePagination/>}` — one bordered box
+for toolbar, rows and pagination, one divider between each. Pages sharing the
+same fields get a twenty-line local composition over `FilterBar`, not a kit
+component. **Select vs Combobox in a filter cell:** native `Select` for a
+short, static list (a status enum, a handful of zones); `Combobox` for a
+dynamic or long one (sellers, trucks, drivers — anything fetched or worth
+typing into). One control per kind of task, so the user never meets two
+widgets for the same job across pages. The count in `summary` is a live
+region (`role="status"`): the new number is what tells a screen-reader user
+the filter acted. `FilterField` names every control the recipe uses — Select,
+Combobox, DatePicker, DateRangePicker — pinned in `Filters.test`. Story:
+Patterns/Filters › "Playground · página de listado".
+
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained
 OBJECT that reads as a unit and would make sense on its own: a metric, a
@@ -119,7 +182,7 @@ Rule of thumb: if you would not drag it somewhere else as a thing, it is a
 section, not a card. Consumers who wrapped every block in a card (and patched
 a `card-flat` class to un-float sections) were compensating for a canvas that
 had to be very grey to make everything float; with canvas F and this rule, a
-page has one or two floating objects and breathes. Story: "Página sin cards".
+page has one or two floating objects and breathes. Story: Data Display/Card › "Playground · superficies en una página".
 
 **Semantic tokens:** `--bg-{canvas,surface,subtle,muted,inverse,inverse-strong}`,
 `--fg-{default,muted,subtle,meta,on-brand,on-secondary,link,link-hover}`,

@@ -10,16 +10,16 @@ export const Basico: StoryObj = {
       <HoverCard
         trigger={
           <span style={{ color: 'var(--color-primary)', textDecoration: 'underline', cursor: 'pointer' }}>
-            @misael703
+            @gojo
           </span>
         }
       >
         <div style={{ display: 'flex', gap: 12, padding: 16, minWidth: 280 }}>
-          <Avatar name="Misael Ocas" size={48} />
+          <Avatar name="Satoru Gojo" size={48} />
           <div>
-            <div style={{ fontWeight: 700 }}>Misael Ocas</div>
+            <div style={{ fontWeight: 700 }}>Satoru Gojo</div>
             <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Founder · Acme Supply Co</div>
-            <div style={{ fontSize: 12, marginTop: 6 }}>misael.ocas@gmail.com</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>satoru.gojo@northwind.cl</div>
           </div>
         </div>
       </HoverCard>

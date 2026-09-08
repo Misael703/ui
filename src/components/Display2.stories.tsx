@@ -6,7 +6,7 @@ export default { title: 'Data Display/Avatar & Stat', tags: ['autodocs'] } as Me
 export const Avatares: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-      <Avatar name="Misael Ocas" />
+      <Avatar name="Satoru Gojo" />
       <Avatar name="Acme Supply Co" size={40} />
       <Avatar name="Acme Co" size={48} />
       <Avatar name="JN" status="online" />
