@@ -230,3 +230,17 @@ export const PaginaDeListadoPlayground: StoryObj<ListPageArgs> = {
     );
   },
 };
+
+/**
+ * **Listado completo.** La composición de referencia con valores fijos —
+ * mismo render que el playground: `PageHeader` con la única primaria; una
+ * sola superficie con `FilterBar` arriba (búsqueda, estado, sucursal, fecha;
+ * Exportar en `overflow`, orden en móvil), filas en el medio con acciones
+ * en kebab, y `TablePagination` abajo en `footer`; un divisor entre cada
+ * zona. Para variar cualquier pieza, usa el playground.
+ */
+export const ListadoCompleto: StoryObj<ListPageArgs> = {
+  ...PaginaDeListadoPlayground,
+  name: 'Listado completo (composición)',
+  args: { fields: 5, visibleCount: 0, mobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'menu', pagination: 'inside' },
+};
