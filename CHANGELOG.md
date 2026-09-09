@@ -5,6 +5,17 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.4] — 2026-09-09
+
+### Fixed
+- **DateRangePicker con un panel en meses/años**: el `CalendarView` cambiaba
+  de ancho según la vista (días 264px, meses/años 240px por su `min-width`),
+  así que con un panel en días y el otro en años los paneles quedaban
+  desiguales y el divisor (centrado al 50% del par) caía pegado a la grilla
+  de días. `.calview` tiene ahora un ancho fijo derivado de la grilla de días
+  y la grilla de meses/años lo llena. De paso, el DatePicker deja de
+  encogerse 24px al subir de días a meses.
+
 ## [3.9.3] — 2026-09-09
 
 ### Fixed

@@ -128,3 +128,22 @@ describe('CalendarView range band CSS (v3.9.1)', () => {
   });
 });
 
+
+describe('CalendarView width CSS (v3.9.4)', () => {
+  // The DateRangePicker puts two CalendarViews side by side and centres its
+  // divider at left:50% of the pair, so the panels must be the same width
+  // whichever view each one shows. The width is the days grid's (7 × 36px +
+  // 6 × 2px gaps) and the months / years grid fills it instead of carrying
+  // its own narrower min-width.
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('.calview has one fixed width derived from the days grid, independent of the view', () => {
+    const cal = css.match(/\.calview\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(cal).toMatch(/width:\s*calc\(7 \* 36px \+ 6 \* 2px\)/);
+  });
+
+  it('the months / years grid fills the panel and declares no min-width of its own', () => {
+    const cells = css.match(/\.calview__grid--cells\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(cells).not.toMatch(/min-width/);
+  });
+});
