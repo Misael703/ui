@@ -114,8 +114,8 @@ describe('compact register — picker family consumes tokens', () => {
   it('.daterange__trigger usa var(--field-min-h)', () => {
     expect(ruleBody(index, '.daterange__trigger')).toMatch(/height:\s*var\(--field-min-h/);
   });
-  it('.gridpicker__cell usa var(--control-h-md)', () => {
-    expect(ruleBody(index, '.gridpicker__cell')).toMatch(/min-height:\s*var\(--control-h-md\)/);
+  it('.calview__cell (grilla de meses / años) usa var(--control-h-md)', () => {
+    expect(ruleBody(index, '.calview__cell')).toMatch(/min-height:\s*var\(--control-h-md\)/);
   });
   it('.gridpicker__toggle width usa var(--control-h-md)', () => {
     expect(ruleBody(index, '.gridpicker__toggle')).toMatch(/width:\s*var\(--control-h-md\)/);

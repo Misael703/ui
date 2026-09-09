@@ -1,9 +1,10 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { CalendarIcon, ChevronLeft, ChevronRight, X, Check } from './Icons';
+import { CalendarIcon, X, Check } from './Icons';
 import { Spinner } from './Display';
-import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, isSameDay, type DateFormat } from '../utils/dateFormat';
+import { CalendarView, focusCalendar } from './CalendarView';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
@@ -351,8 +352,6 @@ export function DatePicker({
   const locale = useLocale();
   const fmt = resolveDateFormat(format);
   const ph = placeholder ?? dateFormatPlaceholder(fmt);
-  const weekdays = locale['picker.weekdaysShort'];
-  const months = locale['calendar.months'];
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
   // What the user is typing (v3.8.1). The input used to be driven straight by
@@ -393,8 +392,6 @@ export function DatePicker({
     if (value) setView(startOfMonth(value));
   }, [value]);
 
-  const { cells } = buildMonthGrid6(view, 0);
-
   const isDisabled = (d: Date) =>
     !!(
       (minDate && d < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate())) ||
@@ -434,6 +431,8 @@ export function DatePicker({
           if (text.trim() !== '' && !complete) setText(value ? formatDate(value, fmt) : '');
         }}
         onFocus={() => setOpen(true)}
+        // ArrowDown hands focus to the calendar (keyboard entry into the portal).
+        onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); if (!open) setOpen(true); requestAnimationFrame(() => focusCalendar(popoverRef.current)); } }}
         aria-invalid={invalid || undefined}
       />
       <button
@@ -456,33 +455,13 @@ export function DatePicker({
             visibility: pos.ready ? 'visible' : 'hidden',
           }}
         >
-          <div className="datepicker__nav">
-            <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
-            <span className="datepicker__title">{months[view.getMonth()]} {view.getFullYear()}</span>
-            <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label={locale['calendar.nextMonth']}><ChevronRight size={16} /></button>
-          </div>
-          <div className="datepicker__grid">
-            {weekdays.map((w, i) => <span key={i} className="datepicker__dow">{w}</span>)}
-            {cells.map(({ date: d, outside }, i) => {
-              // Adjacent-month days are shown greyed for context (so the grid is
-              // always 6 rows and the height never jumps) but are not selectable.
-              if (outside) return <span key={i} className="datepicker__day is-outside" aria-hidden="true">{d.getDate()}</span>;
-              const sel = value && isSameDay(d, value);
-              const today = isSameDay(d, new Date());
-              const off = isDisabled(d);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={cx('datepicker__day', sel && 'is-selected', today && 'is-today', off && 'is-disabled')}
-                  disabled={!!off}
-                  onClick={() => { onChange(d); setOpen(false); }}
-                >
-                  {d.getDate()}
-                </button>
-              );
-            })}
-          </div>
+          <CalendarView
+            month={view}
+            onMonthChange={setView}
+            dayState={(d) => ({ selected: !!value && isSameDay(d, value) })}
+            isDayDisabled={isDisabled}
+            onSelectDay={(d) => { onChange(d); setOpen(false); }}
+          />
         </div>
         </Portal>
       )}
@@ -548,27 +527,13 @@ export function FileUpload({
 }
 
 // ---------- GridPickerField (shared shell: YearPicker / MonthPicker) ------
-interface GridCell {
-  key: string;
-  label: React.ReactNode;
-  selected?: boolean;
-  /** Dimmed (outside the current decade) — YearPicker only. */
-  outside?: boolean;
-  disabled?: boolean;
-  onSelect: () => void;
-}
-
 interface GridPickerFieldProps {
   rootClass: string;
   displayValue: string;
   placeholder: string;
   ariaLabel: string;
-  navTitle: React.ReactNode;
-  prevLabel: string;
-  nextLabel: string;
-  onPrev: () => void;
-  onNext: () => void;
-  cells: GridCell[];
+  /** The popover body (a CalendarView in months / years leaf mode); `close` dismisses. */
+  renderCalendar: (close: () => void) => React.ReactNode;
   disabled?: boolean;
   invalid?: boolean;
   id?: string;
@@ -576,8 +541,7 @@ interface GridPickerFieldProps {
 }
 
 function GridPickerField({
-  rootClass, displayValue, placeholder, ariaLabel, navTitle,
-  prevLabel, nextLabel, onPrev, onNext, cells,
+  rootClass, displayValue, placeholder, ariaLabel, renderCalendar,
   disabled, invalid, id, className,
 }: GridPickerFieldProps) {
   const [open, setOpen] = React.useState(false);
@@ -607,6 +571,7 @@ function GridPickerField({
         disabled={disabled}
         value={displayValue}
         onFocus={() => setOpen(true)}
+        onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); if (!open) setOpen(true); requestAnimationFrame(() => focusCalendar(popoverRef.current)); } }}
         onClick={() => setOpen(true)}
         aria-invalid={invalid || undefined}
       />
@@ -632,24 +597,7 @@ function GridPickerField({
               visibility: pos.ready ? 'visible' : 'hidden',
             }}
           >
-            <div className="gridpicker__nav">
-              <button type="button" onClick={onPrev} aria-label={prevLabel}><ChevronLeft size={16} /></button>
-              <span className="gridpicker__title">{navTitle}</span>
-              <button type="button" onClick={onNext} aria-label={nextLabel}><ChevronRight size={16} /></button>
-            </div>
-            <div className="gridpicker__grid">
-              {cells.map((c) => (
-                <button
-                  key={c.key}
-                  type="button"
-                  className={cx('gridpicker__cell', c.selected && 'is-selected', c.outside && 'is-out')}
-                  disabled={c.disabled}
-                  onClick={() => { c.onSelect(); setOpen(false); }}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
+            {renderCalendar(() => setOpen(false))}
           </div>
         </Portal>
       )}
@@ -676,36 +624,24 @@ export function YearPicker({
 }: YearPickerProps) {
   const t = useLocale();
   const base = value ?? new Date().getFullYear();
-  const [decade, setDecade] = React.useState(Math.floor(base / 10) * 10);
-
-  React.useEffect(() => {
-    if (value != null) setDecade(Math.floor(value / 10) * 10);
-  }, [value]);
-
-  const cells: GridCell[] = Array.from({ length: 12 }, (_, i) => {
-    const year = decade - 1 + i;
-    return {
-      key: String(year),
-      label: year,
-      selected: value === year,
-      outside: year < decade || year > decade + 9,
-      disabled: (minYear != null && year < minYear) || (maxYear != null && year > maxYear),
-      onSelect: () => onChange(year),
-    };
-  });
-
+  const [view, setView] = React.useState(() => new Date(base, 0, 1));
+  React.useEffect(() => { if (value != null) setView(new Date(value, 0, 1)); }, [value]);
   return (
     <GridPickerField
       rootClass="yearpicker"
       displayValue={value != null ? String(value) : ''}
       placeholder={placeholder ?? t['picker.selectYear']}
       ariaLabel={t['picker.openCalendar']}
-      navTitle={`${decade}-${decade + 9}`}
-      prevLabel={t['picker.prevDecade']}
-      nextLabel={t['picker.nextDecade']}
-      onPrev={() => setDecade((d) => d - 10)}
-      onNext={() => setDecade((d) => d + 10)}
-      cells={cells}
+      renderCalendar={(close) => (
+        <CalendarView
+          leaf="years"
+          month={view}
+          onMonthChange={setView}
+          selectedYear={value}
+          isYearDisabled={(y) => (minYear != null && y < minYear) || (maxYear != null && y > maxYear)}
+          onSelectYear={(y) => { onChange(y); close(); }}
+        />
+      )}
       disabled={disabled}
       invalid={invalid}
       id={id}
@@ -733,38 +669,27 @@ export function MonthPicker({
 }: MonthPickerProps) {
   const t = useLocale();
   const months = t['calendar.months'];
-  const base = value ?? new Date();
-  const [year, setYear] = React.useState(base.getFullYear());
-
-  React.useEffect(() => {
-    if (value) setYear(value.getFullYear());
-  }, [value]);
-
-  const monthStart = (y: number, m: number) => new Date(y, m, 1);
-  const outOfRange = (m: number) =>
-    (minDate != null && monthStart(year, m) < monthStart(minDate.getFullYear(), minDate.getMonth())) ||
-    (maxDate != null && monthStart(year, m) > monthStart(maxDate.getFullYear(), maxDate.getMonth()));
-
-  const cells: GridCell[] = months.map((name, m) => ({
-    key: String(m),
-    label: name,
-    selected: !!value && value.getFullYear() === year && value.getMonth() === m,
-    disabled: outOfRange(m),
-    onSelect: () => onChange(new Date(year, m, 1)),
-  }));
-
+  const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
+  React.useEffect(() => { if (value) setView(startOfMonth(value)); }, [value]);
+  const monthStart = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
+  const outOfRange = (first: Date) =>
+    (minDate != null && first < monthStart(minDate)) || (maxDate != null && first > monthStart(maxDate));
   return (
     <GridPickerField
       rootClass="monthpicker"
       displayValue={value ? `${months[value.getMonth()]} ${value.getFullYear()}` : ''}
       placeholder={placeholder ?? t['picker.selectMonth']}
       ariaLabel={t['picker.openCalendar']}
-      navTitle={String(year)}
-      prevLabel={t['picker.prevYear']}
-      nextLabel={t['picker.nextYear']}
-      onPrev={() => setYear((y) => y - 1)}
-      onNext={() => setYear((y) => y + 1)}
-      cells={cells}
+      renderCalendar={(close) => (
+        <CalendarView
+          leaf="months"
+          month={view}
+          onMonthChange={setView}
+          selectedMonth={value}
+          isMonthDisabled={outOfRange}
+          onSelectMonth={(first) => { onChange(first); close(); }}
+        />
+      )}
       disabled={disabled}
       invalid={invalid}
       id={id}

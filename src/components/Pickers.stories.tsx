@@ -3,6 +3,9 @@ import * as React from 'react';
 import { Combobox, DatePicker, FileUpload, YearPicker, MonthPicker } from './Pickers';
 import { action } from '@storybook/addon-actions';
 
+import { CalendarView } from './CalendarView';
+import { isSameDay } from '../utils/dateFormat';
+
 export default { title: 'Forms/Pickers', tags: ['autodocs'] } as Meta;
 
 const opts = [
@@ -193,3 +196,58 @@ export const MonthPickerBasico: StoryObj = {
     return <MonthPicker value={m} onChange={setM} />;
   },
 };
+
+interface CalArgs { leaf: 'days' | 'months' | 'years'; range: boolean; disableSundays: boolean; single: boolean }
+
+/**
+ * **Playground · calendario.** El `CalendarView` (v3.9.0) que comparten
+ * `DatePicker`, `DateRangePicker`, `MonthPicker` y `YearPicker`, solo. La
+ * cabecera es la misma en los tres: prev/next cuadrados y el título como botón
+ * con chevron que sube de nivel (días → meses → años); elegir un año baja a
+ * meses y un mes a días hasta llegar a `leaf`. Hoy lleva un punto, el
+ * seleccionado un círculo relleno; el rango, una banda con extremos redondos.
+ * Teclado: flechas, Inicio/Fin, RePág/AvPág, Escape baja de nivel.
+ */
+export const CalendarioPlayground: StoryObj<CalArgs> = {
+  name: 'Playground · calendario',
+  args: { leaf: 'days', range: true, disableSundays: false, single: true },
+  argTypes: {
+    leaf: { control: 'inline-radio', options: ['days', 'months', 'years'], description: 'Vista hoja: qué reporta (DatePicker = days · MonthPicker = months · YearPicker = years)' },
+    range: { control: 'boolean', description: 'Pinta un rango del 3 al 12 con banda' },
+    disableSundays: { control: 'boolean' },
+    single: { control: 'boolean', description: 'Un panel; apagado = dos paneles como el DateRangePicker' },
+  },
+  render: (a) => {
+    const [month, setMonth] = React.useState(() => new Date(2026, 8, 1));
+    const [picked, setPicked] = React.useState<Date | null>(new Date(2026, 8, 9));
+    const from = new Date(2026, 8, 3), to = new Date(2026, 8, 12);
+    const dayState = (d: Date, col: number) => {
+      if (!a.range) return { selected: !!picked && isSameDay(d, picked) };
+      const sel = isSameDay(d, from) || isSameDay(d, to);
+      const band = d >= from && d <= to;
+      return { selected: sel, band, roundL: band ? (col === 0 || isSameDay(d, from)) : sel, roundR: band ? (col === 6 || isSameDay(d, to)) : sel };
+    };
+    const panel = (offset: number, n: number) => (
+      <CalendarView
+        key={offset}
+        leaf={a.leaf}
+        month={new Date(month.getFullYear(), month.getMonth() + offset, 1)}
+        onMonthChange={(m) => setMonth(new Date(m.getFullYear(), m.getMonth() - offset, 1))}
+        navPrev={offset === 0}
+        navNext={offset === n - 1}
+        dayState={dayState}
+        isDayDisabled={a.disableSundays ? (d) => d.getDay() === 0 : undefined}
+        onSelectDay={setPicked}
+        selectedMonth={picked}
+        selectedYear={picked?.getFullYear() ?? null}
+      />
+    );
+    const n = a.single ? 1 : 2;
+    return (
+      <div style={{ display: 'inline-grid', gridAutoFlow: 'column', gap: 24, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+        {Array.from({ length: n }, (_, i) => panel(i, n))}
+      </div>
+    );
+  },
+};
+
