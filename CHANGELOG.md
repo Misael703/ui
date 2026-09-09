@@ -5,6 +5,17 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.5] — 2026-09-09
+
+### Fixed
+- **`Select` nativo recorta valores largos en celdas angostas.** En una celda
+  de filtro de 138px, "Pendiente de despacho por transportista" se cortaba en
+  seco ("Pendiente de"): el `<select>` tiene `text-overflow: clip` por
+  defecto. Ahora declara `text-overflow: ellipsis` ("Pendiente …", verificado
+  en Chromium; los motores que lo ignoran en un `<select>` conservan el
+  recorte anterior) y su reserva para el chevron pasa de 40 a 38px, la misma
+  que el `Combobox`, para que ambos alineen en una fila de filtros.
+
 ## [3.9.4] — 2026-09-09
 
 ### Fixed

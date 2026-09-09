@@ -62,3 +62,14 @@ describe('FormField shrinks inside constrained tracks', () => {
     expect(rule).toMatch(/min-width:\s*0/);
   });
 });
+
+// Native <select> in a narrow cell (the 138px filter cell): a long value used
+// to clip hard ("Pendiente de") because a <select> has text-overflow: clip by
+// default. Chromium honours text-overflow on a <select>, so the value now
+// trails with an ellipsis ("Pendiente …"); engines that ignore it fall back
+// to the previous clip, never worse.
+describe('native Select: long values trail with an ellipsis (v3.9.5)', () => {
+  it('.select declares text-overflow: ellipsis', () => {
+    expect(block('.select')).toMatch(/text-overflow:\s*ellipsis/);
+  });
+});
