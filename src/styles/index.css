@@ -337,7 +337,12 @@ button, input, select, textarea { box-sizing: border-box; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235b6173' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
-  padding-right: 40px;
+  /* Same chevron reserve as .combobox__input (38px) so the two line up in a
+     filter row. A long value in a narrow cell (138px filter cell) trails with
+     an ellipsis instead of clipping mid-word; engines that ignore
+     text-overflow on a <select> fall back to the old clip. */
+  padding-right: 38px;
+  text-overflow: ellipsis;
 }
 
 .textarea { resize: vertical; min-height: 96px; padding-top: 12px; padding-bottom: 12px; }
