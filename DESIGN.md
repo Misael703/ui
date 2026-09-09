@@ -364,6 +364,12 @@ what moved and what didn't.
 - Durations `--duration-fast` 120ms / `--duration-base` 200ms /
   `--duration-slow` 320ms, plus `--duration-exit` 150ms (~75% of base — dismissals
   feel decisive). Motion conveys state, not decoration.
+- **Full-distance slides (v3.9.3).** `Drawer` (and its mobile bottom sheet)
+  travels its whole width / height, opaque, in `--duration-slide` 260ms with
+  `--ease-out-quint`, and leaves in `--duration-slide-exit` 180ms with
+  `--ease-in`; only the backdrop fades. The old 20px nudge + fade finished its
+  visible motion in 3–4 frames and read as a pop. Rule: enter decelerates,
+  exit accelerates; a panel that moves does not also fade.
 
 ## Focus & layering
 

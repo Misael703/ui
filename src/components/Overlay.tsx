@@ -11,6 +11,9 @@ import { useFocusTrap, useEscape, useScrollLock } from '../hooks';
 // `is-closing` keyframes in src/styles/index.css (`.modal-backdrop`,
 // `.drawer-backdrop`).
 const EXIT_MS = 150;
+// Drawer slides its full width out and accelerates (`--duration-slide-exit`,
+// `--ease-in`); longer than the modal's sink so the panel clears the edge.
+const DRAWER_EXIT_MS = 180;
 
 export interface OverlayProps {
   open: boolean;
@@ -89,7 +92,7 @@ export function Drawer({
   const downOnBackdrop = React.useRef(false);
   const titleId = React.useId();
   const t = useLocale();
-  const { mounted, closing } = useDelayedUnmount(open, EXIT_MS);
+  const { mounted, closing } = useDelayedUnmount(open, DRAWER_EXIT_MS);
   useEscape(open, onClose, closeOnEsc);
   useFocusTrap(ref, open);
   useScrollLock(open);

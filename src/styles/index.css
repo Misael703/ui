@@ -1680,10 +1680,16 @@ button, input, select, textarea { box-sizing: border-box; }
   height: 100%;
   display: flex; flex-direction: column;
   box-shadow: var(--shadow-lg);
-  animation: slideIn var(--duration-base) var(--ease-standard);
 }
 .drawer-backdrop:has(.drawer--left) { justify-content: flex-start; }
-.drawer--left { animation: slideInLeft var(--duration-base) var(--ease-standard); }
+/* Motion (v3.9.3): the panel travels its full width, opaque; only the
+   backdrop fades. It used to nudge 20px while fading in 200ms with
+   ease-out-quint — measured frame by frame, the visible motion was over in
+   3–4 frames and read as a pop, not an arrival. Enter decelerates
+   (`--ease-out-quint`), exit accelerates (`--ease-in`): a thing leaving the
+   screen speeds up. */
+.drawer--right { animation: drawerInRight var(--duration-slide) var(--ease-out-quint); }
+.drawer--left { animation: drawerInLeft var(--duration-slide) var(--ease-out-quint); }
 .drawer__header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px;
@@ -1713,26 +1719,31 @@ button, input, select, textarea { box-sizing: border-box; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes drawerInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes drawerInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 
 /* Exit animations. `animation-fill-mode: forwards` keeps the final
    keyframe applied while React waits to unmount the element. */
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 @keyframes sink { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(8px) scale(0.98); } }
-@keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(20px); opacity: 0; } }
-@keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-20px); opacity: 0; } }
+@keyframes drawerOutRight { from { transform: translateX(0); } to { transform: translateX(100%); } }
+@keyframes drawerOutLeft { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 .modal-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
 .modal.is-closing { animation: sink var(--duration-exit) var(--ease-standard) forwards; }
-.drawer-backdrop.is-closing { animation: fadeOut var(--duration-exit) var(--ease-standard) forwards; }
-.drawer--right.is-closing { animation: slideOut var(--duration-exit) var(--ease-standard) forwards; }
-.drawer--left.is-closing { animation: slideOutLeft var(--duration-exit) var(--ease-standard) forwards; }
+/* The backdrop leaves on the panel's clock and curve so both end together;
+   `DRAWER_EXIT_MS` in Overlay.tsx must match `--duration-slide-exit`. */
+.drawer-backdrop.is-closing { animation: fadeOut var(--duration-slide-exit) var(--ease-in) forwards; }
+.drawer--right.is-closing { animation: drawerOutRight var(--duration-slide-exit) var(--ease-in) forwards; }
+.drawer--left.is-closing { animation: drawerOutLeft var(--duration-slide-exit) var(--ease-in) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .drawer, .drawer-backdrop, .drawer.is-closing, .drawer-backdrop.is-closing { animation: none; }
+}
 
 /* Mobile bottom-sheet: at <600px the drawer slides in from the bottom
    instead of from the side. Native pattern on iOS/Android — feels less
    cramped than a side panel on narrow viewports. */
-@keyframes slideInBottom { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes slideOutBottom { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
+@keyframes slideInBottom { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes slideOutBottom { from { transform: translateY(0); } to { transform: translateY(100%); } }
 @media (max-width: 600px) {
   .drawer-backdrop { align-items: flex-end; justify-content: stretch; }
   .drawer-backdrop:has(.drawer--left) { justify-content: stretch; }
@@ -1740,12 +1751,12 @@ button, input, select, textarea { box-sizing: border-box; }
     width: 100%; max-width: none;
     height: auto; max-height: 90vh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    animation: slideInBottom var(--duration-base) var(--ease-standard);
+    animation: slideInBottom var(--duration-slide) var(--ease-out-quint);
   }
   .drawer.is-closing,
   .drawer--right.is-closing,
   .drawer--left.is-closing {
-    animation: slideOutBottom var(--duration-exit) var(--ease-standard) forwards;
+    animation: slideOutBottom var(--duration-slide-exit) var(--ease-in) forwards;
   }
 }
 
