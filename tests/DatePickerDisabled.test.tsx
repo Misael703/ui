@@ -244,13 +244,27 @@ describe('DatePicker accepts typing', () => {
   it('clearing the text clears the value; an unparseable leftover snaps back on blur', () => {
     render(<Harness initial={new Date(2026, 2, 15)} />);
     const input = screen.getByDisplayValue('15-03-2026') as HTMLInputElement;
+    // the live mask drops the letters; what is left ("15-03-20") is a partial:
+    // NOT committed (the parser would read year 20), value stays put
     fireEvent.change(input, { target: { value: '15-03-20xx' } });
-    expect(input.value).toBe('15-03-20xx');
+    expect(input.value).toBe('15-03-20');
     expect(screen.getByTestId('v')).toHaveTextContent('2026-03-15');
     fireEvent.blur(input);
     expect(input.value).toBe('15-03-2026');
     fireEvent.change(input, { target: { value: '' } });
     expect(screen.getByTestId('v')).toHaveTextContent('null');
+  });
+});
+
+describe('DatePicker live mask', () => {
+  it('formats while typing: digits only, separators auto, capped at a full date', () => {
+    render(<DatePicker value={null} onChange={() => {}} format="dmy" />);
+    const input = screen.getByPlaceholderText('dd-mm-aaaa') as HTMLInputElement;
+    expect(input).toHaveAttribute('inputmode', 'numeric');
+    fireEvent.change(input, { target: { value: '123123123213' } });
+    expect(input.value).toBe('12-31-2312');
+    fireEvent.change(input, { target: { value: '150' } });
+    expect(input.value).toBe('15-0');
   });
 });
 

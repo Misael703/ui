@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   otro día (calendario, set externo), la fecha se confirma cuando parsea, y un
   resto que no parsea vuelve al último valor válido al salir del campo.
   `DateRangePicker` ya tenía este patrón en sus inputs.
+- **Máscara en vivo al escribir fechas** (`DatePicker` y los inputs del
+  `DateRangePicker`): solo dígitos, los separadores aparecen a medida que se
+  llenan los grupos (`dd-mm-aaaa` / `aaaa-mm-dd` según `format`), tope de
+  ocho dígitos, `inputMode="numeric"` para el teclado del teléfono. Backspace
+  sobre un separador borra el dígito anterior en vez de pelear con la
+  máscara; un ISO pegado se reformatea. `DatePicker` confirma solo una fecha
+  COMPLETA: el parser acepta años de 1–4 dígitos y "15-03-20" a medio
+  escribir habría confirmado el año 20. Utilidad `maskDateInput` en
+  `utils/dateFormat`.
 
 ### Changed
 - **`DateRangePicker` vacío**: el trigger muestra el formato de fecha como

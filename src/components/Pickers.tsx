@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, X, Check } from './Icons';
 import { Spinner } from './Display';
-import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
@@ -416,16 +416,22 @@ export function DatePicker({
         size={ph.length + 1}
         disabled={disabled}
         value={text}
+        inputMode="numeric"
         onChange={(e) => {
-          const raw = e.target.value;
+          // Live mask: digits only, separators as the groups fill, 8 digits max.
+          const raw = maskDateInput(e.target.value, fmt);
           setText(raw);
           if (raw.trim() === '') { onChange(null); return; }
+          // Commit only a COMPLETE date (8 digits): the parser accepts 1–4 digit
+          // years, so "15-03-20" mid-typing would otherwise commit year 20.
+          if (raw.replace(/\D/g, '').length !== 8) return;
           const d = parseDate(raw, fmt);
           if (d && !isDisabled(d)) onChange(d);
         }}
         onBlur={() => {
-          // Unparseable leftovers snap back to the last valid value.
-          if (text.trim() !== '' && parseDate(text, fmt) == null) setText(value ? formatDate(value, fmt) : '');
+          // Incomplete or unparseable leftovers snap back to the last valid value.
+          const complete = text.replace(/\D/g, '').length === 8 && parseDate(text, fmt) != null;
+          if (text.trim() !== '' && !complete) setText(value ? formatDate(value, fmt) : '');
         }}
         onFocus={() => setOpen(true)}
         aria-invalid={invalid || undefined}

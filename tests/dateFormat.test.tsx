@@ -1,3 +1,4 @@
+import { maskDateInput } from '../src/utils/dateFormat';
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   detectFormatFromLocale,
@@ -120,3 +121,25 @@ describe('dateFormatPlaceholder', () => {
     expect(dateFormatPlaceholder('mdy')).toBe('mm-dd-aaaa');
   });
 });
+
+describe('maskDateInput (v3.8.1 live mask)', () => {
+  it('dmy: digits only, separators as the groups fill, eight digits max', () => {
+    expect(maskDateInput('1', 'dmy')).toBe('1');
+    expect(maskDateInput('15', 'dmy')).toBe('15');
+    expect(maskDateInput('150', 'dmy')).toBe('15-0');
+    expect(maskDateInput('15-03-2', 'dmy')).toBe('15-03-2');
+    expect(maskDateInput('15032026', 'dmy')).toBe('15-03-2026');
+    expect(maskDateInput('123123123213', 'dmy')).toBe('12-31-2312');
+    expect(maskDateInput('1a5b-03/2026', 'dmy')).toBe('15-03-2026');
+  });
+  it('iso groups 4-2-2; a pasted ISO date is reformatted for dmy / mdy', () => {
+    expect(maskDateInput('20260315', 'iso')).toBe('2026-03-15');
+    expect(maskDateInput('2026-03-15', 'dmy')).toBe('15-03-2026');
+    expect(maskDateInput('2026-03-15', 'mdy')).toBe('03-15-2026');
+  });
+  it('Backspace over a separator removes the digit before it (separator needs a following digit)', () => {
+    expect(maskDateInput('15-', 'dmy')).toBe('15');
+    expect(maskDateInput('', 'dmy')).toBe('');
+  });
+});
+
