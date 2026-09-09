@@ -1,8 +1,9 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
-import { CalendarIcon, ChevronLeft, ChevronRight, ChevronDown, X, Check, Search } from './Icons';
-import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
+import { CalendarIcon, X, Check, Search } from './Icons';
+import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, type DateFormat } from '../utils/dateFormat';
+import { CalendarView, focusCalendar, type DayState } from './CalendarView';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
 import { Portal } from './Portal';
@@ -245,6 +246,7 @@ export interface DateRangePickerProps {
    * Report-grade: replace the static month title with a "MMMM de YYYY ▾" button
    * that opens a month/year jump menu (instead of clicking the arrows N times).
    */
+  /** @deprecated 3.9.0 — the calendar header always offers the month / year picker. No-op. */
   monthDropdown?: boolean;
   /** Number of month panels. Default `2`; `1` is the compact single-month layout. */
   months?: 1 | 2;
@@ -323,11 +325,9 @@ export function DateRangePicker({
   value, onChange, defaultValue, onApply, onOpenChange,
   minDate, maxDate, isDateDisabled, presets,
   invalid, disabled, className, id, format = 'auto',
-  showInputs = false, monthDropdown = false, months = 2, defaultPreset,
+  showInputs = false, months = 2, defaultPreset,
 }: DateRangePickerProps) {
   const locale = useLocale();
-  const weekdays = locale['picker.weekdaysShort'];
-  const monthNames = locale['calendar.months'];
   const fmt = resolveDateFormat(format);
   const isControlled = value !== undefined;
   const applyMode = !!onApply;
@@ -357,12 +357,9 @@ export function DateRangePicker({
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(initial.from ?? new Date()));
   const [hover, setHover] = React.useState<Date | null>(null);
-  // Editable-inputs (showInputs) mirror the current range; the month-jump menu
-  // (monthDropdown) tracks a year while the user browses it.
+  // Editable-inputs (showInputs) mirror the current range.
   const [fromText, setFromText] = React.useState('');
   const [toText, setToText] = React.useState('');
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [menuYear, setMenuYear] = React.useState(() => view.getFullYear());
   // The label of the preset that produced the current value (so the trigger can
   // show "Este mes" instead of the date range). Seeded from `defaultPreset`;
   // cleared on any manual change.
@@ -393,12 +390,6 @@ export function DateRangePicker({
     refs: [wrapRef, popoverRef],
     returnFocusRef: triggerRef,
   });
-
-  // Each panel renders ~42 Date cells. Without memoization, every
-  // setHover() triggered a full rebuild of both panels' grids on every
-  // mouse movement over the calendar. Memo keyed on `view` only.
-  const monthGrid0 = React.useMemo(() => buildMonthGrid6(view, 0), [view]);
-  const monthGrid1 = React.useMemo(() => buildMonthGrid6(view, 1), [view]);
 
   const isDisabled = (d: Date) =>
     !!(
@@ -455,11 +446,6 @@ export function DateRangePicker({
       : (current.from && parsed < current.from ? { from: parsed, to: current.from } : { from: current.from, to: parsed });
     setRange(next);
     setView(startOfMonth(parsed));
-  };
-
-  const jumpToMonth = (monthIndex: number) => {
-    setView(new Date(menuYear, monthIndex, 1));
-    setMenuOpen(false);
   };
 
   const click = (d: Date) => {
@@ -521,80 +507,39 @@ export function DateRangePicker({
         : `${formatDate(displayed.from, fmt)} → …`
       : dateFormatPlaceholder(fmt);
 
-  const renderMonth = (offset: number) => {
-    const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
+  // Per-day decoration for the shared calendar: endpoints + the continuous
+  // band (only for a real multi-day span; a lone endpoint shows just its
+  // circle). `col` 0 = Monday … 6 = Sunday drives the row-edge rounding.
+  const dayState = (d: Date, col: number): DayState => {
     const bounds = spanBounds();
-    // Only paint the band for a real (multi-day) span; a lone endpoint shows
-    // just its circle.
     const isMultiDay = !!bounds && !isSameDay(bounds.a, bounds.b);
-    return (
-      <div className="daterange__month">
-        {/* The dropdown owns the month label when enabled; otherwise a static title. */}
-        {!monthDropdown && <div className="daterange__title">{monthNames[m.getMonth()]} {m.getFullYear()}</div>}
-        <div className="daterange__grid">
-          {weekdays.map((w, i) => <span key={i} className="daterange__dow">{w}</span>)}
-          {cells.map(({ date: d, outside }, i) => {
-            // Adjacent-month days: greyed, non-interactive context (keeps the grid
-            // at a fixed 6 rows so the height never jumps).
-            if (outside) return <span key={i} className="daterange__day is-outside" aria-hidden="true">{d.getDate()}</span>;
-            const sel = (current.from && isSameDay(d, current.from)) || (current.to && isSameDay(d, current.to));
-            const band = inRange(d) && isMultiDay;
-            // Column 0 = Monday, 6 = Sunday (the 7 weekday headers offset by a
-            // multiple of 7, so `i % 7` is the column).
-            const col = i % 7;
-            const leftEnd = band && !!bounds && isSameDay(d, bounds.a);
-            const rightEnd = band && !!bounds && isSameDay(d, bounds.b);
-            // Square model: round the outer corners only at the range ends and the
-            // row edges (everything radius-sm); interior cells stay square and
-            // bridge the gap. A lone selected day (no multi-day band) rounds all
-            // four. is-rl/is-rr round both the band and the endpoint block.
-            const roundL = band ? (col === 0 || leftEnd) : !!sel;
-            const roundR = band ? (col === 6 || rightEnd) : !!sel;
-            const today = isSameDay(d, new Date());
-            const off = isDisabled(d);
-            return (
-              <button
-                key={i}
-                type="button"
-                className={cx(
-                  'daterange__day',
-                  sel && 'is-selected',
-                  band && 'is-band',
-                  roundL && 'is-rl',
-                  roundR && 'is-rr',
-                  today && 'is-today',
-                  off && 'is-disabled',
-                )}
-                disabled={!!off}
-                onMouseEnter={() => setHover(d)}
-                onClick={() => click(d)}
-              >{d.getDate()}</button>
-            );
-          })}
-        </div>
-      </div>
-    );
+    const sel = !!((current.from && isSameDay(d, current.from)) || (current.to && isSameDay(d, current.to)));
+    const band = inRange(d) && isMultiDay;
+    const leftEnd = band && !!bounds && isSameDay(d, bounds.a);
+    const rightEnd = band && !!bounds && isSameDay(d, bounds.b);
+    return {
+      selected: sel,
+      band,
+      roundL: band ? (col === 0 || leftEnd) : sel,
+      roundR: band ? (col === 6 || rightEnd) : sel,
+    };
   };
 
-  // Month/year jump menu (monthDropdown). Inline (not a Portal) — it lives inside
-  // the already-portaled popover and is dismissed by selecting a month.
-  const renderMonthMenu = () => (
-    <div className="daterange__menu" role="dialog" aria-label={locale['daterange.jumpMonth']}>
-      <div className="daterange__menu-year">
-        <button type="button" onClick={() => setMenuYear((y) => y - 1)} aria-label={locale['picker.prevYear']}><ChevronLeft size={16} /></button>
-        <span>{menuYear}</span>
-        <button type="button" onClick={() => setMenuYear((y) => y + 1)} aria-label={locale['picker.nextYear']}><ChevronRight size={16} /></button>
-      </div>
-      <div className="daterange__menu-grid">
-        {monthNames.map((name, idx) => (
-          <button
-            type="button"
-            key={name}
-            className={cx('daterange__menu-month', view.getMonth() === idx && view.getFullYear() === menuYear && 'is-current')}
-            onClick={() => jumpToMonth(idx)}
-          >{name.slice(0, 3)}</button>
-        ))}
-      </div>
+  // One CalendarView per panel; each has its own header (title climbs to
+  // months / years). Prev lives on the first panel, next on the last, so the
+  // pair still reads as one calendar.
+  const renderPanel = (offset: number) => (
+    <div className="daterange__month" key={offset}>
+      <CalendarView
+        month={addMonths(view, offset)}
+        onMonthChange={(m) => setView(addMonths(m, -offset))}
+        navPrev={offset === 0}
+        navNext={offset === months - 1}
+        dayState={dayState}
+        isDayDisabled={isDisabled}
+        onHoverDay={setHover}
+        onSelectDay={click}
+      />
     </div>
   );
 
@@ -610,6 +555,7 @@ export function DateRangePicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={empty ? locale['picker.selectRange'] : undefined}
+        onKeyDown={(e) => { if (e.key === 'ArrowDown') { e.preventDefault(); if (!open) { setOpen(true); onOpenChange?.(true); } requestAnimationFrame(() => focusCalendar(popoverRef.current)); } }}
       >
         <span className="daterange__icon" aria-hidden="true"><CalendarIcon size={16} /></span>
         <span className={cx('daterange__label', empty && 'daterange__label--placeholder')}>{label}</span>
@@ -673,30 +619,9 @@ export function DateRangePicker({
                 </label>
               </div>
             )}
-            <div className="daterange__nav">
-              <button type="button" onClick={() => setView((v) => addMonths(v, -1))} aria-label={locale['calendar.prevMonth']}><ChevronLeft size={16} /></button>
-              {monthDropdown ? (
-                <div className="daterange__monthjump">
-                  <button
-                    type="button"
-                    className="daterange__monthjump-trigger"
-                    onClick={() => { setMenuYear(view.getFullYear()); setMenuOpen((o) => !o); }}
-                    aria-haspopup="dialog"
-                    aria-expanded={menuOpen}
-                  >
-                    <span>{monthNames[view.getMonth()]} {view.getFullYear()}</span>
-                    <ChevronDown size={16} aria-hidden />
-                  </button>
-                  {menuOpen && renderMonthMenu()}
-                </div>
-              ) : (
-                <span />
-              )}
-              <button type="button" onClick={() => setView((v) => addMonths(v, 1))} aria-label={locale['calendar.nextMonth']}><ChevronRight size={16} /></button>
-            </div>
             <div className={cx('daterange__months', months === 1 && 'daterange__months--single')}>
-              {renderMonth(0)}
-              {months === 2 && renderMonth(1)}
+              {renderPanel(0)}
+              {months === 2 && renderPanel(1)}
             </div>
             <div className="daterange__actions">
               <button type="button" className="daterange__clear" onClick={clear}>{locale['common.clear']}</button>

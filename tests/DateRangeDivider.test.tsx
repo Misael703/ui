@@ -34,9 +34,9 @@ describe('DateRangePicker month divider', () => {
 // numbers into loose, far-apart cells — the calendar stays compact. The months
 // container hugs its content (`max-content`) so the divider stays centred.
 describe('DateRangePicker compact calendar', () => {
-  it('the day grid uses fixed 40px columns, not stretchy 1fr', () => {
-    const grid = css.match(/\.daterange__grid\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(grid).toMatch(/grid-template-columns:\s*repeat\(7,\s*40px\)/);
+  it('the day grid uses fixed 36px columns (CalendarView), not stretchy 1fr', () => {
+    const grid = css.match(/\.calview__grid--days\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(grid).toMatch(/grid-template-columns:\s*repeat\(7,\s*36px\)/);
     expect(grid).not.toMatch(/repeat\(7,\s*1fr\)/);
   });
 

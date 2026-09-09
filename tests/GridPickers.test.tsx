@@ -14,7 +14,7 @@ describe('YearPicker', () => {
     expect(screen.getByRole('textbox')).toHaveValue('2025');
     fireEvent.focus(screen.getByRole('textbox'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('2020-2029')).toBeInTheDocument();
+    expect(screen.getByText('2019–2030')).toBeInTheDocument();
     // Boundary years are dimmed (is-out) and the selected one highlighted.
     expect(screen.getByRole('button', { name: '2019' }).className).toContain('is-out');
     expect(screen.getByRole('button', { name: '2030' }).className).toContain('is-out');
@@ -30,7 +30,7 @@ describe('YearPicker', () => {
     expect(screen.getByRole('button', { name: '2023' })).toBeDisabled();
     expect(screen.getByRole('button', { name: '2026' })).not.toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Década anterior' }));
-    expect(screen.getByText('2010-2019')).toBeInTheDocument();
+    expect(screen.getByText('2007–2018')).toBeInTheDocument();
   });
 
   it('dismisses on outside pointer-down', () => {

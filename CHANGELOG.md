@@ -5,6 +5,44 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0] — 2026-09-09
+
+**Minor. Un calendario para los cuatro pickers.** Origen: tres calendarios sin
+código común (DatePicker, DateRangePicker con salto de mes opcional,
+MonthPicker/YearPicker), cada uno navegando y viéndose distinto. Referencia
+del usuario: cabecera con selector de mes y año, hoy con punto, seleccionado
+en círculo.
+
+### Added
+- **`CalendarView`** (interno): cabecera con prev/next cuadrados ghost y el
+  título como botón con chevron que sube de nivel (días → meses → años);
+  un año baja a meses, un mes a días, hasta la vista hoja del picker.
+  Días de 36px: seleccionado en círculo relleno, hoy con punto debajo del
+  número, días del mes vecino en `--fg-subtle`; rango con banda de extremos
+  redondos y los círculos de los extremos encima. Meses y años en píldoras
+  3×4 (el actual en texto de marca, el elegido relleno). **Teclado**: un
+  tab stop por grilla (el seleccionado o el primero habilitado), flechas,
+  Inicio/Fin, RePág/AvPág pasan de página y conservan el día del mes
+  (31 → 30), Escape baja de nivel (y en la vista hoja burbujea al popover).
+  **Flecha abajo en el campo** del picker lleva el foco al calendario: el
+  popover vive al final del body y Tab solo recorría toda la página antes de
+  llegar (`focusCalendar`). `aria-current="date"`
+  en hoy, `aria-pressed` en el seleccionado.
+- Story Forms/Pickers › **"Playground · calendario"** (hoja, rango, domingos
+  deshabilitados, uno o dos paneles).
+
+### Changed
+- **`DatePicker`**, **`DateRangePicker`**, **`MonthPicker`** y
+  **`YearPicker`** usan `CalendarView`. El selector de mes y año existe
+  siempre en la cabecera; `DateRangePicker monthDropdown` queda deprecado
+  como no-op. En el rango de dos meses, prev va en el panel izquierdo y next
+  en el derecho, y cada panel tiene su propio título. Los años se pasean en
+  páginas de doce (`2019–2030`).
+- CSS: familia `.calview*`; retiradas las reglas de grilla de
+  `.datepicker__nav/title/grid/dow/day`, `.gridpicker__nav/title/grid/cell`
+  y `.daterange__nav/title/grid/dow/day/monthjump/menu*`. Los triggers,
+  popovers, presets, inputs y acciones conservan sus clases.
+
 ## [3.8.1] — 2026-09-09
 
 ### Fixed

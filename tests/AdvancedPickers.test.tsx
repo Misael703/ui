@@ -107,7 +107,7 @@ describe('DateRangePicker', () => {
     // Picks two day buttons inside the popover. Avoids button names from the
     // trigger/nav/actions by filtering to numeric labels (1–31).
     const pickTwoDays = (dialog: HTMLElement) => {
-      const dayBtns = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button.daterange__day'))
+      const dayBtns = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button.calview__day'))
         .filter((b) => !b.disabled);
       expect(dayBtns.length).toBeGreaterThanOrEqual(2);
       fireEvent.click(dayBtns[0]);

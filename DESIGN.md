@@ -177,6 +177,18 @@ the filter acted. `FilterField` names every control the recipe uses — Select,
 Combobox, DatePicker, DateRangePicker — pinned in `Filters.test`. Story:
 Patterns/Filters › "Playground · página de listado".
 
+**Calendar family (v3.9.0).** One calendar, `CalendarView`, behind
+`DatePicker`, `DateRangePicker`, `MonthPicker` and `YearPicker`. Header: prev
+and next as 32px square ghost buttons with a hairline, the title as a button
+with a chevron that climbs a level (days → months → years); picking a year
+descends to months, a month to days, down to the picker's leaf. Days are
+36px circles: selected = filled `--fill-brand`, today = a 4px dot under the
+number (never a fill: the fill means selected), adjacent-month days
+`--fg-subtle`; a range is a `--color-primary-100` band with round ends and
+the endpoints' circles on top. Months and years are 3×4 pills, the current
+one in brand text, the selected one filled. Keyboard: one tab stop per grid,
+arrows, Home/End, PageUp/PageDown page the view, Escape climbs back down.
+
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained
 OBJECT that reads as a unit and would make sense on its own: a metric, a

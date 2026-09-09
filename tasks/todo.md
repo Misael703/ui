@@ -1,15 +1,16 @@
-# UI Kit v3.8.0 — `FilterBar layout` (inline · collapse · drawer) + chips de aplicados
+# UI Kit v3.9.0 — `CalendarView`: un calendario para los tres pickers
 
-**Origen:** `visibleCount` colapsaba aunque el set cupiera en una línea (captura 2026-09-08); y el "cómo se muestran los campos" estaba repartido en props implícitas (`visibleCount`, `mobile`, `activeCount`). Decisión: modos de primera clase, general (no para un consumidor).
-**Branch:** `feat/filterbar-layouts` desde main (3.7.0). Push/PR/release con OK explícito.
+**Origen:** tres calendarios sin código común (DatePicker, DateRangePicker con `monthDropdown` opcional, MonthPicker/YearPicker). Referencia del usuario: cabecera con prev/next cuadrados + título "Mes Año" con chevron que abre la grilla de meses; hoy con punto; seleccionado en círculo relleno; meses 3×4 con píldora.
+**Branch:** `feat/calendar-view` desde main (3.8.1). Push/PR/release con OK explícito.
 
 ## Tareas
-- [x] T1 — Medición de capacidad: hook interno `useFilterCapacity` (ResizeObserver sobre la barra + grupo final; `floor((bar − end + gap) / (min + gap))`). Tests con RO stubeado.
-- [x] T2 — `layout: 'inline' | 'collapse' | 'drawer'` (default inline) y `mobileLayout` (default drawer). `collapse`: `visibleCount` número | `'auto'`, colapsa SOLO si el set no cabe; con número, `min(visibleCount, capacidad)`. `drawer`: campos tras el embudo; slot `pinned` siempre visible.
-- [x] T3 — `applied: AppliedFilter[]` ({ key, label, value, onRemove }) → fila de `Chip`s descartables bajo los campos; badge del embudo y del toggle derivados de `applied` (fallback a `activeCount`/`hiddenActiveCount` deprecados). Dev warning: `layout="drawer"` sin `applied`.
-- [x] T4 — Deprecaciones compatibles: `visibleCount` sin `layout` ⇒ `collapse`; `mobile` ⇒ `mobileLayout`; `activeCount`/`hiddenActiveCount` si no hay `applied`. Tests de compat.
-- [x] T5 — Playground de listado: controls `layout`, `mobileLayout`, `visibleCount` (auto | 1–7), `applied` (chips). Story compuesta sin cambios de forma.
-- [x] T6 — DESIGN.md (escala "cuánto escondes": inline → collapse → drawer+pinned; drawer exige applied), CHANGELOG 3.8.0, bump package.json, tests, tsc, lint, build, Chromium 320/390/1100.
+- [x] T1 — `CalendarView` interno (`src/components/CalendarView.tsx`): `view: 'days'|'months'|'years'`, cabecera (prev/next ghost 32px + título-botón con chevron), grilla de días (dow, outside subtle, today dot, selected círculo, banda de rango opcional vía `rangeOf(d)`), grilla de meses y de años (3×4, píldora, actual en marca). Teclado: flechas/Home/End/PageUp/PageDown en días, flechas en meses/años, Enter selecciona, Escape vuelve a días. Roving tabindex, `role="grid"`.
+- [x] T2 — CSS `.calview*` con tokens; retirar `.datepicker__nav/title/grid/dow/day`, `.gridpicker__nav/title/grid/cell`, `.daterange__nav/title/grid/dow/day/monthjump/menu*` (mantener trigger/popover/presets/inputs/actions).
+- [x] T3 — `DatePicker` usa `CalendarView` (días; selector de mes/año siempre).
+- [x] T4 — `DateRangePicker` usa `CalendarView` ×1/×2 con `rangeOf`; `monthDropdown` deprecado (no-op, siempre hay selector); presets/inputs/Aplicar intactos.
+- [x] T5 — `MonthPicker`/`YearPicker` usan las grillas de meses/años de `CalendarView`.
+- [x] T6 — Tests: navegación de vistas, teclado, selección, rango, hoy; re-apuntar tests que pinean clases viejas. Stories: playground de calendario (Forms/Pickers) con controls vista · rango · hoy · disabled; stories de los 3 pickers.
+- [x] T7 — DESIGN.md (familia calendario), CHANGELOG 3.9.0, bump, tsc/lint/build, Chromium light/dark.
 
 ## Review
-1197 tests, tsc 0, lint 0 errores. Chromium 1100/700/1600/320: inline envuelve; collapse auto muestra los que caben y re-mide al redimensionar (4 → 1 → 6 campos); collapse con tope 2 y 4 campos que caben muestra los 4 sin toggle (el caso reportado); drawer con Buscar pinned + embudo badgeado + chips; móvil drawer con chips. Chips en registro neutro (el azul sólido competía con la primaria). Afinado final: `auto` con piso de 2 campos (a 700px con grupo final ancho quedaba 1); test de re-measure con ResizeObserver stubeado. 1200 tests. Chromium 1100/700/320: collapse 4 → 2 campos en una línea, drawer en móvil con Buscar pinned, chips + Limpiar en todos. Pendiente OK para push/PR/release 3.8.0.
+1220 tests (CalendarView: cabecera, vistas, hoy/seleccionado/disabled, teclado con RePág por día del mes, focusCalendar; 15 tests re-apuntados), tsc 0, lint 0 errores, build OK. Chromium light/dark: DatePicker, DateRangePicker (2 paneles, banda con extremos redondos), MonthPicker, YearPicker, playground de calendario; teclado real: ArrowDown entra al calendario, flechas, AvPág, Enter selecciona y cierra. Pendiente OK para push/PR/release 3.9.0.

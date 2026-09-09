@@ -2371,37 +2371,101 @@ button, input, select, textarea { box-sizing: border-box; }
   padding: 12px; z-index: var(--z-tooltip);
   min-width: 280px;
 }
-.datepicker__nav {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 8px;
+
+/* ---------- CalendarView (v3.9.0) — the one calendar ---------------------
+   Behind DatePicker, DateRangePicker, MonthPicker and YearPicker. Header:
+   square ghost prev/next + the title as a button (chevron = climbs a level).
+   Days: 36px cells, selected = filled circle, today = dot under the number,
+   adjacent-month days subtle. Months / years: 3×4 pills. */
+.calview { font-family: var(--font-body); }
+.calview__nav {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  gap: 4px; margin-bottom: 8px;
 }
-.datepicker__nav button {
-  width: 28px; height: 28px; border: none; background: transparent;
-  color: var(--fg-default); cursor: pointer; border-radius: var(--radius-sm);
+.calview__navbtn {
+  width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  background: transparent; color: var(--fg-default); cursor: pointer;
+  transition: background var(--duration-fast);
 }
-.datepicker__nav button:hover { background: var(--bg-subtle); }
-.datepicker__title { font-family: var(--font-body); font-weight: 600; font-size: var(--text-sm); }
-.datepicker__grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+.calview__navbtn:hover { background: var(--bg-subtle); }
+.calview__navbtn:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+.calview__navbtn--ghost { border-color: transparent; pointer-events: none; }
+.calview__title {
+  justify-self: center; display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px; border: 0; border-radius: var(--radius-sm); background: transparent;
+  font-family: var(--font-body); font-weight: 600; font-size: var(--text-sm); color: var(--fg-default);
+  font-variant-numeric: tabular-nums; white-space: nowrap; cursor: pointer;
 }
-.datepicker__dow {
-  text-align: center; font-size: var(--text-2xs); color: var(--fg-muted);
-  padding: 4px 0; text-transform: var(--tt-label);
+.calview__title:hover { background: var(--bg-subtle); }
+.calview__title:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+.calview__title[aria-disabled="true"] { cursor: default; }
+.calview__title[aria-disabled="true"]:hover { background: transparent; }
+/* Fixed 36px columns (not 1fr): the calendar stays tight in a wide popover. */
+.calview__grid--days { display: grid; grid-template-columns: repeat(7, 36px); gap: 2px; }
+.calview__dow {
+  font-size: var(--text-2xs); font-weight: 600; letter-spacing: var(--tracking-wide);
+  text-transform: var(--tt-label); color: var(--fg-muted); text-align: center; padding: 4px 0;
 }
-.datepicker__day {
-  height: 32px; border: none; background: transparent;
-  color: var(--fg-default); border-radius: var(--radius-sm);
-  cursor: pointer; font-family: var(--font-body); font-size: var(--text-sm);
+.calview__day {
+  position: relative; z-index: 0;
+  height: 36px; border: 0; background: transparent; cursor: pointer;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.datepicker__day:hover:not(:disabled) { background: var(--bg-subtle); }
-.datepicker__day.is-today { font-weight: 700; color: var(--color-primary); }
-.datepicker__day.is-selected { background: var(--fill-brand); color: var(--color-white); }
-.datepicker__day.is-disabled, .datepicker__day:disabled { opacity: 0.3; cursor: not-allowed; }
-/* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
-.datepicker__day.is-outside {
-  display: flex; align-items: center; justify-content: center;
-  color: var(--fg-subtle); opacity: 0.4; pointer-events: none;
+.calview__day:hover:not(:disabled):not(.is-band) { background: var(--bg-subtle); }
+.calview__day:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+/* Today: a dot under the number, never a fill (the fill means "selected"). */
+.calview__day.is-today { font-weight: 700; color: var(--color-primary); }
+.calview__day.is-today::after {
+  content: ''; position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: var(--radius-pill); background: currentColor;
 }
+.calview__day.is-selected { color: var(--fg-on-brand); font-weight: 700; }
+.calview__day.is-selected::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: var(--fill-brand); border-radius: var(--radius-pill);
+}
+.calview__day.is-selected.is-today::after { background: var(--fg-on-brand); }
+/* Range band behind the days: bridges the 2px column gap; rounds at the range
+   ends (is-rl / is-rr) and the row edges. Endpoints keep their circle on top. */
+.calview__day.is-band { color: var(--color-primary-800); }
+.calview__day.is-band.is-selected { color: var(--fg-on-brand); }
+.calview__day.is-band::after { display: none; }
+.calview__day.is-band { --calview-band: var(--color-primary-100); }
+.calview__day.is-band:not(.is-selected)::before {
+  content: ''; position: absolute; top: 2px; bottom: 2px; left: -1px; right: -1px;
+  z-index: -2; background: var(--calview-band);
+}
+.calview__day.is-band.is-selected { box-shadow: -1px 0 0 0 var(--calview-band), 1px 0 0 0 var(--calview-band); }
+.calview__day.is-band.is-selected::after {
+  content: ''; display: block; position: absolute; top: 2px; bottom: 2px; z-index: -2; background: var(--calview-band);
+  left: 50%; right: -1px;
+}
+.calview__day.is-band.is-selected.is-rr::after { left: -1px; right: 50%; }
+.calview__day.is-band.is-selected.is-rl.is-rr::after { display: none; }
+.calview__day.is-band.is-selected { box-shadow: none; }
+.calview__day.is-rl::before { left: 0; border-top-left-radius: var(--radius-pill); border-bottom-left-radius: var(--radius-pill); }
+.calview__day.is-rr::before { right: 0; border-top-right-radius: var(--radius-pill); border-bottom-right-radius: var(--radius-pill); }
+.calview__day.is-outside { color: var(--fg-subtle); opacity: 0.5; pointer-events: none; }
+.calview__day.is-disabled, .calview__day:disabled { opacity: 0.3; cursor: not-allowed; }
+/* Months / years: 3×4 pills; the current month/year reads in brand, the
+   selected one is filled. */
+.calview__grid--cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; min-width: 240px; }
+.calview__cell {
+  min-height: var(--control-h-md); padding: 6px 8px; border: 0; background: transparent;
+  border-radius: var(--radius-md); cursor: pointer;
+  font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
+  font-variant-numeric: tabular-nums;
+}
+.calview__cell:hover:not(:disabled) { background: var(--bg-subtle); }
+.calview__cell:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
+.calview__cell.is-current { color: var(--color-primary); font-weight: 600; }
+.calview__cell.is-out { color: var(--fg-subtle); }
+.calview__cell.is-selected { background: var(--fill-brand); color: var(--fg-on-brand); font-weight: 700; }
+.calview__cell:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ---------- TimePicker (custom popover, spinner columns) --------------- */
 /* Trigger mirrors the .datepicker field (border-strong, radius-md, field
@@ -2489,31 +2553,6 @@ button, input, select, textarea { box-sizing: border-box; }
   box-shadow: var(--shadow-md);
   padding: 12px; min-width: 260px;
 }
-.gridpicker__nav {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 8px;
-}
-.gridpicker__nav button {
-  width: 28px; height: 28px; border: none; background: transparent;
-  color: var(--fg-default); cursor: pointer; border-radius: var(--radius-sm);
-}
-.gridpicker__nav button:hover { background: var(--bg-subtle); }
-.gridpicker__nav button:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
-.gridpicker__title { font-family: var(--font-body); font-weight: 600; font-size: var(--text-sm); }
-.gridpicker__grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
-}
-.gridpicker__cell {
-  min-height: var(--control-h-md); padding: 8px 6px; border: none; background: transparent;
-  color: var(--fg-default); border-radius: var(--radius-sm);
-  cursor: pointer; font-family: var(--font-body); font-size: var(--text-sm);
-}
-.gridpicker__cell:hover:not(:disabled) { background: var(--bg-subtle); }
-.gridpicker__cell:focus-visible { outline: none; box-shadow: var(--focus-ring-accent); }
-.gridpicker__cell.is-out { color: var(--fg-subtle); }
-.gridpicker__cell.is-selected { background: var(--fill-brand); color: var(--color-white); }
-.gridpicker__cell:disabled { opacity: 0.3; cursor: not-allowed; }
-
 /* ---------- FileUpload ---------- */
 .file-upload {
   border: 2px dashed var(--border-default);
@@ -2991,16 +3030,6 @@ button, input, select, textarea { box-sizing: border-box; }
    the inputs row, nav and actions all line up to the same square — no dead space
    beside a left-aligned calendar. */
 .daterange__popover--compact .daterange__panes { flex: 0 0 auto; width: max-content; }
-.daterange__nav {
-  display: grid; grid-template-columns: auto 1fr auto;
-  align-items: center; margin-bottom: 8px;
-}
-.daterange__nav > button {
-  background: transparent; border: 0; cursor: pointer;
-  width: 28px; height: 28px; border-radius: var(--radius-sm);
-  color: var(--fg-default); font-size: var(--text-lg);
-}
-.daterange__nav > button:hover { background: var(--bg-subtle); }
 /* `width: max-content` so the container hugs the two fixed-width months — the
    inter-month divider (::before at left:50%) then lands exactly in the gap, and
    the calendar doesn't stretch to a wide popover. */
@@ -3014,60 +3043,6 @@ button, input, select, textarea { box-sizing: border-box; }
   background: var(--color-secondary); border-radius: var(--radius-pill);
 }
 .daterange__month { font-family: var(--font-body); }
-.daterange__title {
-  font-family: var(--font-display); font-weight: 700;
-  font-size: var(--text-sm); text-transform: var(--tt-title);
-  letter-spacing: var(--tracking-wide);
-  text-align: center; margin-bottom: 8px;
-}
-.daterange__grid {
-  /* Fixed 40px columns (not 1fr) so the calendar stays tight regardless of the
-     popover width — a wide container must not stretch the days into loose,
-     far-apart cells (the numbers should hug, like a compact month view). */
-  display: grid; grid-template-columns: repeat(7, 40px); gap: 2px;
-}
-.daterange__dow {
-  font-family: var(--font-body); font-weight: 700; font-size: 0.625rem;
-  letter-spacing: var(--tracking-wider); text-transform: var(--tt-label);
-  color: var(--fg-subtle); text-align: center; padding: 4px 0;
-}
-.daterange__day {
-  position: relative; z-index: 0;
-  height: 32px;
-  border: 0; background: transparent; cursor: pointer;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
-}
-.daterange__day:hover:not(:disabled):not(.is-band) { background: var(--bg-subtle); }
-.daterange__day.is-today { font-weight: 700; color: var(--color-primary); }
-/* Continuous range band behind the days. Everything is SQUARE (radius-sm) for one
-   consistent shape across hover / selected / band — no circles or pills. The band
-   ::before fills each cell and bridges the 2px column gap (left/right: -1px); the
-   outer corners round only at the range ends + row edges, toggled by is-rl/is-rr
-   (which round both the band and the endpoint block to the same radius). */
-.daterange__day.is-band { color: var(--color-primary-800); }
-.daterange__day.is-band::before {
-  content: ''; position: absolute; top: 0; bottom: 0; left: -1px; right: -1px;
-  z-index: -2; background: var(--color-primary-100);
-}
-.daterange__day.is-rl::before { left: 0; }
-.daterange__day.is-rr::before { right: 0; }
-.daterange__day.is-rl::before, .daterange__day.is-rl::after { border-top-left-radius: var(--radius-sm); border-bottom-left-radius: var(--radius-sm); }
-.daterange__day.is-rr::before, .daterange__day.is-rr::after { border-top-right-radius: var(--radius-sm); border-bottom-right-radius: var(--radius-sm); }
-/* Adjacent-month days: greyed, non-interactive context (fixed 6-row height). */
-.daterange__day.is-outside {
-  display: flex; align-items: center; justify-content: center;
-  color: var(--fg-subtle); opacity: 0.4; pointer-events: none;
-}
-/* Endpoints (from/to): a solid square block filling the cell (rounds on its outer
-   side via is-rl/is-rr above), so it merges seamlessly with the band — no circle. */
-.daterange__day.is-selected { color: var(--color-white); font-weight: 700; }
-.daterange__day.is-selected::after {
-  content: ''; position: absolute; inset: 0;
-  z-index: -1; background: var(--fill-brand);
-}
-.daterange__day.is-disabled { opacity: 0.3; pointer-events: none; }
-
 /* Compact single-month layout (months={1}): narrower popover, one panel, no
    inter-month divider. */
 .daterange__popover--compact { min-width: 0; }
@@ -3093,40 +3068,6 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 /* Month/year jump (monthDropdown). */
-.daterange__monthjump { position: relative; justify-self: center; }
-.daterange__monthjump-trigger {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: transparent; border: 0; cursor: pointer; padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm);
-  text-transform: var(--tt-title); letter-spacing: var(--tracking-wide); color: var(--fg-default);
-  white-space: nowrap;
-}
-.daterange__monthjump-trigger:hover { background: var(--bg-subtle); }
-.daterange__menu {
-  /* Centered under the (now centered) trigger so the 220px menu stays inside
-     the compact calendar instead of overflowing to the right. */
-  position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 5;
-  background: var(--bg-surface); border: 1px solid var(--border-default);
-  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
-  padding: 8px; width: 220px;
-}
-.daterange__menu-year { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.daterange__menu-year span { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
-.daterange__menu-year button {
-  background: transparent; border: 0; cursor: pointer; padding: 4px;
-  border-radius: var(--radius-sm); color: var(--fg-default); display: inline-flex;
-}
-.daterange__menu-year button:hover { background: var(--bg-subtle); }
-.daterange__menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.daterange__menu-month {
-  background: transparent; border: 0; cursor: pointer; padding: 8px 0;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-default);
-}
-.daterange__menu-month:hover { background: var(--bg-subtle); }
-.daterange__menu-month.is-current { background: var(--fill-brand); color: var(--color-white); font-weight: 700; }
-
 .daterange__actions {
   display: flex; justify-content: flex-end; gap: 8px;
   padding-top: 12px; margin-top: 12px;

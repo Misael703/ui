@@ -17,7 +17,7 @@ const openWith = (props: Record<string, unknown>) => {
 };
 // Only the in-month days are buttons; adjacent-month days are greyed spans.
 const day = (n: number) =>
-  [...document.querySelectorAll('button.daterange__day')].find((b) => b.textContent === String(n)) as HTMLElement;
+  [...document.querySelectorAll('button.calview__day')].find((b) => b.textContent === String(n)) as HTMLElement;
 
 beforeEach(() => { document.body.innerHTML = ''; });
 
@@ -87,20 +87,31 @@ describe('DateRangePicker — showInputs (opt-in)', () => {
   });
 });
 
-describe('DateRangePicker — monthDropdown (opt-in)', () => {
-  it('shows a month/year trigger instead of the static title; selecting jumps the view', () => {
-    openWith({ value: RANGE, onChange: () => {}, monthDropdown: true, months: 1 });
-    const trigger = document.querySelector('.daterange__monthjump-trigger') as HTMLElement;
-    expect(trigger.textContent).toMatch(/2026/);
-    // No static title when the dropdown owns the label.
-    expect(document.querySelector('.daterange__title')).toBeNull();
-    // Open the menu and jump to January.
-    fireEvent.click(trigger);
-    const menu = document.querySelector('.daterange__menu');
-    expect(menu).not.toBeNull();
-    const jan = [...document.querySelectorAll('.daterange__menu-month')].find((b) => b.textContent === 'Ene') as HTMLElement;
-    fireEvent.click(jan);
-    expect((document.querySelector('.daterange__monthjump-trigger') as HTMLElement).textContent).toMatch(/Enero/);
+describe('DateRangePicker — month / year picker in the calendar header (v3.9.0, always on)', () => {
+  it('the title is a button: it climbs to the months grid, and picking a month jumps the view', () => {
+    openWith({ value: RANGE, onChange: () => {}, months: 1 });
+    const title = document.querySelector('.calview__title') as HTMLButtonElement;
+    expect(title.textContent).toMatch(/2026/);
+    fireEvent.click(title);
+    expect(document.querySelectorAll('.calview__cell').length).toBe(12);
+    const ene = [...document.querySelectorAll('.calview__cell')].find((b) => b.textContent === 'Ene') as HTMLElement;
+    fireEvent.click(ene);
+    expect((document.querySelector('.calview__title') as HTMLElement).textContent).toMatch(/Enero 2026/);
+    expect(document.querySelectorAll('.calview__day').length).toBe(42);
+  });
+  it('from months the title climbs to years; a year descends to months', () => {
+    openWith({ value: RANGE, onChange: () => {}, months: 1 });
+    fireEvent.click(document.querySelector('.calview__title') as HTMLElement);
+    fireEvent.click(document.querySelector('.calview__title') as HTMLElement);
+    const years = [...document.querySelectorAll('.calview__cell')].map((b) => b.textContent);
+    expect(years).toHaveLength(12);
+    expect(years).toContain('2026');
+    fireEvent.click([...document.querySelectorAll('.calview__cell')].find((b) => b.textContent === '2024') as HTMLElement);
+    expect((document.querySelector('.calview__title') as HTMLElement).textContent).toMatch(/^2024/);
+  });
+  it('the deprecated monthDropdown prop is accepted and changes nothing', () => {
+    openWith({ value: RANGE, onChange: () => {}, months: 1, monthDropdown: true });
+    expect(document.querySelector('.calview__title')).not.toBeNull();
   });
 });
 
@@ -130,10 +141,10 @@ describe('buildMonthGrid6 — fixed 6-row grid with adjacent days', () => {
 describe('Date pickers — stable height (adjacent days rendered, not selectable)', () => {
   it('DateRangePicker renders a full 42-cell grid; outside days are greyed non-buttons', () => {
     openWith({ value: RANGE, onChange: () => {}, months: 1 });
-    const grid = document.querySelector('.daterange__grid') as HTMLElement;
+    const grid = document.querySelector('.calview__grid--days') as HTMLElement;
     // 7 weekday headers + 42 day cells.
-    expect(grid.querySelectorAll('.daterange__day').length).toBe(42);
-    const outside = grid.querySelectorAll('.daterange__day.is-outside');
+    expect(grid.querySelectorAll('.calview__day').length).toBe(42);
+    const outside = grid.querySelectorAll('.calview__day.is-outside');
     expect(outside.length).toBeGreaterThan(0);
     outside.forEach((el) => expect(el.tagName).toBe('SPAN'));
   });
@@ -141,8 +152,8 @@ describe('Date pickers — stable height (adjacent days rendered, not selectable
   it('DatePicker renders a full 42-cell grid too', () => {
     const { container } = render(<DatePicker value={new Date(2026, 1, 10)} onChange={() => {}} />);
     fireEvent.focus(container.querySelector('.datepicker__input') as HTMLElement);
-    expect(document.querySelectorAll('.datepicker__day').length).toBe(42);
-    expect(document.querySelectorAll('.datepicker__day.is-outside').length).toBeGreaterThan(0);
+    expect(document.querySelectorAll('.calview__day').length).toBe(42);
+    expect(document.querySelectorAll('.calview__day.is-outside').length).toBeGreaterThan(0);
   });
 });
 
@@ -203,7 +214,7 @@ describe('DateRangePicker — active preset name on the trigger (Bsale-style)', 
     expect(trigger().textContent).toContain('Este mes');
     // Reopen and pick a day manually → the trigger drops the preset name for the range.
     fireEvent.click(trigger());
-    fireEvent.click([...document.querySelectorAll('button.daterange__day')].find((b) => b.textContent === '15') as HTMLElement);
+    fireEvent.click([...document.querySelectorAll('button.calview__day')].find((b) => b.textContent === '15') as HTMLElement);
     expect(trigger().textContent).not.toContain('Este mes');
     expect(trigger().textContent).toContain('→');
   });
@@ -215,7 +226,7 @@ describe('DateRangePicker — active preset name on the trigger (Bsale-style)', 
     expect(trigger.textContent).toContain('Este mes');
     // The range was seeded too: opening shows day 1 selected.
     fireEvent.click(trigger);
-    const d1 = [...document.querySelectorAll('button.daterange__day')].find((b) => b.textContent === '1') as HTMLElement;
+    const d1 = [...document.querySelectorAll('button.calview__day')].find((b) => b.textContent === '1') as HTMLElement;
     expect(d1.className).toContain('is-selected');
   });
 
