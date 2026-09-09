@@ -5,6 +5,14 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.1] — 2026-09-09
+
+### Fixed
+- **Rango cuyo extremo es hoy**: la media banda bajo el círculo del extremo
+  heredaba la geometría del punto de "hoy" (4×4px, transform, radio) y se
+  reducía a una astilla, dejando un hueco entre el círculo y la banda. La
+  regla del extremo resetea esas propiedades.
+
 ## [3.9.0] — 2026-09-09
 
 **Minor. Un calendario para los cuatro pickers.** Origen: tres calendarios sin

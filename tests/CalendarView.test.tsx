@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { CalendarView, focusCalendar } from '../src/components/CalendarView';
 import { isSameDay } from '../src/utils/dateFormat';
 
@@ -114,3 +116,15 @@ describe('CalendarView keyboard (roving focus)', () => {
     expect(outer).toHaveBeenCalledOnce();
   });
 });
+
+describe('CalendarView range band CSS (v3.9.1)', () => {
+  it('an endpoint that is also today keeps its half band (dot geometry reset)', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    const half = css.match(/\.calview__day\.is-band\.is-selected::after \{([^}]*)\}/)?.[1] ?? '';
+    expect(half).toMatch(/width:\s*auto/);
+    expect(half).toMatch(/height:\s*auto/);
+    expect(half).toMatch(/transform:\s*none/);
+    expect(half).toMatch(/border-radius:\s*0/);
+  });
+});
+
