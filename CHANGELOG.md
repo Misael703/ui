@@ -5,7 +5,15 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.8.1] — 2026-09-08
+## [3.8.1] — 2026-09-09
+
+### Fixed
+- **`DatePicker` no aceptaba escritura.** El input iba directo de `value`:
+  cada tecla parseaba una fecha PARCIAL → `null` → `onChange(null)` → el input
+  volvía a vacío. Ahora el texto es local, `value` manda solo cuando cambia a
+  otro día (calendario, set externo), la fecha se confirma cuando parsea, y un
+  resto que no parsea vuelve al último valor válido al salir del campo.
+  `DateRangePicker` ya tenía este patrón en sus inputs.
 
 ### Changed
 - **`DateRangePicker` vacío**: el trigger muestra el formato de fecha como

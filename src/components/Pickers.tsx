@@ -355,6 +355,19 @@ export function DatePicker({
   const months = locale['calendar.months'];
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState(() => startOfMonth(value ?? new Date()));
+  // What the user is typing (v3.8.1). The input used to be driven straight by
+  // `value`: every keystroke parsed a PARTIAL date → null → onChange(null) →
+  // the input re-rendered empty and the characters vanished. The text is local
+  // now; `value` only takes over when it changes to a different day (calendar
+  // pick, external set), and the text snaps back to the last valid date on
+  // blur if what was typed does not parse.
+  const [text, setText] = React.useState(() => (value ? formatDate(value, fmt) : ''));
+  React.useEffect(() => {
+    const typed = parseDate(text, fmt);
+    const same = value == null ? typed == null && text.trim() === '' : typed != null && isSameDay(typed, value);
+    if (!same) setText(value ? formatDate(value, fmt) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from value only
+  }, [value, fmt]);
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const popoverRef = React.useRef<HTMLDivElement>(null);
 
@@ -402,10 +415,17 @@ export function DatePicker({
         // native ~20-char default. `flex: 1` still fills a wider cell.
         size={ph.length + 1}
         disabled={disabled}
-        value={value ? formatDate(value, fmt) : ''}
+        value={text}
         onChange={(e) => {
-          const d = parseDate(e.target.value, fmt);
-          onChange(d);
+          const raw = e.target.value;
+          setText(raw);
+          if (raw.trim() === '') { onChange(null); return; }
+          const d = parseDate(raw, fmt);
+          if (d && !isDisabled(d)) onChange(d);
+        }}
+        onBlur={() => {
+          // Unparseable leftovers snap back to the last valid value.
+          if (text.trim() !== '' && parseDate(text, fmt) == null) setText(value ? formatDate(value, fmt) : '');
         }}
         onFocus={() => setOpen(true)}
         aria-invalid={invalid || undefined}
