@@ -462,6 +462,11 @@
   --duration-base:   200ms;
   --duration-slow:   320ms;
   --duration-exit:   150ms;   /* ~75% of --duration-base: dismissals feel decisive */
+  /* Full-distance slides (Drawer, bottom sheet): a panel crossing its whole
+     width needs more time than a 20px nudge to read as motion; the exit is
+     shorter and accelerates (--ease-in). Overlay.tsx DRAWER_EXIT_MS = exit. */
+  --duration-slide:      260ms;
+  --duration-slide-exit: 180ms;
 
   /* -------- Z-index scale -------------------------------------------- */
   --z-base:      1;

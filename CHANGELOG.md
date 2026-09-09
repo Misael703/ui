@@ -5,6 +5,18 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.3] — 2026-09-09
+
+### Fixed
+- **Drawer lateral: entra deslizándose, no apareciendo.** El panel se
+  desplazaba 20px mientras se fundía (200ms, `ease-out-quint`); medido cuadro
+  a cuadro, el movimiento visible terminaba en 3 o 4 frames y se leía como
+  un "pop". Ahora recorre todo su ancho, opaco, en `--duration-slide` (260ms)
+  con `--ease-out-quint`, y sale acelerando con `--ease-in` en
+  `--duration-slide-exit` (180ms); solo el backdrop se funde. Misma regla
+  para el bottom sheet mobile. `prefers-reduced-motion` anula la animación
+  del drawer. Tokens nuevos en `_root.css`; `DRAWER_EXIT_MS` en Overlay.tsx.
+
 ## [3.9.1] — 2026-09-09
 
 ### Fixed
