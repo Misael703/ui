@@ -2388,7 +2388,11 @@ button, input, select, textarea { box-sizing: border-box; }
    square ghost prev/next + the title as a button (chevron = climbs a level).
    Days: 36px cells, selected = filled circle, today = dot under the number,
    adjacent-month days subtle. Months / years: 3×4 pills. */
-.calview { font-family: var(--font-body); }
+/* One width whatever the view (days / months / years): the DateRangePicker
+   sets two of these side by side and centres its divider at 50% of the pair,
+   so the panels must not resize with their state. Width = the days grid
+   (7 × 36px + 6 × 2px gaps); the months / years grid fills it. */
+.calview { font-family: var(--font-body); width: calc(7 * 36px + 6 * 2px); }
 .calview__nav {
   display: grid; grid-template-columns: auto 1fr auto; align-items: center;
   gap: 4px; margin-bottom: 8px;
@@ -2467,7 +2471,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .calview__day.is-disabled, .calview__day:disabled { opacity: 0.3; cursor: not-allowed; }
 /* Months / years: 3×4 pills; the current month/year reads in brand, the
    selected one is filled. */
-.calview__grid--cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; min-width: 240px; }
+.calview__grid--cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .calview__cell {
   min-height: var(--control-h-md); padding: 6px 8px; border: 0; background: transparent;
   border-radius: var(--radius-md); cursor: pointer;
