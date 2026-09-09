@@ -5,6 +5,34 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.1] — 2026-09-09
+
+### Fixed
+- **`DatePicker` no aceptaba escritura.** El input iba directo de `value`:
+  cada tecla parseaba una fecha PARCIAL → `null` → `onChange(null)` → el input
+  volvía a vacío. Ahora el texto es local, `value` manda solo cuando cambia a
+  otro día (calendario, set externo), la fecha se confirma cuando parsea, y un
+  resto que no parsea vuelve al último valor válido al salir del campo.
+  `DateRangePicker` ya tenía este patrón en sus inputs.
+- **Máscara en vivo al escribir fechas** (`DatePicker` y los inputs del
+  `DateRangePicker`): solo dígitos, los separadores aparecen a medida que se
+  llenan los grupos (`dd-mm-aaaa` / `aaaa-mm-dd` según `format`), tope de
+  ocho dígitos, `inputMode="numeric"` para el teclado del teléfono. Backspace
+  sobre un separador borra el dígito anterior en vez de pelear con la
+  máscara; un ISO pegado se reformatea. `DatePicker` confirma solo una fecha
+  COMPLETA: el parser acepta años de 1–4 dígitos y "15-03-20" a medio
+  escribir habría confirmado el año 20. Utilidad `maskDateInput` en
+  `utils/dateFormat`.
+
+### Changed
+- **`DateRangePicker` vacío**: el trigger muestra el formato de fecha como
+  placeholder en registro muted ("dd-mm-aaaa", según `format`) en vez de
+  "Seleccionar rango"; enseña la forma del valor y cabe en una celda de
+  filtro de 138px sin envolver a dos líneas (el label recorta con elipsis si
+  aun así no cabe). El nombre
+  accesible sigue siendo "Seleccionar rango" (`aria-label` mientras está
+  vacío).
+
 ## [3.8.0] — 2026-09-08
 
 **Minor. `FilterBar layout`: cuánto escondes, como decisión explícita.**

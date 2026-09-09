@@ -52,6 +52,31 @@ export function dateFormatPlaceholder(format: ResolvedDateFormat): string {
   return PLACEHOLDERS[format];
 }
 
+/**
+ * Live input mask for a typed date (v3.8.1): keeps digits only, caps them at
+ * eight, and inserts the `-` separators as the groups fill (`dmy`: 2-2-4,
+ * `mdy`: 2-2-4, `iso`: 4-2-2). A separator appears only once the next group
+ * has a digit, so Backspace over one removes the digit before it instead of
+ * fighting the mask. A pasted ISO date is reformatted, not mangled.
+ */
+export function maskDateInput(raw: string, format: ResolvedDateFormat): string {
+  const iso = raw.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso && format !== 'iso') {
+    const [, y, m, d] = iso;
+    return format === 'dmy' ? `${d}-${m}-${y}` : `${m}-${d}-${y}`;
+  }
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  const groups = format === 'iso' ? [4, 2, 2] : [2, 2, 4];
+  const out: string[] = [];
+  let i = 0;
+  for (const len of groups) {
+    if (i >= digits.length) break;
+    out.push(digits.slice(i, i + len));
+    i += len;
+  }
+  return out.join('-');
+}
+
 /** Format a Date as a string in the given resolved format. Always uses `-` as separator. */
 export function formatDate(d: Date, format: ResolvedDateFormat): string {
   const yyyy = d.getFullYear();

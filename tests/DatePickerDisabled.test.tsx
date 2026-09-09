@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
@@ -219,3 +220,51 @@ describe('field text size: pickers/combobox match the base .input (14px compact)
     expect(css).toMatch(/\.fields--dense \.combobox__input \{[^}]*font-size:\s*var\(--text-sm\)/);
   });
 });
+
+/**
+ * Typing into the DatePicker (v3.8.1). The input used to be driven straight by
+ * `value`: a partial date parsed to null, onChange(null) fired, and the input
+ * re-rendered empty — nothing could be typed. The text is local now.
+ */
+describe('DatePicker accepts typing', () => {
+  function Harness({ initial = null }: { initial?: Date | null }) {
+    const [v, setV] = React.useState<Date | null>(initial);
+    return <><DatePicker value={v} onChange={setV} format="dmy" /><output data-testid="v">{v ? v.toISOString().slice(0, 10) : 'null'}</output></>;
+  }
+  it('keeps partial text while typing and commits when the date parses', () => {
+    render(<Harness />);
+    const input = screen.getByPlaceholderText('dd-mm-aaaa') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '15-0' } });
+    expect(input.value).toBe('15-0');
+    expect(screen.getByTestId('v')).toHaveTextContent('null');
+    fireEvent.change(input, { target: { value: '15-03-2026' } });
+    expect(input.value).toBe('15-03-2026');
+    expect(screen.getByTestId('v')).toHaveTextContent('2026-03-15');
+  });
+  it('clearing the text clears the value; an unparseable leftover snaps back on blur', () => {
+    render(<Harness initial={new Date(2026, 2, 15)} />);
+    const input = screen.getByDisplayValue('15-03-2026') as HTMLInputElement;
+    // the live mask drops the letters; what is left ("15-03-20") is a partial:
+    // NOT committed (the parser would read year 20), value stays put
+    fireEvent.change(input, { target: { value: '15-03-20xx' } });
+    expect(input.value).toBe('15-03-20');
+    expect(screen.getByTestId('v')).toHaveTextContent('2026-03-15');
+    fireEvent.blur(input);
+    expect(input.value).toBe('15-03-2026');
+    fireEvent.change(input, { target: { value: '' } });
+    expect(screen.getByTestId('v')).toHaveTextContent('null');
+  });
+});
+
+describe('DatePicker live mask', () => {
+  it('formats while typing: digits only, separators auto, capped at a full date', () => {
+    render(<DatePicker value={null} onChange={() => {}} format="dmy" />);
+    const input = screen.getByPlaceholderText('dd-mm-aaaa') as HTMLInputElement;
+    expect(input).toHaveAttribute('inputmode', 'numeric');
+    fireEvent.change(input, { target: { value: '123123123213' } });
+    expect(input.value).toBe('12-31-2312');
+    fireEvent.change(input, { target: { value: '150' } });
+    expect(input.value).toBe('15-0');
+  });
+});
+

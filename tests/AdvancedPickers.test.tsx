@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   MultiCombobox, DateRangePicker, CommandPalette,
 } from '../src/components/AdvancedPickers';
@@ -243,3 +245,20 @@ describe('CommandPalette', () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+describe('DateRangePicker empty placeholder (v3.8.1)', () => {
+  it('shows the date format, muted, and keeps "Seleccionar rango" as the accessible name', () => {
+    render(<DateRangePicker value={{ from: null, to: null }} onChange={() => {}} />);
+    const btn = screen.getByRole('button', { name: /Seleccionar rango/i });
+    const label = btn.querySelector('.daterange__label') as HTMLElement;
+    expect(label).toHaveClass('daterange__label--placeholder');
+    expect(label.textContent).toBe('dd-mm-aaaa');
+    expect(label.textContent).not.toMatch(/Seleccionar/);
+  });
+  it('CSS: the label clips instead of wrapping; the placeholder is muted', () => {
+    const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8');
+    expect(css).toMatch(/\.daterange__label \{[^}]*white-space:\s*nowrap/);
+    expect(css).toMatch(/\.daterange__label--placeholder \{[^}]*color:\s*var\(--fg-muted\)/);
+  });
+});
+

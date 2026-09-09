@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { CalendarIcon, ChevronLeft, ChevronRight, ChevronDown, X, Check, Search } from './Icons';
-import { resolveDateFormat, formatDate, parseDate, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
+import { resolveDateFormat, formatDate, parseDate, maskDateInput, dateFormatPlaceholder, startOfMonth, addMonths, isSameDay, buildMonthGrid6, type DateFormat } from '../utils/dateFormat';
 import { useLocale } from '../locale/LocaleProvider';
 import { format as formatMsg } from '../locale/messages';
 import { Portal } from './Portal';
@@ -508,14 +508,18 @@ export function DateRangePicker({
   };
 
   // Show the active preset's name (like Bsale) when one is applied; otherwise the
-  // date range, or the placeholder when empty.
+  // date range. Empty: the FORMAT as a muted placeholder ("dd-mm-aaaa", v3.8.1) —
+  // it teaches the shape of the value and fits a 138px filter cell where a
+  // two-date hint would clip; the accessible name stays "Seleccionar rango" via
+  // aria-label.
+  const empty = !displayed.from;
   const label = appliedPreset && displayed.from
     ? appliedPreset
     : displayed.from
       ? displayed.to
         ? `${formatDate(displayed.from, fmt)} → ${formatDate(displayed.to, fmt)}`
         : `${formatDate(displayed.from, fmt)} → …`
-      : locale['picker.selectRange'];
+      : dateFormatPlaceholder(fmt);
 
   const renderMonth = (offset: number) => {
     const { month: m, cells } = offset === 0 ? monthGrid0 : monthGrid1;
@@ -605,9 +609,10 @@ export function DateRangePicker({
         onClick={toggleOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-label={empty ? locale['picker.selectRange'] : undefined}
       >
         <span className="daterange__icon" aria-hidden="true"><CalendarIcon size={16} /></span>
-        <span>{label}</span>
+        <span className={cx('daterange__label', empty && 'daterange__label--placeholder')}>{label}</span>
       </button>
       {open && (
         <Portal>
@@ -646,7 +651,8 @@ export function DateRangePicker({
                     size={dateFormatPlaceholder(fmt).length + 1}
                     value={fromText}
                     placeholder={dateFormatPlaceholder(fmt)}
-                    onChange={(e) => setFromText(e.target.value)}
+                    inputMode="numeric"
+                    onChange={(e) => setFromText(maskDateInput(e.target.value, fmt))}
                     onBlur={(e) => commitInput('from', e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') commitInput('from', (e.target as HTMLInputElement).value); }}
                   />
@@ -659,7 +665,8 @@ export function DateRangePicker({
                     size={dateFormatPlaceholder(fmt).length + 1}
                     value={toText}
                     placeholder={dateFormatPlaceholder(fmt)}
-                    onChange={(e) => setToText(e.target.value)}
+                    inputMode="numeric"
+                    onChange={(e) => setToText(maskDateInput(e.target.value, fmt))}
                     onBlur={(e) => commitInput('to', e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') commitInput('to', (e.target as HTMLInputElement).value); }}
                   />
