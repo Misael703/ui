@@ -5,6 +5,16 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] — 2026-09-10
+
+### Fixed
+- **Button: 500 en vez de 600, ícono con trazo 2.** En DM Sans el 600 a 14px
+  lee como bold y el label pesaba más que su ícono de 16px con trazo 1.75
+  (visto en el primario El Alba: "+ Nueva orden" quedaba grande y el `+`
+  liviano). Medium más ícono con trazo 2 es el balance de shadcn
+  (`text-sm font-medium`). Comparado en Storybook contra 14/600, 13/600,
+  13/500 y la 3.9 en mayúsculas.
+
 ## [4.2.0] — 2026-09-10
 
 **Minor. Regla de niveles tonales: el tono agrupa, nunca delinea.**

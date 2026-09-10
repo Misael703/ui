@@ -75,7 +75,10 @@ button, input, select, textarea { box-sizing: border-box; }
   /* v4.0.0 product register: sentence case, 600, no tracking (tokens
      --tt-action / --tracking-action so a preset can opt back into caps), one
      radius with every other control of the same height. */
-  font-weight: 600;
+  /* 4.2.1: 500, not 600 — DM Sans 600 reads as bold at 14px and the label
+     outweighed its 16px icon (seen on the El Alba primary). Medium + a 2px
+     icon stroke is the balance shadcn ships (text-sm font-medium). */
+  font-weight: 500;
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-action);
   text-transform: var(--tt-action);
@@ -109,7 +112,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .btn--xl { padding: 14px 28px; font-size: var(--text-md); min-height: 52px; }
 /* Icons inside a button follow the label, not their own default (20px): 16
    next to a 13–14px label, 18 in the two large tiers. */
-.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; stroke-width: 2; }
 .btn--lg svg, .btn--xl svg { width: 18px; height: 18px; }
 .btn--icon { padding: 0; aspect-ratio: 1; }
 .btn--icon.btn--sm { width: 36px; }
