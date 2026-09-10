@@ -65,12 +65,12 @@ describe('compact register — fields', () => {
 });
 
 describe('compact register — buttons', () => {
-  it('md: 38px, 13px uppercase, radio 6, centrado por flex', () => {
+  it('md: 38px, 14px sentence case (v4.0.0 dropped the 13px caps exception), radio 6 en la base', () => {
     const md = ruleBody(index, '.btn--md');
     expect(md).toMatch(/min-height:\s*var\(--control-h-md\)/);
-    expect(md).toMatch(/font-size:\s*var\(--text-data\)/);
+    expect(md).toMatch(/font-size:\s*var\(--control-font-md\)/);
     expect(md).toMatch(/padding:\s*0 16px/);
-    expect(md).toMatch(/border-radius:\s*var\(--control-radius-md\)/);
+    expect(ruleBody(index, '.btn')).toMatch(/border-radius:\s*var\(--control-radius-md\)/);
   });
   it('lg baja a 44/14', () => {
     const lg = ruleBody(index, '.btn--lg');
@@ -89,10 +89,10 @@ describe('compact register — toggle / segmented', () => {
 });
 
 describe('compact register — page header + card', () => {
-  it('.page-header__title matchea clamp(var(--text-lg), 2vw + 0.5rem, var(--text-2xl))', () => {
-    expect(ruleBody(index, '.page-header__title')).toMatch(
-      /clamp\(var\(--text-lg\), 2vw \+ 0\.5rem, var\(--text-2xl\)\)/
-    );
+  it('.page-header__title es fuente de cuerpo, 600, --text-xl (v4.0.0: un título de producto, no display)', () => {
+    const t = ruleBody(index, '.page-header__title');
+    expect(t).toMatch(/font-family:\s*var\(--font-body\)/);
+    expect(t).toMatch(/font-size:\s*var\(--text-xl\)/);
   });
   it('.card__body matchea padding: 16px 20px', () => {
     expect(ruleBody(index, '.card__body')).toMatch(/padding:\s*16px 20px/);

@@ -72,11 +72,14 @@ button, input, select, textarea { box-sizing: border-box; }
   justify-content: center;
   gap: 8px;
   font-family: var(--font-body);
-  font-weight: 700;
+  /* v4.0.0 product register: sentence case, 600, no tracking (tokens
+     --tt-action / --tracking-action so a preset can opt back into caps), one
+     radius with every other control of the same height. */
+  font-weight: 600;
   font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
-  text-transform: var(--tt-label);
-  border-radius: var(--radius-md);
+  letter-spacing: var(--tracking-action);
+  text-transform: var(--tt-action);
+  border-radius: var(--control-radius-md);
   border: 1px solid transparent;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-standard),
@@ -101,9 +104,13 @@ button, input, select, textarea { box-sizing: border-box; }
 /* sizes */
 .btn--xs { padding: 6px 10px; font-size: var(--text-2xs); min-height: 28px; }
 .btn--sm { padding: 8px 14px; font-size: var(--text-xs); min-height: 36px; }
-.btn--md { padding: 0 16px; font-size: var(--text-data); min-height: var(--control-h-md); border-radius: var(--control-radius-md); }
+.btn--md { padding: 0 16px; font-size: var(--control-font-md); min-height: var(--control-h-md); }
 .btn--lg { padding: 0 20px; font-size: var(--text-sm); min-height: var(--control-h-lg); }
 .btn--xl { padding: 14px 28px; font-size: var(--text-md); min-height: 52px; }
+/* Icons inside a button follow the label, not their own default (20px): 16
+   next to a 13–14px label, 18 in the two large tiers. */
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.btn--lg svg, .btn--xl svg { width: 18px; height: 18px; }
 .btn--icon { padding: 0; aspect-ratio: 1; }
 .btn--icon.btn--sm { width: 36px; }
 .btn--icon.btn--md { width: 38px; }
@@ -269,7 +276,7 @@ button, input, select, textarea { box-sizing: border-box; }
   color: var(--fg-default);
   background: var(--bg-surface);
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   /* Tokenized control metrics (v3.0.0). Default is now the compact register
      38px—desktop-optimized form density. On touch-capable devices
      (@media pointer:coarse in _root.css), the WCAG 2.5.5 touch target 44px
@@ -351,7 +358,7 @@ button, input, select, textarea { box-sizing: border-box; }
   display: flex;
   align-items: stretch;
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   overflow: hidden;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
@@ -495,10 +502,15 @@ button, input, select, textarea { box-sizing: border-box; }
      shout and break the scan. So the default now reads as metadata:
      sentence case, tinted text. The brand caps texture is not lost — it
      moves to the opt-in `.badge--label` register below. */
-  font-weight: 600;
-  padding: 3px 8px;
+  /* v4.0.0: a 20px data chip, 500, no tracking — positive tracking belongs
+     to caps only; on lowercase it spreads the word and reads "old system".
+     The caps register (.badge--label) keeps its tracking. */
+  font-weight: 500;
+  padding: 1px 8px;
+  min-height: 20px;
+  line-height: 18px;
   border-radius: var(--radius-pill);
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: 0;
   text-transform: none;
   background: var(--bg-subtle);
   color: var(--fg-muted);
@@ -518,7 +530,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* Opt-in brand micro-label register: eyebrows, kickers, "NUEVO" tags —
    the caps texture that used to be every badge's default. The variant
    tints still apply on top (e.g. <Badge variant="accent" tone="label">). */
-.badge--label { text-transform: var(--tt-label); }
+.badge--label { text-transform: var(--tt-label); letter-spacing: var(--tracking-wide); font-weight: 600; }
 .badge--primary { background: var(--color-primary-100); color: var(--color-primary-800); border-color: var(--color-primary-200); --badge-ink: var(--color-primary-800); }
 .badge--accent { background: var(--color-secondary-100); color: var(--color-secondary-800); border-color: var(--color-secondary-200); --badge-ink: var(--color-secondary-800); }
 .badge--success { background: var(--color-green-50); color: var(--color-green-800); border-color: var(--color-green-200); --badge-ink: var(--color-green-800); }
@@ -653,7 +665,11 @@ button, input, select, textarea { box-sizing: border-box; }
 .card--inset > .card__header { border-bottom-color: var(--border-on-canvas); }
 .card--inset > .card__footer { background: transparent; border-top-color: var(--border-on-canvas); }
 .card__body { padding: 16px 20px; }
-.card__header { padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
+.card__header { padding: 16px 20px; }
+/* v4.0.0: the header hairline is opt-in (`CardHeader divider`). A card
+   already has a border and a shadow; a third horizontal line before the
+   content was the default and rarely earned. */
+.card__header--divided { border-bottom: 1px solid var(--border-default); }
 .card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
 .card__title {
   font-family: var(--font-body);
@@ -1502,7 +1518,7 @@ button, input, select, textarea { box-sizing: border-box; }
      gold from-scratch table; the eco/secondary line uses `.cell-meta`
      (11px / --fg-meta). Padding stays compact (8·12). v3.0.0: --text-sm→--text-data
      (14→13px), padding 8·12→7·10 for compact register default. */
-  padding: 7px 10px;
+  padding: 6px 10px;
   font-size: var(--text-data);
   border-bottom: 1px solid var(--border-default);
   vertical-align: middle;
@@ -1603,7 +1619,7 @@ button, input, select, textarea { box-sizing: border-box; }
    its 32px buttons, the zone adds 6px above and below (44px, the height of a
    row with a badge) and the text takes the data size. */
 .table-surface__footer .pagination { gap: 6px; font-size: var(--text-data); }
-.table-surface__footer .table-pagination { padding-block: 6px; }
+.table-surface__footer .table-pagination { padding-block: 4px; }
 /* The inner wrap defers ALL chrome to the surface — including the shadow,
    so the elevation lands once on the outer surface, not twice. */
 .table-surface > .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
@@ -2263,7 +2279,7 @@ button, input, select, textarea { box-sizing: border-box; }
      padding is fixed: it reserves room for the chevron, not density. */
   padding: var(--field-pad-y, 7px) 38px var(--field-pad-y, 7px) var(--field-pad-x, 12px);
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   color: var(--fg-default);
   font-family: var(--font-body); font-size: var(--text-md);
@@ -2338,7 +2354,7 @@ button, input, select, textarea { box-sizing: border-box; }
   width: 100%; box-sizing: border-box;
   background: var(--bg-surface);
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   min-height: var(--field-min-h, 44px);
   color: var(--fg-default);
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
@@ -2504,7 +2520,7 @@ button, input, select, textarea { box-sizing: border-box; }
   min-height: var(--field-min-h, 44px);
   padding: 0 var(--field-pad-x, 14px);
   background: var(--bg-surface);
-  border: 1px solid var(--border-control); border-radius: var(--radius-md);
+  border: 1px solid var(--border-control); border-radius: var(--control-radius-md);
   color: var(--fg-default);
   font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
@@ -2537,7 +2553,7 @@ button, input, select, textarea { box-sizing: border-box; }
 /* ---------- Grid pickers (YearPicker / MonthPicker) -------------------- */
 .gridpicker {
   position: relative; display: inline-flex; align-items: stretch;
-  border-radius: var(--radius-sm); width: 100%;
+  border-radius: var(--control-radius-md); width: 100%;
 }
 .gridpicker:focus-within { outline: none; box-shadow: var(--focus-ring-accent); }
 .gridpicker__input {
@@ -2727,7 +2743,7 @@ button, input, select, textarea { box-sizing: border-box; }
   display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   min-height: var(--field-min-h); padding: 6px 8px;
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   cursor: text;
 }
@@ -2762,7 +2778,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .phone-input {
   display: inline-flex; align-items: stretch;
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   overflow: hidden; height: var(--field-min-h); width: 100%;
 }
@@ -3005,7 +3021,7 @@ button, input, select, textarea { box-sizing: border-box; }
      138px filter cell at text-sm with 4px to spare instead of clipping. */
   height: var(--field-min-h); padding: 0 10px;
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   font-family: var(--font-body); font-size: var(--text-sm);
   color: var(--fg-default); cursor: pointer;
@@ -3803,7 +3819,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 
 /* ---------- PageHeader ---------- */
-.page-header { margin-bottom: 24px; }
+.page-header { margin-bottom: 8px; }
 .page-header__crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-muted); }
 .page-header__crumbs a { color: var(--fg-muted); border: 0; }
 .page-header__crumbs a:hover { color: var(--color-primary); }
@@ -3815,12 +3831,13 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 .page-header__title-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .page-header__title {
-  font-family: var(--font-display); font-weight: 700;
-  /* Step down from 2xl to lg on narrow viewports without breaking the
-     desktop scale. clamp() handles the fluid step natively. */
-  font-size: clamp(var(--text-lg), 2vw + 0.5rem, var(--text-2xl));
-  line-height: 1.1;
-  text-transform: var(--tt-title); letter-spacing: var(--tracking-tight);
+  /* v4.0.0: the page title reads in the body face at 20px / 600 — one
+     family on a working screen (product register); the display face stays
+     for brand surfaces (AppShell brand, marketing). */
+  font-family: var(--font-body); font-weight: 600;
+  font-size: var(--text-xl);
+  line-height: 1.2;
+  text-transform: var(--tt-title); letter-spacing: 0;
   margin: 0; color: var(--fg-default);
 }
 .page-header__desc { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
@@ -4370,7 +4387,7 @@ button, input, select, textarea { box-sizing: border-box; }
 }
 /* Inside a DataTable `toolbar` slot: the slot has no padding of its own
    (TableToolbar brings its own), so the bar pads itself to the table's gutter. */
-.table-surface__bar > .filter-bar { padding: var(--space-3) 16px; }
+.table-surface__bar > .filter-bar { padding: 8px 16px; }
 /* Phone, table layout: the bar keeps its box but tightens so funnel · count ·
    Limpiar · ⋯ hold one line at 320px. */
 @media (max-width: 600px) {
@@ -4725,7 +4742,7 @@ button, input, select, textarea { box-sizing: border-box; }
 .qty {
   display: inline-flex; align-items: center;
   border: 1px solid var(--border-control);
-  border-radius: var(--radius-md);
+  border-radius: var(--control-radius-md);
   background: var(--bg-surface);
   overflow: hidden;
 }

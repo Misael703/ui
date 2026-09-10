@@ -5,6 +5,56 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] — 2026-09-09
+
+**Major. Registro producto: menos tinta, no menos tamaño.** Cambio visual
+global, sin cambios de API salvo un prop nuevo. Medido contra una página
+shadcn, el kit no era más grande (38 vs 36px de control) sino más pesado en
+tinta: mayúsculas + 700 + tracking en los botones, tracking sobre minúsculas en
+los badges, dos radios a la misma altura, tres líneas horizontales antes del
+contenido de una card. Se queda a propósito lo que hace bien: controles de
+38px, hairlines de superficie y el borde 3:1 de los controles (WCAG 1.4.11).
+
+### Changed
+- **Button**: sentence case, 600, sin tracking. Tokens nuevos `--tt-action`
+  (`none`) y `--tracking-action` (`0`) para que un preset vuelva a mayúsculas
+  sin tocar `.btn`. El tamaño `md` lee `--control-font-md` (14px): cae la
+  excepción documentada de 13px (`--text-data`), que existía solo para
+  compensar el peso de caps + bold. Un solo radio en todos los tamaños
+  (`--control-radius-md`, 6px). Íconos dentro de un botón a 16px (18 en `lg`
+  y `xl`), sin importar el `size` del ícono.
+- **Controles**: input, select, textarea, input-group, Combobox, DateRangePicker,
+  TimePicker, PhoneInput, TagInput y Qty redondean con `--control-radius-md`
+  (6px), igual que el botón: a la misma altura, el mismo radio.
+- **Badge**: chip de datos de 20px (era 24), 500, sin tracking. El registro
+  de mayúsculas opt-in (`.badge--label` / `tone="label"`) conserva 600 y su
+  tracking.
+- **Superficies**: `--radius-lg` 12 → 8px (card, tabla, drawer, modal).
+- **Página de listado**: celda de tabla 6px (era 7); barra de filtros sobre la
+  tabla 8px de padding vertical (era 12); pie de paginación 4px (era 6);
+  `PageHeader` a 8px de la superficie (era 24). `FilterBar layout` por
+  defecto pasa a `collapse`: el grupo final (conteo, acciones) comparte la
+  línea con los campos; un set que cabe en una línea se muestra entero igual.
+  Pasar `layout="inline"` restaura el comportamiento anterior.
+- **PageHeader**: el título lee en la fuente de cuerpo, 600, 20px, sin
+  tracking (era display 24px 700). Una familia en una pantalla de trabajo; la
+  display se queda para superficies de marca.
+- **Card**: la línea bajo `CardHeader` es opt-in (`<CardHeader divider>`).
+
+### Migración
+- Botones y badges cambian de aspecto solos; nada que hacer salvo revisar
+  overrides propios de `.btn` / `.badge`.
+- Si una card dependía de la línea del header, agregar `divider`.
+- Si una barra de filtros dependía de mostrar todo siempre, pasar
+  `layout="inline"`.
+- Un preset que quiera acciones en mayúsculas: `--tt-action: uppercase;
+  --tracking-action: var(--tracking-wide);` en su `:root`.
+
+### Docs
+- Story Foundations/Registro reducida a las tres variantes miradas y NO
+  adoptadas (controles 36px, divisores tonales, borde de controles), para
+  volver a compararlas.
+
 ## [3.9.5] — 2026-09-09
 
 ### Fixed

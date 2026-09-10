@@ -318,17 +318,12 @@ what moved and what didn't.
   `--field-pad-x` are re-fed from `--control-h-md` / `--control-pad-x-md`
   rather than carrying their own literals, so fields and every other `md`
   control stay locked to one source.
-- **Documented exception — `Button` `md` reads `--text-data` (13px), not
-  `--control-font-md` (14px).** Every other `md` control (fields, table
-  toolbars, pickers) takes the 14px control font untouched. `.btn` carries
-  `font-weight: 700` + `text-transform: var(--tt-label)` (uppercase) +
-  `letter-spacing: var(--tracking-wide)` (0.04em) unconditionally — that
-  combination reads visually heavier/larger than a plain-case 14px label at
-  the same pixel size, so `Button` `md` is pinned one stop down to `--text-data`
-  to land at the same *perceived* weight as its sibling controls, not the
-  same literal font-size. `lg` doesn't need the correction (`--text-sm`
-  14px, unchanged) because at that size the caps+bold treatment reads
-  proportionate.
+- **`Button` `md` reads `--control-font-md` (14px) like every other `md`
+  control.** Until 3.x it was pinned one stop down to `--text-data` (13px)
+  because `.btn` carried caps + 700 + tracking, which reads heavier than a
+  plain-case label at the same size. v4.0.0 removed the cause instead of
+  compensating for it (see "Registro producto" below), so the exception is
+  gone.
 - **Touch guard — `@media (pointer: coarse)` (WCAG 2.5.5).** On a coarse
   pointer, `--control-h-md` is re-pinned to 44px and `--field-pad-y` grows
   10px, restoring the 44px touch target on touch devices. Only the tap
@@ -353,6 +348,43 @@ what moved and what didn't.
     genuine **ties** (documented, left untouched rather than guessed) —
     never migrates. `Button`'s `xl` tier is a deliberate larger register
     (52px), not an oversight, so it's explicitly out of the `md` set too.
+
+## Registro producto (v4.0.0)
+
+Measured against a shadcn page, the kit was not bigger (38 vs 36px
+controls) but heavier in **ink**: the eye reads lines, caps and weight, not
+2px of height. v4.0.0 is a visual-only major that spends less ink and keeps
+the sizes. Rules, with what each replaced:
+
+- **Actions in sentence case.** `.btn` is 600, `text-transform:
+  var(--tt-action)` (`none`), `letter-spacing: var(--tracking-action)` (`0`).
+  Caps + 700 + tracking on a button is an eyebrow treatment, not an action;
+  it was ~60% of the "kit looks bigger" effect. A preset that wants caps on
+  actions overrides the two tokens, never `.btn`.
+- **Positive tracking belongs to caps only.** `--tracking-wide` stays on
+  `--tt-label` surfaces (eyebrows, KPI labels, `.badge--label`); on lowercase
+  it spreads the word and reads "old system". `.badge` is a 20px data chip,
+  500, no tracking.
+- **One radius at one height.** Every control (button, input, select,
+  textarea, input-group, Combobox, pickers) rounds with `--control-radius-md`
+  (6px); surfaces (card, table, drawer, modal) with `--radius-lg`, now 8px.
+  Two radii side by side at the same height read "off" without saying why.
+- **One family on a working screen.** `PageHeader` title is the body face,
+  600, `--text-xl`; the display face stays for brand surfaces (AppShell
+  brand, marketing). Icons inside a button are 16px (18 in `lg` / `xl`).
+- **Lines are spent by role.** `CardHeader` draws its hairline only with
+  `divider`: a card already has a border and a shadow. Surface hairlines
+  (table border, header band, bar / footer dividers) STAY — tone-only
+  separation loses the column header's anchor and melts the table into a
+  near-white canvas (looked at, rejected).
+- **Density of the list page.** Cells 6px, filter bar 8px on the surface,
+  pagination 4px, header 8px above the surface, `FilterBar layout` defaults
+  to `collapse` so the trailing group shares the line.
+- **Kept on purpose:** 38px controls (36 was measured as invisible; it also
+  breaks the ~3:1 height:font band above) and the 3:1 `--border-control`
+  (WCAG 1.4.11). A tonal fill *with* the 3:1 border is the one deferred idea
+  worth polishing. Story: Foundations/Registro keeps the rejected knobs so the
+  comparison can be re-run.
 
 ## Motion
 

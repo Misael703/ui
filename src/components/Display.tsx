@@ -51,9 +51,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
   return <div ref={ref} className={cls} {...rest} />;
 });
 
-export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  function CardHeader({ className, ...rest }, ref) {
-    return <div ref={ref} className={cx('card__header', className)} {...rest} />;
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Hairline under the header (v4.0.0: off by default — a card already has a border and a shadow). */
+  divider?: boolean;
+}
+export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  function CardHeader({ className, divider, ...rest }, ref) {
+    return <div ref={ref} className={cx('card__header', divider && 'card__header--divided', className)} {...rest} />;
   }
 );
 

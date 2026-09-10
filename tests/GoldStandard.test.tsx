@@ -72,8 +72,8 @@ describe('P3 — compact register cell text by default (v3.0.0)', () => {
   it('default cell text is --text-data (13px)', () => {
     expect(decl(ruleBody(index, '.table td'), 'font-size')).toBe('var(--text-data)');
   });
-  it('padding drops to 7px 10px', () => {
-    expect(decl(ruleBody(index, '.table td'), 'padding')).toBe('7px 10px');
+  it('padding drops to 6px 10px (7 → 6 in v4.0.0)', () => {
+    expect(decl(ruleBody(index, '.table td'), 'padding')).toBe('6px 10px');
   });
 });
 
