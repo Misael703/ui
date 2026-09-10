@@ -77,7 +77,9 @@ describe('non-typing trigger truncates a long label (v4.2.2)', () => {
     expect(l).toMatch(/min-width:\s*0/);
   });
   it('the trigger can shrink inside a narrow cell (min-width: 0) and carries the full label as title', () => {
-    expect(rule('.combobox__trigger')).toMatch(/min-width:\s*0/);
+    // The trigger's OWN block (not the `.combobox__input,\n.combobox__trigger` shared one).
+    const own = css.match(/(?<!,)\n\.combobox__trigger\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(own).toMatch(/min-width:\s*0/);
     render(<Combobox value="a" onChange={() => {}} searchable={false} options={[{ value: 'a', label: 'Pendiente de emitir' }]} />);
     expect(screen.getByRole('combobox')).toHaveAttribute('title', 'Pendiente de emitir');
   });
