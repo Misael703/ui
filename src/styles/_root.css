@@ -392,6 +392,16 @@
   --tt-action: none;
   --tracking-action: 0;
 
+  /* -------- Placeholders: ink relative to the host (v4.2.3) ------------
+     Skeleton used absolute tier colours (--bg-subtle → --bg-muted): invisible
+     on an inset (same fill), lighter than the page on the El Alba canvas,
+     barely there on a surface. Translucent ink composites to ≥ 1.2:1 over
+     canvas, inset AND surface in both palettes and themes (SkeletonTiers
+     test pins it); the band sits ≥ 1.2:1 over the base. Reads --fg-default,
+     so dark follows with no override. */
+  --skel-ink:      color-mix(in oklab, var(--fg-default) 10%, transparent);
+  --skel-ink-band: color-mix(in oklab, var(--fg-default) 20%, transparent);
+
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;
   --space-1:   4px;

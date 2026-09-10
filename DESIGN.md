@@ -199,7 +199,11 @@ subtle / muted fill is wrong on every tier; it needs an **edge** (hairline:
 Chip, Alert, inset panel), a **shape** (an avatar per row) or **rhythm**
 (spacing + type: Card 4.1.0). Repeated items are rows with a hairline
 BETWEEN them (CommentThread, Cart), not tinted mini-cards inside a card.
-Hover fills are exempt (transient, quiet on purpose). And every component
+Hover fills are exempt (transient, quiet on purpose). A PLACEHOLDER that
+must read on any tier (Skeleton, v4.2.3) paints with translucent ink
+relative to its host (`--skel-ink` = `--fg-default` 10%, band 20%), never
+with an absolute tier colour: it composites to ≥ 1.2:1 over canvas, inset
+and surface alike (`SkeletonTiers.test`). And every component
 is designed for a declared tier: Badge's neutral chip and the inset panel
 carry a hairline because subtle ≈ canvas on the page (1.26.0, 3.6.0);
 CommentThread and Cart sit on a surface, where subtle ≈ white.

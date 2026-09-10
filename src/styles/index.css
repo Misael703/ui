@@ -1910,7 +1910,8 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- Skeleton ----------------------------------------------------- */
 .skel {
-  background: linear-gradient(90deg, var(--bg-subtle), var(--bg-muted), var(--bg-subtle));
+  /* v4.2.3: translucent ink, not tier colours — reads on canvas, inset and surface alike. */
+  background: linear-gradient(90deg, var(--skel-ink), var(--skel-ink-band), var(--skel-ink));
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite linear;
   border-radius: var(--radius-sm);

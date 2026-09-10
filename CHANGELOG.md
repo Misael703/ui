@@ -5,6 +5,21 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.3] — 2026-09-10
+
+### Fixed
+- **Skeleton se lee sobre cualquier nivel.** La base y la banda del shimmer
+  usaban colores absolutos de nivel (`--bg-subtle` → `--bg-muted`): sobre un
+  `Card variant="inset"` (mismo relleno) el skeleton era invisible salvo la
+  banda; sobre el canvas El Alba quedaba más claro que la página
+  (figura/fondo invertidos); sobre una card apenas se veía. Misma familia que
+  inset-on-canvas (3.6.0) y CommentThread-on-card (4.2.0). Ahora es tinta
+  translúcida relativa al host: tokens `--skel-ink` (`--fg-default` al 10%)
+  y `--skel-ink-band` (20%), calibrados para componer a ≥ 1.2:1 sobre
+  canvas, inset y surface en las dos paletas y los dos temas
+  (`tests/SkeletonTiers.test.tsx`). Story "Skeleton · sobre los tres
+  niveles". Regla anotada en DESIGN.md (niveles tonales).
+
 ## [4.2.2] — 2026-09-10
 
 ### Fixed
