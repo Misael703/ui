@@ -5,6 +5,16 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.2] — 2026-09-10
+
+### Fixed
+- **`Combobox searchable={false}`: el trigger trunca en vez de crecer.** Un
+  label largo ("Pendiente de emitir") envolvía a dos líneas y el control se
+  agrandaba; ahora queda en una línea con elipsis, como ya hacía el
+  `DateRangePicker`, y la lista sigue envolviendo. El botón lleva `title` con
+  el label completo. El Combobox buscable no lo sufría: un `<input>` es de
+  una línea.
+
 ## [4.2.1] — 2026-09-10
 
 ### Fixed
