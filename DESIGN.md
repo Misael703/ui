@@ -189,6 +189,21 @@ the endpoints' circles on top. Months and years are 3×4 pills, the current
 one in brand text, the selected one filled. Keyboard: one tab stop per grid,
 arrows, Home/End, PageUp/PageDown page the view, Escape climbs back down.
 
+**Tonal tiers: a step groups, it never delineates (v4.2.0).** `--bg-subtle`
+and `--bg-muted` are insets ON a surface, one small step up (ΔL ≥ .012:
+1.07:1 generic / 1.04:1 El Alba over `--bg-surface`). That step is enough
+to make a region feel part of another (a form section, a table header band,
+a pill track) and never enough to count repeated items or to give a block
+its own edge. Rule: a resting element whose ONLY figure/ground signal is a
+subtle / muted fill is wrong on every tier; it needs an **edge** (hairline:
+Chip, Alert, inset panel), a **shape** (an avatar per row) or **rhythm**
+(spacing + type: Card 4.1.0). Repeated items are rows with a hairline
+BETWEEN them (CommentThread, Cart), not tinted mini-cards inside a card.
+Hover fills are exempt (transient, quiet on purpose). And every component
+is designed for a declared tier: Badge's neutral chip and the inset panel
+carry a hairline because subtle ≈ canvas on the page (1.26.0, 3.6.0);
+CommentThread and Cart sit on a surface, where subtle ≈ white.
+
 **When to card (v3.4.0).** Two surface modes, one rule. `Card` (default) is
 the FLOATING surface — border, radius, `--shadow-card` — for a self-contained
 OBJECT that reads as a unit and would make sense on its own: a metric, a

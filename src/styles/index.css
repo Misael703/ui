@@ -1694,8 +1694,9 @@ button, input, select, textarea { box-sizing: border-box; }
 .modal__footer {
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
+  /* v4.2.0: plain with a line, like CardFooter — the line separates the
+     actions from the scrolling body; the grey band was the old "banda". */
   border-top: 1px solid var(--border-default);
-  background: var(--bg-subtle);
 }
 .modal__close {
   background: transparent; border: 0; cursor: pointer;
@@ -1745,7 +1746,6 @@ button, input, select, textarea { box-sizing: border-box; }
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
   padding: 16px 24px;
   border-top: 1px solid var(--border-default);
-  background: var(--bg-subtle);
 }
 .drawer__close {
   background: transparent; border: 0; cursor: pointer;
@@ -4532,9 +4532,16 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- CommentThread --------------------------------------------- */
 .comments { display: flex; flex-direction: column; gap: var(--space-4); }
-.comments__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
-.comment { display: flex; gap: var(--space-3); padding: var(--space-3); background: var(--bg-subtle); border-radius: var(--radius-md); }
-.comment--internal { background: var(--color-yellow-50); border: 1px dashed var(--color-yellow-300); }
+.comments__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+/* v4.2.0: a comment is a ROW, not a tinted block. The old `--bg-subtle` fill
+   sat 1.04:1 over a white card (El Alba) — a tier step groups, it never
+   delineates a repeated item. Delineation comes from the avatar (shape),
+   the rhythm, and a hairline BETWEEN items. The internal note keeps its
+   semantic tint because it also carries an edge (dashed). */
+.comment { display: flex; gap: var(--space-3); padding: var(--space-3) 0; }
+.comment + .comment { border-top: 1px solid var(--border-default); }
+.comment--internal { background: var(--color-yellow-50); border: 1px dashed var(--color-yellow-300); border-radius: var(--radius-md); padding: var(--space-3); }
+.comment--internal + .comment, .comment + .comment--internal { border-top: 0; margin-top: var(--space-2); }
 .comment__body { flex: 1; min-width: 0; }
 .comment__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .comment__author { font-weight: 700; color: var(--fg-default); font-size: var(--text-sm); }
@@ -4842,8 +4849,10 @@ button, input, select, textarea { box-sizing: border-box; }
 
 /* ---------- CartDrawer ------------------------------------------------- */
 .cart__empty { padding: var(--space-12) var(--space-4); text-align: center; color: var(--fg-muted); font-size: var(--text-sm); }
-.cart__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
-.cart__item { display: flex; gap: var(--space-3); padding: var(--space-3); background: var(--bg-subtle); border-radius: var(--radius-md); }
+.cart__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+/* v4.2.0: rows with a hairline between them, not tinted blocks (see .comment). */
+.cart__item { display: flex; gap: var(--space-3); padding: var(--space-3) 0; }
+.cart__item + .cart__item { border-top: 1px solid var(--border-default); }
 .cart__item-media { flex: none; width: 64px; height: 64px; background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; }
 .cart__item-media img { width: 100%; height: 100%; object-fit: cover; }
 .cart__item-placeholder { width: 100%; height: 100%; background: var(--bg-muted); }
