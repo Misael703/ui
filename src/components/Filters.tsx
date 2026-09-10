@@ -307,7 +307,9 @@ export function FilterBar({
 
   // Effective layout: 3.7.0 props map onto the modes (visibleCount alone
   // meant "collapse"; `mobile` was the phone choice).
-  const deskLayout: FilterBarLayout = layout ?? (typeof visibleCount === 'number' ? 'collapse' : 'inline');
+  // v4.0.0: `collapse` by default — the trailing group (summary, actions)
+  // shares the line with the fields; a set that fits shows whole anyway.
+  const deskLayout: FilterBarLayout = layout ?? 'collapse';
   const phoneLayout: FilterBarLayout = mobileLayout ?? (mobile === 'inline' ? deskLayout : 'drawer');
   const mode: FilterBarLayout = narrow ? phoneLayout : deskLayout;
 

@@ -1,16 +1,32 @@
-# UI Kit v3.9.0 — `CalendarView`: un calendario para los tres pickers
+# 4.0.0 — registro producto
 
-**Origen:** tres calendarios sin código común (DatePicker, DateRangePicker con `monthDropdown` opcional, MonthPicker/YearPicker). Referencia del usuario: cabecera con prev/next cuadrados + título "Mes Año" con chevron que abre la grilla de meses; hoy con punto; seleccionado en círculo relleno; meses 3×4 con píldora.
-**Branch:** `feat/calendar-view` desde main (3.8.1). Push/PR/release con OK explícito.
+Rama `feat/product-register`. Cambio visual global (major): menos tinta, no menos
+tamaño. Decisiones cerradas 2026-09-09: controles se quedan en 38px; hairlines se
+quedan; borde de controles 3:1 se queda (relleno tonal diferido); título de página
+pasa a fuente de cuerpo; `--tt-action` para que un preset pueda volver a caps.
 
-## Tareas
-- [x] T1 — `CalendarView` interno (`src/components/CalendarView.tsx`): `view: 'days'|'months'|'years'`, cabecera (prev/next ghost 32px + título-botón con chevron), grilla de días (dow, outside subtle, today dot, selected círculo, banda de rango opcional vía `rangeOf(d)`), grilla de meses y de años (3×4, píldora, actual en marca). Teclado: flechas/Home/End/PageUp/PageDown en días, flechas en meses/años, Enter selecciona, Escape vuelve a días. Roving tabindex, `role="grid"`.
-- [x] T2 — CSS `.calview*` con tokens; retirar `.datepicker__nav/title/grid/dow/day`, `.gridpicker__nav/title/grid/cell`, `.daterange__nav/title/grid/dow/day/monthjump/menu*` (mantener trigger/popover/presets/inputs/actions).
-- [x] T3 — `DatePicker` usa `CalendarView` (días; selector de mes/año siempre).
-- [x] T4 — `DateRangePicker` usa `CalendarView` ×1/×2 con `rangeOf`; `monthDropdown` deprecado (no-op, siempre hay selector); presets/inputs/Aplicar intactos.
-- [x] T5 — `MonthPicker`/`YearPicker` usan las grillas de meses/años de `CalendarView`.
-- [x] T6 — Tests: navegación de vistas, teclado, selección, rango, hoy; re-apuntar tests que pinean clases viejas. Stories: playground de calendario (Forms/Pickers) con controls vista · rango · hoy · disabled; stories de los 3 pickers.
-- [x] T7 — DESIGN.md (familia calendario), CHANGELOG 3.9.0, bump, tsc/lint/build, Chromium light/dark.
+## Plan
+- [x] Tests de contrato `tests/ProductRegister.test.tsx` (rojo primero)
+- [x] Tokens `_root.css`: `--tt-action: none`, `--tracking-action: 0`, `--radius-lg` 12 → 8
+- [x] Button: frase (`--tt-action`), sin tracking, 600, md a `--control-font-md` (14px, cae la excepción `--text-data`), radio `--control-radius-md` en todos los tamaños, íconos 16px (18 en lg/xl)
+- [x] Inputs/select/textarea/combobox/pickers: radio `--control-radius-md` (6px), igual que el botón
+- [x] Badge: 20px (padding 1px 8px, line-height 18px), 500, sin tracking
+- [x] Tabla: celda 6px 10px; pie de tabla padding-block 4; barra de filtros padding 8px 16px; `FilterBar layout` default `collapse`
+- [x] PageHeader: margen inferior 8px; título fuente de cuerpo 600 20px sin tracking
+- [x] Card: divisor del header opt-in (`CardHeader divider`)
+- [x] Actualizar tests pinneados (ControlRegister, GoldStandard) con la intención nueva
+- [x] Story Foundations/Registro: dejar solo las perillas diferidas (36px, divisores tonales, borde de controles)
+- [x] DESIGN.md (registro producto, tokens, excepción del botón eliminada), CHANGELOG 4.0.0 con guía de migración, package.json 4.0.0
+- [x] Verificación: suite, tsc, lint, build; capturas en Storybook (listado, formulario, card) antes/después
 
-## Review
-1220 tests (CalendarView: cabecera, vistas, hoy/seleccionado/disabled, teclado con RePág por día del mes, focusCalendar; 15 tests re-apuntados), tsc 0, lint 0 errores, build OK. Chromium light/dark: DatePicker, DateRangePicker (2 paneles, banda con extremos redondos), MonthPicker, YearPicker, playground de calendario; teclado real: ArrowDown entra al calendario, flechas, AvPág, Enter selecciona y cierra. Pendiente OK para push/PR/release 3.9.0.
+## Fuera de 4.0.0 (anotado)
+- Placeholder por contexto del Combobox ("Seleccionar…" / "Todos") y trigger no buscable que dice "Buscar…" → minor aparte
+- Guard global de `prefers-reduced-motion` → aparte
+- Relleno tonal de controles con borde 3:1 → explorar después ("si lo pulimos puede quedar bien")
+
+## Revisión (2026-09-10)
+- Rama `feat/product-register`, un commit sobre main 3.9.5 más la story.
+- 18 tests de contrato nuevos (`tests/ProductRegister.test.tsx`), 5 tests pinneados actualizados con la intención nueva (ControlRegister ×2, GoldStandard, Filters, DatePickerDisabled). Suite 1253 verde, tsc 0, lint 0 errores.
+- Medido en Storybook: botón 38px / 14px / 600 / sin caps ni tracking / radio 6; badge 500 sin tracking, 22px con hairline (igual que shadcn: 16 + 2·2 + 1·1).
+- Capturas: listado, superficies (card sin divisor), formulario, badges.
+- Radio de controles: cambió en input/select/textarea, input-group, combobox, datepicker, daterange, timepicker, phone, tag, qty y gridpicker (estaba en 4px). Modal/drawer/card/tabla siguen `--radius-lg` (ahora 8).

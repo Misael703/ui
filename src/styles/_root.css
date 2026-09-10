@@ -384,6 +384,13 @@
   --tt-label: uppercase;
   --tt-data:  none;
   --tt-title: none;
+  /* v4.0.0: actions (Button) read their own pair. Sentence case, no tracking
+     by default — caps + 700 + tracking read heavier and wider than a plain
+     14px label at the same control height (the "kit looks bigger" effect,
+     measured against a 36px shadcn button: it was never the 2px). A preset
+     that wants caps on actions overrides these two, never .btn. */
+  --tt-action: none;
+  --tracking-action: 0;
 
   /* -------- Spacing (4pt grid) --------------------------------------- */
   --space-0:   0;
@@ -423,7 +430,7 @@
   --radius-xs:   2px;
   --radius-sm:   4px;
   --radius-md:   8px;
-  --radius-lg:   12px;
+  --radius-lg:   8px;    /* v4.0.0: surfaces (card, table, drawer) 12 → 8 */
   --radius-xl:   18px;
   --radius-pill: 999px;
 

@@ -232,11 +232,19 @@ describe('FilterBar fills rows and collapses extra fields', () => {
     Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get() { return (this as HTMLElement).classList.contains('filter-bar__end') ? end : 0; } });
     return () => { if (cw) Object.defineProperty(HTMLElement.prototype, 'clientWidth', cw); if (ow) Object.defineProperty(HTMLElement.prototype, 'offsetWidth', ow); };
   };
-  it('layout="inline" (default): every field renders and there is no toggle', () => {
-    const { container } = render(<FilterBar>{four}</FilterBar>);
+  it('layout="inline": every field renders and there is no toggle', () => {
+    const { container } = render(<FilterBar layout="inline">{four}</FilterBar>);
     expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
     expect(container.querySelector('.filter-bar__toggle')).toBeNull();
     expect(container.querySelector('.filter-bar')).toHaveAttribute('data-layout', 'inline');
+  });
+  it('the default layout is collapse (v4.0.0): the trailing group shares the line; a set that fits still shows whole', () => {
+    const restore = widths(1200, 120);
+    const { container } = render(<FilterBar>{four}</FilterBar>);
+    expect(container.querySelector('.filter-bar')).toHaveAttribute('data-layout', 'collapse');
+    expect(container.querySelectorAll('.filter-field')).toHaveLength(4);
+    expect(container.querySelector('.filter-bar__toggle')).toBeNull();
+    restore();
   });
   it('collapse only folds when the set does NOT fit one line: 1200px fits four fields → all shown, no toggle', () => {
     const restore = widths(1200, 120);
