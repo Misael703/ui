@@ -372,8 +372,17 @@ the sizes. Rules, with what each replaced:
 - **One family on a working screen.** `PageHeader` title is the body face,
   600, `--text-xl`; the display face stays for brand surfaces (AppShell
   brand, marketing). Icons inside a button are 16px (18 in `lg` / `xl`).
-- **Lines are spent by role.** `CardHeader` draws its hairline only with
-  `divider`: a card already has a border and a shadow. Surface hairlines
+- **Lines are spent by role.** `CardHeader` / `CardFooter` draw their
+  hairline only with `divider`: a card already has a border and a shadow.
+  **Card rhythm (v4.1.0):** header, body and footer separate by TYPE and
+  vertical rhythm — the header IS the title register (16/600, 10px to its
+  body; a heading inside inherits), the body breathes 20px, the footer is
+  plain at the bottom and lays out its children (label left, total / actions
+  right). `tone="label"` on the header is the caps micro-label for a SECTION
+  rubric (same vocabulary as Badge); the default names an OBJECT. Looked at
+  and rejected: a tonal header band (Bootstrap panel-heading, competes with
+  the content) and the eyebrow as default (turns an object's name into a
+  category). Surface hairlines
   (table border, header band, bar / footer dividers) STAY — tone-only
   separation loses the column header's anchor and melts the table into a
   near-white canvas (looked at, rejected).

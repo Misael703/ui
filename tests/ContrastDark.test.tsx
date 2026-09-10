@@ -287,7 +287,8 @@ describe('--border-on-canvas (v3.6.0) — inset edge legible on the page', () =>
     const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     const inset = css.match(/\.card--inset\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(inset).toMatch(/border-color:\s*var\(--border-on-canvas\)/);
-    expect(css).toMatch(/\.card--inset\s*>\s*\.card__header\s*\{[^}]*border-bottom-color:\s*var\(--border-on-canvas\)/);
-    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer\s*\{[^}]*border-top-color:\s*var\(--border-on-canvas\)/);
+    // v4.1.0: dividers are opt-in (`divider`), the modifier carries the tint.
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__header--divided\s*\{[^}]*border-bottom-color:\s*var\(--border-on-canvas\)/);
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer--divided\s*\{[^}]*border-top-color:\s*var\(--border-on-canvas\)/);
   });
 });

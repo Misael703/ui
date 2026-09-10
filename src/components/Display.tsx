@@ -52,12 +52,18 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
 });
 
 export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Hairline under the header (v4.0.0: off by default — a card already has a border and a shadow). */
+  /** Hairline under the header (off by default — a card already has a border and a shadow; the title register does the separating). */
   divider?: boolean;
+  /**
+   * `'label'` (v4.1.0): the caps micro-label register (same as `Badge tone="label"`)
+   * for a SECTION rubric ("Resumen", "Cliente y entrega"). The default is the
+   * title register (16/600) for an OBJECT's name ("Pedido #1042").
+   */
+  tone?: 'label';
 }
 export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  function CardHeader({ className, divider, ...rest }, ref) {
-    return <div ref={ref} className={cx('card__header', divider && 'card__header--divided', className)} {...rest} />;
+  function CardHeader({ className, divider, tone, ...rest }, ref) {
+    return <div ref={ref} className={cx('card__header', tone === 'label' && 'card__header--label', divider && 'card__header--divided', className)} {...rest} />;
   }
 );
 
@@ -67,9 +73,13 @@ export const CardBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
   }
 );
 
-export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  function CardFooter({ className, ...rest }, ref) {
-    return <div ref={ref} className={cx('card__footer', className)} {...rest} />;
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Hairline above the footer (v4.1.0: off by default) — for a "totals" edge. */
+  divider?: boolean;
+}
+export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
+  function CardFooter({ className, divider, ...rest }, ref) {
+    return <div ref={ref} className={cx('card__footer', divider && 'card__footer--divided', className)} {...rest} />;
   }
 );
 

@@ -94,14 +94,14 @@ describe('compact register — page header + card', () => {
     expect(t).toMatch(/font-family:\s*var\(--font-body\)/);
     expect(t).toMatch(/font-size:\s*var\(--text-xl\)/);
   });
-  it('.card__body matchea padding: 16px 20px', () => {
-    expect(ruleBody(index, '.card__body')).toMatch(/padding:\s*16px 20px/);
+  it('.card__body matchea padding: 20px (v4.1.0 rhythm)', () => {
+    expect(ruleBody(index, '.card__body')).toMatch(/padding:\s*20px/);
   });
-  it('.card__header matchea padding: 16px 20px', () => {
-    expect(ruleBody(index, '.card__header')).toMatch(/padding:\s*16px 20px/);
+  it('.card__header matchea padding: 20px 20px 0 (v4.1.0 rhythm)', () => {
+    expect(ruleBody(index, '.card__header')).toMatch(/padding:\s*20px 20px 0/);
   });
-  it('.card__footer matchea padding: 12px 20px', () => {
-    expect(ruleBody(index, '.card__footer')).toMatch(/padding:\s*12px 20px/);
+  it('.card__footer matchea padding: 0 20px 20px (v4.1.0 rhythm)', () => {
+    expect(ruleBody(index, '.card__footer')).toMatch(/padding:\s*0 20px 20px/);
   });
 });
 
