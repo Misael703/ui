@@ -445,6 +445,36 @@ export const Skeletons: StoryObj = {
   ),
 };
 
+/**
+ * **Skeleton sobre los tres niveles (v4.2.3).** El placeholder es tinta
+ * translúcida relativa al host (`--skel-ink` / `--skel-ink-band`, 10% y 20%
+ * de `--fg-default`), no colores absolutos de nivel: se lee igual sobre el
+ * canvas, sobre un `inset` y sobre una card, en claro y en oscuro (cambiá el
+ * preset y el tema en la barra). Antes, con `--bg-subtle → --bg-muted`, era
+ * invisible sobre un inset y más claro que la página sobre el canvas El Alba.
+ */
+export const SkeletonSobreTresNiveles: StoryObj = {
+  name: 'Skeleton · sobre los tres niveles',
+  render: () => {
+    const lines = (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Skeleton height={18} width="55%" />
+        <Skeleton height={13} width="90%" />
+        <Skeleton height={13} width="75%" />
+        <Skeleton height={72} />
+      </div>
+    );
+    const label = (t: string) => <div style={{ fontSize: 'var(--text-2xs)', fontWeight: 600, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', color: 'var(--fg-subtle)', marginBottom: 8 }}>{t}</div>;
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, alignItems: 'start' }}>
+        <div>{label('canvas')}{lines}</div>
+        <Card variant="inset"><CardBody>{label('inset · --bg-subtle')}{lines}</CardBody></Card>
+        <Card><CardBody>{label('surface · card')}{lines}</CardBody></Card>
+      </div>
+    );
+  },
+};
+
 export const Spinners: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
