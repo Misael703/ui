@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { Combobox } from '../src/components/Pickers';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 /**
  * `searchable` prop (v1.15.0). Default `true` = current behaviour (text input
@@ -61,5 +63,22 @@ describe('Combobox `searchable` prop', () => {
     const activeOpt = opts.find((o) => o.className.includes('is-active')) ?? opts[0];
     expect(activeOpt.id).toBeTruthy();
     expect(trigger.getAttribute('aria-activedescendant')).toBe(activeOpt.id);
+  });
+});
+
+describe('non-typing trigger truncates a long label (v4.2.2)', () => {
+  const css = readFileSync(resolve(__dirname, '../src/styles/index.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = (sel: string) => css.match(new RegExp('(?:^|\\n)' + sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{([^}]*)\\}'))?.[1] ?? '';
+  it('.combobox__trigger-label is single-line with an ellipsis (same recipe as .daterange__label)', () => {
+    const l = rule('.combobox__trigger-label');
+    expect(l).toMatch(/white-space:\s*nowrap/);
+    expect(l).toMatch(/overflow:\s*hidden/);
+    expect(l).toMatch(/text-overflow:\s*ellipsis/);
+    expect(l).toMatch(/min-width:\s*0/);
+  });
+  it('the trigger can shrink inside a narrow cell (min-width: 0) and carries the full label as title', () => {
+    expect(rule('.combobox__trigger')).toMatch(/min-width:\s*0/);
+    render(<Combobox value="a" onChange={() => {}} searchable={false} options={[{ value: 'a', label: 'Pendiente de emitir' }]} />);
+    expect(screen.getByRole('combobox')).toHaveAttribute('title', 'Pendiente de emitir');
   });
 });

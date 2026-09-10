@@ -233,6 +233,7 @@ export function Combobox<T = string>({
           aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
           className="combobox__trigger"
           disabled={disabled}
+          title={selected?.label}
           onClick={() => setOpen((o) => !o)}
           onKeyDown={onKey}
         >
