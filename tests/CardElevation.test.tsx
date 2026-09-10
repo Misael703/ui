@@ -89,9 +89,12 @@ describe('Card variant="inset" (v3.4.0)', () => {
     expect(m![1]).toMatch(/border-color:\s*var\(--border-on-canvas\)/);
     expect(m![1]).toMatch(/box-shadow:\s*none/);
   });
-  it('CSS: header/footer dividers inside an inset use the surface tier below them, not a second inset', () => {
-    // A footer on --bg-subtle inside an inset on --bg-subtle would vanish; the
-    // inset footer drops its fill and keeps only the divider line.
-    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer\s*\{[^}]*background:\s*transparent/);
+  it('CSS: the footer carries no fill of its own (v4.1.0), so an inset footer cannot fuse with the panel', () => {
+    // Pre-4.1.0 the footer was a --bg-subtle band and the inset had to reset it
+    // to transparent; now the footer is plain everywhere and only the opt-in
+    // divider line changes tint inside an inset.
+    const footer = css.match(/\n\.card__footer\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(footer).not.toMatch(/background/);
+    expect(css).toMatch(/\.card--inset\s*>\s*\.card__footer--divided\s*\{[^}]*border-top-color:\s*var\(--border-on-canvas\)/);
   });
 });

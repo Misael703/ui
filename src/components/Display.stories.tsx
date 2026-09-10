@@ -11,9 +11,59 @@ export const CardBasica: StoryObj = {
     <Card style={{ maxWidth: 360 }}>
       <CardHeader>Pedido #1042</CardHeader>
       <CardBody>Cliente: Northwind Builders. 14 ítems.</CardBody>
-      <CardFooter>$1.245.000</CardFooter>
+      <CardFooter><span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Total</span><strong>$1.245.000</strong></CardFooter>
     </Card>
   ),
+};
+
+/**
+ * **Ritmo de la card (v4.1.0).** Header, cuerpo y pie se separan por
+ * tipografía y ritmo vertical, no por tono ni por líneas. El header ES el
+ * registro de título (16/600) a 10px de su contenido; un `h2`/`h3` adentro
+ * hereda; `.card__subtitle` va debajo a 2px; un badge o botón al final del
+ * header alinea solo (flex + gap). El pie es plano al fondo y reparte sus
+ * hijos (etiqueta a la izquierda, total o acciones a la derecha). `divider`
+ * en header y pie dibuja la hairline cuando hace falta un canto de "totales";
+ * `tone="label"` en el header es el rótulo en mayúsculas de una SECCIÓN
+ * ("Resumen"), mismo vocabulario que `Badge tone="label"`; el default es el
+ * nombre de un OBJETO ("Pedido #1042").
+ */
+export const CardRegistros: StoryObj = {
+  name: 'Card · header, subtítulo, acción, rótulo y divisores',
+  render: () => {
+    const row = (l: string, v: React.ReactNode) => (
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 'var(--text-sm)' }}><span style={{ color: 'var(--fg-muted)' }}>{l}</span><span style={{ fontVariantNumeric: 'tabular-nums' }}>{v}</span></div>
+    );
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
+        <Card>
+          <CardHeader>
+            <div><h3>Estado del arriendo</h3><p className="card__subtitle">Taladro percutor · 3 días</p></div>
+            <Badge variant="success">Activo</Badge>
+          </CardHeader>
+          <CardBody><div style={{ display: 'grid', gap: 6 }}>{row('Inicio', '8 sep 2026')}{row('Devolución', '11 sep 2026')}{row('Garantía', '$50.000')}</div></CardBody>
+          <CardFooter><Button variant="outline" size="sm">Extender</Button><Button size="sm">Devolver</Button></CardFooter>
+        </Card>
+        <Card variant="inset">
+          <CardHeader tone="label">Cliente y entrega</CardHeader>
+          <CardBody>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 'var(--text-sm)' }}>
+              <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
+              <div><div style={{ color: 'var(--fg-muted)' }}>Sucursal</div><div>Casa matriz</div></div>
+              <div><div style={{ color: 'var(--fg-muted)' }}>Entrega</div><div>Retiro en tienda</div></div>
+              <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Mesón 2</div></div>
+            </div>
+          </CardBody>
+          <CardFooter><Button variant="ghost" size="sm">Editar</Button></CardFooter>
+        </Card>
+        <Card>
+          <CardHeader divider>Resumen</CardHeader>
+          <CardBody><div style={{ display: 'grid', gap: 6 }}>{row('Ítems', 14)}{row('Preparado', '52 / 76')}{row('Estado', <Badge variant="warning">Pendiente</Badge>)}</div></CardBody>
+          <CardFooter divider><span style={{ color: 'var(--fg-muted)', fontSize: 'var(--text-sm)' }}>Total</span><strong style={{ fontVariantNumeric: 'tabular-nums' }}>$1.245.000</strong></CardFooter>
+        </Card>
+      </div>
+    );
+  },
 };
 
 /**

@@ -662,22 +662,38 @@ button, input, select, textarea { box-sizing: border-box; }
   border-color: var(--border-on-canvas);
   box-shadow: none;
 }
-.card--inset > .card__header { border-bottom-color: var(--border-on-canvas); }
-.card--inset > .card__footer { background: transparent; border-top-color: var(--border-on-canvas); }
-.card__body { padding: 16px 20px; }
-.card__header { padding: 16px 20px; }
-/* v4.0.0: the header hairline is opt-in (`CardHeader divider`). A card
-   already has a border and a shadow; a third horizontal line before the
-   content was the default and rarely earned. */
-.card__header--divided { border-bottom: 1px solid var(--border-default); }
-.card__footer { padding: 12px 20px; border-top: 1px solid var(--border-default); background: var(--bg-subtle); }
-.card__title {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: var(--text-lg);
-  margin: 0 0 4px;
+.card--inset > .card__header--divided { border-bottom-color: var(--border-on-canvas); }
+.card--inset > .card__footer--divided { border-top-color: var(--border-on-canvas); }
+/* Rhythm (v4.1.0): header, body and footer separate by TYPE and vertical
+   rhythm, not by tone or lines. 4.0.0 dropped the header hairline and the
+   header turned out to be body text — the line was what made it a title.
+   Now the header IS the title register (16/600, tight), 10px from its body;
+   the body breathes 20px; the footer is plain at the bottom and lays out its
+   children (label left, total / actions right). Lines are opt-in (`divider`)
+   for a "totals" edge; the caps micro-label is opt-in (`tone="label"`), the
+   same vocabulary as Badge. */
+.card__header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 20px 20px 0;
+  font-family: var(--font-body); font-size: var(--text-md); font-weight: 600; line-height: 1.25;
+  color: var(--fg-default);
 }
-.card__subtitle { color: var(--fg-muted); font-size: var(--text-sm); margin: 0; }
+/* A heading dropped inside keeps the register (blocks used `<h3 class="h4">`). */
+.card__header :is(h1, h2, h3, h4) { font: inherit; margin: 0; }
+.card__header--divided { border-bottom: 1px solid var(--border-default); padding-bottom: 12px; }
+.card__header--label {
+  font-size: var(--text-2xs); font-weight: 600; line-height: 1.3;
+  text-transform: var(--tt-label); letter-spacing: var(--tracking-wide); color: var(--fg-muted);
+  padding-top: 16px;
+}
+.card__title { font: inherit; margin: 0; }
+.card__subtitle { display: block; color: var(--fg-muted); font-size: var(--text-sm); font-weight: 400; line-height: 1.4; letter-spacing: 0; text-transform: none; margin: 2px 0 0; }
+.card__body { padding: 20px; }
+.card__header + .card__body { padding-top: 10px; }
+.card__header--label + .card__body { padding-top: 6px; }
+.card__header--divided + .card__body { padding-top: 16px; }
+.card__footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 20px 20px; }
+.card__footer--divided { border-top: 1px solid var(--border-default); padding-top: 12px; margin-top: -4px; }
 
 /* card interactive (clickable / hover) */
 .card--interactive {

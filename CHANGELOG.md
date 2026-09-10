@@ -5,6 +5,40 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] — 2026-09-10
+
+**Minor. Ritmo de la Card: header y pie con lugar propio, sin línea.**
+
+4.0.0 quitó la hairline bajo el header y quedó a la vista que el header no
+tenía registro tipográfico: era texto de cuerpo, y la línea era lo único que
+lo hacía leer como título. Se miraron tres salidas (ritmo, banda tonal,
+rótulo en mayúsculas) y quedó el ritmo como default.
+
+### Changed
+- **`CardHeader` es el registro de título**: 16px / 600 / interlineado 1.25,
+  20px arriba y a los lados, 10px hasta el cuerpo. Un `h1`–`h4` adentro
+  hereda (los blocks ponían `<h3 class="h4">` a mano). Flex con `gap`, así un
+  badge o botón al final del header alinea solo. `.card__subtitle` a 2px,
+  14px muted. `.card__title` queda como alias del registro del header.
+- **`CardBody`**: 20px de padding (era 16/20).
+- **`CardFooter` es plano**: sin relleno ni línea, 20px abajo y a los lados,
+  flex `space-between` (etiqueta a la izquierda, total o acciones a la
+  derecha). Era una banda `--bg-subtle` con hairline.
+
+### Added
+- **`CardHeader tone="label"`**: el rótulo en mayúsculas de una SECCIÓN
+  ("Resumen", "Cliente y entrega"), 11px muted con tracking, 6px al cuerpo.
+  Mismo vocabulario que `Badge tone="label"`. El default sigue siendo el
+  nombre de un OBJETO ("Pedido #1042").
+- **`CardFooter divider`** (y `CardHeader divider`, ya existía): hairline
+  opt-in para un canto de "totales"; en `inset` usa `--border-on-canvas`.
+
+### Migración
+- Un pie que dependía del relleno gris o de la línea: `divider`.
+- Un header con un `<h3 class="h4">` propio: el `class` ya no hace falta.
+- Story: Data Display/Card & Badge › "Card · header, subtítulo, acción,
+  rótulo y divisores".
+
 ## [4.0.0] — 2026-09-09
 
 **Major. Registro producto: menos tinta, no menos tamaño.** Cambio visual
