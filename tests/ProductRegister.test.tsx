@@ -36,10 +36,10 @@ describe('4.0.0 tokens', () => {
 
 describe('4.0.0 Button: sentence case, 600, one font with its siblings', () => {
   const btn = rule(index, '.btn');
-  it('reads --tt-action / --tracking-action, weight 600', () => {
+  it('reads --tt-action / --tracking-action, weight 500 (4.2.1: DM Sans 600 reads bold at 14px)', () => {
     expect(decl(btn, 'text-transform')).toBe('var(--tt-action)');
     expect(decl(btn, 'letter-spacing')).toBe('var(--tracking-action)');
-    expect(decl(btn, 'font-weight')).toBe('600');
+    expect(decl(btn, 'font-weight')).toBe('500');
   });
   it('md reads --control-font-md (14px): the --text-data exception is gone', () => {
     const md = rule(index, '.btn--md');
@@ -49,8 +49,9 @@ describe('4.0.0 Button: sentence case, 600, one font with its siblings', () => {
   it('every size shares --control-radius-md', () => {
     expect(decl(btn, 'border-radius')).toBe('var(--control-radius-md)');
   });
-  it('icons inside a button are 16px (18 in lg / xl)', () => {
+  it('icons inside a button are 16px (18 in lg / xl) with a 2px stroke to match the 500 label', () => {
     expect(rule(index, '.btn svg')).toMatch(/width:\s*16px;\s*height:\s*16px/);
+    expect(decl(rule(index, '.btn svg'), 'stroke-width')).toBe('2');
     expect(rule(index, '.btn--lg svg, .btn--xl svg')).toMatch(/width:\s*18px;\s*height:\s*18px/);
   });
 });
