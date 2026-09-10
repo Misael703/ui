@@ -5,6 +5,27 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] — 2026-09-10
+
+**Minor. Regla de niveles tonales: el tono agrupa, nunca delinea.**
+
+`--bg-subtle` queda a 1.07:1 (genérico) / 1.04:1 (El Alba) sobre
+`--bg-surface`: alcanza para que una región se sienta parte de otra, no para
+contar ítems repetidos. Un elemento en reposo cuya única señal de figura/fondo
+es un relleno subtle o muted está mal en cualquier nivel; necesita un canto,
+una forma o ritmo. Regla nueva en DESIGN.md (junta las decisiones sueltas de
+Badge 1.26.0, inset 3.6.0 y Card 4.1.0).
+
+### Changed
+- **`CommentThread`**: cada comentario es una fila (avatar + nombre/fecha +
+  texto), no un bloque tintado; hairline `--border-default` entre ítems,
+  nunca antes del primero. La nota interna conserva su tinte amarillo porque
+  además tiene canto (borde punteado). Reportado desde despachos: sobre una
+  card blanca El Alba los bloques no se veían.
+- **`Cart`**: mismo tratamiento para los ítems.
+- **`Modal` y `Drawer`**: el pie pierde la banda `--bg-subtle` y conserva la
+  línea, como `CardFooter` desde 4.1.0.
+
 ## [4.1.0] — 2026-09-10
 
 **Minor. Ritmo de la Card: header y pie con lugar propio, sin línea.**
