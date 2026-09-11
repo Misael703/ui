@@ -17,4 +17,11 @@ export const ICON_NAMES = [
   'Tag', 'Tool', 'Trash',
   'Truck', 'Underline', 'Unlock', 'Upload', 'User', 'Users', 'Wallet',
   'Wrench', 'X',
+  // v4.3.0 batch (Lucide)
+  'Printer', 'Undo2', 'Redo2', 'Save', 'Send', 'Paperclip', 'FileDown', 'FileUp',
+  'ClipboardList', 'ClipboardCheck', 'Archive', 'XCircle', 'PlusCircle', 'MinusCircle',
+  'HelpCircle', 'Ban', 'Shield', 'Flag', 'Pin', 'ChevronsLeft', 'ChevronsRight',
+  'ArrowUpDown', 'SlidersHorizontal', 'TableIcon', 'Layers', 'Maximize2', 'Minimize2',
+  'Receipt', 'Banknote', 'Calculator', 'Percent', 'Barcode', 'QrCode', 'ScanLine',
+  'Store', 'Warehouse', 'Box', 'UserPlus', 'UserCheck', 'MessageSquare', 'Image', 'Camera',
 ] as const;
