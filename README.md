@@ -319,7 +319,7 @@ import { LineChart } from '@misael703/ui';
 
 ### Iconos
 
-`@misael703/ui` exporta un set completo de íconos SVG (24×24, `currentColor`, stroke 1.75) directamente desde el barrel — no es necesario redibujarlos a mano:
+`@misael703/ui` exporta un set de íconos SVG (24×24, `currentColor`, stroke 1.75) directamente desde el barrel — no es necesario redibujarlos a mano. La geometría es de [Lucide](https://lucide.dev) (ISC; los derivados de Feather, MIT), inlineada sin dependencia de runtime; el aviso completo viaja en el paquete como `LICENSE-lucide`:
 
 ```tsx
 import { Search, ShoppingCart, ChevronRight } from '@misael703/ui';
@@ -343,6 +343,11 @@ Catálogo (ver la grilla completa con búsqueda en Storybook → `Foundations/Ic
 | **Vistas (switchers)** | `Rows3`, `LayoutGrid`, `Columns3` |
 | **Text formatting** | `Bold`, `Italic`, `Underline`, `AlignLeft`, `AlignCenter`, `AlignRight` |
 | **Misc** | `Star`, `Heart`, `Mail`, `Phone`, `MapPin`, `Map`, `Lock`, `Unlock`, `Sun`, `Moon`, `Globe`, `Building` |
+| **Documentos (4.3.0)** | `Printer`, `Undo2`, `Redo2`, `Save`, `Send`, `Paperclip`, `FileDown`, `FileUp`, `ClipboardList`, `ClipboardCheck`, `Archive` |
+| **Estado (4.3.0)** | `XCircle`, `PlusCircle`, `MinusCircle`, `HelpCircle`, `Ban`, `Shield`, `Flag`, `Pin` |
+| **Navegación / datos (4.3.0)** | `ChevronsLeft`, `ChevronsRight`, `ArrowUpDown`, `SlidersHorizontal`, `TableIcon`, `Layers`, `Maximize2`, `Minimize2` |
+| **Comercio / logística (4.3.0)** | `Receipt`, `Banknote`, `Calculator`, `Percent`, `Barcode`, `QrCode`, `ScanLine`, `Store`, `Warehouse`, `Box` |
+| **Personas / comunicación (4.3.0)** | `UserPlus`, `UserCheck`, `MessageSquare`, `Image`, `Camera` |
 
 ### Fuentes (opcional)
 

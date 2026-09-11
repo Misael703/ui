@@ -5,6 +5,30 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] — 2026-09-11
+
+**Minor. 42 íconos más, y la licencia de los que ya había.**
+
+### Added
+- **42 íconos nuevos**, con los paths exactos del repo de Lucide
+  (`lucide-icons/lucide`, rama main), en el mismo formato que el set actual
+  (24×24, `currentColor`, sin dependencia de runtime):
+  documentos `Printer`, `Undo2`, `Redo2`, `Save`, `Send`, `Paperclip`,
+  `FileDown`, `FileUp`, `ClipboardList`, `ClipboardCheck`, `Archive`; estado
+  `XCircle`, `PlusCircle`, `MinusCircle`, `HelpCircle`, `Ban`, `Shield`,
+  `Flag`, `Pin`; navegación y datos `ChevronsLeft`, `ChevronsRight`,
+  `ArrowUpDown`, `SlidersHorizontal`, `TableIcon` (`Table` es el componente
+  de datos), `Layers`, `Maximize2`, `Minimize2`; comercio y logística
+  `Receipt`, `Banknote`, `Calculator`, `Percent`, `Barcode`, `QrCode`,
+  `ScanLine`, `Store`, `Warehouse`, `Box`; personas y comunicación
+  `UserPlus`, `UserCheck`, `MessageSquare`, `Image`, `Camera`. Aparecen
+  solos en Foundations/Icons › Galería.
+- **`LICENSE-lucide`** en el paquete (entra en `files`): el aviso ISC de
+  Lucide y el MIT de Feather, verbatim. Los 75 íconos anteriores ya eran
+  paths de Lucide y el aviso faltaba; el header de `Icons.tsx` y el README lo
+  dicen ahora. Test `tests/IconsBatch.test.tsx`: cada ícono nuevo renderiza un
+  SVG 24×24 con geometría, y las piezas de licencia existen.
+
 ## [4.2.3] — 2026-09-10
 
 ### Fixed

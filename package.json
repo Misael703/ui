@@ -1,6 +1,6 @@
 {
   "name": "@misael703/ui",
-  "version": "4.2.3",
+  "version": "4.3.0",
   "description": "Generic React + TypeScript UI kit, optimized for Next.js. Tokens, accessible components, runtime-configurable theming via presets.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",
@@ -65,7 +65,8 @@
     "./presets/elalba-logos/*": "./dist/presets/elalba/logos/*"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE-lucide"
   ],
   "sideEffects": [
     "**/*.css"
