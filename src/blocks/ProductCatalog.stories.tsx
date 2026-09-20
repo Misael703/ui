@@ -1,14 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ProductCatalog } from './ProductCatalog';
 
-/**
- * Copy-paste recipe (not shipped). E-commerce catalog page: FilterPanel
- * sidebar + responsive grid of ProductCards + toolbar (search + sort).
- * Source: `src/blocks/ProductCatalog.tsx`.
- */
 export default {
-  title: 'Blocks/Commerce/Product catalog',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Product catalog',
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Copy-paste recipe (not shipped). E-commerce catalog page: FilterPanel sidebar + responsive grid of ProductCards + toolbar (search + sort). Source: `src/blocks/ProductCatalog.tsx`.' } } },
   tags: ['autodocs'],
 } as Meta;
 

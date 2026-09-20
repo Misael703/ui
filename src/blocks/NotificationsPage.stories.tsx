@@ -1,15 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { NotificationsPage } from './NotificationsPage';
 
-/**
- * Copy-paste recipe (not shipped). Full-page notifications inbox with
- * tone filters and mark-all-as-read. Shares the `NotificationItem` shape
- * with the kit's `NotificationCenter` (bell dropdown) so one source of
- * truth can feed both. Source: `src/blocks/NotificationsPage.tsx`.
- */
 export default {
-  title: 'Blocks/Genéricos/Utility/Notifications page',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Notifications page',
+  parameters: { layout: 'fullscreen', docs: { description: { component: "Copy-paste recipe (not shipped). Full-page notifications inbox with tone filters and mark-all-as-read. Shares the `NotificationItem` shape with the kit's `NotificationCenter` (bell dropdown) so both can read from a single source. Source: `src/blocks/NotificationsPage.tsx`." } } },
   tags: ['autodocs'],
 } as Meta;
 

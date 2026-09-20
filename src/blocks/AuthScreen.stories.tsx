@@ -1,13 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AuthScreen } from './AuthScreen';
 
-/**
- * Copy-paste recipe (not shipped). Toggle the El Alba preset in the toolbar
- * to see it branded. Source: `src/blocks/AuthScreen.tsx`.
- */
 export default {
-  title: 'Blocks/Genéricos/Auth/Auth screen',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Auth screen',
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Copy-paste recipe (not shipped). Switch the toolbar preset to see the brand overlay. Source: `src/blocks/AuthScreen.tsx`.' } } },
   tags: ['autodocs'],
 } as Meta;
 
