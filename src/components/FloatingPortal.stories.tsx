@@ -11,7 +11,7 @@ import { Portal } from './Portal';
 import { Slot, Slottable } from './Primitives';
 
 export default {
-  title: 'Internal/Regression/Floating in overflow',
+  title: 'Internal/Floating in overflow',
   tags: ['autodocs'],
 } as Meta;
 
@@ -157,7 +157,7 @@ export const AppShellCollapsed: StoryObj = {
         theme="brand"
         defaultCollapsed
         footer={<span style={{ fontSize: 12 }}>v1.1.0 · soporte</span>}
-        header={{ center: <span>FERRETERÍA EL ALBA</span> }}
+        header={{ center: <span>NORTHWIND BUILDERS</span> }}
         sections={[
           { items: [
             { id: 'h', label: 'Inicio', href: '#', active: true },
