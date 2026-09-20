@@ -67,7 +67,7 @@ export const Default: Story = {};
 export const TruncatePerColumn: Story = {
   render: () => {
     const wide = [
-      { id: '1', name: 'Taladro percutor inalámbrico 20V con maletín', address: 'Av. Libertador Bernardo O’Higgins 1234, Depto 567, Santiago Centro, Región Metropolitana', notes: 'Cliente pidió despacho en la mañana; dejar en conserjería si no hay nadie; timbre no funciona.' },
+      { id: '1', name: 'Taladro percutor inalámbrico 20V con maletín', address: 'Av. Libertador Bernardo O’Higgins 1234, Depto 567, Santiago Centro, Región Metropolitana', notes: 'Cliente pidió entrega en la mañana; dejar en conserjería si no hay nadie; timbre no funciona.' },
       { id: '2', name: 'Sierra circular', address: 'askjdalksdjalksdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdjaslkdj', notes: 'Sin observaciones.' },
       { id: '3', name: 'Lijadora orbital 300W', address: 'Calle Uno 42', notes: 'Retiro en tienda.' },
     ];
