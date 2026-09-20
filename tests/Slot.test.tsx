@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Slot, Slottable } from '../src/components/Primitives';
+import { Slot } from '../src/components/Primitives';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Display';
 

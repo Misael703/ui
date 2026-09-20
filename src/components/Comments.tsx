@@ -189,7 +189,7 @@ export function CommentThread({
 export interface AttachmentItem {
   id: string;
   name: string;
-  size?: string;          // ya formateado: "245 KB"
+  size?: string;          // already formatted: "245 KB"
   url?: string;
   uploadedBy?: string;
   uploadedAt?: React.ReactNode;
@@ -241,4 +241,4 @@ export function AttachmentList({ attachments, emptyMessage, className, ...rest }
   );
 }
 
-// re-export para que el bundle no tenga dead imports
+// re-export so the bundle has no dead imports

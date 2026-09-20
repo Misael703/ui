@@ -10,7 +10,7 @@
      import "@misael703/ui/styles.css";       // kit base (generic defaults)
      import "@misael703/ui/presets/elalba";   // this file — restores El Alba
 
-   Originally pixel-identical to @misael703/elalba-ui@0.7.1; since then a few
+   Originally pixel-identical to the pre-rename 0.7.1 release; since then a few
    deliberate, documented refinements have diverged from it, all AA/craft-driven
    and all noted inline where they live: the v1.10.0 fg-subtle AA fix, and the
    v1.77.0 palette pass (hue-corrected orange scale, tinted surface #fcfdff,
@@ -121,7 +121,7 @@
   --bg-muted:   #f0f4f9;
 
   /* Base aliases — El Alba anchors primary at the 700 stop and secondary
-     at the 600 stop (matches the original @misael703/elalba-ui). */
+     at the 600 stop (matches the pre-rename original). */
   --color-primary:   var(--color-primary-700);
   --color-secondary: var(--color-secondary-600);
 

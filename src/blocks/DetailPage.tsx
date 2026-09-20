@@ -29,12 +29,11 @@ import {
 const order = {
   id: '1042',
   cliente: 'Northwind Builders',
-  rut: '76.123.456-7',
   total: 1245000,
   estado: 'Despachado',
   fechaPedido: '14 may 2026',
   fechaDespacho: '15 may 2026',
-  vendedor: 'Carla Pizarro',
+  vendedor: 'Satoru Gojo',
   metodoPago: 'Transferencia',
 };
 
@@ -159,7 +158,6 @@ export function DetailPage(): React.ReactElement {
             <CardBody>
               <FieldList>
                 <Field label="Cliente">{order.cliente}</Field>
-                <Field label="RUT" mono>{order.rut}</Field>
                 <Field label="Vendedor">{order.vendedor}</Field>
                 <Field label="Método pago">{order.metodoPago}</Field>
                 <Field label="Despacho">{order.fechaDespacho}</Field>
@@ -176,7 +174,7 @@ export function DetailPage(): React.ReactElement {
 /**
  * Stacked field: label above, value below at full width. In a narrow meta
  * sidebar this beats a 2-column KeyValue — the value gets the full card
- * width so mono values (RUT, dates) don't wrap mid-token.
+ * width so mono values (ids, dates) don't wrap mid-token.
  */
 function FieldList({ children }: { children: React.ReactNode }) {
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>;

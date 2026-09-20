@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronDown, Star } from './Icons';
+import { useLocale } from '../locale';
 
 // ---------- Hero / Banner ----------------------------------------------
 export interface HeroProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -9,13 +10,13 @@ export interface HeroProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 't
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
-  /** Imagen de fondo. */
+  /** Background image. */
   image?: string;
-  /** Posiciona el contenido. Default: center. */
+  /** Positions the content. Default: center. */
   align?: 'start' | 'center' | 'end';
-  /** Variantes visuales. */
+  /** Visual variants. */
   tone?: 'brand' | 'inverse' | 'subtle' | 'image';
-  /** Altura. */
+  /** Height. */
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -86,9 +87,9 @@ export interface CategoryItem {
   id: string;
   label: React.ReactNode;
   href?: string;
-  /** Subcategorías agrupadas (mega menu). */
+  /** Grouped subcategories (mega menu). */
   groups?: Array<{ title: React.ReactNode; items: Array<{ label: React.ReactNode; href?: string }> }>;
-  /** Si tiene groups, se muestra el mega menu en hover. */
+  /** If it has groups, the mega menu shows on hover. */
 }
 
 export interface CategoryNavProps extends React.HTMLAttributes<HTMLElement> {
@@ -96,6 +97,7 @@ export interface CategoryNavProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export function CategoryNav({ categories, className, ...rest }: CategoryNavProps) {
+  const t = useLocale();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const ref = React.useRef<HTMLElement>(null);
 
@@ -114,7 +116,7 @@ export function CategoryNav({ categories, className, ...rest }: CategoryNavProps
   }, [openId]);
 
   return (
-    <nav ref={ref} className={cx('category-nav', className)} aria-label="Categorías" {...rest}>
+    <nav ref={ref} className={cx('category-nav', className)} aria-label={t['categoryNav.label']} {...rest}>
       <ul className="category-nav__list">
         {categories.map((c) => {
           const hasMega = !!(c.groups && c.groups.length);

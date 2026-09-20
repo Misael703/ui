@@ -182,6 +182,7 @@ export function Menu({ trigger, items, align = 'start', className }: MenuProps) 
           <div
             ref={panelRef}
             role="menu"
+            tabIndex={-1}
             className="menu__panel"
             onKeyDown={onPanelKeyDown}
             style={{

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle, type Column } from './DataTable';
 import type { ToolbarAction } from './ToolbarActions';
 import { Badge, Card, CardBody } from './Display';
-import { Input, Select } from './Form';
+import { Input } from './Form';
 import { Button } from './Button';
 import { Modal } from './Overlay';
 import { Filter, Download, Edit, Trash } from './Icons';

@@ -9,7 +9,7 @@ export type LogoBg = 'light' | 'dark';
 export type LogoBgProp = LogoBg | 'auto';
 export type LogoFormat = 'svg' | 'png';
 
-/** Formato preferido por variante. SVG en todas las variantes (mejor escalado y peso). */
+/** Preferred format per variant. SVG for every variant (better scaling and weight). */
 const PREFERRED_FORMAT: Record<LogoVariant, LogoFormat> = {
   horizontal: 'svg',
   vertical: 'svg',
@@ -17,7 +17,7 @@ const PREFERRED_FORMAT: Record<LogoVariant, LogoFormat> = {
   wordmark: 'svg',
 };
 
-/** Altura razonable por defecto según la forma de la variante. */
+/** Reasonable default height per variant shape. */
 const DEFAULT_HEIGHT: Record<LogoVariant, number> = {
   horizontal: 32,
   vertical: 64,
@@ -36,41 +36,41 @@ function buildPath(
 }
 
 export interface LogoProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
-  /** Forma del logo. Default: `mark` (isotipo). */
+  /** Logo shape. Default: `mark` (isotype). */
   variant?: LogoVariant;
   /**
-   * Superficie donde se pinta el logo, elige la variante del asset. Default:
-   * `auto` — consciente de la superficie: usa la variante para fondo claro por
-   * defecto, y la variante para fondo oscuro cuando está en una banda inverse
-   * (`data-tone="inverse"`) o en tema oscuro (`data-theme="dark"`). Sin JS, sin
-   * flash. Pasa `light`/`dark` fijo para superficies de tono fijo (un documento
-   * blanco: `bg="light"`), que deben ignorar el tema.
+   * Surface the logo paints on, picks the asset variant. Default:
+   * `auto` — surface-aware: uses the light-surface variant by
+   * default, and the dark-surface variant when under an inverse band
+   * (`data-tone="inverse"`) or in dark theme (`data-theme="dark"`). No JS, no
+   * flash. Pass a fixed `light`/`dark` for fixed-tone surfaces (a white
+   * document: `bg="light"`), which should ignore the theme.
    */
   bg?: LogoBgProp;
-  /** Forza el formato (svg|png). Por defecto se usa el preferido por variante. */
+  /** Force the format (svg|png). Defaults to the variant's preferred format. */
   format?: LogoFormat;
   /**
-   * Si `true`, usa `mark` en mobile (<768px) y `variant` en desktop.
-   * Útil para AppShell / topbars / headers que se vuelven angostos.
+   * When `true`, renders `mark` on mobile (<768px) and `variant` on desktop.
+   * Useful for AppShell / topbars / headers that get narrow.
    */
   responsive?: boolean;
-  /** Base URL donde están los assets. Default desde `getBrand().logoBasePath`. */
+  /** Base URL of the assets. Defaults to `getBrand().logoBasePath`. */
   basePath?: string;
-  /** Altura en px. Default depende de la variante (mark: 32, horizontal: 32, vertical: 64, wordmark: 28). */
+  /** Height in px. Default depends on the variant (mark: 32, horizontal: 32, vertical: 64, wordmark: 28). */
   height?: number;
-  /** Texto alternativo (a11y). Default: el `brandName`. */
+  /** Alternative text (a11y). Defaults to `brandName`. */
   alt?: string;
-  /** Nombre de la marca; fallback de `alt`. Default desde `getBrand().name`. */
+  /** Brand name; fallback for `alt`. Defaults to `getBrand().name`. */
   brandName?: string;
 }
 
 /**
- * Componente Logo unificado para todas las variantes (horizontal, vertical, mark, wordmark)
- * con soporte responsive (`mark` en mobile, variante elegida en desktop).
+ * Unified Logo component for every variant (horizontal, vertical, mark, wordmark)
+ * with responsive support (`mark` on mobile, chosen variant on desktop).
  *
  * @example
  * <Logo variant="horizontal" bg="light" />
- * <Logo responsive variant="horizontal" bg="light" />   // mark en mobile, horizontal en desktop
+ * <Logo responsive variant="horizontal" bg="light" />   // mark on mobile, horizontal on desktop
  * <Logo variant="mark" bg="dark" height={48} />
  */
 export const Logo = React.forwardRef<HTMLImageElement, LogoProps>(function Logo(

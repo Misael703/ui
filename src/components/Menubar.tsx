@@ -4,6 +4,7 @@ import { cx } from '../utils/cx';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
 import { useDismiss } from '../hooks/useDismiss';
+import { useLocale } from '../locale';
 
 export interface MenubarItem {
   id: string;
@@ -26,7 +27,9 @@ export interface MenubarProps {
   ariaLabel?: string;
 }
 
-export function Menubar({ menus, className, ariaLabel = 'Barra de menús' }: MenubarProps) {
+export function Menubar({ menus, className, ariaLabel }: MenubarProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['menubar.label'];
   const [openId, setOpenId] = React.useState<string | null>(null);
   const [active, setActive] = React.useState(0);
   // Roving tab stop for the menubar row (one tab stop, arrows move between
@@ -174,7 +177,7 @@ export function Menubar({ menus, className, ariaLabel = 'Barra de menús' }: Men
   };
 
   return (
-    <div ref={rootRef} role="menubar" aria-label={ariaLabel} className={cx('menubar', className)}>
+    <div ref={rootRef} role="menubar" aria-label={label} className={cx('menubar', className)}>
       {menus.map((menu, index) => {
         const isOpen = openId === menu.id;
         return (

@@ -1,25 +1,25 @@
 /**
- * Self-hosted fonts bundled with @misael703/elalba-ui — opt-in import.
+ * Self-hosted fonts bundled with @misael703/ui — opt-in import.
  *
- *   import "@misael703/elalba-ui/fonts.css";
- *   import "@misael703/elalba-ui/styles.css";
+ *   import "@misael703/ui/fonts.css";
+ *   import "@misael703/ui/styles.css";
  *
- * `styles.css` y `tokens.css` NO declaran @font-face — solo este archivo
- * lo hace, así no hay duplicación ni url() rotos en otros bundles.
- * Apps que cargan fonts por otro mecanismo (next/font, Google Fonts,
- * sistema) pueden saltarse este archivo: el kit hace fallback al
- * siguiente family de los tokens `--font-display` / `--font-body`.
+ * `styles.css` and `tokens.css` do NOT declare @font-face — only this file
+ * does, so there's no duplication and no broken url()s in other bundles.
+ * Apps that load fonts through another mechanism (next/font, Google Fonts,
+ * system) can skip this file: the kit falls back to the
+ * next family in the `--font-display` / `--font-body` tokens.
  *
- * Ambas fonts shipean bajo SIL Open Font License 1.1. Ver `dist/fonts/OFL.txt`.
+ * Both fonts ship under the SIL Open Font License 1.1. See `dist/fonts/OFL.txt`.
  *
  *   - Outfit (display)        — Google Fonts / The Outfit Project Authors
  *   - DM Sans (body)          — Google Fonts / Colophon Foundry, J. Pinhorn
  *   - JetBrains Mono (mono)   — Google Fonts / The JetBrains Mono Authors
  *
- * Las tres son variable fonts: un solo woff2 cubre el rango de weights.
+ * All three are variable fonts: a single woff2 covers the whole weight range.
  */
 
-/* Outfit — variable; `font-weight: 100 900` cubre thin→black en 44 KB. */
+/* Outfit — variable; `font-weight: 100 900` covers thin→black in 44 KB. */
 @font-face {
   font-family: "Outfit";
   src: url("./fonts/Outfit-VariableFont_wght.woff2") format("woff2-variations"),
@@ -29,10 +29,10 @@
   font-display: swap;
 }
 
-/* DM Sans — variable; `font-weight: 100 1000` cubre thin→black en 36 KB.
-   Cobertura unicode: latin (U+0000–U+00FF). Suficiente para español,
-   inglés y la mayoría de idiomas europeos comunes. Para latin-ext
-   (polaco, vietnamita, etc.), agregar un segundo @font-face. */
+/* DM Sans — variable; `font-weight: 100 1000` covers thin→black in 36 KB.
+   Unicode coverage: latin (U+0000–U+00FF). Enough for Spanish,
+   English and most common European languages. For latin-ext
+   (Polish, Vietnamese, etc.), add a second @font-face. */
 @font-face {
   font-family: "DM Sans";
   src: url("./fonts/DMSans-VariableFont_wght.woff2") format("woff2-variations"),

@@ -2,16 +2,12 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
-import prettier from 'eslint-config-prettier/flat';
+import react from 'eslint-plugin-react';
 
 // Flat config (ESLint 9). The gate is intentionally pragmatic: correctness
-// rules that must never ship are `error`; pre-existing debt in this
-// previously-unlinted codebase is `warn` so CI stays green while the debt is
-// visible and can be paid down incrementally. Formatting is owned by Prettier
-// (eslint-config-prettier disables stylistic rules).
-const a11yWarnings = Object.fromEntries(
-  Object.keys(jsxA11y.flatConfigs.recommended.rules).map((rule) => [rule, 'warn']),
-);
+// rules that must never ship are `error`. Every enabled rule is an error;
+// debt was paid in 4.4.0 (Fase 1 plan). Formatting is hand-written and
+// unenforced by tooling (see spec D6).
 
 export default tseslint.config(
   {
@@ -31,32 +27,57 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
-    plugins: { 'react-hooks': reactHooks },
+    plugins: { 'react-hooks': reactHooks, react },
+    settings: { react: { version: 'detect' } },
     rules: {
-      // Correctness — these are real bugs, never ship them.
       'react-hooks/rules-of-hooks': 'error',
-      // Debt made visible without blocking the gate.
-      'react-hooks/exhaustive-deps': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      'react-hooks/exhaustive-deps': 'error',
+      'react/jsx-key': 'error',
+      'react/jsx-no-duplicate-props': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/no-children-prop': 'error',
+      'react/no-danger-with-children': 'error',
+      'react/self-closing-comp': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
       ],
-      'prefer-const': 'warn',
-      'no-empty': ['warn', { allowEmptyCatch: true }],
-      'no-useless-escape': 'warn',
-      '@typescript-eslint/no-empty-object-type': 'warn',
+      'prefer-const': 'error',
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-useless-escape': 'error',
+      '@typescript-eslint/no-empty-object-type': 'error',
     },
   },
   {
     ...jsxA11y.flatConfigs.recommended,
     files: ['src/**/*.{ts,tsx}'],
-  },
-  {
-    // a11y is already governed by the design audit; surface plugin findings
-    // as warnings rather than blocking on heuristics over custom components.
-    files: ['src/**/*.{ts,tsx}'],
-    rules: a11yWarnings,
+    rules: {
+      ...jsxA11y.flatConfigs.recommended.rules,
+      // Deprecated in the plugin; superseded by label-has-associated-control.
+      'jsx-a11y/label-has-for': 'off',
+      'jsx-a11y/label-has-associated-control': ['error', {
+        controlComponents: ['Input', 'Select', 'Textarea', 'NumberInput', 'MoneyInput', 'PhoneInput', 'TagInput', 'TimePicker', 'Slider', 'Combobox', 'MultiCombobox', 'DatePicker', 'DateRangePicker', 'Checkbox', 'Radio', 'Switch', 'FileUpload', 'PasswordInput'],
+        depth: 3,
+      }],
+      // The plugin exempts role="presentation" from the two sibling
+      // interaction rules (no-static-element-interactions,
+      // no-noninteractive-element-interactions) but not from this one — a
+      // gap, since a focusable role="presentation" element is a real,
+      // spec-sanctioned pattern (HTML-AAM's focusable-element conflict
+      // resolution ignores the presentational role and exposes it as a
+      // plain focusable container). Used for composite widgets whose
+      // landmark/semantic role lives on an ancestor (e.g. Carousel's
+      // role="region"), so the focus/keydown target itself carries no role.
+      // 'separator' too: ARIA 1.2 explicitly makes a separator interactive
+      // once it carries tabindex (a resize handle, not a static <hr>-like
+      // divider) — the plugin's role classification predates that carve-out.
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { tags: [], roles: ['tabpanel', 'presentation', 'separator'], allowExpressionValues: true }],
+      // `role` is also a domain prop on several kit components (UserMenu,
+      // Testimonial: the person's job title, not an ARIA role) — scope this
+      // rule to actual DOM elements so it doesn't flag those call sites.
+      'jsx-a11y/aria-role': ['error', { ignoreNonDOM: true }],
+    },
   },
   {
     files: ['tests/**/*.{ts,tsx}', 'src/**/*.stories.tsx'],
@@ -68,5 +89,4 @@ export default tseslint.config(
       'react-hooks/rules-of-hooks': 'off',
     },
   },
-  prettier,
 );

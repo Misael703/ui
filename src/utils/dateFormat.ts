@@ -107,7 +107,7 @@ export function parseDate(s: string, format: ResolvedDateFormat): Date | null {
     return safeDate(Number(iso[1]), Number(iso[2]), Number(iso[3]));
   }
 
-  const m = trimmed.match(/^(\d{1,4})[\-\/.](\d{1,2})[\-\/.](\d{1,4})$/);
+  const m = trimmed.match(/^(\d{1,4})[-/.](\d{1,2})[-/.](\d{1,4})$/);
   if (!m) return null;
 
   let y: number, mo: number, d: number;

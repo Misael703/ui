@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { cx } from '../utils/cx';
 import { ChevronLeft, ChevronRight } from './Icons';
+import { useLocale } from '../locale';
 
 export interface CarouselProps {
   children: React.ReactNode;
@@ -22,10 +23,12 @@ export function Carousel({
   autoplayInterval = 4000,
   showControls = true,
   showDots = true,
-  ariaLabel = 'Carrusel',
+  ariaLabel,
   className,
   onIndexChange,
 }: CarouselProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['carousel.label'];
   const slides = React.Children.toArray(children);
   const total = slides.length;
   const [index, setIndex] = React.useState(0);
@@ -82,15 +85,19 @@ export function Carousel({
       className={cx('carousel', className)}
       role="region"
       aria-roledescription="carousel"
-      aria-label={ariaLabel}
-      tabIndex={0}
-      onKeyDown={onKey}
+      aria-label={label}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className="carousel__viewport">
+      {/* The landmark above carries the region's identity; arrow-key
+          navigation is a supplementary shortcut layered on the viewport
+          itself (the Prev/Next buttons remain the primary, fully keyboard-
+          operable control — role="presentation" here is overridden by the
+          browser's focusable-element conflict resolution, so this stays in
+          the a11y tree as a plain focusable container, not hidden). */}
+      <div className="carousel__viewport" role="presentation" tabIndex={0} onKeyDown={onKey}>
         <div className="carousel__track" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map((slide, i) => (
             <div
@@ -110,7 +117,7 @@ export function Carousel({
             <button
               type="button"
               className="carousel__control carousel__control--prev"
-              aria-label="Anterior"
+              aria-label={t['carousel.prev']}
               onClick={prev}
               disabled={!loop && index === 0}
             >
@@ -119,7 +126,7 @@ export function Carousel({
             <button
               type="button"
               className="carousel__control carousel__control--next"
-              aria-label="Siguiente"
+              aria-label={t['carousel.next']}
               onClick={next}
               disabled={!loop && index === total - 1}
             >

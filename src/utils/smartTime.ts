@@ -33,7 +33,7 @@ function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);
 }
 
-// Day-precision markers (T00:00:00Z from Bsale/APIs that don't carry a
+// Day-precision markers (T00:00:00Z from APIs that don't carry a
 // real time) parse as midnight in local TZ — checking local h/m matches
 // what the user sees. Without this, the smart formatter would render
 // "mié 00:00" for every day-precision value, which is noise.

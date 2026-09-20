@@ -54,7 +54,7 @@ describe('DataTable row expansion', () => {
     expect(detail).not.toBeNull();
     expect(screen.getByText('Detalle de Martillo')).toBeInTheDocument();
     // checkbox + chevron + 1 columna de datos
-    expect(detail.colSpan).toBe(3);
+    expect((detail as HTMLTableCellElement).colSpan).toBe(3);
     expect(btn.getAttribute('aria-controls')).toBe(detail.id);
   });
 

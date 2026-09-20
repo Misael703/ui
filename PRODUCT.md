@@ -18,8 +18,8 @@ foundation.
 ## Users
 
 - **Primary:** the owner (solo dev) building and maintaining several apps that
-  consume the kit via npm + SemVer — barritas (Next.js, in prod), marginapp,
-  and other El Alba / hardware-retail tools.
+  consume the kit via npm + SemVer — despachos-ferreteria (Next.js, in
+  production), cobros-meson, barritas, rentools.
 - **End users of those apps:** Spanish-speaking operators of hardware-retail /
   POS / admin software (Ferretería El Alba domain). They are in a task, on
   desktop and mobile, and value speed and clarity over novelty.
@@ -66,7 +66,7 @@ consistency are features here, not weaknesses.
 
 ## Known constraints _(refine)_
 
-- Light theme only today; global dark mode is deferred (revisit when a
-  consuming app actually needs it).
-- Single CSS stylesheet (~19 KB gzip); no per-component CSS split (documented
+- Dark theme is opt-in via `data-theme="dark"` (v1.79.0); no automatic
+  `prefers-color-scheme` switch.
+- Single CSS stylesheet (~27 KB gzip); no per-component CSS split (documented
   tradeoff, acceptable for internal multi-app use).

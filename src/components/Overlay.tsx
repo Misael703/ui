@@ -50,6 +50,7 @@ export function Modal({
   return createPortal(
     <div
       className={cx('modal-backdrop', closing && 'is-closing')}
+      role="presentation"
       onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
       onClick={(e) => {
         if (closeOnBackdrop && downOnBackdrop.current && e.target === e.currentTarget) onClose();
@@ -100,6 +101,7 @@ export function Drawer({
   return createPortal(
     <div
       className={cx('drawer-backdrop', closing && 'is-closing')}
+      role="presentation"
       onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
       onClick={(e) => {
         if (closeOnBackdrop && downOnBackdrop.current && e.target === e.currentTarget) onClose();

@@ -197,4 +197,15 @@ export const esMessages: UiKitMessages = {
 
   // Charts
   'chart.empty': 'Sin datos',
+
+  // Landmarks and controls
+  'navigationMenu.label': 'Navegación principal',
+  'menubar.label': 'Barra de menús',
+  'contextMenu.label': 'Menú contextual',
+  'resizable.handle': 'Redimensionar',
+  'carousel.label': 'Carrusel',
+  'carousel.prev': 'Anterior',
+  'carousel.next': 'Siguiente',
+  'categoryNav.label': 'Categorías',
+  'breadcrumbs.label': 'Navegación de ruta',
 };

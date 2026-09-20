@@ -50,7 +50,7 @@ export function ErrorPage({ onRetry }: ErrorPageProps = {}): React.ReactElement 
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, alignItems: 'center' }}>
               {onRetry && <Button onClick={onRetry}>Reintentar</Button>}
-              <a href="mailto:soporte@empresa.cl" className="caption">Contactar soporte</a>
+              <a href="mailto:soporte@northwind.example" className="caption">Contactar soporte</a>
             </div>
       </div>
     </div>

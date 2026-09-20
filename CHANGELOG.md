@@ -5,6 +5,37 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] — 2026-09-17
+
+Entries from this version on are written in English.
+
+### Changed
+- Typecheck now covers `tests/` and `.storybook/`; new `npm run typecheck`.
+- CI runs lint, typecheck, test and build on every pull request.
+- ESLint: every enabled rule is an error, including `jsx-a11y/recommended`; added `eslint-plugin-react`.
+- Prettier removed; the code style is compact and hand-written.
+- commitlint + husky (`commit-msg`, `pre-push`).
+- Remaining hardcoded `aria-label` defaults go through `UiKitMessages` (new keys, same Spanish values).
+- JSDoc and code comments in English; stale `@misael703/elalba-ui` references removed.
+- Build script moved to `scripts/build.mjs` (cross-platform).
+- `Breadcrumbs` default `aria-label` is now `Navegación de ruta` (was the English literal `Breadcrumb`).
+- `PhoneInput` no longer ships a default `placeholder` (was `9 1234 5678`); pass your own.
+- Chart component generics default to `Record<string, unknown>` instead of `any`.
+
+### Fixed
+**Accessibility markup (jsx-a11y recommended is now an error).**
+- `CommandPalette`: `role="dialog"` moved from the overlay to the panel; overlay is `role="presentation"`.
+- `Lightbox`: new presentational wrapper catches outside clicks; dialog is the inner panel.
+- `Carousel`: keyboard target and focus moved from `.carousel` to `.carousel__viewport`.
+- `TransferList`: options are focusable, Enter/Space toggle, checkbox is not a separate tab stop.
+- `Menu`: panel `tabIndex={-1}`.
+- `Tree`: rows handle Enter/Space.
+- `Modal`/`Drawer` backdrops, and non-interactive wrapper elements in `Popover`/`UserMenu`/`ContextMenu`/`NavigationMenu`/`AppShell`: `role="presentation"`.
+
+### Removed
+- Domain blocks (DispatchBoard, RouteMap, RouteSchedule, DeliveryTimeline, RentalBoard, RentalBooking, RentalDetail, RentalAgreement, ReturnInspection, ToolCatalog, AvailabilityCalendar). Last commit containing them: `f1634b8`. Blocks were never part of the package.
+- `docs/BLOCKS.md` (merged into `src/blocks/README.md`).
+
 ## [4.3.0] — 2026-09-11
 
 **Minor. 42 íconos más, y la licencia de los que ya había.**

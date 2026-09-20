@@ -11,10 +11,10 @@ import { format } from '../locale/messages';
 export interface RatingProps {
   value: number;          // 0..max
   max?: number;           // default 5
-  /** Si se pasa, se vuelve interactivo. */
+  /** If passed, it becomes interactive. */
   onChange?: (value: number) => void;
   size?: number;
-  /** Permite medias estrellas (display only). */
+  /** Allows half stars (display only). */
   allowHalf?: boolean;
   className?: string;
   ariaLabel?: string;
@@ -56,14 +56,14 @@ export function Rating({
 // ---------- PriceDisplay -----------------------------------------------
 export interface PriceDisplayProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   amount: number;
-  /** Precio original tachado (para descuentos). */
+  /** Original price, struck through (for discounts). */
   compareAt?: number;
-  /** ISO 4217. Default desde `getBrand().currency`. */
+  /** ISO 4217. Default from `getBrand().currency`. */
   currency?: string;
-  /** BCP 47. Default desde `getBrand().locale`. */
+  /** BCP 47. Default from `getBrand().locale`. */
   locale?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  /** Muestra "% off" si hay compareAt. Default: true. */
+  /** Shows "% off" when there's a compareAt. Default: true. */
   showDiscount?: boolean;
 }
 
@@ -159,7 +159,7 @@ export interface VariantOption<T = string> {
   value: T;
   label: React.ReactNode;
   disabled?: boolean;
-  /** Color hex/rgb para chips de tipo "color". */
+  /** Hex/rgb color for "color"-type chips. */
   swatch?: string;
 }
 
@@ -168,7 +168,7 @@ export interface VariantSelectorProps<T = string> {
   options: VariantOption<T>[];
   value: T | null;
   onChange: (value: T) => void;
-  /** 'chip' (default), 'swatch' (círculos de color). */
+  /** 'chip' (default), 'swatch' (color circles). */
   appearance?: 'chip' | 'swatch';
   className?: string;
 }
@@ -244,7 +244,7 @@ export function WishlistButton({ active = false, onToggle, size = 20, className,
 
 // ---------- PromoCodeInput ---------------------------------------------
 export interface PromoCodeInputProps {
-  /** Validador async. Resuelve con un mensaje de éxito o lanza un Error con el mensaje. */
+  /** Async validator. Resolves with a success message or throws an Error with the message. */
   onApply: (code: string) => Promise<string>;
   placeholder?: string;
   buttonLabel?: string;
@@ -306,9 +306,9 @@ export function PromoCodeInput({
 
 // ---------- FreeShippingProgress ---------------------------------------
 export interface FreeShippingProgressProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Subtotal actual del cart. */
+  /** Current cart subtotal. */
   current: number;
-  /** Threshold para envío gratis. */
+  /** Threshold for free shipping. */
   threshold: number;
   currency?: string;
   locale?: string;
@@ -444,7 +444,7 @@ export function CartDrawer({
 export interface OrderLineRow {
   label: React.ReactNode;
   value: React.ReactNode;
-  /** Aplica estilo de total (negrita, más grande). */
+  /** Applies total styling (bold, larger). */
   emphasis?: boolean;
 }
 
@@ -485,18 +485,18 @@ export interface AddressFieldOption {
 }
 
 export interface AddressField {
-  /** Key del campo en el objeto `value`. */
+  /** Field key in the `value` object. */
   key: string;
   label: React.ReactNode;
   type?: 'text' | 'select' | 'textarea';
   placeholder?: string;
-  /** Solo para `type: 'select'`. */
+  /** Only for `type: 'select'`. */
   options?: readonly AddressFieldOption[];
-  /** Placeholder de la opción vacía. Default: 'Selecciona…' (locale: `common.search` no aplica). */
+  /** Placeholder for the empty option. Default: 'Selecciona…' (locale: `common.search` doesn't apply). */
   selectPlaceholder?: string;
-  /** Anchura en una grilla de 6 columnas. Default: 'full'. */
+  /** Width in a 6-column grid. Default: 'full'. */
   width?: 'full' | 'half' | 'third';
-  /** Solo para `type: 'textarea'`. */
+  /** Only for `type: 'textarea'`. */
   rows?: number;
 }
 
@@ -570,7 +570,7 @@ export interface CompareItem {
 export interface CompareAttribute {
   key: string;
   label: React.ReactNode;
-  /** Valor por item, indexado por id. */
+  /** Value per item, indexed by id. */
   values: Record<string, React.ReactNode>;
 }
 

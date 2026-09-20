@@ -3,9 +3,9 @@
  * Block: split-screen auth — narrow form on the left, brand panel on the
  * right. On mobile the brand panel hides and the form takes the full width.
  *
- * Iterated from the real El Alba login: the right side carries the Logo as
- * a large watermark on a brand-colored canvas, the left stays neutral with
- * a tight focused form. Compare with the simpler centered `AuthScreen`.
+ * Common split-screen login pattern: the right side carries the Logo as a
+ * large watermark on a brand-colored canvas, the left stays neutral with a
+ * tight focused form. Compare with the simpler centered `AuthScreen`.
  *
  * Copy-paste recipe. Replace `../index` with `@misael703/ui` in your app.
  */
@@ -53,7 +53,7 @@ export function AuthSplit(): React.ReactElement {
               <Input
                 id="split-email"
                 type="email"
-                placeholder="tu@empresa.cl"
+                placeholder="tu@northwind.example"
                 value={email}
                 invalid={!email && !!error}
                 onChange={(e) => setEmail(e.target.value)}
@@ -70,12 +70,12 @@ export function AuthSplit(): React.ReactElement {
               />
             </FormField>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -4 }}>
-              <a href="#" className="caption">¿Olvidaste tu contraseña?</a>
+              <a href="/forgot-password" className="caption">¿Olvidaste tu contraseña?</a>
             </div>
             <Button type="submit" fullWidth>Entrar</Button>
           </form>
           <p className="caption" style={{ marginTop: 24, color: 'var(--fg-muted)' }}>
-            ¿No tienes cuenta? <a href="#">Crear cuenta</a>
+            ¿No tienes cuenta? <a href="/sign-up">Crear cuenta</a>
           </p>
         </div>
       </div>

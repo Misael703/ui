@@ -711,7 +711,7 @@ export const InvertedSurfaces: StoryObj = {
         <h3 className="h3" style={{ marginTop: 0 }}>Footer en navy de marca</h3>
         <p>El reset del kit pone <code>color: var(--fg-default)</code> en p — con la inversión activa, <code>--fg-default</code> resuelve a blanco.</p>
         <p className="caption">Captions caen a <code>--fg-subtle</code> que en la inversión es blanco al 50%.</p>
-        <p><a href="#">Anchors usan</a> el accent invertido (naranja de marca en hover).</p>
+        <p><a href="/anchors-demo">Anchors usan</a> el accent invertido (naranja de marca en hover).</p>
       </footer>
 
       <section className="surface-inverse surface-inverse--dark" style={{ padding: 24, borderRadius: 12 }}>
@@ -731,7 +731,6 @@ export const Localization: StoryObj = {
   render: () => {
     const [openEs, setOpenEs] = React.useState(false);
     const [openEn, setOpenEn] = React.useState(false);
-    const rows = [{ id: '1' }, { id: '2' }];
     const cols = [
       { key: 'name', header: 'Producto', accessor: () => '—' },
       { key: 'sku', header: 'SKU', accessor: () => '—' },

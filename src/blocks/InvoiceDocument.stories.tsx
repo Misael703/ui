@@ -3,7 +3,7 @@ import { InvoiceDocument } from './InvoiceDocument';
 
 /**
  * Copy-paste recipe (not shipped). Print-friendly factura/recibo with
- * issuer + customer blocks, line items, totals (subtotal + IVA), and
+ * issuer + customer blocks, line items, totals (subtotal + tax), and
  * footer. The `@media print` block strips the page chrome for clean
  * PDF/paper output. Source: `src/blocks/InvoiceDocument.tsx`.
  */

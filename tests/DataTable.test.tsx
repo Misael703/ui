@@ -583,7 +583,7 @@ describe('DataTable — column truncate (hard cap that never stretches the colum
     );
     const clip = container.querySelector('.table__cell-clip') as HTMLElement;
     expect(clip.classList.contains('table__cell-clip--clamp')).toBe(true);
-    expect(clip.style.getPropertyValue('-webkit-line-clamp') || clip.style.WebkitLineClamp).toBe('2');
+    expect(clip.style.getPropertyValue('-webkit-line-clamp') || clip.style.webkitLineClamp).toBe('2');
   });
 
   it('string cells get a native title with the full value; JSX cells do not', () => {

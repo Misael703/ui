@@ -81,6 +81,7 @@ export function Popover({
       <span
         ref={triggerRef}
         className="popover__trigger"
+        role="presentation"
         onClick={() => setOpen(!open)}
       >
         {triggerNode}

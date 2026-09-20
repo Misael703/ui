@@ -138,8 +138,8 @@ export interface AppShellProps {
   className?: string;
   /**
    * Sidebar color theme:
-   * - `default` (light): claro, mejor para apps data-heavy de uso prolongado.
-   * - `brand`: superficie azul de marca con texto blanco. Mayor brand recall.
+   * - `default` (light): light, better for prolonged use in data-heavy apps.
+   * - `brand`: brand-blue surface with white text. Higher brand recall.
    *
    * The header band's theme is `headerTheme`, defaulting to this value so
    * `theme="brand"` tints both bands by default.
@@ -318,7 +318,7 @@ const NavItemNode = React.memo(function NavItemNode({
   // here and closes the drawer. The fallback <a> already closes via its own
   // onClick, so it's left unwrapped (single close path per branch, no double).
   const node = item.href && linkAs
-    ? <span className="appshell__navlink-slot" onClick={onCloseMobile}>{rawNode}</span>
+    ? <span className="appshell__navlink-slot" role="presentation" onClick={onCloseMobile}>{rawNode}</span>
     : rawNode;
   return <li>{tip(node as React.ReactElement)}</li>;
 });

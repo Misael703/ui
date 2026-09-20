@@ -23,20 +23,16 @@ interface InvoiceLine {
 }
 
 const ISSUER = {
-  name: 'Ferretería El Alba SpA',
-  rut: '76.512.340-9',
-  giro: 'Comercio al por menor de ferretería',
-  address: 'Av. Principal 123, Santiago',
-  email: 'contacto@elalba.cl',
-  phone: '+56 2 2345 6789',
+  name: 'Northwind Builders',
+  address: 'Av. Principal 123',
+  email: 'hola@northwind.example',
+  phone: '+1 555 0100',
 };
 
 const CUSTOMER = {
-  name: 'Northwind Builders S.A.',
-  rut: '76.123.456-7',
-  giro: 'Construcción de obras civiles',
-  address: 'Av. Apoquindo 4500, Las Condes',
-  email: 'compras@northwind.cl',
+  name: 'Satoru Gojo',
+  address: 'Av. Principal 123',
+  email: 'satoru@example.com',
 };
 
 const LINES: InvoiceLine[] = [
@@ -45,12 +41,13 @@ const LINES: InvoiceLine[] = [
   { sku: 'PNT-01',  name: 'Pintura látex blanca 1gal', qty: 12, unitPrice: 12990 },
 ];
 
-const IVA_RATE = 0.19;
+// Sample tax rate for the demo document.
+const TAX_RATE = 0.19;
 
 export function InvoiceDocument(): React.ReactElement {
   const subtotal = LINES.reduce((sum, l) => sum + l.qty * l.unitPrice, 0);
-  const iva = Math.round(subtotal * IVA_RATE);
-  const total = subtotal + iva;
+  const tax = Math.round(subtotal * TAX_RATE);
+  const total = subtotal + tax;
 
   return (
     <div className="invoice-block" style={{ maxWidth: 820, margin: '0 auto', padding: 24 }}>
@@ -77,8 +74,6 @@ export function InvoiceDocument(): React.ReactElement {
               <Logo variant="horizontal" bg="light" height={32} />
             </div>
             <div className="cell-meta">{ISSUER.name}</div>
-            <div className="cell-meta cell-mono">RUT {ISSUER.rut}</div>
-            <div className="cell-meta">{ISSUER.giro}</div>
             <div className="cell-meta">{ISSUER.address}</div>
           </div>
           <div style={{ textAlign: 'right', minWidth: 220 }}>
@@ -99,8 +94,7 @@ export function InvoiceDocument(): React.ReactElement {
               Cliente
             </div>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>{CUSTOMER.name}</div>
-            <div className="cell-meta cell-mono">RUT {CUSTOMER.rut}</div>
-            <div className="cell-meta">{CUSTOMER.giro}</div>
+            <div className="cell-meta cell-mono">Cliente #8841</div>
             <div className="cell-meta">{CUSTOMER.address}</div>
             <div className="cell-meta">{CUSTOMER.email}</div>
           </div>
@@ -116,7 +110,7 @@ export function InvoiceDocument(): React.ReactElement {
               <dt className="cell-meta">Condición</dt>
               <dd style={{ margin: 0 }}>30 días</dd>
               <dt className="cell-meta">Vendedor</dt>
-              <dd style={{ margin: 0 }}>Carla Pizarro</dd>
+              <dd style={{ margin: 0 }}>Satoru Gojo</dd>
             </dl>
           </div>
         </section>
@@ -150,8 +144,8 @@ export function InvoiceDocument(): React.ReactElement {
           <dl style={{ display: 'grid', gridTemplateColumns: 'auto auto', gap: '4px 24px', margin: 0, minWidth: 280 }}>
             <dt className="cell-meta">Subtotal</dt>
             <dd className="cell-mono" style={{ margin: 0, textAlign: 'right' }}>${subtotal.toLocaleString('es-CL')}</dd>
-            <dt className="cell-meta">IVA (19%)</dt>
-            <dd className="cell-mono" style={{ margin: 0, textAlign: 'right' }}>${iva.toLocaleString('es-CL')}</dd>
+            <dt className="cell-meta">Impuesto (19%)</dt>
+            <dd className="cell-mono" style={{ margin: 0, textAlign: 'right' }}>${tax.toLocaleString('es-CL')}</dd>
             <dt style={{ fontWeight: 600, fontSize: 16, marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border-default)' }}>Total</dt>
             <dd className="cell-mono" style={{ margin: 0, fontWeight: 700, fontSize: 18, textAlign: 'right', marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border-default)' }}>
               ${total.toLocaleString('es-CL')}

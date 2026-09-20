@@ -126,7 +126,7 @@ export function TagInput({
   const addTags = (raw: string) => {
     const next = raw.split(separator).map((t) => t.trim()).filter(Boolean);
     if (next.length === 0) return;
-    let merged = [...value];
+    const merged = [...value];
     for (const t of next) {
       if (validate && !validate(t)) continue;
       if (merged.includes(t)) continue;
@@ -138,7 +138,7 @@ export function TagInput({
   };
 
   return (
-    <div className={cx('tag-input', disabled && 'is-disabled', className)} onClick={(e) => {
+    <div className={cx('tag-input', disabled && 'is-disabled', className)} role="presentation" onClick={(e) => {
       const input = (e.currentTarget.querySelector('input') as HTMLInputElement);
       input?.focus();
     }}>
@@ -345,7 +345,7 @@ export interface PhoneInputProps {
   onBlur?: React.FocusEventHandler<HTMLInputElement>;
 }
 
-export function PhoneInput({ value, onChange, prefix, invalid, disabled, className, id, placeholder = '9 1234 5678', onBlur }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, prefix, invalid, disabled, className, id, placeholder, onBlur }: PhoneInputProps) {
   return (
     <div className={cx('phone-input', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
       {prefix && <span className="phone-input__prefix">{prefix}</span>}
@@ -451,8 +451,10 @@ function TimeColumn({ label, values, selected, idBase, onSelect }: {
           id={`${idBase}-${v}`}
           role="option"
           aria-selected={v === selected}
+          tabIndex={-1}
           className={cx('timepicker__cell', v === selected && 'is-selected')}
           onClick={() => onSelect(v)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(v); } }}
         >{pad2(v)}</div>
       ))}
     </div>

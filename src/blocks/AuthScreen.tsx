@@ -1,8 +1,8 @@
 'use client';
 /**
  * Block: centered auth / login screen. Copy-paste recipe. Replace `../index`
- * with `@misael703/ui`. Looks branded under the El Alba preset (toggle the
- * preset in the Storybook toolbar to see it).
+ * with `@misael703/ui`. Looks branded when a brand preset is applied (toggle
+ * a preset in the Storybook toolbar to see it).
  */
 import * as React from 'react';
 import { Card, CardBody, FormField, Input, Button, Logo } from '../index';
@@ -41,7 +41,7 @@ export function AuthScreen(): React.ReactElement {
               <Input
                 id="auth-email"
                 type="email"
-                placeholder="tu@empresa.cl"
+                placeholder="tu@northwind.example"
                 value={email}
                 invalid={!email && !!error}
                 onChange={(e) => setEmail(e.target.value)}
@@ -60,7 +60,7 @@ export function AuthScreen(): React.ReactElement {
             <Button type="submit" fullWidth>Entrar</Button>
           </form>
           <p className="caption" style={{ textAlign: 'center', marginTop: 16 }}>
-            <a href="#">¿Olvidaste tu contraseña?</a>
+            <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
           </p>
         </CardBody>
       </Card>

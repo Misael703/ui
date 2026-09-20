@@ -1,20 +1,20 @@
 /**
- * @misael703/ui/cl — helpers específicos de Chile.
+ * @misael703/ui/cl — Chile-specific helpers.
  *
- * Entry point separado a propósito: el core del kit no asume país (ver
- * `src/brand.ts`); lo país-específico vive en subpaths opt-in, mismo patrón
- * que `date-fns/locale`. Quien no importa `./cl` no carga nada de esto.
+ * Separate entry point on purpose: the kit's core does not assume a country
+ * (see `src/brand.ts`); country-specific code lives in opt-in subpaths, same
+ * pattern as `date-fns/locale`. Whoever doesn't import `./cl` loads none of this.
  */
 
 /**
- * Normaliza un RUT a su forma canónica: solo dígitos + dígito verificador,
- * sin puntos ni guión, K en mayúscula. `"12.345.678-k"` → `"12345678K"`.
+ * Normalizes a RUT (Chilean tax id) to its canonical form: digits plus check
+ * digit only, no dots or dash, uppercase K. `"12.345.678-k"` → `"12345678K"`.
  */
 export function cleanRut(rut: string): string {
   return rut.replace(/[^0-9kK]/g, '').toUpperCase();
 }
 
-/** Dígito verificador (módulo 11) para un cuerpo numérico de RUT. */
+/** Check digit (modulo 11) for a numeric RUT body. */
 function computeDv(body: string): string {
   let sum = 0;
   let factor = 2;
@@ -27,8 +27,8 @@ function computeDv(body: string): string {
 }
 
 /**
- * Valida un RUT chileno (módulo 11). Acepta cualquier formato de entrada
- * (con/sin puntos y guión): `validateRut('12.345.678-5')` → `true`.
+ * Validates a Chilean RUT (modulo 11). Accepts any input format
+ * (with/without dots and dash): `validateRut('12.345.678-5')` → `true`.
  */
 export function validateRut(rut: string): boolean {
   const clean = cleanRut(rut);
@@ -40,10 +40,10 @@ export function validateRut(rut: string): boolean {
 }
 
 /**
- * Formatea un RUT al estándar visual chileno: `formatRut('123456785')` →
- * `"12.345.678-5"`. No valida — formatea lo que recibe (útil para máscaras
- * en vivo mientras el usuario tipea). Entrada vacía o sin caracteres de RUT
- * devuelve `""`.
+ * Formats a RUT to the standard Chilean visual style: `formatRut('123456785')` →
+ * `"12.345.678-5"`. Does not validate — formats whatever it receives (useful
+ * for live masks while the user types). Empty input or input with no RUT
+ * characters returns `""`.
  */
 export function formatRut(rut: string): string {
   const clean = cleanRut(rut);

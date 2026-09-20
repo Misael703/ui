@@ -103,7 +103,7 @@ function CuentaSection() {
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <Avatar name="Misael Ocas" size={64} />
+          <Avatar name="Satoru Gojo" size={64} />
           <div>
             <Button size="sm" variant="outline">Cambiar foto</Button>
             <p className="caption" style={{ color: 'var(--fg-muted)', margin: '8px 0 0' }}>JPG o PNG. Máx 2 MB.</p>
@@ -112,13 +112,13 @@ function CuentaSection() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <FormField label="Nombre" htmlFor="set-name">
-            <Input id="set-name" defaultValue="Misael" />
+            <Input id="set-name" defaultValue="Satoru" />
           </FormField>
           <FormField label="Apellido" htmlFor="set-last">
-            <Input id="set-last" defaultValue="Ocas" />
+            <Input id="set-last" defaultValue="Gojo" />
           </FormField>
           <FormField label="Correo" htmlFor="set-email">
-            <Input id="set-email" type="email" defaultValue="misael@empresa.cl" />
+            <Input id="set-email" type="email" defaultValue="hola@northwind.example" />
           </FormField>
           <FormField label="Idioma" htmlFor="set-lang">
             <Select id="set-lang" defaultValue="es-CL">
@@ -214,16 +214,10 @@ function FacturacionSection() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <FormField label="Razón social" htmlFor="bill-name">
-            <Input id="bill-name" defaultValue="Ferretería El Alba SpA" />
-          </FormField>
-          <FormField label="RUT" htmlFor="bill-rut">
-            <Input id="bill-rut" defaultValue="76.512.340-9" />
-          </FormField>
-          <FormField label="Giro" htmlFor="bill-giro">
-            <Input id="bill-giro" defaultValue="Comercio al por menor de ferretería" />
+            <Input id="bill-name" defaultValue="Northwind Builders" />
           </FormField>
           <FormField label="Dirección" htmlFor="bill-addr">
-            <Input id="bill-addr" defaultValue="Av. Principal 123, Santiago" />
+            <Input id="bill-addr" defaultValue="Av. Principal 123" />
           </FormField>
         </div>
 

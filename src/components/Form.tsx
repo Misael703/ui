@@ -225,8 +225,8 @@ export function FormField({ label, hint, error, required, htmlFor, children, cla
 }
 
 // ---------- InputGroup --------------------------------------------------
-// Permite combinar un Input con addons a la izquierda/derecha.
-// Uso: <InputGroup><InputGroupAddon>$</InputGroupAddon><Input /></InputGroup>
+// Allows combining an Input with addons on the left/right.
+// Usage: <InputGroup><InputGroupAddon>$</InputGroupAddon><Input /></InputGroup>
 export const InputGroup = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   function InputGroup({ className, ...rest }, ref) {
     return <div ref={ref} className={cx('input-group', className)} {...rest} />;

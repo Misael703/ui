@@ -1,4 +1,4 @@
-Fonts bundled with @misael703/elalba-ui are released under the
+Fonts bundled with @misael703/ui are released under the
 SIL Open Font License, Version 1.1.
 
   - Outfit

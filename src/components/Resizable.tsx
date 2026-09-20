@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { cx } from '../utils/cx';
+import { useLocale } from '../locale';
 
 export type ResizableDirection = 'horizontal' | 'vertical';
 
@@ -126,7 +127,9 @@ export interface ResizableHandleProps {
   ariaLabel?: string;
 }
 
-export function ResizableHandle({ panelId, className, ariaLabel = 'Redimensionar' }: ResizableHandleProps) {
+export function ResizableHandle({ panelId, className, ariaLabel }: ResizableHandleProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['resizable.handle'];
   const ctx = React.useContext(ResizableContext);
   if (!ctx) throw new Error('ResizableHandle must be inside ResizableGroup');
   const size = ctx.sizes[panelId] ?? 0;
@@ -144,11 +147,12 @@ export function ResizableHandle({ panelId, className, ariaLabel = 'Redimensionar
   };
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- APG Window Splitter: focusable separator with aria-valuenow is interactive
     <div
       role="separator"
       tabIndex={0}
       aria-orientation={ctx.direction === 'horizontal' ? 'vertical' : 'horizontal'}
-      aria-label={ariaLabel}
+      aria-label={label}
       aria-valuenow={Math.round(size)}
       aria-valuemin={Math.round(min)}
       aria-valuemax={100}

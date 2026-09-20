@@ -5,6 +5,7 @@ import { ChevronDown } from './Icons';
 import { Portal } from './Portal';
 import { usePopoverPosition } from '../hooks/usePopoverPosition';
 import { useDismiss } from '../hooks/useDismiss';
+import { useLocale } from '../locale';
 
 export interface NavLink {
   id: string;
@@ -31,7 +32,9 @@ export interface NavigationMenuProps {
   rootLinkAs?: (item: NavMenuItem, content: React.ReactNode, className: string) => React.ReactNode;
 }
 
-export function NavigationMenu({ items, className, ariaLabel = 'Navegación principal', linkAs, rootLinkAs }: NavigationMenuProps) {
+export function NavigationMenu({ items, className, ariaLabel, linkAs, rootLinkAs }: NavigationMenuProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['navigationMenu.label'];
   const [openId, setOpenId] = React.useState<string | null>(null);
   // When the panel was opened by keyboard we move focus into it; pointer
   // (click/hover) opens leave focus with the user's cursor.
@@ -71,22 +74,22 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
   // `.nav-menu__link` is applied to every link node (default <a> and the
   // `linkAs` render-prop alike), so querying by class manages focus
   // uniformly regardless of how the consumer renders links.
-  const panelLinks = (): HTMLElement[] =>
-    Array.from(panelRef.current?.querySelectorAll<HTMLElement>('.nav-menu__link') ?? []);
+  const panelLinks = React.useCallback((): HTMLElement[] =>
+    Array.from(panelRef.current?.querySelectorAll<HTMLElement>('.nav-menu__link') ?? []), []);
 
-  const focusLinkAt = (index: number) => {
+  const focusLinkAt = React.useCallback((index: number) => {
     const links = panelLinks();
     if (links.length === 0) return;
     const wrapped = ((index % links.length) + links.length) % links.length;
     links[wrapped]?.focus();
-  };
+  }, [panelLinks]);
 
   React.useEffect(() => {
     if (open && focusOnOpen.current) {
       focusOnOpen.current = false;
       focusLinkAt(0);
     }
-  }, [open]);
+  }, [open, focusLinkAt]);
 
   const onPanelKeyDown = (e: React.KeyboardEvent) => {
     const links = panelLinks();
@@ -112,7 +115,7 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
   };
 
   return (
-    <nav ref={rootRef} aria-label={ariaLabel} className={cx('nav-menu', className)}>
+    <nav ref={rootRef} aria-label={label} className={cx('nav-menu', className)}>
       <ul className="nav-menu__list">
         {items.map((item) => {
           const hasChildren = !!item.links?.length;
@@ -174,7 +177,7 @@ export function NavigationMenu({ items, className, ariaLabel = 'Navegación prin
                     ref={panelRef}
                     id={`nav-menu-panel-${item.id}`}
                     className="nav-menu__panel"
-                    aria-label={typeof item.label === 'string' ? item.label : undefined}
+                    role="presentation"
                     onKeyDown={onPanelKeyDown}
                     style={{
                       position: 'fixed',

@@ -9,7 +9,7 @@ export const Basico: StoryObj = {
     const [value, setValue] = React.useState('');
     return (
       <div style={{ display: 'grid', gap: 12 }}>
-        <InputOTP value={value} onChange={setValue} length={6} autoFocus />
+        <InputOTP value={value} onChange={setValue} length={6} />
         <p style={{ fontSize: 13, color: 'var(--fg-muted)' }}>
           Valor: <code>{value || '—'}</code>
         </p>

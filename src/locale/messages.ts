@@ -240,6 +240,17 @@ export interface UiKitMessages {
 
   // Charts — placeholder when a chart receives no data rows.
   'chart.empty': string;
+
+  // Landmarks and controls (v4.4.0: previously hardcoded defaults)
+  'navigationMenu.label': string;
+  'menubar.label': string;
+  'contextMenu.label': string;
+  'resizable.handle': string;
+  'carousel.label': string;
+  'carousel.prev': string;
+  'carousel.next': string;
+  'categoryNav.label': string;
+  'breadcrumbs.label': string;
 }
 
 /**

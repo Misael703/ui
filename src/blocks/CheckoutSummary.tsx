@@ -21,8 +21,7 @@ const CL_REGIONS = ['Metropolitana', 'Valparaíso', 'Biobío', 'Maule', 'Araucan
 
 const fields: AddressField[] = [
   { key: 'fullName', label: 'Nombre completo' },
-  { key: 'rut', label: 'RUT', placeholder: '12.345.678-9' },
-  { key: 'phone', label: 'Teléfono', placeholder: '+56 9 1234 5678' },
+  { key: 'phone', label: 'Teléfono', placeholder: '+1 555 0100' },
   { key: 'street', label: 'Calle', width: 'half' },
   { key: 'number', label: 'Número', width: 'third' },
   { key: 'apartment', label: 'Depto/Casa', width: 'third' },
@@ -34,7 +33,7 @@ const fields: AddressField[] = [
 export function CheckoutSummary(): React.ReactElement {
   const [addr, setAddr] = React.useState<Record<string, string>>({});
 
-  // Totals derived so the breakdown always reconciles: net + shipping + 19% IVA.
+  // Totals derived so the breakdown always reconciles: net + shipping + 19% tax.
   const clp = (n: number): string => `$${n.toLocaleString('es-CL')}`;
   const subtotal = 45250;
   const shipping = 3500;
@@ -65,7 +64,7 @@ export function CheckoutSummary(): React.ReactElement {
           rows={[
             { label: 'Subtotal (3 ítems)', value: clp(subtotal) },
             { label: 'Despacho', value: clp(shipping) },
-            { label: 'IVA 19%', value: clp(iva) },
+            { label: 'Impuesto 19%', value: clp(iva) },
             { label: 'Total', value: clp(total), emphasis: true },
           ]}
         />

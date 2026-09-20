@@ -38,7 +38,7 @@
   --color-primary-100: #f0e9e1;
   --color-primary-50:  #faf6f2;
 
-  /* Secondary — sand / café-con-leche scale. Base at 400 (light
+  /* Secondary — sand / coffee-with-milk scale. Base at 400 (light
      decorative accent: eyebrows, card rails — not a CTA color). */
   --color-secondary-900: #573820;
   --color-secondary-800: #7a4f30;
@@ -75,7 +75,7 @@
   --color-gray-50:   #f9f8f7;
   --color-white:     #ffffff;
 
-  /* Status palettes — escalas completas para flexibilidad */
+  /* Status palettes — full scales for flexibility */
   --color-green-900: #0f4d22;
   --color-green-800: #166130;
   --color-green-700: #1f7a3d;
@@ -110,7 +110,7 @@
   --color-red-900: #5b0e0e;
   --color-red-800: #7e1818;
   --color-red-700: #b91c1c;
-  --color-red-600: #dc2626;     /* base — rojo limpio, no tira a naranja */
+  --color-red-600: #dc2626;     /* base — clean red, doesn't lean orange */
   --color-red-500: #ef4444;
   --color-red-400: #f87171;
   --color-red-300: #fca5a5;
@@ -240,7 +240,7 @@
      placed directly on the page — `Card variant="inset"`, any bordered block
      that is not a floating surface. `--border-default` is tuned for edges on
      `--bg-surface` and reads ~1.08:1 on the canvas: invisible there. A
-     consumer (despachos) measured the inset at 1.09:1 against the canvas-F
+     consumer with dense data tables measured the inset at 1.09:1 against the canvas-F
      page: only its rounded corners gave it away. DERIVED, not a hex: a share
      of the brand ink mixed into the canvas, so every preset gets an on-hue
      hairline without overriding anything (El Alba resolves it against its
@@ -281,8 +281,8 @@
 
   /* -------- Dataviz semantic roles (v3.1.0) --------------------------- */
   /* For chart MARKS (SVG fill/stroke, Meter/ProportionBar segments), by the
-     job a series does — never by position. Consumer-driven (despachos reports
-     dashboard): the app kept a local hex palette because the kit exposed no
+     job a series does — never by position. Consumer-driven (reports dashboards):
+     the app kept a local hex palette because the kit exposed no
      dataviz roles, which broke "the kit owns the palette" and left every chart
      blind to dark mode. Each role ALIASES an existing primitive — no new hex —
      so a brand preset re-tints them for free and the dark block below only
@@ -344,9 +344,9 @@
   --weight-black:      900;
 
   /* -------- Type scale (Major Third, rooted at 16) ------------------- */
-  --text-2xs:  0.6875rem;  /* 11 — micro labels, badges chiquitos */
+  --text-2xs:  0.6875rem;  /* 11 — micro labels, tiny badges */
   --text-xs:   0.75rem;    /* 12 */
-  --text-data: 0.8125rem;  /* 13 — celdas de tabla y datos densos (entre xs y sm) */
+  --text-data: 0.8125rem;  /* 13 — table cells and dense data (between xs and sm) */
   --text-sm:   0.875rem;   /* 14 */
   --text-md:   1rem;       /* 16 */
   --text-lg:   1.125rem;   /* 18 */
@@ -417,9 +417,9 @@
   --space-20:  80px;
   --space-24:  96px;
 
-  /* Control size sets (v3.0.0 compact register). Un control escala TODAS
-     sus medidas juntas — altura, font, pad, radio — nunca una altura
-     suelta (relación interna ~3:1 altura:font). */
+  /* Control size sets (v3.0.0 compact register). A control scales ALL
+     of its measurements together — height, font, pad, radius — never a
+     loose height (internal ratio ~3:1 height:font). */
   --control-h-sm: 28px;
   --control-h-md: 38px;
   --control-h-lg: 44px;
@@ -429,8 +429,8 @@
   --control-pad-x-md: 12px;
   --control-radius-sm: 4px;
   --control-radius-md: 6px;
-  /* Field metrics (seam v1.10.0, ahora token-fed): .input/.select/.textarea
-     y la familia combobox los consumen. */
+  /* Field metrics (seam v1.10.0, now token-fed): .input/.select/.textarea
+     and the combobox family consume them. */
   --field-min-h: var(--control-h-md);
   --field-pad-y: 7px;
   --field-pad-x: var(--control-pad-x-md);
@@ -657,8 +657,8 @@
   --chart-negative: var(--color-red-500);
 }
 
-/* Touch guard (WCAG 2.5.5): en puntero grueso los controles interactivos
-   restauran el target de 44px. Solo crece el área táctil; el font queda. */
+/* Touch guard (WCAG 2.5.5): on a coarse pointer, interactive controls
+   restore the 44px target. Only the touch area grows; the font stays. */
 @media (pointer: coarse) {
   :root {
     --control-h-md: 44px;

@@ -83,8 +83,8 @@ export interface ToggleGroupMultipleProps extends ToggleGroupBaseProps {
 
 export type ToggleGroupProps = ToggleGroupSingleProps | ToggleGroupMultipleProps;
 
-// useLayoutEffect en cliente, useEffect en el server (evita el warning de SSR;
-// el kit es 'use client' pero igual se renderiza en el server de Next).
+// useLayoutEffect on the client, useEffect on the server (avoids the SSR warning;
+// the kit is 'use client' but still gets rendered on Next's server).
 const useIsoLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 export function ToggleGroup(props: ToggleGroupProps) {
@@ -111,8 +111,8 @@ export function ToggleGroup(props: ToggleGroupProps) {
     }
   };
 
-  // Indicador deslizante (solo single): un único pill absoluto que se traslada a
-  // la geometría del ítem activo, en vez de prender/apagar el fondo de cada ítem.
+  // Sliding indicator (single only): a single absolute pill that moves to match
+  // the active item's geometry, instead of turning each item's background on/off.
   const wantIndicator = indicator && type === 'single';
   const groupRef = React.useRef<HTMLDivElement>(null);
   const [ind, setInd] = React.useState<{ left: number; width: number; ready: boolean } | null>(null);
@@ -124,24 +124,24 @@ export function ToggleGroup(props: ToggleGroupProps) {
     const measure = () => {
       const active = el.querySelector<HTMLElement>('[data-state="on"]');
       if (!active) {
-        setInd((prev) => (prev ? { ...prev, width: 0 } : null)); // nada activo → pill oculto
+        setInd((prev) => (prev ? { ...prev, width: 0 } : null)); // nothing active → hide the pill
         return;
       }
       const g = el.getBoundingClientRect();
       const b = active.getBoundingClientRect();
-      // left relativo al padding-box del grupo (containing block del absolute).
+      // left relative to the group's padding-box (containing block of the absolute).
       setInd((prev) => ({ left: b.left - g.left - el.clientLeft, width: b.width, ready: prev?.ready ?? false }));
     };
     measure();
-    // typeof-guard: jsdom/SSR no traen ResizeObserver (mismo patrón que la
-    // elevación del DataTable y useVirtualRows); measure() ya corrió una vez.
+    // typeof-guard: jsdom/SSR don't ship ResizeObserver (same pattern as the
+    // DataTable elevation and useVirtualRows); measure() has already run once.
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
     ro?.observe(el);
     return () => ro?.disconnect();
   }, [wantIndicator, current, children]);
 
-  // La transición se habilita recién tras la primera medición → el pill aparece en
-  // su lugar al montar (no desliza desde 0); a partir de ahí los cambios animan.
+  // The transition is enabled only after the first measurement → the pill appears
+  // in place on mount (it doesn't slide from 0); from then on, changes animate.
   React.useEffect(() => {
     if (ind && !ind.ready) setInd((prev) => (prev ? { ...prev, ready: true } : prev));
   }, [ind]);

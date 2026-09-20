@@ -138,39 +138,41 @@ export function Lightbox({ open, onClose, images, index, onChange }: LightboxPro
 
   return (
     <Portal>
-    <div ref={dialogRef} className="lightbox" role="dialog" aria-modal="true" aria-label={t['gallery.viewer']} onClick={onClose}>
-      <button
-        type="button"
-        className="lightbox__close"
-        aria-label={t['gallery.close']}
-        onClick={onClose}
-      >
-        <X size={20} />
-      </button>
-      {images.length > 1 && onChange && (
+    <div role="presentation" onClick={onClose}>
+      <div ref={dialogRef} className="lightbox" role="dialog" aria-modal="true" aria-label={t['gallery.viewer']}>
         <button
           type="button"
-          className="lightbox__nav lightbox__nav--prev"
-          aria-label={t['gallery.prev']}
-          onClick={(e) => { e.stopPropagation(); onChange((index - 1 + images.length) % images.length); }}
+          className="lightbox__close"
+          aria-label={t['gallery.close']}
+          onClick={onClose}
         >
-          <ChevronLeft size={24} />
+          <X size={20} />
         </button>
-      )}
-      <img src={current.src} alt={current.alt ?? ''} className="lightbox__image" onClick={(e) => e.stopPropagation()} />
-      {images.length > 1 && onChange && (
-        <button
-          type="button"
-          className="lightbox__nav lightbox__nav--next"
-          aria-label={t['gallery.next']}
-          onClick={(e) => { e.stopPropagation(); onChange((index + 1) % images.length); }}
-        >
-          <ChevronRight size={24} />
-        </button>
-      )}
-      {images.length > 1 && (
-        <div className="lightbox__counter">{index + 1} / {images.length}</div>
-      )}
+        {images.length > 1 && onChange && (
+          <button
+            type="button"
+            className="lightbox__nav lightbox__nav--prev"
+            aria-label={t['gallery.prev']}
+            onClick={(e) => { e.stopPropagation(); onChange((index - 1 + images.length) % images.length); }}
+          >
+            <ChevronLeft size={24} />
+          </button>
+        )}
+        <img src={current.src} alt={current.alt ?? ''} className="lightbox__image" role="presentation" onClick={(e) => e.stopPropagation()} />
+        {images.length > 1 && onChange && (
+          <button
+            type="button"
+            className="lightbox__nav lightbox__nav--next"
+            aria-label={t['gallery.next']}
+            onClick={(e) => { e.stopPropagation(); onChange((index + 1) % images.length); }}
+          >
+            <ChevronRight size={24} />
+          </button>
+        )}
+        {images.length > 1 && (
+          <div className="lightbox__counter">{index + 1} / {images.length}</div>
+        )}
+      </div>
     </div>
     </Portal>
   );

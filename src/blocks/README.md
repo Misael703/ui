@@ -19,4 +19,18 @@ import { ... } from '@misael703/ui';   // in your app
 then adapt the data, columns and handlers to your domain. They are starting
 points, not configurable components: own the code once you copy it.
 
-Browse them rendered under **Blocks/** in Storybook.
+## Index
+
+| Block | Composes |
+|---|---|
+| AdminDashboard | AppShell, StatCard, DataTable |
+| AuditLogPage | PageHeader, FilterBar, DataTable |
+| AuthScreen / AuthSplit | Card, FormField, Button |
+| CartDrawer / CheckoutSummary / ProductCatalog / InvoiceDocument | commerce components |
+| DataTablePage / DetailPage | PageHeader, DataTable, DescriptionList |
+| EmptyStatePage / ErrorPage / NotFound | EmptyState, Button |
+| NotificationsPage / OnboardingChecklist / WizardPage | NotificationCenter, Stepper, Card |
+| SettingsPage | Tabs, FormField, Switch |
+
+Blocks are generic by rule: sample company "Northwind Builders", no real data.
+Screens of a specific app do not belong here; keep them in that app.

@@ -1,21 +1,21 @@
 /**
- * Defaults centralizados de marca y locale para formateo UI.
+ * Centralized brand and locale defaults for UI formatting.
  *
- * El kit no asume país. Solo guarda lo que necesita para renderizar:
- * la identidad visual (nombre, logos) y la configuración de formateo
- * (moneda, locale BCP 47 para Intl.NumberFormat / DateTimeFormat).
+ * The kit does not assume a country. It only holds what it needs to render:
+ * visual identity (name, logos) and formatting configuration
+ * (currency, BCP 47 locale for Intl.NumberFormat / DateTimeFormat).
  *
- * Datos de país (regiones, prefijo telefónico, validaciones de RUT, etc.)
- * los pasa el consumer como props. Ver `<AddressForm fields={...}>` y
+ * Country-specific data (regions, phone prefix, RUT validation, etc.)
+ * is passed by the consumer as props. See `<AddressForm fields={...}>` and
  * `<PhoneInput prefix="+56">`.
  *
- * Uso:
+ * Usage:
  *
  * ```tsx
- * import { configureBrand } from '@misael703/elalba-ui';
+ * import { configureBrand } from '@misael703/ui';
  *
  * configureBrand({
- *   name: 'Mi Marca',
+ *   name: 'My Brand',
  *   currency: 'USD',
  *   locale: 'en-US',
  *   logoBasePath: '/static/brand',
@@ -24,13 +24,13 @@
  */
 
 export interface BrandDefaults {
-  /** Nombre legible de la marca. Usado como `alt` por defecto en `<Logo>`. */
+  /** Human-readable brand name. Used as the default `alt` in `<Logo>`. */
   name: string;
-  /** Path base donde están los assets de logos. Default: `/assets/logos`. */
+  /** Base path where the logo assets live. Default: `/assets/logos`. */
   logoBasePath: string;
-  /** Código ISO 4217 (CLP, USD, EUR, ...) para inputs monetarios. */
+  /** ISO 4217 code (CLP, USD, EUR, ...) for money inputs. */
   currency: string;
-  /** Locale BCP 47 para Intl.NumberFormat / DateTimeFormat. */
+  /** BCP 47 locale for Intl.NumberFormat / DateTimeFormat. */
   locale: string;
 }
 
@@ -48,15 +48,15 @@ let _overrides: Partial<BrandDefaults> | null = null;
 let _cached: BrandDefaults | null = null;
 
 /**
- * Sobreescribe los defaults globales del kit. Llamar una sola vez al arranque
- * de la app. Las props siguen funcionando como override puntual.
+ * Overrides the kit's global defaults. Call once at app startup.
+ * Props still work as a one-off override.
  */
 export function configureBrand(overrides: Partial<BrandDefaults>): void {
   _overrides = overrides;
   _cached = null;
 }
 
-/** Lee los defaults actuales. Los componentes lo usan internamente. */
+/** Reads the current defaults. Components use it internally. */
 export function getBrand(): BrandDefaults {
   if (!_cached) {
     _cached = _overrides ? { ...BRAND_DEFAULTS, ..._overrides } : BRAND_DEFAULTS;
@@ -64,7 +64,7 @@ export function getBrand(): BrandDefaults {
   return _cached;
 }
 
-/** Resetea a los defaults originales. Útil en tests. */
+/** Resets to the original defaults. Useful in tests. */
 export function resetBrand(): void {
   _overrides = null;
   _cached = null;

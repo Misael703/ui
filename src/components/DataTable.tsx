@@ -923,8 +923,9 @@ export interface BreadcrumbItem {
 }
 
 export function Breadcrumbs({ items, className }: { items: BreadcrumbItem[]; className?: string }) {
+  const t = useLocale();
   return (
-    <nav aria-label="Breadcrumb" className={cx('breadcrumbs', className)}>
+    <nav aria-label={t['breadcrumbs.label']} className={cx('breadcrumbs', className)}>
       <ol>
         {items.map((it, i) => {
           const last = i === items.length - 1;
@@ -992,8 +993,8 @@ export function TablePagination({
 }
 
 // ---------- TableToolbar -------------------------------------------------
-// Barra superior que se compone arriba (o dentro de un wrapper) de un DataTable.
-// Cualquier hijo con className "grow" se expande para empujar las acciones al lado.
+// Top bar composed above (or inside a wrapper) of a DataTable.
+// Any child with className "grow" expands to push the actions to the side.
 export interface TableToolbarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Actions that may leave the bar on a phone (v3.7.0): inline tertiary

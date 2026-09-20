@@ -121,7 +121,7 @@ export function MultiCombobox<T = string>({
 
   return (
     <div ref={wrapRef} className={cx('multicombo', invalid && 'is-invalid', disabled && 'is-disabled', className)}>
-      <div className="multicombo__chips" onClick={() => inputRef.current?.focus()}>
+      <div className="multicombo__chips" role="presentation" onClick={() => inputRef.current?.focus()}>
         {visible.map((c) => (
           <span key={String(c.value)} className="multicombo__chip">
             {c.label}
@@ -308,7 +308,7 @@ export interface DateRangePresetsOptions {
 }
 
 /**
- * The common analytics date-range presets (Bsale-style): today, yesterday,
+ * The common analytics date-range presets (same shortcuts as common ERP report filters): today, yesterday,
  * this/last week, this/last month, this/last year. Pass straight to
  * `<DateRangePicker presets={dateRangePresets()} />` so consumers don't
  * re-derive the (fiddly) "previous week/month" boundaries each time.
@@ -340,13 +340,17 @@ export function DateRangePicker({
     : (matchedPreset ? matchedPreset.range() : (defaultValue ?? EMPTY_RANGE));
   const [draft, setDraft] = React.useState<DateRange>(initial);
   const [lastApplied, setLastApplied] = React.useState<DateRange>(initial);
-  // Resync draft/lastApplied when controlled `value` changes externally.
-  const vFrom = value?.from?.getTime() ?? 0;
-  const vTo = value?.to?.getTime() ?? 0;
+  // Resync draft/lastApplied when controlled `value` changes externally. Deps
+  // are the primitive timestamps (not `value` itself) so a new object with the
+  // same dates doesn't re-trigger the effect; the range is rebuilt from those
+  // same primitives so the effect body never reads `value` directly.
+  const vFrom = value?.from?.getTime() ?? null;
+  const vTo = value?.to?.getTime() ?? null;
   React.useEffect(() => {
     if (!isControlled) return;
-    setDraft(value as DateRange);
-    setLastApplied(value as DateRange);
+    const next: DateRange = { from: vFrom != null ? new Date(vFrom) : null, to: vTo != null ? new Date(vTo) : null };
+    setDraft(next);
+    setLastApplied(next);
   }, [isControlled, vFrom, vTo]);
   // Legacy-controlled (no `onApply`) keeps prior semantics: `value` drives render
   // directly. Otherwise the draft is truth.
@@ -480,10 +484,10 @@ export function DateRangePicker({
   };
 
   const clear = () => {
-    // "Limpiar" resetea el FILTRO, no solo el draft: en apply mode commitea el
-    // rango vacío (dispara onApply + cierra). Antes solo reseteaba el draft y,
-    // como "Aplicar" exige from+to, el estado limpio nunca se podía aplicar →
-    // no se podía volver a "sin filtro".
+    // "Limpiar" resets the FILTER, not just the draft: in apply mode it commits the
+    // empty range (fires onApply + closes). It used to only reset the draft, and
+    // since "Aplicar" requires from+to, the cleared state could never be applied →
+    // there was no way back to "no filter".
     if (applyMode) commit(EMPTY_RANGE);
     else { onChange?.(EMPTY_RANGE); setAppliedPreset(null); }
   };
@@ -493,7 +497,7 @@ export function DateRangePicker({
     else { setOpen(true); onOpenChange?.(true); }
   };
 
-  // Show the active preset's name (like Bsale) when one is applied; otherwise the
+  // Show the active preset's name when one is applied; otherwise the
   // date range. Empty: the FORMAT as a muted placeholder ("dd-mm-aaaa", v3.8.1) —
   // it teaches the shape of the value and fits a 138px filter cell where a
   // two-date hint would clip; the accessible name stays "Seleccionar rango" via
@@ -743,8 +747,8 @@ export function CommandPalette({
   if (!open) return null;
   let idx = -1;
   return (
-    <div className="cmdk__overlay" role="dialog" aria-modal="true" aria-label={locale['picker.commandPalette']} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="cmdk__panel">
+    <div className="cmdk__overlay" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="cmdk__panel" role="dialog" aria-modal="true" aria-label={locale['picker.commandPalette']}>
         <div className="cmdk__searchbar">
           <span className="cmdk__icon" aria-hidden="true"><Search size={16} /></span>
           <input

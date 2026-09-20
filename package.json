@@ -1,6 +1,6 @@
 {
   "name": "@misael703/ui",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Generic React + TypeScript UI kit, optimized for Next.js. Tokens, accessible components, runtime-configurable theming via presets.",
   "author": "Misael Ocas <misael.ocas@gmail.com>",
   "license": "MIT",
@@ -72,25 +72,27 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup && node scripts/add-use-client.mjs && npm run build:css && mkdir -p dist/fonts && cp src/fonts/*.woff2 src/fonts/OFL.txt dist/fonts/ && mkdir -p dist/presets/elalba/logos && cp src/presets/elalba/logos/* dist/presets/elalba/logos/",
+    "build": "node scripts/build.mjs",
     "build:css": "postcss src/styles/index.css -o dist/styles.css && postcss src/styles/fonts.css -o dist/fonts.css && postcss src/styles/tokens.css -o dist/tokens.css && mkdir -p dist/presets/elalba && postcss src/presets/elalba/styles.css -o dist/presets/elalba/styles.css",
     "dev": "tsup --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "smoke:ci": "node scripts/smoke-ci.mjs",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "react": ">=18.2.0 <20",
     "react-dom": ">=18.2.0 <20"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.39.4",
     "@storybook/addon-a11y": "^8.3.0",
     "@storybook/addon-essentials": "^8.3.0",
@@ -98,20 +100,21 @@
     "@storybook/react-vite": "^8.3.0",
     "@testing-library/jest-dom": "^6.4.0",
     "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.20.3",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.5.0",
     "cssnano": "^7.1.7",
     "eslint": "^9.39.4",
-    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.0",
     "postcss": "^8.5.12",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.1",
-    "prettier": "^3.8.3",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "recharts": "^3.8.1",
@@ -124,5 +127,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -22,7 +22,7 @@ export interface NotificationCenterProps {
   onMarkAllRead?: () => void;
   onClearAll?: () => void;
   emptyMessage?: React.ReactNode;
-  /** Custom trigger element. Si se pasa, reemplaza el botón con bell. */
+  /** Custom trigger element. If passed, replaces the bell button. */
   trigger?: React.ReactElement;
   className?: string;
 }

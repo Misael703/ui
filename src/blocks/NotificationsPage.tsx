@@ -90,41 +90,45 @@ export function NotificationsPage(): React.ReactElement {
               {visible.map((n, i) => {
                 const tone = n.tone ?? 'info';
                 return (
-                  <li
-                    key={n.id}
-                    style={{
-                      display: 'flex',
-                      gap: 12,
-                      padding: '14px 20px',
-                      borderTop: i === 0 ? 'none' : '1px solid var(--border-default)',
-                      background: n.read ? 'transparent' : 'var(--bg-muted)',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => toggleRead(n.id)}
-                  >
-                    <span aria-hidden="true" style={{ color: TONE_COLOR[tone], flex: '0 0 auto' }}>
-                      {TONE_ICON[tone]}
-                    </span>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                        <span style={{ fontWeight: n.read ? 400 : 600 }}>{n.title}</span>
-                        <span className="cell-meta" style={{ flex: '0 0 auto' }}>{n.timestamp}</span>
+                  <li key={n.id} style={{ borderTop: i === 0 ? 'none' : '1px solid var(--border-default)' }}>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      style={{
+                        display: 'flex',
+                        gap: 12,
+                        padding: '14px 20px',
+                        background: n.read ? 'transparent' : 'var(--bg-muted)',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => toggleRead(n.id)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRead(n.id); } }}
+                    >
+                      <span aria-hidden="true" style={{ color: TONE_COLOR[tone], flex: '0 0 auto' }}>
+                        {TONE_ICON[tone]}
+                      </span>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                          <span style={{ fontWeight: n.read ? 400 : 600 }}>{n.title}</span>
+                          <span className="cell-meta" style={{ flex: '0 0 auto' }}>{n.timestamp}</span>
+                        </div>
+                        {n.description && <div className="cell-meta" style={{ marginTop: 2 }}>{n.description}</div>}
                       </div>
-                      {n.description && <div className="cell-meta" style={{ marginTop: 2 }}>{n.description}</div>}
+                      {!n.read && (
+                        <span
+                          style={{
+                            flex: '0 0 auto',
+                            alignSelf: 'center',
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            background: 'var(--color-primary)',
+                          }}
+                        >
+                          <span className="sr-only">No leída</span>
+                        </span>
+                      )}
                     </div>
-                    {!n.read && (
-                      <span
-                        aria-label="No leída"
-                        style={{
-                          flex: '0 0 auto',
-                          alignSelf: 'center',
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          background: 'var(--color-primary)',
-                        }}
-                      />
-                    )}
                   </li>
                 );
               })}

@@ -84,7 +84,6 @@ function CrudPage(a: CrudArgs) {
   const [q, setQ] = React.useState('');
   const [category, setCategory] = React.useState<'all' | Category>('all');
   const [availability, setAvailability] = React.useState<'all' | 'in' | 'out'>('all');
-  const hasFilters = q !== '' || category !== 'all' || availability !== 'all';
   const clearFilters = () => { setQ(''); setCategory('all'); setAvailability('all'); setPage(1); };
   const filtered = React.useMemo(() => items.filter((p) =>
     (category === 'all' || p.category === category) &&

@@ -21,6 +21,7 @@ export default defineConfig({
     'src/presets/elalba/defaults.ts',
     'src/cl/index.ts',
   ],
+  tsconfig: 'tsconfig.build.json',
   format: ['esm', 'cjs'],
   dts: true,
   external: ['react', 'react-dom'],

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import {
   ConfirmDialog, DescriptionList, DescriptionListItem,
   DiffViewer, TransferList, type TransferItem,
@@ -108,6 +108,22 @@ describe('TransferList', () => {
     const checks = container.querySelectorAll('label.check');
     expect(checks.length).toBeGreaterThan(0);
     expect(checks[0].querySelector('.check__box')).not.toBeNull();
+  });
+
+  it('has a single tab stop per row: option is tabbable, checkbox is not', () => {
+    render(<TransferList source={items} selected={[]} onChange={() => {}} />);
+    const option = screen.getAllByRole('option')[0];
+    expect(option).toHaveAttribute('tabIndex', '0');
+    const checkbox = within(option).getByRole('checkbox');
+    expect(checkbox).toHaveAttribute('tabIndex', '-1');
+  });
+
+  it('toggles selection with Enter/Space on the row', () => {
+    render(<TransferList source={items} selected={[]} onChange={() => {}} />);
+    const option = screen.getAllByRole('option')[0];
+    expect(option).toHaveAttribute('aria-selected', 'false');
+    fireEvent.keyDown(option, { key: ' ' });
+    expect(option).toHaveAttribute('aria-selected', 'true');
   });
 
   it('respects LocaleProvider override for default titles', () => {

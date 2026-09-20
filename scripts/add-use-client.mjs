@@ -8,7 +8,7 @@
 // it is inert in the CJS `.js`. .map and .d.* files are left untouched.
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 
 const dist = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const DIRECTIVE = `'use client';\n`;
@@ -22,6 +22,9 @@ function walk(dir) {
       continue;
     }
     if (!/\.(mjs|js)$/.test(name) || /\.map$/.test(name)) continue;
+    // Pure modules a Server Component may import directly: no client boundary.
+    const rel = relative(dist, full).split(sep).join('/');
+    if (/^(cl|utils)\//.test(rel) || /^brand\.m?js$/.test(rel) || /^presets\/elalba\/defaults\.m?js$/.test(rel)) continue;
     const src = readFileSync(full, 'utf8');
     if (src.startsWith(DIRECTIVE) || src.startsWith('"use client"')) continue;
     writeFileSync(full, DIRECTIVE + src);

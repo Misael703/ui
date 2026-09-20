@@ -69,8 +69,7 @@ export const Timeline = React.forwardRef<HTMLOListElement, TimelineProps>(
  * - `current` — happening now: ringed/pulsing marker, solid connector above.
  * - `pending` — not started: hollow muted marker, **dashed** connector above.
  *
- * Use it to scan progress on a list of events that grow over time (a despachos
- * order accumulating envíos/retiros until the last marks it complete). Default
+ * Use it to scan progress on a list of events that grow over time. Default
  * (state omitted) keeps the 1.x look exactly.
  */
 export type TimelineState = 'done' | 'current' | 'pending';
@@ -331,6 +330,17 @@ function TreeNode({
           onFocusItem(node.id);
           onSelect?.(node.id);
         }}
+        onKeyDown={(e) => {
+          // Enter/Space mirror onClick; stop here so the tree container's
+          // roving-tabindex handler (which also matches these keys, for the
+          // no-mouse case) doesn't fire onSelect a second time.
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            onFocusItem(node.id);
+            onSelect?.(node.id);
+          }
+        }}
       >
         {hasChildren ? (
           <button
@@ -370,7 +380,7 @@ function TreeNode({
   );
 }
 
-// ---------- Calendar (vista mes completa, no picker) -------------------
+// ---------- Calendar (full month view, not a picker) -------------------
 export interface CalendarEvent {
   date: Date;
   label: React.ReactNode;
@@ -385,7 +395,7 @@ export interface CalendarEvent {
 }
 
 export interface CalendarProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Mes a mostrar. Default: mes actual. */
+  /** Month to display. Default: current month. */
   month?: Date;
   events?: CalendarEvent[];
   onMonthChange?: (m: Date) => void;
@@ -405,9 +415,9 @@ export function Calendar({ month: monthProp, events = [], onMonthChange, onDayCl
 
   const today = new Date();
 
-  // primer día visible: lunes anterior al primer día del mes
+  // first visible day: the Monday before the first day of the month
   const firstDay = startOfMonth(month);
-  const firstWeekday = (firstDay.getDay() + 6) % 7; // domingo=0 → 6, lunes=1 → 0
+  const firstWeekday = (firstDay.getDay() + 6) % 7; // Sunday=0 → 6, Monday=1 → 0
   const gridStart = new Date(firstDay);
   gridStart.setDate(firstDay.getDate() - firstWeekday);
 

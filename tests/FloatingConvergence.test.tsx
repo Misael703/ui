@@ -5,7 +5,6 @@ import { NavigationMenu } from '../src/components/NavigationMenu';
 import { Menubar } from '../src/components/Menubar';
 import { DatePicker } from '../src/components/Pickers';
 import { DateRangePicker } from '../src/components/AdvancedPickers';
-import { AppShell } from '../src/components/AppShell';
 
 // v1.2.0 — NavigationMenu / Menubar / DatePicker / DateRangePicker now route
 // through the shared floating primitive (Portal + usePopoverPosition +

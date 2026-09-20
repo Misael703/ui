@@ -109,7 +109,7 @@ export function AdminDashboard(): React.ReactElement {
         <SectionHeader
           title="Pedidos recientes"
           titleId="dash-recent"
-          actions={<a href="#" className="caption">Ver todos</a>}
+          actions={<a href="/orders" className="caption">Ver todos</a>}
         />
         <DataTable
           rows={recent}

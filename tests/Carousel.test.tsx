@@ -59,6 +59,21 @@ describe('Carousel', () => {
     expect(onChange).toHaveBeenCalledWith(2);
   });
 
+  it('navigates with ArrowRight on the viewport', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <Carousel onIndexChange={onChange}>
+        <div>A</div>
+        <div>B</div>
+        <div>C</div>
+      </Carousel>
+    );
+    const viewport = container.querySelector('.carousel__viewport')!;
+    fireEvent.keyDown(viewport, { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenLastCalledWith(1);
+    expect(screen.getByRole('tab', { name: 'Ir a la diapositiva 2' })).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('autoplay pauses while the pointer is inside (WCAG 2.2.2)', () => {
     vi.useFakeTimers();
     const onChange = vi.fn();

@@ -429,7 +429,7 @@ export function Spacer({ size, style, ...rest }: SpacerProps) {
 
 // ---------- KeyValue ----------------------------------------------------
 export interface KeyValueProps extends React.HTMLAttributes<HTMLDListElement> {
-  /** Override del ancho de la columna de keys (default 200px) */
+  /** Override the width of the keys column (default 200px) */
   keyWidth?: number | string;
 }
 

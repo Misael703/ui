@@ -15,9 +15,9 @@ export interface ConfirmDialogProps {
   description?: React.ReactNode;
   confirmLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
-  /** 'danger' usa botón rojo. */
+  /** 'danger' uses a red button. */
   tone?: 'default' | 'danger';
-  /** Si true, deshabilita el confirm mientras se ejecuta. */
+  /** If true, disables the confirm button while it's running. */
   loading?: boolean;
 }
 
@@ -75,7 +75,7 @@ export function ConfirmDialog({
 export interface DescriptionListItemProps {
   label: React.ReactNode;
   value: React.ReactNode;
-  /** Si se pasa, el valor se vuelve editable inline. */
+  /** If passed, the value becomes inline-editable. */
   onEdit?: () => void;
   editable?: boolean;
 }
@@ -208,12 +208,21 @@ export function TransferList({
             className={cx('transfer__item', checked.has(it.id) && 'is-checked', it.disabled && 'is-disabled')}
             role="option"
             aria-selected={checked.has(it.id)}
+            aria-disabled={it.disabled}
+            tabIndex={it.disabled ? -1 : 0}
             onClick={() => !it.disabled && toggleCheck(checked, setChecked, it.id)}
+            onKeyDown={(e) => {
+              if (!it.disabled && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                toggleCheck(checked, setChecked, it.id);
+              }
+            }}
           >
-            <span onClick={(e) => e.stopPropagation()}>
+            <span role="presentation" onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 checked={checked.has(it.id)}
                 disabled={it.disabled}
+                tabIndex={-1}
                 onChange={() => toggleCheck(checked, setChecked, it.id)}
               />
             </span>

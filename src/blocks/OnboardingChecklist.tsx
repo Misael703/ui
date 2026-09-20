@@ -23,7 +23,7 @@ interface Task {
 
 const TASKS: Task[] = [
   { id: 'profile',  title: 'Completa tu perfil',         description: 'Sube una foto y verifica tu correo.', cta: 'Ir a perfil' },
-  { id: 'company',  title: 'Configura tu empresa',       description: 'Razón social, RUT y datos de facturación.', cta: 'Configurar' },
+  { id: 'company',  title: 'Configura tu empresa',       description: 'Razón social y datos de facturación.', cta: 'Configurar' },
   { id: 'products', title: 'Carga tus primeros productos', description: 'Importa desde CSV o crea uno manual.', cta: 'Cargar productos' },
   { id: 'team',     title: 'Invita a tu equipo',         description: 'Da acceso a vendedores y administradores.', cta: 'Invitar' },
   { id: 'payment',  title: 'Conecta un método de pago',  description: 'Necesario para emitir facturas electrónicas.', cta: 'Conectar' },

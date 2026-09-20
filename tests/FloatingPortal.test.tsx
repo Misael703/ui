@@ -2,7 +2,6 @@ import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, renderHook } from '@testing-library/react';
 import { Menu } from '../src/components/Display2';
-import { AppShell } from '../src/components/AppShell';
 import { usePopoverPosition } from '../src/hooks/usePopoverPosition';
 
 describe('Bug 1 — floating panels escape overflow via body portal', () => {

@@ -287,7 +287,7 @@ export const CardComoLink: StoryObj = {
       ].map((o) => (
         <Card key={o.id} interactive asChild>
           {/* In your app this is a Next <Link href=…>. Plain <a> here. */}
-          <a href="#" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+          <a href={`/orders/${o.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
             <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 16px' }}>
               <div>
                 <div style={{ fontWeight: 600 }}>{o.cliente}</div>

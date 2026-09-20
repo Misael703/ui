@@ -74,7 +74,7 @@ describe('Button', () => {
       'danger', 'success', 'warning', 'link',
     ] as const;
     variants.forEach((v) => {
-      const { unmount, container } = render(<Button variant={v}>x</Button>);
+      const { unmount } = render(<Button variant={v}>x</Button>);
       const btn = screen.getByRole('button');
       expect(btn).toBeInTheDocument();
       expect(btn.className).toContain(`btn--${v}`);

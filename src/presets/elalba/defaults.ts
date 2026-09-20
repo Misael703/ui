@@ -13,7 +13,7 @@
  * configureBrand(elalbaDefaults);
  * ```
  *
- * Produces behavior identical to @misael703/elalba-ui@0.7.1, where these
+ * Produces behavior identical to the pre-rename 0.7.1 release, where these
  * were the hard-coded BRAND_DEFAULTS.
  */
 

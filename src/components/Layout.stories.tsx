@@ -200,7 +200,7 @@ export const SectionHeaderDemo: StoryObj = {
         <SectionHeader
           title="Pedidos recientes"
           titleId="sh-1"
-          actions={<a href="#" className="caption">Ver todos</a>}
+          actions={<a href="/orders" className="caption">Ver todos</a>}
         />
         <Grid minColWidth={140} gap={3}>
           {[1, 2, 3].map((n) => (

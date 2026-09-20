@@ -4,6 +4,7 @@ import { cx } from '../utils/cx';
 import { Portal } from './Portal';
 import { usePopoverPosition, type VirtualElement } from '../hooks/usePopoverPosition';
 import { useDismiss } from '../hooks/useDismiss';
+import { useLocale } from '../locale';
 
 export interface ContextMenuItem {
   id: string;
@@ -23,7 +24,9 @@ export interface ContextMenuProps {
   ariaLabel?: string;
 }
 
-export function ContextMenu({ items, children, className, menuClassName, ariaLabel = 'Menú contextual' }: ContextMenuProps) {
+export function ContextMenu({ items, children, className, menuClassName, ariaLabel }: ContextMenuProps) {
+  const t = useLocale();
+  const label = ariaLabel ?? t['contextMenu.label'];
   const [point, setPoint] = React.useState<{ x: number; y: number } | null>(null);
   // `active` indexes into `enabledIdx` (the non-separator, non-disabled items) —
   // same roving-tabindex model as Menubar.
@@ -115,14 +118,14 @@ export function ContextMenu({ items, children, className, menuClassName, ariaLab
   };
 
   return (
-    <span className={cx('context-menu', className)} onContextMenu={onContextMenu} onKeyDown={onWrapperKeyDown}>
+    <span className={cx('context-menu', className)} role="presentation" onContextMenu={onContextMenu} onKeyDown={onWrapperKeyDown}>
       {children}
       {open && (
         <Portal>
           <ul
             ref={menuRef}
             role="menu"
-            aria-label={ariaLabel}
+            aria-label={label}
             className={cx('context-menu__menu', 'is-floating', menuClassName)}
             onKeyDown={onMenuKeyDown}
             style={{

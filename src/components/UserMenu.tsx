@@ -65,7 +65,7 @@ export function UserMenu({
     );
     if (item.href) {
       const onClick = () => { item.onSelect?.(); setOpen(false); };
-      if (linkAs) return <span key={key} onClick={onClick}>{linkAs({ href: item.href, className: klass, children: inner })}</span>;
+      if (linkAs) return <span key={key} role="presentation" onClick={onClick}>{linkAs({ href: item.href, className: klass, children: inner })}</span>;
       return <a key={key} href={item.href} className={klass} onClick={onClick}>{inner}</a>;
     }
     return (

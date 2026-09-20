@@ -20,12 +20,13 @@ import { useLocale } from '../locale/LocaleProvider';
  *   <LineChart recharts={Recharts} data={...} dataKey="value" categoryKey="month" />
  */
 
-// Structural mirror of the Recharts public API. `any` is intentional here:
-// each Recharts component has a different prop shape, and typing them
-// exhaustively would mean depending on `recharts` types — which would force
-// consumers to install recharts even when they don't use any chart.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RechartsComp = React.ComponentType<any>;
+// Structural mirror of the Recharts public API. `React.ElementType` (not a
+// concrete prop type) is intentional here: each Recharts component has a
+// different prop shape, and typing them exhaustively would mean depending on
+// `recharts` types — which would force consumers to install recharts even
+// when they don't use any chart. `ElementType` still lets JSX usage
+// (`<R.Foo {...props} />`) pass arbitrary props without a cast.
+type RechartsComp = React.ElementType;
 
 export type RechartsLike = {
   ResponsiveContainer: RechartsComp;
@@ -67,7 +68,7 @@ export interface ChartTooltipConfig {
   allowEscapeViewBox?: { x?: boolean; y?: boolean };
 }
 
-export interface BaseChartProps<D = any> {
+export interface BaseChartProps<D = Record<string, unknown>> {
   recharts: RechartsLike;
   data: D[];
   height?: number;
@@ -111,7 +112,7 @@ export type AxisInterval =
 
 // Shared cartesian controls (Line/Area/Bar). DonutChart/Sparkline don't have a
 // category axis, so they keep BaseChartProps.
-export interface CartesianChartProps<D = any> extends BaseChartProps<D> {
+export interface CartesianChartProps<D = Record<string, unknown>> extends BaseChartProps<D> {
   categoryKey: keyof D & string;
   series: Array<{ key: keyof D & string; label?: string; color?: string }>;
   showGrid?: boolean;
@@ -212,14 +213,14 @@ const legendFormatter = (value: React.ReactNode) => (
 );
 
 // ---------- LineChart ---------------------------------------------------
-export interface LineChartProps<D = any> extends CartesianChartProps<D> {
+export interface LineChartProps<D = Record<string, unknown>> extends CartesianChartProps<D> {
   smooth?: boolean;
   /** Interpolation. `monotone` smooths (default, back-compat); `linear` draws honest
    *  straight segments — recommended for counts/stepped series (no phantom humps over zeros). */
   curve?: 'linear' | 'monotone';
 }
 
-export function LineChart<D = any>({
+export function LineChart<D = Record<string, unknown>>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve,
@@ -257,11 +258,11 @@ export function LineChart<D = any>({
 }
 
 // ---------- AreaChart ---------------------------------------------------
-export interface AreaChartProps<D = any> extends LineChartProps<D> {
+export interface AreaChartProps<D = Record<string, unknown>> extends LineChartProps<D> {
   stacked?: boolean;
 }
 
-export function AreaChart<D = any>({
+export function AreaChart<D = Record<string, unknown>>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   showGrid = true, showLegend = true, smooth = true, curve, stacked,
@@ -300,14 +301,14 @@ export function AreaChart<D = any>({
 }
 
 // ---------- BarChart ----------------------------------------------------
-export interface BarChartProps<D = any> extends CartesianChartProps<D> {
+export interface BarChartProps<D = Record<string, unknown>> extends CartesianChartProps<D> {
   layout?: 'vertical' | 'horizontal';
   stacked?: boolean;
 }
 
 const BAR_RADIUS = 4;
 
-export function BarChart<D = any>({
+export function BarChart<D = Record<string, unknown>>({
   recharts: R, data, categoryKey, series,
   height = 280, className, ariaLabel,
   layout = 'vertical', stacked, showGrid = true, showLegend = true,
@@ -427,7 +428,7 @@ export function DonutChart({
 }
 
 // ---------- Sparkline ---------------------------------------------------
-export interface SparklineProps<D = any> {
+export interface SparklineProps<D = Record<string, unknown>> {
   recharts: RechartsLike;
   data: D[];
   dataKey: keyof D & string;
@@ -447,7 +448,7 @@ export interface SparklineProps<D = any> {
   ariaLabel?: string;
 }
 
-export function Sparkline<D = any>({
+export function Sparkline<D = Record<string, unknown>>({
   recharts: R, data, dataKey,
   width = 120, height = 32, color = 'var(--color-primary)',
   fill = true, interactive = false, tooltip, className, ariaLabel,

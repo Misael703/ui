@@ -1,19 +1,19 @@
 import * as React from 'react';
 
 /**
- * Icon set para @misael703/ui — 24×24, currentColor, stroke-based.
+ * Icon set for @misael703/ui — 24×24, currentColor, stroke-based.
  *
- * Geometría: los paths son de Lucide (https://lucide.dev, licencia ISC), y
- * los que Lucide deriva de Feather son MIT. El texto completo de ambas
- * licencias viaja en el paquete como `LICENSE-lucide`. No hay dependencia
- * de runtime: los paths están inlineados acá (cero deps, tree-shaking por
- * componente).
+ * Geometry: the paths come from Lucide (https://lucide.dev, ISC license), and
+ * the ones Lucide derives from Feather are MIT. The full text of both
+ * licenses ships in the package as `LICENSE-lucide`. No runtime
+ * dependency: the paths are inlined here (zero deps, tree-shaking per
+ * component).
  *
- * Uso:
+ * Usage:
  *   import { ChevronRight, Search, Trash } from '@misael703/ui';
  *   <ChevronRight size={16} strokeWidth={2} />
  *
- * Tamaño por defecto: 20px.  Color: currentColor (heredado).
+ * Default size: 20px.  Color: currentColor (inherited).
  */
 
 export interface IconProps extends React.SVGAttributes<SVGSVGElement> {

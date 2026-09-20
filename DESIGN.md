@@ -4,7 +4,7 @@ Design system of `@misael703/ui`. Derived from the canonical token source
 `src/styles/_root.css` (single source of truth) and `src/styles/_typography.css`.
 Keep this in sync with that file; the CSS wins if they ever disagree.
 
-> Last synced to tokens: **v1.67.0** (2026-06-30). On a token change, re-verify
+> Last synced to tokens: **v4.3.0** (2026-09-11). On a token change, re-verify
 > the values quoted here against `_root.css` / the El Alba preset.
 
 ## Theme model

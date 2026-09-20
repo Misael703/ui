@@ -1,4 +1,4 @@
-// @misael703/elalba-ui — public surface
+// @misael703/ui — public surface
 export * from './brand';
 export * from './utils/cx';
 export * from './utils/dateFormat';
