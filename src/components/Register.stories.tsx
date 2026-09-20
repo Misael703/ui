@@ -1,8 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { PaginaDeListadoPlayground } from './Filters.stories';
+import { ListPagePlayground, type ListPageArgs } from './__fixtures__/listPage';
 
-export default { title: 'Foundations/Registro', tags: ['autodocs'] } as Meta;
+export default { title: 'Internal/Register', tags: ['autodocs'] } as Meta;
 
 interface RegisterArgs {
   compare: boolean;
@@ -38,12 +38,12 @@ const CSS = `
 .reg__label { font: 600 var(--text-xs)/1 var(--font-body); color: var(--fg-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); padding: 0 24px; }
 `;
 
-const LIST_ARGS = { fields: 5, layout: 'collapse', visibleCount: 'auto', barMobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: true, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' } as const;
+const LIST_ARGS: ListPageArgs = { fields: 5, layout: 'collapse', visibleCount: 'auto', barMobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: true, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' };
 
 function Page({ cls }: { cls: string }) {
   // The list page as the specimen: header (primary), filter bar (tertiary
   // actions), table, pagination — every register at once.
-  return <div className={cls}>{PaginaDeListadoPlayground.render!(LIST_ARGS as never, {} as never)}</div>;
+  return <div className={cls}><ListPagePlayground {...LIST_ARGS} /></div>;
 }
 
 /**
@@ -53,8 +53,8 @@ function Page({ cls }: { cls: string }) {
  * controles (3:1 actual · hairline claro · relleno tonal sin borde). `compare`
  * apila el kit tal cual arriba y la variante abajo.
  */
-export const Registro: StoryObj<RegisterArgs> = {
-  name: 'Playground · registro',
+export const Register: StoryObj<RegisterArgs> = {
+  name: 'Playground · register',
   parameters: { layout: 'fullscreen' },
   args: { compare: true, controls: 38, dividers: 'kit', controlBorder: 'kit' },
   argTypes: {
