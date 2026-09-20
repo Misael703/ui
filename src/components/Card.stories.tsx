@@ -8,10 +8,11 @@ import { formatCurrency } from '../utils/format';
 const meta = {
   title: 'Components/Card',
   component: Card,
+  subcomponents: { CardHeader, CardBody, CardFooter },
   tags: ['autodocs'],
-  args: { children: 'Pedido #1042' },
+  args: { children: 'Pedido #1042', variant: 'card' },
   argTypes: {
-    variant: { control: 'inline-radio', options: ['default', 'inset'] },
+    variant: { control: 'inline-radio', options: ['card', 'inset'] },
     interactive: { control: 'boolean' },
   },
 } satisfies Meta<typeof Card>;
