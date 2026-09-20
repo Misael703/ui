@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ResizableGroup, ResizablePanel, ResizableHandle } from './Resizable';
 
-export default { title: 'Layout/Resizable', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Resizable',
+  component: ResizableGroup,
+  subcomponents: { ResizablePanel, ResizableHandle },
+  tags: ['autodocs'],
+} satisfies Meta<typeof ResizableGroup>;
+export default meta;
 
 const Pane = ({ children, bg = 'var(--bg-subtle)' }: { children: React.ReactNode; bg?: string }) => (
   <div

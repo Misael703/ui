@@ -3,7 +3,8 @@ import { ToastProvider, useToast } from './Toast';
 import { Button } from './Button';
 
 export default {
-  title: 'Feedback/Toast',
+  title: 'Components/Toast',
+  component: ToastProvider,
   tags: ['autodocs'],
   decorators: [
     (Story) => (
@@ -34,4 +35,4 @@ function Demo() {
   );
 }
 
-export const Demo_: StoryObj = { render: () => <Demo />, name: 'Demo' };
+export const Default: StoryObj = { render: () => <Demo /> };

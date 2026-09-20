@@ -3,7 +3,7 @@ import { Button, ButtonGroup, IconButton } from './Button';
 import { ArrowLeft, ChevronDown, X, Search } from './Icons';
 
 const meta: Meta<typeof Button> = {
-  title: 'Actions/Button',
+  title: 'Components/Button',
   component: Button,
   tags: ['autodocs'],
   args: { children: 'Guardar pedido', variant: 'primary', size: 'md' },
@@ -15,7 +15,7 @@ const meta: Meta<typeof Button> = {
 export default meta;
 type S = StoryObj<typeof Button>;
 
-export const Primary: S = {};
+export const Default: S = {};
 export const Secondary: S = { args: { variant: 'secondary' } };
 export const Outline: S = { args: { variant: 'outline' } };
 export const Ghost: S = { args: { variant: 'ghost' } };
@@ -45,10 +45,11 @@ export const AllSizes: S = {
 };
 
 /**
- * Primary vs Secondary. Cambia el toolbar **Preset → El Alba**: el kit
- * invierte los colores SOLO en ese preset y SOLO en botones — primary pasa
- * a naranja profundo (`#b84300` + blanco, 5.47:1 AA) y secondary al azul de
- * marca (`#002f87` + blanco, 11.96:1). Links/focus/badges no se invierten.
+ * Primary vs Secondary. Switch the toolbar **Preset → El Alba**: the kit
+ * inverts the colors ONLY in that preset and ONLY on buttons — primary
+ * becomes deep orange (`#b84300` + white, 5.47:1 AA) and secondary becomes
+ * the brand blue (`#002f87` + white, 11.96:1). Links/focus/badges are not
+ * inverted.
  */
 export const PrimaryVsSecondary: StoryObj = {
   render: () => (
@@ -61,9 +62,9 @@ export const PrimaryVsSecondary: StoryObj = {
 };
 
 /**
- * `ButtonGroup`: agrupa botones como un control segmentado (los bordes
- * internos se colapsan; `role="group"`, configurable). Útil para acciones
- * relacionadas o un toggle de vista.
+ * `ButtonGroup`: groups buttons as a segmented control (the internal
+ * borders collapse; `role="group"`, configurable). Useful for related
+ * actions or a view toggle.
  */
 export const Grouped: StoryObj = {
   render: () => (
@@ -83,9 +84,10 @@ export const Grouped: StoryObj = {
 };
 
 /**
- * `asChild`: renderiza como el elemento hijo (aquí un `<a>`, en tu app sería
- * `next/link`) conservando estilos, ref y handlers del Button. Polimorfismo
- * sin wrappers, sin perder el modelo versionado.
+ * `asChild`: renders as the child element (here an `<a>`, in your app it
+ * would be `next/link`) while keeping the Button's styles, ref and
+ * handlers. Polymorphism without wrappers, without losing the versioned
+ * model.
  */
 export const AsChildLink: S = {
   render: () => (

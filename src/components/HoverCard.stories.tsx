@@ -2,9 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { HoverCard } from './HoverCard';
 import { Avatar } from './Display2';
 
-export default { title: 'Overlay/HoverCard', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/HoverCard',
+  component: HoverCard,
+  tags: ['autodocs'],
+} satisfies Meta<typeof HoverCard>;
+export default meta;
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <div style={{ padding: 64 }}>
       <HoverCard
@@ -27,7 +32,7 @@ export const Basico: StoryObj = {
   ),
 };
 
-export const ConDelay: StoryObj = {
+export const WithDelay: StoryObj = {
   render: () => (
     <div style={{ padding: 48 }}>
       <HoverCard

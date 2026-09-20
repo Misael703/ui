@@ -19,7 +19,7 @@ export default {
    (`NavItem` with `children`, v1.83.0), so every story exercises the mixed
    case instead of an isolated one. Items carry REAL paths and no hardcoded
    `active`: the stories drive the active item through `currentPath` (the
-   consumer pattern — despachos feeds `usePathname()`), so clicking navigates.
+   consumer pattern — a consumer feeds `usePathname()`), so clicking navigates.
    Starting on a TOP-LEVEL item shows the orange `is-active` stripe (a
    top-level-only marker); the group starts open (`defaultOpen`) exposing
    children + guide line. The dual cell (active INSIDE the group: `is-within`
@@ -245,7 +245,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
  * with a custom trigger. Add `persistKey="…"` to remember it across reloads.
  * (For the standard trigger, just use `showMenuToggle` — see Playground.)
  */
-export const TopbarUncontrolledRenderProp: StoryObj = {
+export const TopbarUncontrolled: StoryObj = {
   name: 'Topbar · Uncontrolled (header render-prop)',
   render: function Uncontrolled() {
     const { path, linkAs } = useDemoRouter(ROUTE_TOP_LEVEL);
@@ -288,7 +288,7 @@ export const TopbarUncontrolledRenderProp: StoryObj = {
  * that don't need panel navigation. Omit `sections` and the shell renders just
  * the header band over a single-column content area (no sidebar at all).
  */
-export const TopbarOnlyNoNav: StoryObj = {
+export const TopbarOnly: StoryObj = {
   name: 'Topbar · Top-bar only (no sidebar)',
   render: () => (
     <div style={{ height: '100vh' }}>

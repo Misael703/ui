@@ -6,7 +6,7 @@ import { CheckboxGroup, type CheckboxGroupProps, type OptionItem } from './Input
 const CHECK_OPTIONS: OptionItem[] = [
   { value: 'factura', label: 'Enviar factura' },
   { value: 'boleta', label: 'Enviar boleta' },
-  { value: 'guia', label: 'Enviar guía de despacho' },
+  { value: 'guia', label: 'Enviar comprobante' },
 ];
 
 function Controlled(args: CheckboxGroupProps) {

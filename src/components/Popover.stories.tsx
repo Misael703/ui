@@ -3,9 +3,14 @@ import * as React from 'react';
 import { Popover } from './Popover';
 import { Button } from './Button';
 
-export default { title: 'Overlay/Popover', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Popover',
+  component: Popover,
+  tags: ['autodocs'],
+} satisfies Meta<typeof Popover>;
+export default meta;
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <Popover trigger={<Button variant="outline">Abrir popover</Button>}>
       <div style={{ padding: 16, minWidth: 240 }}>
@@ -34,7 +39,7 @@ export const Placements: StoryObj = {
   ),
 };
 
-export const Controlado: StoryObj = {
+export const Controlled: StoryObj = {
   render: () => {
     const [open, setOpen] = React.useState(false);
     return (

@@ -2,7 +2,13 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { TimeAgo, TimeAgoDate } from './TimeAgo';
 
-export default { title: 'Time/TimeAgo', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/TimeAgo',
+  component: TimeAgo,
+  subcomponents: { TimeAgoDate },
+  tags: ['autodocs'],
+} satisfies Meta<typeof TimeAgo>;
+export default meta;
 
 // A pinned `now` keeps the story output stable in the docs and visual
 // snapshot tools. Real apps pass `undefined` and let it default to
@@ -25,7 +31,7 @@ const DateRow: React.FC<{ label: string; iso: string }> = ({ label, iso }) => (
   </tr>
 );
 
-export const Casos: StoryObj = {
+export const Cases: StoryObj = {
   name: 'TimeAgo · scale table',
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -52,7 +58,7 @@ export const Casos: StoryObj = {
   ),
 };
 
-export const SoloFecha: StoryObj = {
+export const DateOnly: StoryObj = {
   name: 'TimeAgoDate · date-only scale',
   render: () => (
     <div style={{ maxWidth: 640 }}>

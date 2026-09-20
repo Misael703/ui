@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Carousel } from './Carousel';
 
-export default { title: 'Data Display/Carousel', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Carousel',
+  component: Carousel,
+  tags: ['autodocs'],
+} satisfies Meta<typeof Carousel>;
+export default meta;
 
 const Slide = ({ n, color }: { n: number; color: string }) => (
   <div
@@ -23,7 +28,7 @@ const Slide = ({ n, color }: { n: number; color: string }) => (
   </div>
 );
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <div style={{ width: 640 }}>
       <Carousel ariaLabel="Demostración">

@@ -2,9 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ContextMenu } from './ContextMenu';
 import { Edit, Trash, Copy, Download } from './Icons';
 
-export default { title: 'Overlay/ContextMenu', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/ContextMenu',
+  component: ContextMenu,
+  tags: ['autodocs'],
+} satisfies Meta<typeof ContextMenu>;
+export default meta;
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <ContextMenu
       items={[

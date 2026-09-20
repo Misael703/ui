@@ -2,9 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { InputOTP } from './InputOTP';
 
-export default { title: 'Forms/Input OTP', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/InputOTP',
+  component: InputOTP,
+  tags: ['autodocs'],
+} satisfies Meta<typeof InputOTP>;
+export default meta;
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState('');
     return (
@@ -18,21 +23,21 @@ export const Basico: StoryObj = {
   },
 };
 
-export const Cuatro: StoryObj = {
+export const FourDigits: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState('');
     return <InputOTP value={value} onChange={setValue} length={4} />;
   },
 };
 
-export const Texto: StoryObj = {
+export const Alphanumeric: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState('');
     return <InputOTP value={value} onChange={setValue} length={5} inputMode="text" />;
   },
 };
 
-export const Invalido: StoryObj = {
+export const Invalid: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState('123');
     return <InputOTP value={value} onChange={setValue} invalid />;

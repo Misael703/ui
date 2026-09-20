@@ -2,9 +2,14 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { NotificationCenter } from './Notifications';
 
-export default { title: 'Feedback/Notifications', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/NotificationCenter',
+  component: NotificationCenter,
+  tags: ['autodocs'],
+} satisfies Meta<typeof NotificationCenter>;
+export default meta;
 
-export const ConNotificaciones: StoryObj = {
+export const WithItems: StoryObj = {
   render: () => {
     const [notifs, setNotifs] = React.useState([
       { id: '1', title: 'Pedido #1042 confirmado', description: 'Northwind Builders', tone: 'success' as const, timestamp: 'hace 2 min', read: false },
@@ -24,7 +29,7 @@ export const ConNotificaciones: StoryObj = {
   },
 };
 
-export const Vacio: StoryObj = {
+export const Empty: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 24 }}>
       <NotificationCenter notifications={[]} />

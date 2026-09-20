@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Stat } from './Display2';
+import { formatCurrency } from '../utils/format';
 
 const meta = {
   title: 'Components/Stat',
@@ -17,7 +18,7 @@ export const Default: Story = {
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
       {/* Preferred: numeric `delta` → shared DeltaBadge (signed, localized, tone by sign). */}
-      <Stat label="Ventas hoy" value="$1.245.000" hint="vs ayer" delta={12.4} />
+      <Stat label="Ventas hoy" value={formatCurrency(1245000)} hint="vs ayer" delta={12.4} />
       <Stat label="Pedidos" value="38" delta={-4} deltaFormat={(v) => `${v > 0 ? '+' : ''}${v}`} />
       <Stat label="Margen promedio" value="22%" hint="objetivo: 25%" />
     </div>
@@ -31,7 +32,7 @@ export const DeltaInvertAndLegacy: Story = {
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
       <Stat label="Merma" value="3,1%" delta={3.1} deltaInvert hint="vs mes ant." />
-      <Stat label="Costo envío" value="$4.200" delta={-8.5} deltaInvert hint="bajó, mejor" />
+      <Stat label="Costo envío" value={formatCurrency(4200)} delta={-8.5} deltaInvert hint="bajó, mejor" />
       <Stat label="NPS (legacy trend)" value="72" trend={{ value: '+5', dir: 'up' }} />
     </div>
   ),

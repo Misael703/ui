@@ -7,7 +7,7 @@ const files = readdirSync(SRC, { recursive: true, encoding: 'utf8' })
   .filter((f) => f.endsWith('.stories.tsx'))
   .map((f) => join(SRC, f));
 
-const EXEMPT_TITLES = /title:\s*'(Internal|Blocks)\//;
+const EXEMPT_TITLES = /title:\s*'(Internal|Blocks|Foundations)\//;
 const NO_AUTODOCS = /title:\s*'Components\/AppShell'/;
 
 describe('story metas', () => {

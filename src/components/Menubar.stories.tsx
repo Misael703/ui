@@ -1,15 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Menubar } from './Menubar';
 
-export default { title: 'Navigation/Menubar', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Menubar',
+  component: Menubar,
+  tags: ['autodocs'],
+} satisfies Meta<typeof Menubar>;
+export default meta;
 
 /**
- * Navegable por teclado (patrón WAI-ARIA Menubar): Tab entra a la barra (roving
- * tabindex), ←/→ mueven entre menús, ↓/Enter/Espacio abren el menú, ↑/↓ e
- * Inicio/Fin recorren los ítems, Enter/Espacio seleccionan, Esc cierra y
- * devuelve el foco al trigger.
+ * Keyboard-navigable (WAI-ARIA Menubar pattern): Tab enters the bar (roving
+ * tabindex), ←/→ move between menus, ↓/Enter/Space open the menu, ↑/↓ and
+ * Home/End walk the items, Enter/Space select, Esc closes and returns focus
+ * to the trigger.
  */
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <Menubar
       menus={[

@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ScrollArea } from './Primitives';
 
-export default { title: 'Layout/ScrollArea', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/ScrollArea',
+  component: ScrollArea,
+  tags: ['autodocs'],
+} satisfies Meta<typeof ScrollArea>;
+export default meta;
 
 const items = Array.from({ length: 40 }, (_, i) => `Producto ${String(i + 1).padStart(3, '0')}`);
 
@@ -59,7 +64,7 @@ export const Horizontal: StoryObj = {
   ),
 };
 
-export const Ambos: StoryObj = {
+export const Both: StoryObj = {
   render: () => (
     <ScrollArea
       orientation="both"

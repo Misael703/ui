@@ -7,6 +7,8 @@ import { NavigationMenu } from './NavigationMenu';
 import { Menubar } from './Menubar';
 import { DatePicker } from './Pickers';
 import { DateRangePicker } from './AdvancedPickers';
+import { Portal } from './Portal';
+import { Slot, Slottable } from './Primitives';
 
 export default {
   title: 'Internal/Regression/Floating in overflow',
@@ -166,5 +168,40 @@ export const AppShellCollapsed: StoryObj = {
         <div style={{ padding: 24 }}>Contenido</div>
       </AppShell>
     </div>
+  ),
+};
+
+/** `Portal` renders a box straight into `document.body`, bypassing any ancestor with `overflow: hidden`. */
+export const PortalDefault: StoryObj = {
+  render: () => (
+    <div>
+      <p style={{ margin: 0 }}>The box below is portaled into <code>document.body</code>, not this paragraph.</p>
+      <Portal>
+        <div style={{ position: 'fixed', bottom: 16, right: 16, padding: 12, background: 'var(--fg-default)', color: 'var(--bg-surface)', borderRadius: 8 }}>
+          Portaled into document.body
+        </div>
+      </Portal>
+    </div>
+  ),
+};
+
+/** `Slot` merges its className/handlers onto its single child element (here an `<a>`) instead of rendering its own DOM node. */
+export const SlotDefault: StoryObj = {
+  render: () => (
+    <Slot className="btn btn--outline btn--md" onClick={() => alert('Slot click')}>
+      <a href="https://example.com" target="_blank" rel="noreferrer">Slot onto an anchor</a>
+    </Slot>
+  ),
+};
+
+/** `Slottable` marks WHICH child receives the merge when there are siblings (e.g. a decorative icon) that must stay put. */
+export const SlottableDefault: StoryObj = {
+  render: () => (
+    <Slot className="btn btn--primary btn--md" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span aria-hidden="true">★</span>
+      <Slottable>
+        <a href="https://example.com" target="_blank" rel="noreferrer">Slottable marks the target</a>
+      </Slottable>
+    </Slot>
   ),
 };

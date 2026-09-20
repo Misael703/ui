@@ -1,9 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { NavigationMenu } from './NavigationMenu';
 
-export default { title: 'Navigation/Navigation Menu', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/NavigationMenu',
+  component: NavigationMenu,
+  tags: ['autodocs'],
+} satisfies Meta<typeof NavigationMenu>;
+export default meta;
 
-export const Basico: StoryObj = {
+export const Default: StoryObj = {
   render: () => (
     <NavigationMenu
       items={[

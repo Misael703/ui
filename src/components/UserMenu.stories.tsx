@@ -9,21 +9,28 @@ import {
 } from './Icons';
 
 /**
- * **UserMenu** — el menú de usuario de topbar (patrón Linear / Vercel / Notion),
- * empaquetado. El avatar es el ÚNICO control siempre visible; nombre + rol +
- * chevron viven en el trigger en desktop y **colapsan a puro avatar bajo 900px**
- * (mismo breakpoint que el mobile drawer del `AppShell`), así un header angosto
- * nunca desborda. Al click abre un `Popover` con header (nombre/rol) + items;
- * cierra con ESC, click-fuera, o al seleccionar un item.
+ * **UserMenu** — the packaged topbar user menu (Linear / Vercel / Notion
+ * pattern). The avatar is the ONLY control always visible; name + role +
+ * chevron live in the trigger on desktop and **collapse to a bare avatar
+ * under 900px** (the same breakpoint as `AppShell`'s mobile drawer), so a
+ * narrow header never overflows. Clicking opens a `Popover` with a header
+ * (name/role) + items; it closes on ESC, click-outside, or when an item is
+ * selected.
  *
- * > **Tip:** estas stories renderizan el `UserMenu` suelto sobre una franja que
- * > imita la esquina derecha de un header. En producción va en `header.right`
- * > del `AppShell` (ver la story **En topbar**). Para ver el colapso a mobile,
- * > usa la barra de viewport de Storybook y baja de 900px.
+ * > **Tip:** these stories render the `UserMenu` on its own over a strip
+ * > that imitates the right edge of a header. In production it goes in
+ * > `header.right` of the `AppShell` (see the **In topbar** story). To see
+ * > the collapse to mobile, use Storybook's viewport toolbar and go below
+ * > 900px.
  */
-export default { title: 'Overlay/UserMenu', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/UserMenu',
+  component: UserMenu,
+  tags: ['autodocs'],
+} satisfies Meta<typeof UserMenu>;
+export default meta;
 
-/** Franja que imita la esquina derecha de un topbar (solo para encuadrar el demo). */
+/** Strip that imitates the right edge of a topbar (only to frame the demo). */
 const headerStrip: React.CSSProperties = {
   display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
   padding: '12px 20px', minHeight: 64, background: 'var(--bg-subtle)',
@@ -35,8 +42,8 @@ const Strip = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-/** Lo mínimo: nombre, rol y tres acciones. Un `'separator'` aísla la acción destructiva. */
-export const Basico: StoryObj = {
+/** The minimum: name, role and three actions. A `'separator'` isolates the destructive action. */
+export const Default: StoryObj = {
   render: () => (
     <Strip>
       <UserMenu
@@ -53,9 +60,9 @@ export const Basico: StoryObj = {
   ),
 };
 
-/** Con íconos por item — escanea más rápido. `danger` pinta la acción destructiva. */
-export const ConIconos: StoryObj = {
-  name: 'Con íconos',
+/** Icons per item — scans faster. `danger` colors the destructive action. */
+export const WithIcons: StoryObj = {
+  name: 'With icons',
   render: () => (
     <Strip>
       <UserMenu
@@ -75,12 +82,12 @@ export const ConIconos: StoryObj = {
 };
 
 /**
- * Items como links (`href`) ruteados por tu router. `linkAs` te deja envolverlos
- * en el `<Link>` de Next (acá un `<a>` de demo) sin perder el estilado del item.
- * Las acciones (logout) siguen siendo `onSelect`.
+ * Items as links (`href`) routed by your router. `linkAs` lets you wrap
+ * them in Next's `<Link>` (here a demo `<a>`) without losing the item's
+ * styling. Actions (logout) remain `onSelect`.
  */
-export const ConLinks: StoryObj = {
-  name: 'Con links (linkAs)',
+export const WithLinks: StoryObj = {
+  name: 'With links (linkAs)',
   render: () => (
     <Strip>
       <UserMenu
@@ -104,11 +111,12 @@ export const ConLinks: StoryObj = {
 };
 
 /**
- * `avatar` reemplaza el avatar de iniciales por el tuyo — una foto (`src`), un
- * `status` dot, o un avatar cuadrado. Útil cuando ya tienes la foto del usuario.
+ * `avatar` replaces the initials avatar with your own — a photo (`src`), a
+ * `status` dot, or a square avatar. Useful when you already have the
+ * user's photo.
  */
-export const AvatarPropio: StoryObj = {
-  name: 'Avatar propio',
+export const CustomAvatar: StoryObj = {
+  name: 'Custom avatar',
   render: () => (
     <Strip>
       <UserMenu
@@ -127,15 +135,15 @@ export const AvatarPropio: StoryObj = {
 };
 
 /**
- * `compact` colapsa el trigger a puro avatar en TODO viewport — variante de
- * tamaño opt-in para headers con acciones hermanas (notificaciones, búsqueda)
- * donde nombre + rol apretarían el slot. El hover es CUADRADO (misma caja
- * 40×40 del menu toggle): el trigger lee como un control más del header, no
- * como un círculo suelto. El popover sigue mostrando la identidad completa:
- * no se pierde nada, solo cambia la huella del trigger.
+ * `compact` collapses the trigger to a bare avatar on EVERY viewport — an
+ * opt-in size variant for headers with sibling actions (notifications,
+ * search) where name + role would crowd the slot. The hover is SQUARE (the
+ * same 40×40 box as the menu toggle): the trigger reads as one more header
+ * control, not as a loose circle. The popover still shows the full
+ * identity: nothing is lost, only the trigger's footprint changes.
  */
-export const Compacto: StoryObj = {
-  name: 'Compacto (compact)',
+export const Compact: StoryObj = {
+  name: 'Compact',
   render: () => (
     <Strip>
       <button type="button" aria-label="Notificaciones" style={{
@@ -159,12 +167,13 @@ export const Compacto: StoryObj = {
 };
 
 /**
- * `placement` + `align` controlan de qué lado y con qué anclaje sale el panel.
- * En un topbar normalmente quieres `placement="bottom"` + `align="end"` (default),
- * para que el panel se pegue al borde derecho y no se salga del viewport.
+ * `placement` + `align` control which side the panel comes out from and
+ * its anchor. In a topbar you usually want `placement="bottom"` +
+ * `align="end"` (default), so the panel hugs the right edge and doesn't
+ * overflow the viewport.
  */
-export const PlacementYAlign: StoryObj = {
-  name: 'Placement y align',
+export const PlacementAndAlign: StoryObj = {
+  name: 'Placement and align',
   render: () => (
     <div style={{ display: 'flex', gap: 48, padding: 24, paddingBottom: 260, flexWrap: 'wrap' }}>
       <div>
@@ -195,13 +204,13 @@ const navSections = [
 ];
 
 /**
- * El uso canónico: dentro de `header.right` de un `AppShell`. El header brand
- * (`theme="brand"`) tinta la barra; el `UserMenu` hereda el hover blanco-α.
- * Reduce el viewport bajo 900px (toolbar de Storybook) para ver el trigger
- * colapsar a puro avatar — sin overflow.
+ * The canonical usage: inside `header.right` of an `AppShell`. The brand
+ * header (`theme="brand"`) tints the bar; `UserMenu` inherits the
+ * white-alpha hover. Shrink the viewport below 900px (Storybook's toolbar)
+ * to see the trigger collapse to a bare avatar — with no overflow.
  */
-export const EnTopbar: StoryObj = {
-  name: 'En topbar (AppShell)',
+export const InTopbar: StoryObj = {
+  name: 'In topbar (AppShell)',
   parameters: { layout: 'fullscreen' },
   render: () => (
     <div style={{ height: '100vh' }}>

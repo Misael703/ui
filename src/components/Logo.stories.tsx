@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Logo } from './Logo';
 
 export default {
-  title: 'Foundations/Logo',
+  title: 'Components/Logo',
   component: Logo,
   tags: ['autodocs'],
   parameters: {
@@ -47,7 +47,7 @@ export const Wordmark: S = {
   args: { variant: 'wordmark', bg: 'light' },
 };
 
-export const SobreFondoOscuro: S = {
+export const OnDarkBackground: S = {
   args: { variant: 'horizontal', bg: 'dark' },
   decorators: [
     (Story) => (
@@ -58,7 +58,7 @@ export const SobreFondoOscuro: S = {
   ],
 };
 
-export const TodasLasVariantes: S = {
+export const AllVariants: S = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div>
@@ -94,7 +94,7 @@ export const TodasLasVariantes: S = {
  * mismatches between the SVG and PNG of the same variant. Replace with
  * your own brand's files (same names) to make this your QA grid.
  */
-export const InspeccionDeArchivos: S = {
+export const FileInspection: S = {
   render: () => {
     const variants = ['mark', 'horizontal', 'wordmark', 'vertical'] as const;
     const bgs = ['light', 'dark'] as const;
@@ -151,7 +151,7 @@ export const Responsive: S = {
   ),
 };
 
-export const TamanosCustom: S = {
+export const CustomSizes: S = {
   render: () => (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32 }}>
       <div style={{ textAlign: 'center' }}>

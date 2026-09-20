@@ -11,6 +11,8 @@ Storybook is the kit's documentation. Every export of `src/index.ts` has a story
 - `component:` is mandatory; `tags: ['autodocs']` is mandatory (only `Internal/*`, `Blocks/*` and `Components/AppShell` opt out).
 - `args` for the `Default` story; `argTypes` with `control: 'select'` / `'inline-radio'` for every enum prop.
 - `satisfies Meta<typeof X>`; `type Story = StoryObj<typeof meta>`.
+- Generic components (`DataTable<T>`, `Combobox<T>`, `RadioGroup<T>`…): TypeScript collapses `ComponentProps` on generic function components, so use `const meta: Meta = { … }` with `type Story = StoryObj<XxxProps<string>>` and a per-story `render`; non-generic components keep `satisfies Meta<typeof X>`.
+- `Default` should be `{}` driven by meta `args` so Controls work; a custom `render` that ignores `args` is only for compositions.
 
 ## Story names (English)
 `Default`, `Sizes`, `Variants`, `Disabled`, `Loading`, `Invalid`, `Empty`, `Controlled`, `WithIcons`, `Playground`. A `Playground` is the one composition story with args; never one story per consumer case.
