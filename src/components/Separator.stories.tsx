@@ -1,9 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Separator } from './Primitives';
 
-export default { title: 'Layout/Separator', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Separator',
+  component: Separator,
+  tags: ['autodocs'],
+  args: { orientation: 'horizontal', decorative: true },
+  argTypes: {
+    orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
+    decorative: { control: 'boolean' },
+  },
+} satisfies Meta<typeof Separator>;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Horizontal: StoryObj = {
+export const Horizontal: Story = {
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <p style={{ margin: 0 }}>Sección anterior con su contenido.</p>
@@ -13,7 +24,7 @@ export const Horizontal: StoryObj = {
   ),
 };
 
-export const Vertical: StoryObj = {
+export const Vertical: Story = {
   render: () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, height: 24 }}>
       <span>Inicio</span>
@@ -25,7 +36,7 @@ export const Vertical: StoryObj = {
   ),
 };
 
-export const NoDecorativo: StoryObj = {
+export const Semantic: Story = {
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <p style={{ margin: 0 }}>El primer texto.</p>
