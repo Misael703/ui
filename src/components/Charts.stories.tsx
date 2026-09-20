@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as Recharts from 'recharts';
-import { LineChart, AreaChart, BarChart, DonutChart, Sparkline } from './Charts';
+import { LineChart, AreaChart, BarChart, DonutChart, Sparkline as SparklineChart } from './Charts';
+import { formatCurrency } from '../utils/format';
 
-export default { title: 'Data Display/Charts', tags: ['autodocs'] } as Meta;
-
-const monthlyData = [
+// Charts are generic (`<D = Record<string, unknown>>`): `satisfies Meta<typeof
+// LineChart>` collapses `D` to `unknown` (same failure as `DataTable<T>` in
+// Task 13) and rejects a concrete fixture row shape. Loose `Meta` sidesteps it —
+// every story below supplies its own concrete `data`/`series` via `render`.
+const SERIES = [
   { mes: 'Ene', ventas: 4200, devoluciones: 320 },
   { mes: 'Feb', ventas: 3800, devoluciones: 280 },
   { mes: 'Mar', ventas: 5100, devoluciones: 410 },
@@ -13,10 +16,20 @@ const monthlyData = [
   { mes: 'Jun', ventas: 5800, devoluciones: 420 },
 ];
 
+const meta: Meta = {
+  title: 'Components/Charts',
+  component: LineChart,
+  subcomponents: { AreaChart, BarChart, DonutChart, Sparkline: SparklineChart },
+  tags: ['autodocs'],
+  args: { data: SERIES, recharts: Recharts },
+};
+export default meta;
+type Story = StoryObj;
+
 // Zero-state: an empty `data` array renders the "Sin datos" placeholder at the
 // chart's height (locale `chart.empty`, overridable via `empty`) instead of a
 // blank recharts box, so an async dashboard doesn't jump when data arrives.
-export const SinDatos: StoryObj = {
+export const Empty: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
       <div style={{ width: 360 }}>
@@ -29,12 +42,12 @@ export const SinDatos: StoryObj = {
   ),
 };
 
-export const Linea: StoryObj = {
+export const Line: Story = {
   render: () => (
     <div style={{ width: 600 }}>
       <LineChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         categoryKey="mes"
         series={[
           { key: 'ventas', label: 'Ventas' },
@@ -45,12 +58,12 @@ export const Linea: StoryObj = {
   ),
 };
 
-export const Area: StoryObj = {
+export const Area: Story = {
   render: () => (
     <div style={{ width: 600 }}>
       <AreaChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         categoryKey="mes"
         series={[
           { key: 'ventas', label: 'Ventas' },
@@ -62,12 +75,12 @@ export const Area: StoryObj = {
   ),
 };
 
-export const Barras: StoryObj = {
+export const Bars: Story = {
   render: () => (
     <div style={{ width: 600 }}>
       <BarChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         categoryKey="mes"
         series={[{ key: 'ventas', label: 'Ventas' }]}
       />
@@ -77,12 +90,12 @@ export const Barras: StoryObj = {
 
 // Non-actionable chart (no drill-down): opt out of recharts' keyboard layer so the
 // svg isn't a Tab stop. The keyboard focus ring (when enabled) is :focus-visible only.
-export const BarrasSinTabStop: StoryObj = {
+export const BarsNoTabStop: Story = {
   render: () => (
     <div style={{ width: 600 }}>
       <BarChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         categoryKey="mes"
         series={[{ key: 'ventas', label: 'Ventas' }]}
         accessibilityLayer={false}
@@ -92,16 +105,16 @@ export const BarrasSinTabStop: StoryObj = {
 };
 
 // Horizontal bars: the value end (right) is rounded, not the top.
-export const BarrasHorizontal: StoryObj = {
+export const HorizontalBars: Story = {
   render: () => (
     <div style={{ width: 600 }}>
       <BarChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         categoryKey="mes"
         series={[{ key: 'ventas', label: 'Ventas' }]}
         layout="horizontal"
-        valueFormatter={(n) => `$${n.toLocaleString('es-CL')}`}
+        valueFormatter={(n) => formatCurrency(n)}
       />
     </div>
   ),
@@ -109,7 +122,7 @@ export const BarrasHorizontal: StoryObj = {
 
 // Count data with a small max (1): the value axis auto-detects integers and shows
 // only whole ticks (0, 1) — no 0.25/0.5/0.75.
-export const BarrasConteo: StoryObj = {
+export const CountBars: Story = {
   render: () => (
     <div style={{ width: 480 }}>
       <BarChart
@@ -128,7 +141,7 @@ export const BarrasConteo: StoryObj = {
 };
 
 // Decimal data: auto-detection leaves allowDecimals=true, so fractional ticks show.
-export const Decimales: StoryObj = {
+export const Decimals: Story = {
   render: () => (
     <div style={{ width: 560 }}>
       <LineChart
@@ -150,19 +163,19 @@ export const Decimales: StoryObj = {
 // Dense daily series with long ISO labels: thinned + rotated + formatted ticks,
 // an honest `linear` curve, AND a formatted tooltip label (shows `18 may`, not the
 // raw ISO — the tooltip reuses xTickFormatter by default).
-const dailyData = Array.from({ length: 31 }, (_, i) => {
+const DAILY_DATA = Array.from({ length: 31 }, (_, i) => {
   const day = i + 1;
   // deterministic-ish counts with some zeros
   const v = [0, 3, 0, 7, 12, 5, 0, 9][i % 8] + (i % 5);
   return { fecha: `2026-05-${String(day).padStart(2, '0')}`, ventas: v };
 });
 
-export const LineaDensa: StoryObj = {
+export const DenseLine: Story = {
   render: () => (
     <div style={{ width: 700 }}>
       <LineChart
         recharts={Recharts as any}
-        data={dailyData}
+        data={DAILY_DATA}
         categoryKey="fecha"
         series={[{ key: 'ventas', label: 'Ventas diarias' }]}
         curve="linear"
@@ -175,7 +188,7 @@ export const LineaDensa: StoryObj = {
   ),
 };
 
-export const Donut: StoryObj = {
+export const Donut: Story = {
   render: () => (
     <div style={{ width: 280 }}>
       <DonutChart
@@ -194,12 +207,12 @@ export const Donut: StoryObj = {
   ),
 };
 
-export const SparklineDemo: StoryObj = {
+export const Sparkline: Story = {
   render: () => (
     <div style={{ display: 'inline-block' }}>
-      <Sparkline
+      <SparklineChart
         recharts={Recharts as any}
-        data={monthlyData}
+        data={SERIES}
         dataKey="ventas"
         width={120}
         height={32}
