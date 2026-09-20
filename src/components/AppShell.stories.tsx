@@ -7,17 +7,13 @@ import { Home, Package, Truck, Users, Settings, ShoppingCart, MenuIcon, Bell, Fi
 import { UserMenu } from './UserMenu';
 
 export default {
-  title: 'Layout/AppShell',
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'fullscreen',
-    // AppShell fills the viewport (top layout = internal scroll). Rendered
-    // inline in the autodocs page it overflows the bounded Docs canvas (sidebar
-    // clipped left, content/actions clipped right). Render each story in its own
-    // sized iframe in Docs so 100vh maps to the iframe, not the doc column.
-    docs: { story: { inline: false, iframeHeight: 720 } },
-  },
-} as Meta;
+  title: 'Components/AppShell',
+  component: AppShell,
+  // The shell owns 100vh (internal-scroll model); it cannot render inside the
+  // bounded docs column, so it has no autodocs page. Each story is full-screen.
+  tags: ['!autodocs'],
+  parameters: { layout: 'fullscreen' },
+} satisfies Meta<typeof AppShell>;
 
 /* Shared nav fixture. Deliberately MIXED: flat links + a collapsible group
    (`NavItem` with `children`, v1.83.0), so every story exercises the mixed

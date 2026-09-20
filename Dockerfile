@@ -17,8 +17,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # Source needed by the Storybook build: src/ (stories, fonts referenced
-# by .storybook/fonts.css), .storybook/ config, public/ (staticDirs),
-# tsconfig, postcss config. `.dockerignore` trims the rest.
+# by .storybook/fonts.css), .storybook/ config, src/presets/elalba/logos
+# (staticDirs), tsconfig, postcss config. `.dockerignore` trims the rest.
 COPY . .
 RUN npm run build-storybook
 
