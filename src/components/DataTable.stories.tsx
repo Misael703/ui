@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, expect } from '@storybook/test';
 import * as React from 'react';
-import { DataTable, Accordion, AccordionItem, Breadcrumbs, TableToolbar, TablePagination, ColumnToggle, type Column } from './DataTable';
+import { DataTable, TableToolbar, TablePagination, ColumnToggle, type Column, type DataTableProps } from './DataTable';
 import type { ToolbarAction } from './ToolbarActions';
 import { Badge, Card, CardBody } from './Display';
 import { Input } from './Form';
@@ -8,52 +9,62 @@ import { Button } from './Button';
 import { Modal } from './Overlay';
 import { Filter, Download, Edit, Trash } from './Icons';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { formatCurrency } from '../utils/format';
 
-export default { title: 'Data Display/DataTable', tags: ['autodocs'] } as Meta;
+interface OrderRow {
+  id: string;
+  order: string;
+  customer: string;
+  branch: string;
+  total: number;
+}
 
-const rows = [
-  { id: '1', name: 'Taladro percutor', sku: 'TLD-700', stock: 24, price: 89990 },
-  { id: '2', name: 'Sierra circular', sku: 'SRR-7', stock: 8, price: 159990 },
-  { id: '3', name: 'Lijadora orbital', sku: 'LIJ-300', stock: 0, price: 49990 },
+const ROWS: OrderRow[] = [
+  { id: '1', order: 'Pedido #1042', customer: 'Satoru Gojo', branch: 'Sucursal Centro', total: 89990 },
+  { id: '2', order: 'Pedido #1043', customer: 'Satoru Gojo', branch: 'Sucursal Norte', total: 159990 },
+  { id: '3', order: 'Pedido #1044', customer: 'Satoru Gojo', branch: 'Sucursal Centro', total: 49990 },
 ];
 
-export const DataTableBasica: StoryObj = {
-  render: () => {
-    const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
-    const [sel, setSel] = React.useState<Set<string>>(new Set());
-    return (
-      <DataTable
-        rows={rows}
-        rowKey={(r) => r.id}
-        sort={sort}
-        onSortChange={setSort}
-        selectable
-        selectedKeys={sel}
-        onSelectionChange={setSel}
-        columns={[
-          { key: 'name', header: 'Producto', sortable: true },
-          { key: 'sku', header: 'SKU' },
-          {
-            key: 'stock', header: 'Stock', sortable: true, align: 'right',
-            accessor: (r) => r.stock === 0 ? <Badge variant="danger">Agotado</Badge> : r.stock < 10 ? <Badge variant="warning">{r.stock}</Badge> : r.stock,
-          },
-          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
-        ]}
-      />
-    );
+const COLUMNS: Column<OrderRow>[] = [
+  { key: 'order', header: 'Pedido' },
+  { key: 'customer', header: 'Cliente' },
+  { key: 'branch', header: 'Sucursal' },
+  { key: 'total', header: 'Total', numeric: true, accessor: (r) => formatCurrency(r.total) },
+];
+
+// `DataTable<T>` is generic: `ComponentProps<typeof DataTable>` / `satisfies
+// Meta<typeof DataTable>` collapses `T` to `unknown` (same failure as
+// `Combobox<T>`, `RadioGroup<T>` in Tasks 9/10) — every prop typed off `T`
+// (`rows`, `columns`, `rowKey`, `rowLabel`, `rowHref`, accessors…) then
+// rejects the concrete `OrderRow` fixture. Loose `Meta` + `StoryObj` typed
+// directly off `DataTableProps<OrderRow>` sidesteps the collapse.
+const meta: Meta = {
+  title: 'Components/DataTable',
+  component: DataTable,
+  subcomponents: { TablePagination, TableToolbar, ColumnToggle },
+  tags: ['autodocs'],
+  args: { rows: ROWS, columns: COLUMNS, rowKey: (r: OrderRow) => r.id, density: 'compact' },
+  argTypes: {
+    density: { control: 'inline-radio', options: ['compact', 'comfortable'] },
+    mobileLayout: { control: 'inline-radio', options: ['cards', 'table'] },
   },
 };
+export default meta;
+type Story = StoryObj<DataTableProps<OrderRow>>;
+
+export const Default: Story = {};
 
 /**
- * **Truncado por columna** (`Column.truncate`). En `table-layout:auto` un valor
- * largo —peor si es un string SIN espacios— estira la columna y revienta el ancho
- * de la tabla. `truncate: true` recorta a una línea con "…"; `truncate: n` hace
- * clamp a `n` líneas. El cap es DURO (max-width en un wrapper interno, tomado del
- * `width` de la columna o 240px por defecto) y rompe tokens sin espacios. En celdas
- * string el valor completo va en el `title` (hover). En `mobileLayout="cards"` no
- * aplica (las cards ya envuelven).
+ * **Per-column truncation** (`Column.truncate`). Under `table-layout:auto` a
+ * long value — worse yet a string with NO spaces — stretches the column and
+ * blows out the table's width. `truncate: true` clips to one line with "…";
+ * `truncate: n` clamps to `n` lines. The cap is HARD (a `max-width` on an
+ * inner wrapper, taken from the column's `width` or a 240px default) and
+ * breaks spaceless tokens. In string cells the full value goes into the
+ * `title` (hover). Doesn't apply in `mobileLayout="cards"` (cards already
+ * wrap).
  */
-export const TruncadoPorColumna: StoryObj = {
+export const TruncatePerColumn: Story = {
   render: () => {
     const wide = [
       { id: '1', name: 'Taladro percutor inalámbrico 20V con maletín', address: 'Av. Libertador Bernardo O’Higgins 1234, Depto 567, Santiago Centro, Región Metropolitana', notes: 'Cliente pidió despacho en la mañana; dejar en conserjería si no hay nadie; timbre no funciona.' },
@@ -77,15 +88,15 @@ export const TruncadoPorColumna: StoryObj = {
 };
 
 /**
- * **Virtualización** (v1.51.0): `virtualizeRows` ventanea 5.000 filas a
- * ~30 nodos DOM con spacers pixel-exactos. Requiere `maxHeight` y alturas
- * uniformes — se auto-desactiva con `renderExpanded`. En móvil sigue siendo
- * tabla (las cards no se ventanean; 5.000 tarjetas no es una opción): SKU se
- * esconde con `mobile: 'hidden'`. La selección opera sobre el dataset
- * completo (solo el DOM se ventanea). El sticky header + footer de totales
- * conviven con el windowing.
+ * **Virtualization** (v1.51.0): `virtualizeRows` windows 5,000 rows down to
+ * ~30 DOM nodes with pixel-exact spacers. Requires `maxHeight` and uniform
+ * row heights — auto-disables with `renderExpanded`. On mobile it stays a
+ * table (cards aren't virtualized; 5,000 cards isn't an option): SKU is
+ * hidden with `mobile: 'hidden'`. Selection operates over the full dataset
+ * (only the DOM is windowed). The sticky header + totals footer coexist with
+ * the windowing.
  */
-export const Virtualizada: StoryObj = {
+export const Virtualized: Story = {
   render: () => {
     const big = React.useMemo(() => Array.from({ length: 5000 }, (_, i) => ({
       id: String(i),
@@ -109,8 +120,8 @@ export const Virtualizada: StoryObj = {
           { key: 'name', header: 'Producto', footer: 'Total (5.000)' },
           { key: 'sku', header: 'SKU', mobile: 'hidden' },
           { key: 'price', header: 'Precio', numeric: true,
-            accessor: (r) => `$${r.price.toLocaleString('es-CL')}`,
-            footer: `$${total.toLocaleString('es-CL')}` },
+            accessor: (r) => formatCurrency(r.price),
+            footer: formatCurrency(total) },
         ]}
       />
     );
@@ -118,25 +129,24 @@ export const Virtualizada: StoryObj = {
 };
 
 /**
- * **Visibilidad de columnas** (v1.49.0): `hiddenColumnKeys` filtra columnas
- * sin mutar el array canónico — header, celdas, footer y colSpans siguen
- * solos. `<ColumnToggle>` en el toolbar es el menú listo: popover con
- * checkboxes que queda abierto entre toggles; la última columna visible se
- * deshabilita (cero columnas es un estado roto inalcanzable).
+ * **Column visibility** (v1.49.0): `hiddenColumnKeys` filters columns without
+ * mutating the canonical array — header, cells, footer and colSpans all
+ * follow. `<ColumnToggle>` in the toolbar is the ready-made menu: a popover
+ * with checkboxes that stays open across toggles; the last visible column is
+ * disabled (zero columns is an unreachable broken state).
  */
-export const ConVisibilidadDeColumnas: StoryObj = {
-  render: () => {
-    const [hidden, setHidden] = React.useState<Set<string>>(new Set(['sku']));
-    const cols = [
-      { key: 'name', header: 'Producto' },
-      { key: 'sku', header: 'SKU' },
-      { key: 'stock', header: 'Stock', numeric: true },
-      { key: 'price', header: 'Precio', numeric: true, accessor: (r: typeof rows[number]) => `$${r.price.toLocaleString('es-CL')}` },
+export const ColumnVisibility: Story = {
+  render: (a) => {
+    const [hidden, setHidden] = React.useState<Set<string>>(new Set(['branch']));
+    const cols: Column<OrderRow>[] = [
+      { key: 'order', header: 'Pedido' },
+      { key: 'customer', header: 'Cliente' },
+      { key: 'branch', header: 'Sucursal' },
+      { key: 'total', header: 'Total', numeric: true, accessor: (r) => formatCurrency(r.total) },
     ];
     return (
       <DataTable
-        rows={rows}
-        rowKey={(r) => r.id}
+        {...a}
         hiddenColumnKeys={hidden}
         columns={cols}
         toolbar={
@@ -151,54 +161,53 @@ export const ConVisibilidadDeColumnas: StoryObj = {
 };
 
 /**
- * Toolbar / filter zone + DataTable en UNA superficie redondeada. Se pasa
- * por el prop `toolbar`: el DataTable **posee** la superficie
- * (borde+radio+overflow), la toolbar queda clipeada al radio, hay UNA sola
- * divisoria con el header y la esquina queda limpia — sin apilar
- * card-border + filtro + header-top, sin costura. Esta ES la forma de
- * combinar una toolbar con un DataTable; no los envuelvas a mano en tu
- * propio contenedor bordeado (eso reintroduce la costura).
+ * Toolbar / filter zone + DataTable on ONE rounded surface. Passed via the
+ * `toolbar` prop: the DataTable OWNS the surface (border+radius+overflow),
+ * the toolbar is clipped to the radius, there is ONE divider with the
+ * header, and the corner stays clean — no stacked card-border + filter +
+ * header-top, no seam. This IS the way to combine a toolbar with a
+ * DataTable; don't hand-wrap them in your own bordered container (that
+ * reintroduces the seam).
  */
 // Hoisted: an element created inside render carries a fiber `_owner`, and
 // Storybook's JSX source decorator recurses into nested arrays/objects — a
 // fiber there is circular (stack overflow). Module scope has no owner.
 const EXPORT_ACTIONS: ToolbarAction[] = [{ label: 'Exportar', icon: <Download size={16} />, onSelect: () => {} }];
 
-export const ConToolbar: StoryObj = {
-  render: () => {
+export const WithToolbar: Story = {
+  render: (a) => {
     const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
     return (
       <DataTable
-        rows={rows}
-        rowKey={(r) => r.id}
+        {...a}
         sort={sort}
         onSortChange={setSort}
         toolbar={
           <TableToolbar overflow={EXPORT_ACTIONS}>
-            <div className="grow"><Input placeholder="Buscar producto…" /></div>
+            <div className="grow"><Input placeholder="Buscar pedido…" /></div>
             <Button variant="ghost" size="sm" iconLeft={<Filter size={16} />} hideLabel="mobile">Filtros</Button>
           </TableToolbar>
         }
         columns={[
-          { key: 'name', header: 'Producto', sortable: true },
-          { key: 'sku', header: 'SKU' },
-          { key: 'stock', header: 'Stock', sortable: true, align: 'right' },
-          { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+          { key: 'order', header: 'Pedido', sortable: true },
+          { key: 'customer', header: 'Cliente' },
+          { key: 'branch', header: 'Sucursal' },
+          { key: 'total', header: 'Total', sortable: true, align: 'right', accessor: (r) => formatCurrency(r.total) },
         ]}
       />
     );
   },
 };
 
-/** Sticky header: el thead queda visible al scrollear el body. El propio
- * wrapper es el contenedor de scroll (no lo envuelvas en tu propio
- * `overflow-y:auto`). Default `max-height:70vh`; aquí se override con un
+/** Sticky header: the thead stays visible while the body scrolls. The wrap
+ * itself is the scroll container (don't wrap it in your own
+ * `overflow-y:auto`). Default `max-height:70vh`; overridden here with a
  * `className`. */
 const stickyCols = [
   { key: 'name', header: 'Producto' },
   { key: 'sku', header: 'SKU' },
   { key: 'stock', header: 'Stock', align: 'right' as const },
-  { key: 'price', header: 'Precio', align: 'right' as const, accessor: (r: { price: number }) => `$${r.price.toLocaleString('es-CL')}` },
+  { key: 'price', header: 'Precio', align: 'right' as const, accessor: (r: { price: number }) => formatCurrency(r.price) },
 ];
 const stickyRows = Array.from({ length: 30 }, (_, i) => ({
   id: String(i + 1),
@@ -218,19 +227,20 @@ const stickyRows = Array.from({ length: 30 }, (_, i) => ({
  * v1.42.0: scroll the body — the header sits flush at rest and lifts off with
  * a soft shadow once content scrolls beneath it (the "command bar" elevation).
  */
-export const StickyHeader: StoryObj = {
+export const StickyHeader: Story = {
   render: () => (
     <DataTable stickyHeader maxHeight={300} rows={stickyRows} rowKey={(r) => r.id} ariaLabel="Inventario" columns={stickyCols} />
   ),
 };
 
 /**
- * **`stickyHeader` dentro de un Modal** (v1.41.0): sin `maxHeight`, el wrap no
- * crea su propio scroll — el header se pega al scroll del `Modal` body. Un solo
- * scroll, sin barras anidadas ni artefactos de borde. Abre el modal y scrollea.
+ * **`stickyHeader` inside a Modal** (v1.41.0): without `maxHeight`, the wrap
+ * doesn't create its own scroll — the header pins to the `Modal` body's
+ * scroll instead. A single scroll, no nested scrollbars or edge artifacts.
+ * Open the modal and scroll.
  */
-export const StickyHeaderEnModal: StoryObj = {
-  name: 'Sticky header en Modal (un solo scroll)',
+export const StickyHeaderInModal: Story = {
+  name: 'Sticky header in Modal (single scroll)',
   render: () => {
     const [open, setOpen] = React.useState(false);
     return (
@@ -244,17 +254,16 @@ export const StickyHeaderEnModal: StoryObj = {
   },
 };
 
-/** P5h — columna de acción `align:'right'` con un nodo React (flex de
- * botones): ahora se alinea de verdad (antes flotaba a la izquierda). */
-export const ColumnaAccionAlineada: StoryObj = {
-  render: () => (
+/** P5h — `align:'right'` action column with a React node (a button flex row):
+ * now genuinely right-aligned (it used to float left). */
+export const AlignedActionColumn: Story = {
+  render: (a) => (
     <DataTable
-      rows={rows}
-      rowKey={(r) => r.id}
-      ariaLabel="Productos"
+      {...a}
+      ariaLabel="Pedidos"
       columns={[
-        { key: 'name', header: 'Producto' },
-        { key: 'sku', header: 'SKU' },
+        { key: 'order', header: 'Pedido' },
+        { key: 'customer', header: 'Cliente' },
         {
           key: 'acc', header: 'Acciones', align: 'right', mobile: 'actions',
           accessor: () => (
@@ -269,31 +278,30 @@ export const ColumnaAccionAlineada: StoryObj = {
   ),
 };
 
-/** Card layout en mobile (default): bajo 600px cada fila es una tarjeta con
- * tres zonas según `Column.mobile` — cabecera (título con caption + estado +
- * checkbox), cuerpo (label · valor) y pie (acciones a lo ancho). Mismo DOM que
- * la tabla. Usa el viewport mobile en Storybook para verlo. */
-export const CardLayoutMobile: StoryObj = {
+/** Card layout on mobile (default): below 600px each row becomes a card with
+ * three zones per `Column.mobile` — header (title with caption + status +
+ * checkbox), body (label · value) and footer (full-width actions). Same DOM
+ * as the table. Use Storybook's mobile viewport to see it. */
+export const CardLayoutMobile: Story = {
   parameters: {
     viewport: { defaultViewport: 'mobile1' },
   },
-  render: () => {
+  render: (a) => {
     const [sel, setSel] = React.useState<Set<string>>(new Set());
     return (
       <div style={{ background: 'var(--bg-canvas)', padding: 16 }}>
         <DataTable
-          rows={rows}
-          rowKey={(r) => r.id}
-          ariaLabel="Productos"
+          {...a}
+          ariaLabel="Pedidos"
           selectable
           selectedKeys={sel}
           onSelectionChange={setSel}
           onRowClick={() => {}}
           columns={[
-            { key: 'name', header: 'Producto', mobile: 'title' },
-            { key: 'sku', header: 'SKU' },
-            { key: 'stock', header: 'Stock', align: 'right', mobile: 'status', accessor: (r) => (r.stock === 0 ? <Badge variant="danger">Sin stock</Badge> : <Badge variant="success">{r.stock} en stock</Badge>) },
-            { key: 'price', header: 'Precio', align: 'right', accessor: (r) => `$${r.price.toLocaleString('es-CL')}` },
+            { key: 'order', header: 'Pedido', mobile: 'title' },
+            { key: 'customer', header: 'Cliente' },
+            { key: 'branch', header: 'Sucursal', mobile: 'status', accessor: (r) => <Badge variant="info">{r.branch}</Badge> },
+            { key: 'total', header: 'Total', align: 'right', accessor: (r) => formatCurrency(r.total) },
             { key: 'actions', header: '', align: 'right', mobile: 'actions', accessor: () => <Button variant="outline" size="sm" data-row-interactive>Ver detalle</Button> },
           ]}
         />
@@ -302,8 +310,8 @@ export const CardLayoutMobile: StoryObj = {
   },
 };
 
-/** TablePagination con page-size selector y rango de filas. */
-export const PaginacionCompleta: StoryObj = {
+/** TablePagination with a page-size selector and a row range. */
+export const FullPagination: Story = {
   render: () => {
     const [page, setPage] = React.useState(1);
     const [pageSize, setPageSize] = React.useState(10);
@@ -319,8 +327,8 @@ export const PaginacionCompleta: StoryObj = {
   },
 };
 
-/** TablePagination sin page-size selector — para tablas con tamaño fijo. */
-export const PaginacionSimple: StoryObj = {
+/** TablePagination without a page-size selector — for fixed-size tables. */
+export const SimplePagination: Story = {
   render: () => {
     const [page, setPage] = React.useState(1);
     return (
@@ -334,8 +342,8 @@ export const PaginacionSimple: StoryObj = {
   },
 };
 
-/** DataTable + TablePagination juntos, patrón típico de uso. */
-export const DataTableConPaginacion: StoryObj = {
+/** DataTable + TablePagination together, the typical usage pattern. */
+export const WithPagination: Story = {
   render: () => {
     const allRows = Array.from({ length: 87 }, (_, i) => ({
       id: String(i + 1),
@@ -371,31 +379,31 @@ export const DataTableConPaginacion: StoryObj = {
   },
 };
 
-/**
- * Cada `AccordionItem` cablea el trigger con el panel vía ARIA (desde v1.3.0):
- * el botón lleva `aria-controls` + `aria-expanded`; el panel abierto lleva
- * `id`, `role="region"` y `aria-labelledby` (ids estables con `React.useId()`).
- * El panel se desmonta al cerrar; el comportamiento no cambió.
- */
-export const AccordionBasico: StoryObj = {
-  render: () => (
-    <Accordion defaultOpen={['envio']}>
-      <AccordionItem id="envio" title="Envío y plazos">Despachamos en 24-48h hábiles.</AccordionItem>
-      <AccordionItem id="dev" title="Devoluciones">Tienes 10 días para devolver productos sin uso.</AccordionItem>
-      <AccordionItem id="pago" title="Métodos de pago">Tarjetas, transferencia y crédito empresa.</AccordionItem>
-    </Accordion>
-  ),
-};
+function SortableTable(args: DataTableProps<OrderRow>) {
+  const [sort, setSort] = React.useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
+  return <DataTable {...args} sort={sort} onSortChange={setSort} />;
+}
 
-export const BreadcrumbsBasico: StoryObj = {
-  render: () => (
-    <Breadcrumbs items={[
-      { label: 'Inicio', href: '/' },
-      { label: 'Catálogo', href: '/catalogo' },
-      { label: 'Herramientas eléctricas', href: '/catalogo/electricas' },
-      { label: 'Taladro percutor' },
-    ]}/>
-  ),
+/**
+ * Sorting is uncontrolled inside the table (from v1's `sort`/`onSortChange`
+ * contract, see `DataTableProps`): the header button cycles `aria-sort`
+ * `none → ascending → descending → none` and the consumer re-orders `rows`
+ * in response. Verified live against the real markup — the sortable header
+ * cell (`role="columnheader"`) wraps a `<button>` that carries the click
+ * handler; `aria-sort` lives on the `<th>` itself.
+ */
+export const SortToggle: Story = {
+  args: { columns: COLUMNS.map((c) => (c.key === 'total' ? { ...c, sortable: true } : c)) },
+  render: (a) => <SortableTable {...a} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const header = canvas.getByRole('columnheader', { name: /Total/ });
+    await expect(header).toHaveAttribute('aria-sort', 'none');
+    await userEvent.click(within(header).getByRole('button'));
+    await expect(header).toHaveAttribute('aria-sort', 'ascending');
+    await userEvent.click(within(header).getByRole('button'));
+    await expect(header).toHaveAttribute('aria-sort', 'descending');
+  },
 };
 
 interface DataTablePlaygroundArgs {
@@ -412,38 +420,41 @@ interface DataTablePlaygroundArgs {
 }
 
 /**
- * **Playground · DataTable.** Las props de la tabla combinadas en un solo
- * lugar (antes, una story por valor).
+ * **Playground · DataTable.** The table's props combined in one place
+ * (previously, one story per value).
  *
- * - **`state`**: `rows={[]}` muestra el vacío por defecto o el slot `empty`
- *   (overlay hermano de la tabla, anclado y centrado en el área visible, con
- *   el header aún scrolleable para comunicar la forma); `loading` pinta un
- *   skeleton de 5 filas; `error` toma precedencia sobre todo y va en
- *   `role="alert"`.
- * - **`density`**: `compact` es el default legible (v1.10.0); `comfortable`
- *   es el registro previo, más alto por fila.
- * - **`surface`**: una tabla standalone es FLAT por default y dueña de su
- *   borde/radio; sobre un canvas tintado sube `--table-elevation` en un
- *   ancestro (aquí `var(--shadow-card)`) y el kit la aplica al wrap y al
- *   surface — la misma sombra que `<Card>`. Dentro de una Card pasa
- *   `surface="flush"`: sin él se ve doble borde y radio anidado.
- * - **`selectable`**: "seleccionar todo" opera sobre las filas presentes (una
- *   página del server = la página, no el dataset).
- * - **`interactive`**: fila navegable con `rowHref` — un `<a>` real estirado,
- *   operable por teclado, con nombre de lector de pantalla (`rowLabel`) y foco
- *   visible en la fila; markup de tabla válido, sin role hack en `<tr>`.
- * - **`expandable`**: `renderExpanded` agrega la columna del chevron; el
- *   panel es un `<tr>` extra a todo lo ancho, controlado igual que la
- *   selección (`expandedKeys` / `onExpandedChange`).
- * - **`totals`**: `Column.footer` renderiza un `<tfoot>` con la banda del
- *   header pero registro de dato; con `bounded` queda fijo al fondo del
- *   scroll box, espejo del sticky header. El kit NO suma por ti (el total de
- *   página ≠ total del dataset).
- * - **`stickyHeader` / `bounded`**: el header se pega al scroller más cercano
- *   — el interno con `maxHeight`, o uno externo (Modal, página) sin él.
- * - **`mobileLayout`**: cards (default) o tabla bajo 600px; angosta el canvas.
+ * - **`state`**: `rows={[]}` shows the default empty state or the `empty`
+ *   slot (an overlay sibling of the table, anchored and centered in the
+ *   visible area, with the header still scrollable to communicate the
+ *   shape); `loading` paints a 5-row skeleton; `error` takes precedence over
+ *   everything and renders in `role="alert"`.
+ * - **`density`**: `compact` is the readable default (v1.10.0); `comfortable`
+ *   is the previous register, taller per row.
+ * - **`surface`**: a standalone table is FLAT by default and owns its own
+ *   border/radius; on a tinted canvas raise `--table-elevation` on an
+ *   ancestor (here `var(--shadow-card)`) and the kit applies it to the wrap
+ *   and the surface — the same shadow as `<Card>`. Inside a Card pass
+ *   `surface="flush"`: without it you get a doubled border and nested
+ *   radius.
+ * - **`selectable`**: "select all" operates on the rows currently present
+ *   (a server page = the page, not the whole dataset).
+ * - **`interactive`**: navigable row via `rowHref` — a real `<a>` stretched
+ *   over the row, keyboard-operable, with a screen-reader name (`rowLabel`)
+ *   and a visible focus ring on the row.
+ * - **`expandable`**: `renderExpanded` adds the chevron column; the panel is
+ *   an extra full-width `<tr>`, controlled like selection (`expandedKeys` /
+ *   `onExpandedChange`).
+ * - **`totals`**: `Column.footer` renders a `<tfoot>` styled like the header
+ *   band but in the data register; with `bounded` it stays pinned to the
+ *   bottom of the scroll box, mirroring the sticky header. The kit does NOT
+ *   sum for you (the page total ≠ the dataset total).
+ * - **`stickyHeader` / `bounded`**: the header pins to the nearest scroller —
+ *   the internal one with `maxHeight`, or an external one (Modal, page)
+ *   without it.
+ * - **`mobileLayout`**: cards (default) or table below 600px; narrows the
+ *   canvas.
  */
-export const DataTablePlayground: StoryObj<DataTablePlaygroundArgs> = {
+export const Playground: StoryObj<DataTablePlaygroundArgs> = {
   name: 'Playground · DataTable',
   args: { state: 'rows', density: 'compact', surface: 'standalone', selectable: false, interactive: false, expandable: false, totals: false, stickyHeader: false, bounded: false, mobileLayout: 'cards' },
   argTypes: {
@@ -470,14 +481,13 @@ export const DataTablePlayground: StoryObj<DataTablePlaygroundArgs> = {
     const data = a.state === 'rows' ? many : [];
     const [sel, setSel] = React.useState<Set<string>>(new Set());
     const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['1']));
-    const money = (n: number) => `$${n.toLocaleString('es-CL')}`;
     const totalStock = many.reduce((s, r) => s + r.stock, 0);
     const totalPrice = many.reduce((s, r) => s + r.price, 0);
     const columns: Column<Row>[] = [
       { key: 'name', header: 'Producto', mobile: 'title', footer: a.totals ? 'Total (20 productos)' : undefined },
       { key: 'sku', header: 'SKU' },
       { key: 'stock', header: 'Stock', numeric: true, footer: a.totals ? totalStock : undefined },
-      { key: 'price', header: 'Precio', numeric: true, accessor: (r) => money(r.price), footer: a.totals ? money(totalPrice) : undefined },
+      { key: 'price', header: 'Precio', numeric: true, accessor: (r) => formatCurrency(r.price), footer: a.totals ? formatCurrency(totalPrice) : undefined },
     ];
     const table = (
       <DataTable
@@ -528,8 +538,8 @@ export const DataTablePlayground: StoryObj<DataTablePlaygroundArgs> = {
   },
 };
 
-/* Dataset ancho genérico (16 columnas de ancho fijo): la suma supera cualquier
-   contenedor, para ejercitar scroll horizontal + pistas de borde. */
+/* Generic wide dataset (16 fixed-width columns): the sum exceeds any
+   container, to exercise horizontal scroll + edge cues. */
 const WIDE_HEADERS = [
   'Producto', 'SKU', 'Categoría', 'Bodega', 'Lote', 'Proveedor', 'Unidad', 'Stock',
   'Reservado', 'Disponible', 'Costo', 'Precio', 'Margen', 'Actualizado', 'Responsable', 'Observación',
@@ -551,21 +561,21 @@ interface ScrollRegionArgs {
 }
 
 /**
- * **Playground · región de scroll.** Cómo se comportan `fillHeight` / `maxHeight`
- * al combinarse con toolbar, paginación, virtualización y una tabla más ancha
- * que su contenedor. `fillHeight` (v3.2.0) llena el alto del contenedor (columna
- * flex de alto definido) sin número; `maxHeight` fija un tope. En ambos, el
- * sticky header se pega al scroller interno y las **pistas de borde**
- * (`has-more-{left,right,down}`) marcan hacia dónde queda contenido — antes de
- * 3.2.0 no se veían en modo acotado. Sube `columns` a 16 para el scroll
- * horizontal; `rows` a 400 + `virtualize` para el windowing; `rows` a 0 para el
- * vacío de una tabla más ancha que el viewport: el mensaje queda anclado y
- * centrado en el área visible (overlay hermano de la tabla, fuera del track
- * de scroll horizontal) mientras el header sigue scrolleable para comunicar la
- * forma de la tabla.
+ * **Playground · scroll region.** How `fillHeight` / `maxHeight` behave when
+ * combined with a toolbar, pagination, virtualization, and a table wider
+ * than its container. `fillHeight` (v3.2.0) fills the container's height (a
+ * flex column with a definite height) with no number; `maxHeight` sets a
+ * fixed cap. In both, the sticky header pins to the internal scroller and
+ * the **edge cues** (`has-more-{left,right,down}`) mark which direction has
+ * more content — invisible in bounded mode before 3.2.0. Raise `columns` to
+ * 16 for horizontal scroll; `rows` to 400 + `virtualize` for windowing;
+ * `rows` to 0 for the empty state of a table wider than the viewport: the
+ * message stays anchored and centered in the visible area (an overlay
+ * sibling of the table, outside the horizontal scroll track) while the
+ * header stays scrollable to communicate the table's shape.
  */
-export const RegionDeScrollPlayground: StoryObj<ScrollRegionArgs> = {
-  name: 'Playground · región de scroll (fillHeight / maxHeight)',
+export const ScrollRegionPlayground: StoryObj<ScrollRegionArgs> = {
+  name: 'Playground · scroll region',
   args: { mode: 'fillHeight', columns: 16, rows: 60, containerHeight: 520, toolbar: false, pagination: true, virtualize: false },
   argTypes: {
     mode: { control: 'inline-radio', options: ['fillHeight', 'maxHeight'] },
