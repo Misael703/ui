@@ -6,7 +6,7 @@ import { RadioGroup, type RadioGroupProps, type OptionItem } from './InputsExtra
 const RADIO_OPTIONS: OptionItem[] = [
   { value: 'retiro', label: 'Retiro en tienda' },
   { value: 'delivery', label: 'Entrega a domicilio' },
-  { value: 'obra', label: 'Despacho a obra' },
+  { value: 'obra', label: 'Entrega en obra' },
 ];
 
 function Controlled(args: RadioGroupProps) {

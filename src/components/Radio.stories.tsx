@@ -21,7 +21,7 @@ export const Default: Story = {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <Radio {...args} defaultChecked />
       <Radio name={args.name} disabled={args.disabled}>
-        Despacho a domicilio
+        Entrega a domicilio
       </Radio>
     </div>
   ),
