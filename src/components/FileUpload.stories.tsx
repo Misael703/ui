@@ -6,7 +6,7 @@ const meta = {
   title: 'Components/FileUpload',
   component: FileUpload,
   tags: ['autodocs'],
-  args: { onFiles: fn(), hint: 'PDF or image, max 5MB', accept: 'application/pdf,image/*' },
+  args: { onFiles: fn(), hint: 'PDF o imagen, máx 5MB', accept: 'application/pdf,image/*' },
 } satisfies Meta<typeof FileUpload>;
 export default meta;
 type Story = StoryObj<typeof meta>;

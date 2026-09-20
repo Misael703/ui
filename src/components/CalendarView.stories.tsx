@@ -5,11 +5,11 @@ import { isSameDay } from '../utils/dateFormat';
 
 interface CalArgs { leaf: 'days' | 'months' | 'years'; range: boolean; disableSundays: boolean; single: boolean }
 
-const meta: Meta = {
+const meta = {
   title: 'Components/CalendarView',
   component: CalendarView,
   tags: ['autodocs'],
-};
+} satisfies Meta<typeof CalendarView>;
 export default meta;
 type Story = StoryObj<CalArgs>;
 
