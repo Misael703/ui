@@ -21,7 +21,7 @@ Spec: `docs/superpowers/specs/2026-09-16-kit-cleanup-design.md`
 - [x] T18 blocks retitled with descriptions
 - [x] T19 Foundations split by topic with Doc Blocks (ThemeProvider fix); guard green
 - [x] T20 MDX guides (Introduction, Getting started, Theming, Accessibility, Hooks)
-- [x] T21 Storybook CI job; README documents the Railway deploy (URL pending from the owner)
+- [x] T21 Storybook CI job; README and `homepage` link the Railway deploy (https://ui-production-8958.up.railway.app/)
 - [ ] T22 Storybook 9 migration — owner-gated, not started
 - [x] Final whole-branch review + fix wave (hoisting, dead viewports, Hooks.mdx, README path, args-driven Defaults, guard hardening, CHANGELOG 4.5.0)
 
@@ -33,5 +33,5 @@ Spec: `docs/superpowers/specs/2026-09-16-kit-cleanup-design.md`
 - Executed with one fresh subagent per task plus a task review each; 6 tasks needed one fix round; one agent stalled once (T19) and was resumed. Final review found 6 Important items, all fixed and re-reviewed.
 - No change to the published package (`src/index.ts`, component sources, styles untouched).
 - Rulings on the owner's behalf are in `.superpowers/sdd/2026-09-16-fase2-storybook/progress.md` (local) and in the session summary.
-- Pending for the owner: the hosted Storybook URL (README + `package.json.homepage`), and whether to run T22 (Storybook 9).
+- Pending for the owner: whether to run T22 (Storybook 9). Storybook URL linked on 2026-09-21.
 - Deferred: external image URLs in stories (picsum/pravatar), `() => {}` vs `fn()` on a few inert callbacks, Motion keyframes redeclared per row.

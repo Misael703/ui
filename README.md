@@ -378,7 +378,7 @@ To consume it without publishing (iterative development across repos): `npm inst
 
 ### Storybook
 
-Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook`. A static build is deployed on Railway from the `Dockerfile` on every push to `main` (the URL lives in the Railway dashboard). Sidebar order: Docs → Foundations → Components → Patterns → Blocks → Internal. Conventions: [`docs/STORYBOOK.md`](./docs/STORYBOOK.md).
+Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook`. A static build is deployed on Railway from the `Dockerfile` on every push to `main`: [ui-production-8958.up.railway.app](https://ui-production-8958.up.railway.app/). Sidebar order: Docs → Foundations → Components → Patterns → Blocks → Internal. Conventions: [`docs/STORYBOOK.md`](./docs/STORYBOOK.md).
 
 ### Tests
 
