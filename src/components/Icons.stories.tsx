@@ -8,7 +8,7 @@ export default {
     docs: {
       description: {
         component:
-          'Set de iconos SVG (24×24, `currentColor`, stroke 1.75). Heredan color del padre y aceptan `size`, `strokeWidth`, `className` y `title`.',
+          'SVG icon set (24×24, `currentColor`, stroke 1.75). They inherit color from the parent and accept `size`, `strokeWidth`, `className` and `title`.',
       },
     },
   },
@@ -18,7 +18,7 @@ const ICON_NAMES = Object.keys(Icons).filter((name) => /^[A-Z]/.test(name) && na
   keyof typeof Icons
 >;
 
-export const Galeria: StoryObj = {
+export const Gallery: StoryObj = {
   render: () => (
     <div
       style={{
@@ -54,7 +54,7 @@ export const Galeria: StoryObj = {
   ),
 };
 
-export const Tamanos: StoryObj = {
+export const Sizes: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <Icons.Search size={16} />
@@ -66,7 +66,7 @@ export const Tamanos: StoryObj = {
   ),
 };
 
-export const ColorHeredado: StoryObj = {
+export const InheritedColor: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <span style={{ color: 'var(--color-primary)' }}>

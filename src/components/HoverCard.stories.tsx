@@ -2,12 +2,20 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { HoverCard } from './HoverCard';
 import { Avatar } from './Display2';
 
-export default { title: 'Overlay/HoverCard', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/HoverCard',
+  component: HoverCard,
+  tags: ['autodocs'],
+  args: { trigger: null, children: null, openDelay: 200, closeDelay: 100 },
+} satisfies Meta<typeof HoverCard>;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Basico: StoryObj = {
-  render: () => (
+export const Default: Story = {
+  render: (a) => (
     <div style={{ padding: 64 }}>
       <HoverCard
+        {...a}
         trigger={
           <span style={{ color: 'var(--color-primary)', textDecoration: 'underline', cursor: 'pointer' }}>
             @gojo
@@ -19,7 +27,7 @@ export const Basico: StoryObj = {
           <div>
             <div style={{ fontWeight: 700 }}>Satoru Gojo</div>
             <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Founder · Acme Supply Co</div>
-            <div style={{ fontSize: 12, marginTop: 6 }}>satoru.gojo@northwind.cl</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>satoru@example.com</div>
           </div>
         </div>
       </HoverCard>
@@ -27,7 +35,7 @@ export const Basico: StoryObj = {
   ),
 };
 
-export const ConDelay: StoryObj = {
+export const WithDelay: StoryObj = {
   render: () => (
     <div style={{ padding: 48 }}>
       <HoverCard

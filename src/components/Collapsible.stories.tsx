@@ -3,11 +3,19 @@ import * as React from 'react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './Collapsible';
 import { ChevronDown } from './Icons';
 
-export default { title: 'Layout/Collapsible', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Collapsible',
+  component: Collapsible,
+  subcomponents: { CollapsibleTrigger, CollapsibleContent },
+  tags: ['autodocs'],
+  args: { defaultOpen: false },
+} satisfies Meta<typeof Collapsible>;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Basico: StoryObj = {
-  render: () => (
-    <Collapsible defaultOpen={false}>
+export const Default: Story = {
+  render: (a) => (
+    <Collapsible {...a}>
       <CollapsibleTrigger style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
         Mostrar más detalles
       </CollapsibleTrigger>
@@ -21,7 +29,7 @@ export const Basico: StoryObj = {
   ),
 };
 
-export const FiltrosAvanzados: StoryObj = {
+export const AdvancedFilters: StoryObj = {
   render: () => (
     <Collapsible>
       <CollapsibleTrigger
@@ -41,7 +49,7 @@ export const FiltrosAvanzados: StoryObj = {
   ),
 };
 
-export const Controlado: StoryObj = {
+export const Controlled: StoryObj = {
   render: () => {
     const [open, setOpen] = React.useState(false);
     return (

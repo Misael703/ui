@@ -1,13 +1,30 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AspectRatio } from './Primitives';
 
-export default { title: 'Layout/AspectRatio', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/AspectRatio',
+  component: AspectRatio,
+  tags: ['autodocs'],
+  args: { ratio: 16 / 9 },
+} satisfies Meta<typeof AspectRatio>;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
   <div style={{ width: 360, border: '1px solid var(--border-default)', borderRadius: 12, overflow: 'hidden' }}>
     {children}
   </div>
 );
+
+export const Default: Story = {
+  render: (a) => (
+    <Frame>
+      <AspectRatio {...a}>
+        <img alt="" src="https://picsum.photos/seed/default/800/450" />
+      </AspectRatio>
+    </Frame>
+  ),
+};
 
 export const Square: StoryObj = {
   render: () => (

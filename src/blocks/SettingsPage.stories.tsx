@@ -1,15 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SettingsPage } from './SettingsPage';
 
-/**
- * Copy-paste recipe (not shipped). Settings page with vertical section nav
- * (Cuenta / Notificaciones / Seguridad / Facturación) and a form area per
- * section. In your app, route each section to its own URL and read the
- * active section from the router. Source: `src/blocks/SettingsPage.tsx`.
- */
 export default {
-  title: 'Blocks/Genéricos/Config/Settings page',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Settings page',
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Copy-paste recipe (not shipped). Settings page with a vertical section nav and one form area per section. Source: `src/blocks/SettingsPage.tsx`.' } } },
   tags: ['autodocs'],
 } as Meta;
 

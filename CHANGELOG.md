@@ -5,6 +5,22 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.0] — Unreleased
+
+No change to the published package.
+
+### Changed
+- Storybook upgraded to 8.6, with `addon-interactions`, `@storybook/test`, `@storybook/blocks` and `@storybook/theming`.
+- One story file per component under `Components/<Name>`, English titles and story names, mandatory `component:` and args-driven `Default` everywhere, enforced by `tests/StoriesMeta.test.tsx`.
+- Fixtures are neutral (no real company/domain names or persona duplicates).
+- `play` interaction tests for Menu, Combobox, DataTable sort and Modal.
+- Foundations split by topic with Doc Blocks.
+- New MDX guides: Introduction, Getting started, Theming, Accessibility, Hooks.
+- `public/` logo copy removed; preset logos are served through `staticDirs`.
+- Nested-iframe globals bridge removed; `AppShell` opts out of autodocs.
+- Storybook build job added to CI.
+- New `docs/STORYBOOK.md` conventions.
+
 ## [4.4.0] — 2026-09-17
 
 Entries from this version on are written in English.

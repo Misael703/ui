@@ -1,22 +1,31 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { Toggle, ToggleGroup, ToggleGroupItem, SegmentedControl, SegmentedControlItem } from './Toggle';
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Rows3, CalendarDays, Map, LayoutGrid, Columns3 } from './Icons';
+import { Toggle, ToggleGroup, ToggleGroupItem } from './Toggle';
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from './Icons';
 
-export default { title: 'Actions/Toggle', tags: ['autodocs'] } as Meta;
+const meta = {
+  title: 'Components/Toggle',
+  component: Toggle,
+  subcomponents: { ToggleGroup, ToggleGroupItem },
+  tags: ['autodocs'],
+  args: { children: 'Notificaciones', size: 'md', variant: 'default', disabled: false },
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    variant: { control: 'inline-radio', options: ['default', 'outline'] },
+    disabled: { control: 'boolean' },
+  },
+} satisfies Meta<typeof Toggle>;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const ToggleSimple: StoryObj = {
-  render: () => {
+export const Default: Story = {
+  render: (a) => {
     const [pressed, setPressed] = React.useState(false);
-    return (
-      <Toggle pressed={pressed} onPressedChange={setPressed} aria-label="Notificaciones">
-        Notificaciones {pressed ? 'on' : 'off'}
-      </Toggle>
-    );
+    return <Toggle {...a} pressed={pressed} onPressedChange={setPressed} aria-label="Notificaciones" />;
   },
 };
 
-export const Variantes: StoryObj = {
+export const Variants: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
       <Toggle defaultPressed>Default</Toggle>
@@ -28,7 +37,7 @@ export const Variantes: StoryObj = {
   ),
 };
 
-export const ToggleGroupSingle: StoryObj = {
+export const GroupSingle: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState<string | null>('center');
     return (
@@ -47,63 +56,7 @@ export const ToggleGroupSingle: StoryObj = {
   },
 };
 
-/**
- * **SegmentedControl** — single-select with equal-width segments, the
- * view-switcher case. No `type` to forget (it's always single), so no
- * cryptic union error. `SegmentedControlItem` aliases `ToggleGroupItem`.
- */
-export const SegmentedControlDemo: StoryObj = {
-  render: () => {
-    const [view, setView] = React.useState<string | null>('list');
-    return (
-      <div style={{ maxWidth: 320 }}>
-        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
-          <SegmentedControlItem value="list">Lista</SegmentedControlItem>
-          <SegmentedControlItem value="grid">Tarjetas</SegmentedControlItem>
-          <SegmentedControlItem value="board">Tablero</SegmentedControlItem>
-        </SegmentedControl>
-        <p style={{ marginTop: 12, fontSize: 13, color: 'var(--fg-muted)' }}>Vista actual: {view}</p>
-      </div>
-    );
-  },
-};
-
-/**
- * **View switcher con iconos** — `SegmentedControlItem` acepta `icon`. Cinco
- * vistas de un mismo recurso (Lista / Calendario / Mapa / Grilla / Tablero). Arriba con
- * icono + label; abajo icon-only (cada segmento con `aria-label` para el nombre
- * accesible, ya que el icono es decorativo).
- */
-export const ViewSwitcherIcons: StoryObj = {
-  name: 'SegmentedControl · view switcher (iconos)',
-  render: () => {
-    const [view, setView] = React.useState<string | null>('list');
-    const views = [
-      { value: 'list', label: 'Lista', icon: <Rows3 size={16} /> },
-      { value: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} /> },
-      { value: 'map', label: 'Mapa', icon: <Map size={16} /> },
-      { value: 'grid', label: 'Grilla', icon: <LayoutGrid size={16} /> },
-      { value: 'board', label: 'Tablero', icon: <Columns3 size={16} /> },
-    ];
-    return (
-      <div style={{ display: 'grid', gap: 20, maxWidth: 560 }}>
-        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
-          {views.map((v) => (
-            <SegmentedControlItem key={v.value} value={v.value} icon={v.icon}>{v.label}</SegmentedControlItem>
-          ))}
-        </SegmentedControl>
-        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista (compacta)">
-          {views.map((v) => (
-            <SegmentedControlItem key={v.value} value={v.value} icon={v.icon} aria-label={v.label} />
-          ))}
-        </SegmentedControl>
-        <p style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Vista actual: {view}</p>
-      </div>
-    );
-  },
-};
-
-export const ToggleGroupMultiple: StoryObj = {
+export const GroupMultiple: StoryObj = {
   render: () => {
     const [value, setValue] = React.useState<string[]>(['bold']);
     return (
@@ -113,20 +66,5 @@ export const ToggleGroupMultiple: StoryObj = {
         <ToggleGroupItem value="underline" aria-label="Subrayado"><Underline size={16} /></ToggleGroupItem>
       </ToggleGroup>
     );
-  },
-};
-
-/** Playground interactivo: usa Controls para `size`, `variant` y `disabled`. */
-export const TogglePlayground: StoryObj<typeof Toggle> = {
-  args: { children: 'Notificaciones', size: 'md', variant: 'default', disabled: false },
-  argTypes: {
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    variant: { control: 'inline-radio', options: ['default', 'outline'] },
-    disabled: { control: 'boolean' },
-    children: { control: 'text' },
-  },
-  render: (args) => {
-    const [pressed, setPressed] = React.useState(false);
-    return <Toggle {...args} pressed={pressed} onPressedChange={setPressed} aria-label="Demo" />;
   },
 };

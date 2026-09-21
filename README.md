@@ -371,18 +371,18 @@ npm install
 npm run build           # emite dist/ con .mjs, .cjs, .d.ts y styles.css
 npm test                # Vitest + Testing Library
 npm run storybook       # http://localhost:6006
-npm run build-storybook # genera storybook-static/ para deploy
+npm run build-storybook # builds storybook-static/ for deploy
 ```
 
 To consume it without publishing (iterative development across repos): `npm install file:../ui_kit`.
 
 ### Storybook
 
-Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook` — there is no hosted instance yet.
+Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook`. A static build is deployed on Railway from the `Dockerfile` on every push to `main` (the URL lives in the Railway dashboard). Sidebar order: Docs → Foundations → Components → Patterns → Blocks → Internal. Conventions: [`docs/STORYBOOK.md`](./docs/STORYBOOK.md).
 
 ### Tests
 
-`npm test` runs Vitest + Testing Library in jsdom. Current coverage: **~1,326 tests** across every public component, including a11y regressions (FormField wiring, indeterminate, hover-pause, focus rings). Adding tests is trivial — copy an existing one as a reference.
+`npm test` runs Vitest + Testing Library in jsdom. Current coverage: **~1,934 tests** across every public component, including a11y regressions (FormField wiring, indeterminate, hover-pause, focus rings). Adding tests is trivial — copy an existing one as a reference.
 
 ### Code style
 
@@ -471,7 +471,7 @@ The whole kit uses `var(--font-display)` and `var(--font-body)`; no component re
 
 ### 4. Logos
 
-Replace the files in `public/assets/logos/`, keeping the naming (`logo-horizontal-light.svg`, `mark-dark.svg`, etc.). If you use another path, configure it:
+Replace the files in `src/presets/elalba/logos/` (Storybook serves them at `/assets/logos` through `staticDirs`), keeping the naming (`logo-horizontal-light.svg`, `mark-dark.svg`, etc.). If you use another path, configure it:
 
 ```tsx
 configureBrand({ logoBasePath: '/static/mi-marca' });

@@ -11,7 +11,11 @@ import { Badge, Skeleton } from './Display';
 import { AlertTriangle, Edit, Trash } from './Icons';
 import { ToastProvider, useToast } from './Toast';
 
-export default { title: 'Patterns/CRUD', tags: ['autodocs'] } as Meta;
+export default {
+  title: 'Patterns/CRUD',
+  component: DataTable,
+  tags: ['autodocs'],
+} as Meta;
 
 /* ---------- Dominio de muestra genérico del kit ---------------------------- */
 const CATEGORIES = ['Herramientas', 'Eléctrico', 'Construcción'] as const;
@@ -52,17 +56,18 @@ function validate(f: FormState, items: Product[], editingId: string | null): Par
 }
 
 /**
- * **Playground · CRUD.** El ciclo completo de un recurso, con estado local real
- * (crea, edita y borra de verdad dentro del Storybook), para ver cómo se
- * comportan las piezas al juntarse: la receta de listado (`PageHeader` →
- * `DataTable` con `FilterBar` en `toolbar`: N campos, aquí tres), acciones por fila, selección con
- * `BulkActionBar`, crear/editar en `Drawer` o `Modal` con `FormField` y
- * validación, confirmación de borrado en `Modal`, `Toast` de resultado,
- * paginación, y los tres vacíos: sin datos, sin resultados por filtro, cargando
- * y error. Controls: `rows` (0 = vacío inicial, 200 = paginación real),
- * `editIn`, `state`, `selectable`.
+ * **Playground · CRUD.** The full lifecycle of a resource, with real local
+ * state (it creates, edits and deletes for real inside Storybook), to see
+ * how the pieces behave together: the list recipe (`PageHeader` →
+ * `DataTable` with `FilterBar` in `toolbar`: N fields, three here), per-row
+ * actions, selection with `BulkActionBar`, create/edit in a `Drawer` or
+ * `Modal` with `FormField` and validation, delete confirmation in a
+ * `Modal`, a result `Toast`, pagination, and the three empty states: no
+ * data, no results for the filter, loading and error. Controls: `rows`
+ * (0 = initial empty state, 200 = real pagination), `editIn`, `state`,
+ * `selectable`.
  */
-export const CrudPlayground: StoryObj<CrudArgs> = {
+export const Playground: StoryObj<CrudArgs> = {
   name: 'Playground · CRUD',
   parameters: { layout: 'fullscreen' },
   args: { rows: 12, editIn: 'drawer', state: 'idle', selectable: true },

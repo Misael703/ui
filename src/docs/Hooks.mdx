@@ -1,0 +1,45 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Docs/Hooks" />
+
+# Hooks
+
+Three hooks power the kit's floating panels and large tables. They are exported from the package; the composite widgets are built on them, so this page documents the contracts those widgets rely on.
+
+## usePopoverPosition
+
+```ts
+function usePopoverPosition(
+  anchorRef: React.RefObject<HTMLElement | VirtualElement | null>,
+  contentRef: React.RefObject<HTMLElement | null>,
+  { open, side = 'bottom', align = 'center', offset = 8, matchAnchorWidth = false }: UsePopoverPositionOptions,
+): PopoverPosition; // { top, left, side, ready }
+```
+
+Positions a floating panel relative to an anchor for panels portaled to `document.body`. It computes viewport-relative coordinates from `getBoundingClientRect()` — used with `position: fixed`, which stays correct inside transformed/fixed ancestors (a Modal) and scroll containers — flips to the opposite side when the preferred side doesn't fit the viewport, clamps into the viewport, and recomputes on scroll of any ancestor and on resize. The content must be mounted (it can be visually hidden) so its size can be measured; gate visibility on the returned `ready` flag.
+
+## useDismiss
+
+```ts
+function useDismiss({
+  open,
+  onDismiss,
+  refs,
+  closeOnEscape = true,
+  closeOnOutsideClick = true,
+  returnFocusRef,
+}: UseDismissOptions): void;
+```
+
+Shared dismiss behaviour for floating panels: closes on outside pointer-down and on Escape, and restores focus to the trigger when the panel closes (focus hygiene for keyboard and assistive-technology users). `refs` lists the trigger and panel elements whose subtree should *not* count as "outside". `onDismiss` and `refs` are read through refs internally, so callers don't need to memoize them to avoid re-subscribing listeners.
+
+## useVirtualRows
+
+```ts
+function useVirtualRows(
+  scrollRef: React.RefObject<HTMLElement | null>,
+  { count, rowHeight, overscan = 6, enabled = true }: UseVirtualRowsOptions
+): VirtualRowsRange; // { start, end, padTop, padBottom }
+```
+
+Fixed-height row windowing with zero dependencies. It renders only the rows inside the viewport (plus `overscan`) and replaces the rest with two pixel-exact spacers, so a 10k-row table costs about 40 DOM rows. It's deliberately fixed-height only — variable heights need a measurement cache — so the row-height contract must hold: every row in the scroller has to be exactly `rowHeight` pixels tall, or the math drifts.

@@ -1,15 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AuthSplit } from './AuthSplit';
 
-/**
- * Copy-paste recipe (not shipped). Split-screen auth: form left + brand
- * panel right (logo watermark + tagline). Right panel hides under 768px.
- * Toggle the El Alba preset in the toolbar to see brand colors. Source:
- * `src/blocks/AuthSplit.tsx`.
- */
 export default {
-  title: 'Blocks/Genéricos/Auth/Auth split',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Auth split',
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Copy-paste recipe (not shipped). Split-screen auth: form left + brand panel right (logo watermark + tagline). Right panel hides under 768px. Switch the toolbar preset to see the brand overlay. Source: `src/blocks/AuthSplit.tsx`.' } } },
   tags: ['autodocs'],
 } as Meta;
 

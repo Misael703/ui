@@ -1,15 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { OnboardingChecklist } from './OnboardingChecklist';
 
-/**
- * Copy-paste recipe (not shipped). Activation checklist with progress bar
- * and a CTA per task. In your app, wire the completion state to your real
- * source of truth (user profile, feature flag, API count). Source:
- * `src/blocks/OnboardingChecklist.tsx`.
- */
 export default {
-  title: 'Blocks/Genéricos/Utility/Onboarding checklist',
-  parameters: { layout: 'fullscreen' },
+  title: 'Blocks/Onboarding checklist',
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Copy-paste recipe (not shipped). Activation checklist with a progress bar and a CTA per task. Source: `src/blocks/OnboardingChecklist.tsx`.' } } },
   tags: ['autodocs'],
 } as Meta;
 
