@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Typeset } from '@storybook/blocks';
+import { ThemeProvider, themes, ensure } from '@storybook/theming';
 import { formatCurrency } from '../utils/format';
 import { SectionTitle, Caption } from './_helpers';
 
@@ -10,9 +11,21 @@ export default meta;
 const SIZES = ['11px', '12px', '13px', '14px', '16px', '20px', '25px', '31px', '39px', '49px', '61px', '88px'];
 const SAMPLE = 'Pedido #1042 · Northwind Builders';
 
-export const Display: StoryObj = { render: () => <Typeset fontFamily="var(--font-display)" fontSizes={SIZES} fontWeight={600} sampleText={SAMPLE} /> };
-export const Body: StoryObj = { render: () => <Typeset fontFamily="var(--font-body)" fontSizes={SIZES.slice(0, 8)} fontWeight={400} sampleText={SAMPLE} /> };
-export const Mono: StoryObj = { render: () => <Typeset fontFamily="var(--font-mono)" fontSizes={['12px', '13px', '14px']} fontWeight={400} sampleText={`total: ${formatCurrency(1245000)}`} /> };
+// Doc Blocks (Typeset/ColorPalette) read an emotion theme normally supplied by
+// Storybook's DocsContainer, which only wraps content authored in .mdx — a
+// CSF3 story's render() always executes inside the unthemed preview iframe,
+// so we supply the theme ourselves.
+function ThemedTypeset(props: React.ComponentProps<typeof Typeset>) {
+  return (
+    <ThemeProvider theme={ensure(themes.light)}>
+      <Typeset {...props} />
+    </ThemeProvider>
+  );
+}
+
+export const Display: StoryObj = { render: () => <ThemedTypeset fontFamily="var(--font-display)" fontSizes={SIZES} fontWeight={600} sampleText={SAMPLE} /> };
+export const Body: StoryObj = { render: () => <ThemedTypeset fontFamily="var(--font-body)" fontSizes={SIZES.slice(0, 8)} fontWeight={400} sampleText={SAMPLE} /> };
+export const Mono: StoryObj = { render: () => <ThemedTypeset fontFamily="var(--font-mono)" fontSizes={['12px', '13px', '14px']} fontWeight={400} sampleText={`total: ${formatCurrency(1245000)}`} /> };
 
 // =============================================================================
 // Weight scale

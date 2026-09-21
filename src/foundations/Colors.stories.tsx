@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ColorPalette, ColorItem } from '@storybook/blocks';
+import { ThemeProvider, themes, ensure } from '@storybook/theming';
 
 const meta = { title: 'Foundations/Colors', tags: ['autodocs'], parameters: { layout: 'padded' } } satisfies Meta;
 export default meta;
@@ -28,9 +29,11 @@ const SEMANTIC = ['bg-canvas', 'bg-surface', 'bg-subtle', 'bg-muted', 'fg-defaul
 function Palette({ tokens, title, subtitle }: { tokens: string[]; title: string; subtitle: string }) {
   const map = useTokens(tokens);
   return (
-    <ColorPalette>
-      <ColorItem title={title} subtitle={subtitle} colors={Object.fromEntries(tokens.map((t) => [`--${t}`, map[t] ?? '#00000000']))} />
-    </ColorPalette>
+    <ThemeProvider theme={ensure(themes.light)}>
+      <ColorPalette>
+        <ColorItem title={title} subtitle={subtitle} colors={Object.fromEntries(tokens.map((t) => [`--${t}`, map[t] ?? '#00000000']))} />
+      </ColorPalette>
+    </ThemeProvider>
   );
 }
 
