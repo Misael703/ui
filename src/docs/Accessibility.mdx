@@ -1,0 +1,27 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Docs/Accessibility" />
+
+# Accessibility
+
+Accessibility is owned by the kit: semantic roles, ARIA wiring, keyboard navigation, and focus trap/restore in overlays are hand-built — the kit uses no Radix or other headless-a11y dependency.
+
+## Focus ring
+
+Focus is `:focus-visible` + a `box-shadow` ring (`--focus-ring-brand` / `-accent` / `-danger`, a 3px halo, all at 16% alpha). Never a bare `outline: none`. This is a hard rule — every interactive component must show a visible focus ring.
+
+## Owned WAI-ARIA patterns
+
+Composite widgets follow the WAI-ARIA authoring practices, hand-implemented rather than pulled from a headless library: **TreeView**, **Accordion**, **Menu**, **Menubar**, **Combobox**.
+
+## Checking a story
+
+The Storybook toolbar includes the a11y addon (`@storybook/addon-a11y`) — open its panel on any story to run an automated audit against `wcag2a`/`wcag2aa` rules, including color contrast, directly on the rendered component.
+
+## Touch targets
+
+**Touch guard — `@media (pointer: coarse)` (WCAG 2.5.5).** On a coarse pointer, `--control-h-md` is re-pinned to 44px and `--field-pad-y` grows so the tap target reaches the 44px minimum on touch devices. Only the tap area grows; `--control-font-md` stays put, so the type doesn't visually inflate on mobile just because the desktop default is denser.
+
+## Documented AA exception
+
+One deliberate, owner-accepted departure from "accessibility is owned": in the **El Alba preset only**, the primary button is the exact brand orange `#ff671d` on white — **2.91:1** (hover `#e05400` = 3.86:1), below WCAG AA. Brand fidelity was chosen over AA for this single surface, eyes open. It isn't silent: `tests/Contrast.test.tsx` pins the exact sub-AA value (it cannot drift or silently "improve" without the test forcing a conscious look), and `CHANGELOG.md` records the decision. The scope is exactly this one button pair plus its hover state — every other button and surface, in every palette, remains strictly AA.

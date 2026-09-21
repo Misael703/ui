@@ -1,0 +1,38 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Docs/Theming" />
+
+# Theming
+
+## Theme model
+
+Light is the default; dark is opt-in via `data-theme="dark"` set on a root ancestor (the kit repaints from that attribute). Activation is manual — the consumer owns the toggle and its persistence; there is no `prefers-color-scheme` auto-switch.
+
+Dark elevation is **additive light**: the canvas is the deepest surface and `surface`/`inset` rise lighter as they get closer to the user — the inverse of the light-mode ordinal, where the canvas is the lightest tier.
+
+## Cascade isolation
+
+All kit CSS lives in `@layer elalba`, so unlayered consumer CSS always wins — you can override any component without fighting specificity. The flip side: if your own global reset isn't inside a layer either, it wins over the kit too (the classic case is Tailwind's `preflight`). See the README's "Layers and precedence" section for the three ways to handle that.
+
+## Extending variants
+
+Variant props are open enums (`Extensible<T>`): known values autocomplete, but any string is accepted. The kit emits a BEM class from the value (`variant="x"` → `btn--x`, `badge--x`, `card--accent-x`, `alert--x`). To add a brand-specific variant without forking:
+
+1. Pass it: `<Button variant="brand-x">`. No type error (since v1.6.0).
+2. Style the emitted class in your own CSS, **outside** `@layer elalba` so it wins by the layer order the kit already establishes:
+
+```css
+/* your app, unlayered */
+.btn--brand-x {
+  background: var(--my-brand);
+  color: #fff;
+}
+```
+
+Open today: `Button.variant`, `Badge.variant`, `Alert.variant`, `Card.accent`. The same `Extensible<T>` type is exported for forks/consumers to reuse on their own components. Unknown values are safe at runtime: these components only interpolate the class, they don't switch on the value.
+
+## Writing a preset
+
+A preset is a plain CSS file, imported after the base stylesheet, that redeclares the semantic/brand tokens inside the same `@layer elalba` the kit uses — the cascade takes care of the rest. Follow the same two-file shape the kit's own **El Alba** preset (`@misael703/ui/presets/elalba`) uses: a CSS file overriding the token values your brand needs, and, optionally, a `BrandDefaults` object (`name`, `currency`, `locale`, `logoBasePath`) passed to `configureBrand()`.
+
+**The cascade gotcha:** the kit's tokens sit in `@layer elalba`, but a preset is imported unlayered — so a preset's light `:root` value beats the base `:root[data-theme="dark"]` block (unlayered wins over layered, before specificity is even considered). Any token your preset overrides in its light `:root` that should also hold in dark mode must be re-asserted in that preset's own `[data-theme="dark"]` block. In El Alba that's the surfaces, `fg-muted`/`fg-subtle`, `fg-on-secondary`, and its two remapped category colors — pinned by `tests/ContrastDark.test.tsx`, which models the same layer priority in its spread order.

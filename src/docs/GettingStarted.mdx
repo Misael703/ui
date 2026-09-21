@@ -1,0 +1,80 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Docs/Getting started" />
+
+# Getting started
+
+## Install
+
+```bash
+npm install @misael703/ui
+# pares
+npm install react react-dom
+```
+
+## Set up your Next.js app
+
+Import the kit's styles once, in `app/layout.tsx`. Order matters: fonts (optional) and the base stylesheet first, then the brand preset overlay.
+
+```tsx
+// app/layout.tsx
+import '@misael703/ui/fonts.css';
+import '@misael703/ui/styles.css';
+import '@misael703/ui/presets/elalba';
+```
+
+Configure the brand defaults once at startup and wrap the tree in the providers the kit ships — `LocaleProvider` for translated strings, `ToastProvider` for `useToast()` — typically in a client `providers.tsx`:
+
+```tsx
+'use client';
+import { configureBrand, LocaleProvider, ToastProvider } from '@misael703/ui';
+import { elalbaDefaults } from '@misael703/ui/presets/elalba-defaults';
+
+configureBrand(elalbaDefaults);
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <LocaleProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </LocaleProvider>
+  );
+}
+```
+
+`LocaleProvider` is optional — without it the kit's strings default to Spanish (`esMessages`). Pass `messages` with only the keys you want to override; the rest fall back to the default.
+
+## Use the components
+
+```tsx
+import {
+  Button, Card, CardBody, CardHeader,
+  Input, FormField, Badge, Alert,
+  Modal, Drawer, Tabs, TabList, Tab, TabPanel,
+  Stepper, useToast,
+} from '@misael703/ui';
+
+export function NewOrder() {
+  const { push } = useToast();
+  return (
+    <Card>
+      <CardHeader>Nuevo pedido <Badge variant="success">Activo</Badge></CardHeader>
+      <CardBody>
+        {/* FormField genera automáticamente el id del input y enlaza
+            label/aria-describedby con hint y error. */}
+        <FormField label="SKU" required hint="Ej. ELT-12-AC">
+          <Input placeholder="SKU del producto" />
+        </FormField>
+        <Button onClick={() => push({ title: 'Guardado', variant: 'success' })}>
+          Guardar
+        </Button>
+      </CardBody>
+    </Card>
+  );
+}
+```
+
+## Next steps
+- Theming — token model, cascade isolation, extending variants, writing a preset: [Docs/Theming](?path=/docs/docs-theming--docs).
+- Accessibility — focus rings and the owned WAI-ARIA patterns: see **Docs/Accessibility** in the sidebar.
+- Hooks — floating-panel positioning, dismiss, and row virtualization: see **Docs/Hooks** in the sidebar.
+- Browse **Components** in the sidebar for the full props table of everything you import.
