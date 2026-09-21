@@ -122,3 +122,10 @@ componente o decisión de esa app. Si solo existe en una app, no entra al kit ni
 
 [2026-09-10] Context: cadena `vitest | grep … && commit && push && merge && release` mergeó y releaseó 4.2.2 con un test en rojo, porque `grep` devuelve 0 aunque la suite falle; el publish falló en CI (nada llegó a npm) y hubo que rehacer tag y release → Rule: nunca encadenar acciones externas (push/merge/release) detrás de un comando cuyo exit code es el de un filtro. Correr `npx vitest run >log 2>&1` y encadenar sobre SU exit code; ver el log aparte.
 [2026-09-11] Context: `gh pr checks --watch | tail -1 && gh pr merge …` mergeó y releaseó 4.3.0 con el smoke consumer en ROJO (el pipe a `tail` devolvió 0); además, la memoria ya avisaba que un export nuevo del barrel exige actualizar `smoke/gallery/icon-names.ts` y no lo hice → Rule: (1) esperar checks con `gh pr checks --watch --fail-fast` SIN pipe y decidir sobre `$?` (o `set -o pipefail`); (2) antes de abrir un PR que agrega exports al barrel, actualizar `smoke/gallery/icon-names.ts` / `registry.tsx` y correr `npm run smoke:ci` en local.
+
+[2026-09-21] Context: Fase 2 (stories-only release 4.5.0) never bumped `package.json`; the
+owner tagged `v4.5.0` and publish.yml shipped `@misael703/ui@4.4.0` to npm from that tag, so
+tag and npm version diverged. → Rule: every phase plan that ends in a release gets an explicit
+"bump version + CHANGELOG date" task, and before suggesting a tag command, read
+`package.json` version and confirm it equals the tag. The published version is whatever
+`package.json` says at the tagged commit, never the tag name.

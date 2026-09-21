@@ -5,7 +5,7 @@ All notable changes to `@misael703/ui` will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.5.0] — Unreleased
+## [4.5.0] — 2026-09-21
 
 No change to the published package.
 
