@@ -319,7 +319,7 @@ export const TopbarOnly: StoryObj = {
  */
 export const TopbarMobileDrawer: StoryObj = {
   name: 'Topbar · Mobile drawer (≤900px)',
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: { viewport: { defaultViewport: 'mobile' } },
   render: function Routing() {
     // Same in-memory router as the Playground: `currentPath` resolves the
     // active item recursively (group children route too, only ONE active).

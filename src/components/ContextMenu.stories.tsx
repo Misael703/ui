@@ -9,17 +9,17 @@ const meta = {
 } satisfies Meta<typeof ContextMenu>;
 export default meta;
 
+const ITEMS = [
+  { id: 'edit', label: 'Editar', icon: <Edit size={14} />, onSelect: () => alert('Editar') },
+  { id: 'copy', label: 'Duplicar', icon: <Copy size={14} />, onSelect: () => alert('Duplicar') },
+  { id: 'download', label: 'Descargar', icon: <Download size={14} />, onSelect: () => alert('Descargar') },
+  { id: 'sep', separator: true } as any,
+  { id: 'del', label: 'Eliminar', icon: <Trash size={14} />, onSelect: () => alert('Eliminar') },
+];
+
 export const Default: StoryObj = {
   render: () => (
-    <ContextMenu
-      items={[
-        { id: 'edit', label: 'Editar', icon: <Edit size={14} />, onSelect: () => alert('Editar') },
-        { id: 'copy', label: 'Duplicar', icon: <Copy size={14} />, onSelect: () => alert('Duplicar') },
-        { id: 'download', label: 'Descargar', icon: <Download size={14} />, onSelect: () => alert('Descargar') },
-        { id: 'sep', separator: true } as any,
-        { id: 'del', label: 'Eliminar', icon: <Trash size={14} />, onSelect: () => alert('Eliminar') },
-      ]}
-    >
+    <ContextMenu items={ITEMS}>
       <div
         style={{
           padding: 32,

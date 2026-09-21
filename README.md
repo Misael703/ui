@@ -371,7 +371,7 @@ npm install
 npm run build           # emite dist/ con .mjs, .cjs, .d.ts y styles.css
 npm test                # Vitest + Testing Library
 npm run storybook       # http://localhost:6006
-npm run build-storybook # genera storybook-static/ para deploy
+npm run build-storybook # builds storybook-static/ for deploy
 ```
 
 To consume it without publishing (iterative development across repos): `npm install file:../ui_kit`.
@@ -471,7 +471,7 @@ The whole kit uses `var(--font-display)` and `var(--font-body)`; no component re
 
 ### 4. Logos
 
-Replace the files in `public/assets/logos/`, keeping the naming (`logo-horizontal-light.svg`, `mark-dark.svg`, etc.). If you use another path, configure it:
+Replace the files in `src/presets/elalba/logos/` (Storybook serves them at `/assets/logos` through `staticDirs`), keeping the naming (`logo-horizontal-light.svg`, `mark-dark.svg`, etc.). If you use another path, configure it:
 
 ```tsx
 configureBrand({ logoBasePath: '/static/mi-marca' });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { UserMenu } from './UserMenu';
+import { UserMenu, type UserMenuItem } from './UserMenu';
 import { AppShell } from './AppShell';
 import { Logo } from './Logo';
 import { Avatar } from './Display2';
@@ -60,23 +60,22 @@ export const Default: StoryObj = {
   ),
 };
 
+// Hoisted: items hold React elements.
+const ICON_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil', icon: <User size={16} /> },
+  { label: 'Facturación', icon: <CreditCard size={16} /> },
+  { label: 'Notificaciones', icon: <Bell size={16} /> },
+  { label: 'Configuración', icon: <Settings size={16} /> },
+  'separator',
+  { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
+];
+
 /** Icons per item — scans faster. `danger` colors the destructive action. */
 export const WithIcons: StoryObj = {
   name: 'With icons',
   render: () => (
     <Strip>
-      <UserMenu
-        name="Satoru Gojo"
-        role="Administrador · Northwind"
-        items={[
-          { label: 'Mi perfil', icon: <User size={16} /> },
-          { label: 'Facturación', icon: <CreditCard size={16} /> },
-          { label: 'Notificaciones', icon: <Bell size={16} /> },
-          { label: 'Configuración', icon: <Settings size={16} /> },
-          'separator',
-          { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
-        ]}
-      />
+      <UserMenu name="Satoru Gojo" role="Administrador · Northwind" items={ICON_ITEMS} />
     </Strip>
   ),
 };
@@ -86,6 +85,15 @@ export const WithIcons: StoryObj = {
  * them in Next's `<Link>` (here a demo `<a>`) without losing the item's
  * styling. Actions (logout) remain `onSelect`.
  */
+// Hoisted: items hold React elements.
+const LINK_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil', icon: <User size={16} />, href: '/perfil' },
+  { label: 'Mensajes', icon: <Mail size={16} />, href: '/mensajes' },
+  { label: 'Mi sucursal', icon: <Building size={16} />, href: '/sucursal' },
+  'separator',
+  { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true, onSelect: () => alert('logout()') },
+];
+
 export const WithLinks: StoryObj = {
   name: 'With links (linkAs)',
   render: () => (
@@ -93,13 +101,7 @@ export const WithLinks: StoryObj = {
       <UserMenu
         name="Camila Soto"
         role="Cajera"
-        items={[
-          { label: 'Mi perfil', icon: <User size={16} />, href: '/perfil' },
-          { label: 'Mensajes', icon: <Mail size={16} />, href: '/mensajes' },
-          { label: 'Mi sucursal', icon: <Building size={16} />, href: '/sucursal' },
-          'separator',
-          { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true, onSelect: () => alert('logout()') },
-        ]}
+        items={LINK_ITEMS}
         linkAs={({ href, className, children }) => (
           <a href={href} className={className} onClick={(e) => { e.preventDefault(); alert(`navegar a ${href}`); }}>
             {children}
@@ -115,21 +117,20 @@ export const WithLinks: StoryObj = {
  * `status` dot, or a square avatar. Useful when you already have the
  * user's photo.
  */
+// Hoisted: items and avatar hold React elements.
+const AVATAR_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil', icon: <User size={16} /> },
+  { label: 'Equipo', icon: <Users size={16} /> },
+  'separator',
+  { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
+];
+const CUSTOM_AVATAR = <Avatar name="Valentina Ruiz" size={32} status="online" />;
+
 export const CustomAvatar: StoryObj = {
   name: 'Custom avatar',
   render: () => (
     <Strip>
-      <UserMenu
-        name="Valentina Ruiz"
-        role="Supervisora"
-        avatar={<Avatar name="Valentina Ruiz" size={32} status="online" />}
-        items={[
-          { label: 'Mi perfil', icon: <User size={16} /> },
-          { label: 'Equipo', icon: <Users size={16} /> },
-          'separator',
-          { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
-        ]}
-      />
+      <UserMenu name="Valentina Ruiz" role="Supervisora" avatar={CUSTOM_AVATAR} items={AVATAR_ITEMS} />
     </Strip>
   ),
 };
@@ -142,6 +143,14 @@ export const CustomAvatar: StoryObj = {
  * control, not as a loose circle. The popover still shows the full
  * identity: nothing is lost, only the trigger's footprint changes.
  */
+// Hoisted: items hold React elements.
+const COMPACT_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil', icon: <User size={16} /> },
+  { label: 'Configuración', icon: <Settings size={16} /> },
+  'separator',
+  { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
+];
+
 export const Compact: StoryObj = {
   name: 'Compact',
   render: () => (
@@ -151,17 +160,7 @@ export const Compact: StoryObj = {
         cursor: 'pointer', color: 'inherit', marginRight: 8,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
       }}><Bell size={18} /></button>
-      <UserMenu
-        compact
-        name="Satoru Gojo"
-        role="Administrador"
-        items={[
-          { label: 'Mi perfil', icon: <User size={16} /> },
-          { label: 'Configuración', icon: <Settings size={16} /> },
-          'separator',
-          { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
-        ]}
-      />
+      <UserMenu compact name="Satoru Gojo" role="Administrador" items={COMPACT_ITEMS} />
     </Strip>
   ),
 };
@@ -172,24 +171,24 @@ export const Compact: StoryObj = {
  * `align="end"` (default), so the panel hugs the right edge and doesn't
  * overflow the viewport.
  */
+// Hoisted: shared across the three menus below.
+const PLACEMENT_ITEMS: ('separator' | UserMenuItem)[] = [{ label: 'Perfil' }, 'separator', { label: 'Salir', danger: true }];
+
 export const PlacementAndAlign: StoryObj = {
   name: 'Placement and align',
   render: () => (
     <div style={{ display: 'flex', gap: 48, padding: 24, paddingBottom: 260, flexWrap: 'wrap' }}>
       <div>
         <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>align=&quot;end&quot; (default)</div>
-        <UserMenu name="Admin" role="end" align="end"
-          items={[{ label: 'Perfil' }, 'separator', { label: 'Salir', danger: true }]} />
+        <UserMenu name="Admin" role="end" align="end" items={PLACEMENT_ITEMS} />
       </div>
       <div>
         <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>align=&quot;start&quot;</div>
-        <UserMenu name="Admin" role="start" align="start"
-          items={[{ label: 'Perfil' }, 'separator', { label: 'Salir', danger: true }]} />
+        <UserMenu name="Admin" role="start" align="start" items={PLACEMENT_ITEMS} />
       </div>
       <div>
         <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 8 }}>placement=&quot;top&quot;</div>
-        <UserMenu name="Admin" role="top" placement="top"
-          items={[{ label: 'Perfil' }, 'separator', { label: 'Salir', danger: true }]} />
+        <UserMenu name="Admin" role="top" placement="top" items={PLACEMENT_ITEMS} />
       </div>
     </div>
   ),
@@ -209,32 +208,25 @@ const navSections = [
  * white-alpha hover. Shrink the viewport below 900px (Storybook's toolbar)
  * to see the trigger collapse to a bare avatar — with no overflow.
  */
+// Hoisted: items and the header object hold React elements.
+const TOPBAR_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil', icon: <User size={16} /> },
+  { label: 'Facturación', icon: <CreditCard size={16} /> },
+  { label: 'Configuración', icon: <Settings size={16} /> },
+  'separator',
+  { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
+];
+const TOPBAR_HEADER = {
+  center: <Logo variant="horizontal" bg="dark" height={28} />,
+  right: <UserMenu name="Administrador Admin" role="Administrador" items={TOPBAR_ITEMS} />,
+};
+
 export const InTopbar: StoryObj = {
   name: 'In topbar (AppShell)',
   parameters: { layout: 'fullscreen' },
   render: () => (
     <div style={{ height: '100vh' }}>
-      <AppShell
-        theme="brand"
-        sections={navSections}
-        showMenuToggle
-        header={{
-          center: <Logo variant="horizontal" bg="dark" height={28} />,
-          right: (
-            <UserMenu
-              name="Administrador Admin"
-              role="Administrador"
-              items={[
-                { label: 'Mi perfil', icon: <User size={16} /> },
-                { label: 'Facturación', icon: <CreditCard size={16} /> },
-                { label: 'Configuración', icon: <Settings size={16} /> },
-                'separator',
-                { label: 'Cerrar sesión', icon: <LogOut size={16} />, danger: true },
-              ]}
-            />
-          ),
-        }}
-      >
+      <AppShell theme="brand" sections={navSections} showMenuToggle header={TOPBAR_HEADER}>
         <div style={{ padding: 24 }}>
           <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Dashboard</h1>
           <p style={{ color: 'var(--fg-muted)' }}>

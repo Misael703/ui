@@ -11,6 +11,15 @@ const meta = {
 } satisfies Meta<typeof SegmentedControl>;
 export default meta;
 
+// Hoisted: array holds React elements.
+const VIEWS = [
+  { value: 'list', label: 'Lista', icon: <Rows3 size={16} /> },
+  { value: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} /> },
+  { value: 'map', label: 'Mapa', icon: <Map size={16} /> },
+  { value: 'grid', label: 'Grilla', icon: <LayoutGrid size={16} /> },
+  { value: 'board', label: 'Tablero', icon: <Columns3 size={16} /> },
+];
+
 /**
  * **SegmentedControl** — single-select with equal-width segments, the
  * view-switcher case. No `type` to forget (it's always single), so no
@@ -42,22 +51,15 @@ export const ViewSwitcherIcons: StoryObj = {
   name: 'View switcher (icons)',
   render: () => {
     const [view, setView] = React.useState<string | null>('list');
-    const views = [
-      { value: 'list', label: 'Lista', icon: <Rows3 size={16} /> },
-      { value: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} /> },
-      { value: 'map', label: 'Mapa', icon: <Map size={16} /> },
-      { value: 'grid', label: 'Grilla', icon: <LayoutGrid size={16} /> },
-      { value: 'board', label: 'Tablero', icon: <Columns3 size={16} /> },
-    ];
     return (
       <div style={{ display: 'grid', gap: 20, maxWidth: 560 }}>
         <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
-          {views.map((v) => (
+          {VIEWS.map((v) => (
             <SegmentedControlItem key={v.value} value={v.value} icon={v.icon}>{v.label}</SegmentedControlItem>
           ))}
         </SegmentedControl>
         <SegmentedControl value={view} onChange={setView} ariaLabel="Vista (compacta)">
-          {views.map((v) => (
+          {VIEWS.map((v) => (
             <SegmentedControlItem key={v.value} value={v.value} icon={v.icon} aria-label={v.label} />
           ))}
         </SegmentedControl>

@@ -133,6 +133,63 @@ export const MilestoneTones: Story = {
 
 interface OrderLifecycleArgs { events: number; payload: boolean; types: boolean; density: 'default' | 'compact'; completed: boolean }
 
+// Hoisted: icon size depends on `a.density` — two flat sets picked by
+// density inside render, so no element is created (or nested in an
+// array/object) during render.
+const LIFECYCLE_ICONS = {
+  default: {
+    anchor: <CheckCircle size={18} />,
+    shipment: <Truck size={14} />,
+    pickup: <Package size={14} />,
+    note: <Bell size={14} />,
+  },
+  compact: {
+    anchor: <CheckCircle size={10} />,
+    shipment: <Truck size={10} />,
+    pickup: <Package size={10} />,
+    note: <Bell size={10} />,
+  },
+} as const;
+
+const LIFECYCLE_TYPES = {
+  shipment: <Badge variant="primary">envío</Badge>,
+  pickup: <Badge variant="accent">retiro</Badge>,
+  note: <Badge>nota</Badge>,
+} as const;
+
+const LIFECYCLE_PAYLOADS = {
+  shipment1: (
+    <div style={{ marginTop: 6, padding: '8px 12px', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12, color: 'var(--fg-muted)', display: 'grid', gap: 2 }}>
+      <div><span style={{ color: 'var(--fg-subtle)' }}>Seguimiento:</span> TRK-78422 · Courier Andes</div>
+      <div><span style={{ color: 'var(--fg-subtle)' }}>Bultos:</span> 4 · 38,2 kg</div>
+    </div>
+  ),
+  shipment2: (
+    <div style={{ marginTop: 6, padding: '8px 12px', border: '1px dashed var(--border-default)', borderRadius: 8, fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <Clock size={14} /> Seguimiento aún sin emitir
+    </div>
+  ),
+} as const;
+
+type LifecycleIconKey = keyof typeof LIFECYCLE_ICONS['default'];
+type LifecycleTypeKey = keyof typeof LIFECYCLE_TYPES;
+type LifecyclePayloadKey = keyof typeof LIFECYCLE_PAYLOADS;
+
+interface LifecycleEvent {
+  title: string; meta: string; doneMeta: string;
+  iconKey: LifecycleIconKey; typeKey: LifecycleTypeKey;
+  state: 'done' | 'current' | 'pending'; tone?: 'success' | 'info';
+  payloadKey?: LifecyclePayloadKey;
+}
+
+const LIFECYCLE_POOL: LifecycleEvent[] = [
+  { title: 'Envío 1/3 enviado', meta: '25-05-2026 14:30 · Bodega norte', doneMeta: '25-05-2026 14:30 · Bodega norte', iconKey: 'shipment', typeKey: 'shipment', state: 'done', tone: 'success', payloadKey: 'shipment1' },
+  { title: 'Retiro parcial en tienda', meta: '26-05-2026 10:12', doneMeta: '26-05-2026 10:12', iconKey: 'pickup', typeKey: 'pickup', state: 'done', tone: 'success' },
+  { title: 'Preparando envío 2/3', meta: 'En curso · Bodega norte', doneMeta: '26-05-2026 16:40 · Bodega norte', iconKey: 'shipment', typeKey: 'shipment', state: 'current', tone: 'info', payloadKey: 'shipment2' },
+  { title: 'Envío 3/3', meta: 'Pendiente', doneMeta: '27-05-2026 11:05', iconKey: 'shipment', typeKey: 'shipment', state: 'pending' },
+  { title: 'Cliente cambió la dirección', meta: 'Pendiente de confirmación', doneMeta: '27-05-2026 09:30 · Satoru Gojo', iconKey: 'note', typeKey: 'note', state: 'pending' },
+];
+
 /**
  * **Playground · order lifecycle.** The four layers the kit offers to tell
  * the full lifecycle of a resource, combined:
@@ -164,45 +221,25 @@ export const OrderLifecyclePlayground: StoryObj<OrderLifecycleArgs> = {
     completed: { control: 'boolean' },
   },
   render: (a) => {
-    const size = a.density === 'compact' ? 10 : 14;
-    const anchor = a.density === 'compact' ? 10 : 18;
-    type S = 'done' | 'current' | 'pending';
-    const pool: { title: string; meta: string; doneMeta: string; icon: React.ReactNode; type: React.ReactNode; state: S; tone?: 'success' | 'info'; payload?: React.ReactNode }[] = [
-      { title: 'Envío 1/3 enviado', meta: '25-05-2026 14:30 · Bodega norte', doneMeta: '25-05-2026 14:30 · Bodega norte', icon: <Truck size={size} />, type: <Badge variant="primary">envío</Badge>, state: 'done', tone: 'success',
-        payload: (
-          <div style={{ marginTop: 6, padding: '8px 12px', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12, color: 'var(--fg-muted)', display: 'grid', gap: 2 }}>
-            <div><span style={{ color: 'var(--fg-subtle)' }}>Seguimiento:</span> TRK-78422 · Courier Andes</div>
-            <div><span style={{ color: 'var(--fg-subtle)' }}>Bultos:</span> 4 · 38,2 kg</div>
-          </div>
-        ) },
-      { title: 'Retiro parcial en tienda', meta: '26-05-2026 10:12', doneMeta: '26-05-2026 10:12', icon: <Package size={size} />, type: <Badge variant="accent">retiro</Badge>, state: 'done', tone: 'success' },
-      { title: 'Preparando envío 2/3', meta: 'En curso · Bodega norte', doneMeta: '26-05-2026 16:40 · Bodega norte', icon: <Truck size={size} />, type: <Badge variant="primary">envío</Badge>, state: 'current', tone: 'info',
-        payload: (
-          <div style={{ marginTop: 6, padding: '8px 12px', border: '1px dashed var(--border-default)', borderRadius: 8, fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Clock size={14} /> Seguimiento aún sin emitir
-          </div>
-        ) },
-      { title: 'Envío 3/3', meta: 'Pendiente', doneMeta: '27-05-2026 11:05', icon: <Truck size={size} />, type: <Badge variant="primary">envío</Badge>, state: 'pending' },
-      { title: 'Cliente cambió la dirección', meta: 'Pendiente de confirmación', doneMeta: '27-05-2026 09:30 · Satoru Gojo', icon: <Bell size={size} />, type: <Badge>nota</Badge>, state: 'pending' },
-    ];
-    const items = pool.slice(0, a.events);
+    const icons = a.density === 'compact' ? LIFECYCLE_ICONS.compact : LIFECYCLE_ICONS.default;
+    const items = LIFECYCLE_POOL.slice(0, a.events);
     return (
       <Timeline density={a.density === 'compact' ? 'compact' : undefined} style={{ maxWidth: 580 }}>
-        <TimelineItem variant="milestone" state="done" tone="success" icon={<CheckCircle size={anchor} />} title="Pedido #1042 creado" meta="25-05-2026 09:14 · Satoru Gojo" />
+        <TimelineItem variant="milestone" state="done" tone="success" icon={icons.anchor} title="Pedido #1042 creado" meta="25-05-2026 09:14 · Satoru Gojo" />
         {items.map((e) => (
           <TimelineItem
             key={e.title}
             state={a.completed ? 'done' : e.state}
             tone={a.completed ? 'success' : e.tone}
-            icon={e.icon}
+            icon={icons[e.iconKey]}
             title={e.title}
             meta={a.completed ? e.doneMeta : e.meta}
-            right={a.types ? e.type : undefined}
+            right={a.types ? LIFECYCLE_TYPES[e.typeKey] : undefined}
           >
-            {a.payload && !a.completed && e.payload}
+            {a.payload && !a.completed && e.payloadKey ? LIFECYCLE_PAYLOADS[e.payloadKey] : undefined}
           </TimelineItem>
         ))}
-        <TimelineItem variant="milestone" state={a.completed ? 'done' : 'pending'} tone="success" icon={<CheckCircle size={anchor} />} title="Pedido #1042 entregado" meta={a.completed ? '27-05-2026 16:45' : 'Pendiente'} />
+        <TimelineItem variant="milestone" state={a.completed ? 'done' : 'pending'} tone="success" icon={icons.anchor} title="Pedido #1042 entregado" meta={a.completed ? '27-05-2026 16:45' : 'Pendiente'} />
       </Timeline>
     );
   },

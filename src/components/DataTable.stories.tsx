@@ -138,21 +138,15 @@ export const Virtualized: Story = {
 export const ColumnVisibility: Story = {
   render: (a) => {
     const [hidden, setHidden] = React.useState<Set<string>>(new Set(['branch']));
-    const cols: Column<OrderRow>[] = [
-      { key: 'order', header: 'Pedido' },
-      { key: 'customer', header: 'Cliente' },
-      { key: 'branch', header: 'Sucursal' },
-      { key: 'total', header: 'Total', numeric: true, accessor: (r) => formatCurrency(r.total) },
-    ];
     return (
       <DataTable
         {...a}
         hiddenColumnKeys={hidden}
-        columns={cols}
+        columns={COLUMNS}
         toolbar={
           <TableToolbar>
             <span className="grow" />
-            <ColumnToggle columns={cols} hiddenKeys={hidden} onChange={setHidden} />
+            <ColumnToggle columns={COLUMNS} hiddenKeys={hidden} onChange={setHidden} />
           </TableToolbar>
         }
       />
@@ -284,7 +278,7 @@ export const AlignedActionColumn: Story = {
  * as the table. Use Storybook's mobile viewport to see it. */
 export const CardLayoutMobile: Story = {
   parameters: {
-    viewport: { defaultViewport: 'mobile1' },
+    viewport: { defaultViewport: 'mobile' },
   },
   render: (a) => {
     const [sel, setSel] = React.useState<Set<string>>(new Set());

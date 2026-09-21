@@ -11,18 +11,18 @@ const meta = {
 export default meta;
 
 /**
- * **Playground · página de listado.** La estructura estándar de un listado y
- * cómo se comportan sus piezas al juntarse: `PageHeader` → `DataTable` con
- * `toolbar={<FilterBar/>}` → filas. La barra lleva los campos, el conteo en
- * `summary` y en `actions` lo que opera sobre el resultado: "Limpiar" solo con
- * filtros aplicados; "Exportar" va en `overflow` — ambas terciarias (`ghost
- * sm`): la única primaria de la página vive en el `PageHeader`; en móvil
- * "Exportar" se esconde tras el menú "⋯" y "Filtros" es el embudo con el
- * conteo encima. `layout` recorre la escala "cuánto escondes" (inline →
- * collapse → drawer) y `applied` pinta los valores como chips descartables,
- * la única forma honesta de esconder campos. Sin Card: la tabla es la
- * superficie. Sube `fields` a 7 para ver cómo envuelve la grilla y dónde queda
- * el conteo. Reglas completas en DESIGN.md › List-page recipe.
+ * **Playground · list page.** The standard structure of a listing and how
+ * its pieces behave together: `PageHeader` → `DataTable` with
+ * `toolbar={<FilterBar/>}` → rows. The bar carries the fields, the count in
+ * `summary`, and in `actions` what operates on the result: "Clear" only with
+ * filters applied; "Export" goes in `overflow` — both tertiary (`ghost
+ * sm`): the page's only primary action lives in the `PageHeader`; on mobile
+ * "Export" hides behind the "⋯" menu and "Filters" is the funnel with the
+ * count on top. `layout` walks the "how much you hide" scale (inline →
+ * collapse → drawer) and `applied` paints the values as dismissible chips,
+ * the only honest way to hide fields. No Card: the table is the surface.
+ * Bump `fields` to 7 to see how it wraps the grid and where the count lands.
+ * Full rules in DESIGN.md › List-page recipe.
  */
 export const Playground: StoryObj<ListPageArgs> = {
   args: { fields: 7, layout: 'inline', visibleCount: 'auto', barMobile: 'drawer', mobileLayout: 'cards', summary: true, filtersApplied: false, exportAction: true, sort: true, rowActions: 'inline', pagination: 'inside' },
@@ -43,11 +43,11 @@ export const Playground: StoryObj<ListPageArgs> = {
 };
 
 /**
- * **Listado completo.** La composición de referencia con valores fijos —
- * mismo render que el playground: `PageHeader` con la única primaria; una
- * sola superficie con `FilterBar` arriba (búsqueda, estado, sucursal, fecha;
- * Exportar en `overflow`, orden en móvil), filas en el medio con acciones
- * en kebab, y `TablePagination` abajo en `footer`; un divisor entre cada
- * zona. Para variar cualquier pieza, usa el playground.
+ * **Full listing.** The reference composition with fixed values — same
+ * render as the playground: `PageHeader` with the single primary action;
+ * one surface with `FilterBar` on top (search, status, branch, date; Export
+ * in `overflow`, sort on mobile), rows in the middle with actions in a
+ * kebab menu, and `TablePagination` at the bottom in `footer`; one divider
+ * between each zone. To vary any piece, use the playground.
  */
 export const Full: StoryObj = { render: () => <FullListPage /> };

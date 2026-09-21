@@ -8,7 +8,7 @@ import { Meta } from '@storybook/blocks';
 
 ```bash
 npm install @misael703/ui
-# pares
+# peers
 npm install react react-dom
 ```
 
@@ -59,8 +59,8 @@ export function NewOrder() {
     <Card>
       <CardHeader>Nuevo pedido <Badge variant="success">Activo</Badge></CardHeader>
       <CardBody>
-        {/* FormField genera automáticamente el id del input y enlaza
-            label/aria-describedby con hint y error. */}
+        {/* FormField automatically generates the input's id and wires
+            label/aria-describedby to hint and error. */}
         <FormField label="SKU" required hint="Ej. ELT-12-AC">
           <Input placeholder="SKU del producto" />
         </FormField>
