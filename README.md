@@ -378,11 +378,11 @@ To consume it without publishing (iterative development across repos): `npm inst
 
 ### Storybook
 
-Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook` — there is no hosted instance yet.
+Every component has a `*.stories.tsx` with interactive variants and autodocs. Run it locally with `npm run storybook`. A static build is deployed on Railway from the `Dockerfile` on every push to `main` (the URL lives in the Railway dashboard). Sidebar order: Docs → Foundations → Components → Patterns → Blocks → Internal. Conventions: [`docs/STORYBOOK.md`](./docs/STORYBOOK.md).
 
 ### Tests
 
-`npm test` runs Vitest + Testing Library in jsdom. Current coverage: **~1,326 tests** across every public component, including a11y regressions (FormField wiring, indeterminate, hover-pause, focus rings). Adding tests is trivial — copy an existing one as a reference.
+`npm test` runs Vitest + Testing Library in jsdom. Current coverage: **~1,934 tests** across every public component, including a11y regressions (FormField wiring, indeterminate, hover-pause, focus rings). Adding tests is trivial — copy an existing one as a reference.
 
 ### Code style
 
