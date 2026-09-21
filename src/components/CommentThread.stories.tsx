@@ -2,11 +2,16 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { CommentThread, type CommentItem } from './Comments';
 
+const SEED_COMMENTS: CommentItem[] = [
+  { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente pidió adelantar la entrega a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
+  { id: '2', author: { name: 'Satoru Gojo' }, body: 'Confirmé con bodega, va con el comprobante actualizado.', timestamp: 'ayer', internal: true },
+];
+
 const meta = {
   title: 'Components/CommentThread',
   component: CommentThread,
   tags: ['autodocs'],
-  args: { comments: [] },
+  args: { comments: SEED_COMMENTS, allowInternal: true },
   argTypes: {
     inputLayout: { control: 'inline-radio', options: ['stacked', 'inline'] },
   },
@@ -15,16 +20,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => {
-    const [comments, setComments] = React.useState<CommentItem[]>([
-      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente pidió adelantar la entrega a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
-      { id: '2', author: { name: 'Satoru Gojo' }, body: 'Confirmé con bodega, va con el comprobante actualizado.', timestamp: 'ayer', internal: true },
-    ]);
+  render: (a) => {
+    const [comments, setComments] = React.useState<CommentItem[]>(a.comments);
     return (
       <div style={{ maxWidth: 600 }}>
         <CommentThread
+          {...a}
           comments={comments}
-          allowInternal
           onAdd={(body, internal) => {
             setComments((c) => [...c, { id: String(c.length + 1), author: { name: 'Tú' }, body, timestamp: 'ahora', internal }]);
           }}

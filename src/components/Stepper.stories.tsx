@@ -19,7 +19,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Interactive: buttons advance the `current` step. */
+export const Examples: Story = {
   render: () => {
     const [c, setC] = React.useState(1);
     return (

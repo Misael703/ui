@@ -19,7 +19,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Header, body and footer composed together, with a totals row. */
+export const Examples: Story = {
   render: () => (
     <Card style={{ maxWidth: 360 }}>
       <CardHeader>Pedido #1042</CardHeader>

@@ -6,7 +6,7 @@ const meta = {
   title: 'Components/BulletChart',
   component: BulletChart,
   tags: ['autodocs'],
-  args: { value: 72, target: 80 },
+  args: { value: 72, target: 80, label: 'Ventas vs. meta', ranges: [50, 75, 100], valueLabel: '72%' },
   argTypes: {
     tone: { control: 'inline-radio', options: ['primary', 'success', 'warning', 'danger'] },
   },
@@ -14,7 +14,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Three bullet charts stacked, each with its own scale and tone. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 360 }}>
       <BulletChart label="Ventas vs. meta" value={234} target={260} ranges={[150, 220, 300]} valueLabel={formatCurrency(234000)} tone="primary" />

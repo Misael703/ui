@@ -8,12 +8,14 @@ const meta = {
   component: Collapsible,
   subcomponents: { CollapsibleTrigger, CollapsibleContent },
   tags: ['autodocs'],
+  args: { defaultOpen: false },
 } satisfies Meta<typeof Collapsible>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: StoryObj = {
-  render: () => (
-    <Collapsible defaultOpen={false}>
+export const Default: Story = {
+  render: (a) => (
+    <Collapsible {...a}>
       <CollapsibleTrigger style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
         Mostrar más detalles
       </CollapsibleTrigger>

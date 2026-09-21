@@ -16,17 +16,18 @@ const meta = {
   component: FilterPanel,
   subcomponents: { FilterSection },
   tags: ['autodocs'],
+  args: { title: 'Filtros' },
 } satisfies Meta<typeof FilterPanel>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => {
+  render: (a) => {
     const [estados, setEstados] = React.useState<string[]>(['abierto', 'enproceso']);
     const [precio, setPrecio] = React.useState(50);
     const total = estados.length + (precio !== 50 ? 1 : 0);
     return (
-      <FilterPanel activeCount={total} onClearAll={() => { setEstados([]); setPrecio(50); }}>
+      <FilterPanel {...a} activeCount={total} onClearAll={() => { setEstados([]); setPrecio(50); }}>
         <FilterSection title="Estado">
           {ESTADOS.map((o) => (
             <label key={o.v} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>

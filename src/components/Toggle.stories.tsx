@@ -8,17 +8,20 @@ const meta = {
   component: Toggle,
   subcomponents: { ToggleGroup, ToggleGroupItem },
   tags: ['autodocs'],
+  args: { children: 'Notificaciones', size: 'md', variant: 'default', disabled: false },
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    variant: { control: 'inline-radio', options: ['default', 'outline'] },
+    disabled: { control: 'boolean' },
+  },
 } satisfies Meta<typeof Toggle>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: StoryObj = {
-  render: () => {
+export const Default: Story = {
+  render: (a) => {
     const [pressed, setPressed] = React.useState(false);
-    return (
-      <Toggle pressed={pressed} onPressedChange={setPressed} aria-label="Notificaciones">
-        Notificaciones {pressed ? 'on' : 'off'}
-      </Toggle>
-    );
+    return <Toggle {...a} pressed={pressed} onPressedChange={setPressed} aria-label="Notificaciones" />;
   },
 };
 
@@ -63,20 +66,5 @@ export const GroupMultiple: StoryObj = {
         <ToggleGroupItem value="underline" aria-label="Subrayado"><Underline size={16} /></ToggleGroupItem>
       </ToggleGroup>
     );
-  },
-};
-
-/** Interactive playground: use Controls for `size`, `variant` and `disabled`. */
-export const Playground: StoryObj<typeof Toggle> = {
-  args: { children: 'Notificaciones', size: 'md', variant: 'default', disabled: false },
-  argTypes: {
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
-    variant: { control: 'inline-radio', options: ['default', 'outline'] },
-    disabled: { control: 'boolean' },
-    children: { control: 'text' },
-  },
-  render: (args) => {
-    const [pressed, setPressed] = React.useState(false);
-    return <Toggle {...args} pressed={pressed} onPressedChange={setPressed} aria-label="Demo" />;
   },
 };

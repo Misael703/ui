@@ -16,7 +16,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A few sizes, a status dot and an image avatar side by side. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <Avatar name="Satoru Gojo" />

@@ -17,7 +17,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Removable list: each item's `onRemove` drops it from local state. */
+export const Examples: Story = {
   render: () => {
     const [files, setFiles] = React.useState(INITIAL_FILES);
     return (

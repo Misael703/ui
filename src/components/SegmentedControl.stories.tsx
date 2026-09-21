@@ -8,8 +8,13 @@ const meta = {
   component: SegmentedControl,
   subcomponents: { SegmentedControlItem },
   tags: ['autodocs'],
+  args: { children: null, ariaLabel: 'Vista', size: 'md', disabled: false },
+  argTypes: {
+    size: { control: 'inline-radio', options: ['sm', 'md'] },
+  },
 } satisfies Meta<typeof SegmentedControl>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Hoisted: array holds React elements.
 const VIEWS = [
@@ -25,12 +30,12 @@ const VIEWS = [
  * view-switcher case. No `type` to forget (it's always single), so no
  * cryptic union error. `SegmentedControlItem` aliases `ToggleGroupItem`.
  */
-export const Default: StoryObj = {
-  render: () => {
+export const Default: Story = {
+  render: (a) => {
     const [view, setView] = React.useState<string | null>('list');
     return (
       <div style={{ maxWidth: 320 }}>
-        <SegmentedControl value={view} onChange={setView} ariaLabel="Vista">
+        <SegmentedControl {...a} value={view} onChange={setView}>
           <SegmentedControlItem value="list">Lista</SegmentedControlItem>
           <SegmentedControlItem value="grid">Tarjetas</SegmentedControlItem>
           <SegmentedControlItem value="board">Tablero</SegmentedControlItem>

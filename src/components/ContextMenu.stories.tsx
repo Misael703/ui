@@ -2,13 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ContextMenu } from './ContextMenu';
 import { Edit, Trash, Copy, Download } from './Icons';
 
-const meta = {
-  title: 'Components/ContextMenu',
-  component: ContextMenu,
-  tags: ['autodocs'],
-} satisfies Meta<typeof ContextMenu>;
-export default meta;
-
 const ITEMS = [
   { id: 'edit', label: 'Editar', icon: <Edit size={14} />, onSelect: () => alert('Editar') },
   { id: 'copy', label: 'Duplicar', icon: <Copy size={14} />, onSelect: () => alert('Duplicar') },
@@ -17,9 +10,18 @@ const ITEMS = [
   { id: 'del', label: 'Eliminar', icon: <Trash size={14} />, onSelect: () => alert('Eliminar') },
 ];
 
-export const Default: StoryObj = {
-  render: () => (
-    <ContextMenu items={ITEMS}>
+const meta = {
+  title: 'Components/ContextMenu',
+  component: ContextMenu,
+  tags: ['autodocs'],
+  args: { items: ITEMS, children: null, ariaLabel: 'Menú contextual' },
+} satisfies Meta<typeof ContextMenu>;
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: (a) => (
+    <ContextMenu {...a}>
       <div
         style={{
           padding: 32,

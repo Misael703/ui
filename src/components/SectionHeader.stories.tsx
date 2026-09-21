@@ -14,7 +14,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Two sections in context, each with its own header actions and body. */
+export const Examples: Story = {
   render: () => (
     <Stack gap={6}>
       <section aria-labelledby="sh-1">

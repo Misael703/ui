@@ -6,13 +6,16 @@ const meta = {
   title: 'Components/HoverCard',
   component: HoverCard,
   tags: ['autodocs'],
+  args: { trigger: null, children: null, openDelay: 200, closeDelay: 100 },
 } satisfies Meta<typeof HoverCard>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: StoryObj = {
-  render: () => (
+export const Default: Story = {
+  render: (a) => (
     <div style={{ padding: 64 }}>
       <HoverCard
+        {...a}
         trigger={
           <span style={{ color: 'var(--color-primary)', textDecoration: 'underline', cursor: 'pointer' }}>
             @gojo

@@ -7,12 +7,15 @@ const meta = {
   title: 'Components/Sparkbar',
   component: Sparkbar,
   tags: ['autodocs'],
-  args: { data: [3, 5, 2, 8, 6] },
+  args: { data: TREND_DATA, ariaLabel: 'tendencia ventas', highlightLast: false, height: 32 },
 } satisfies Meta<typeof Sparkbar>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Three sparkbars: plain, highlighted-last with a custom color, and taller. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
       <Sparkbar data={TREND_DATA} ariaLabel="tendencia ventas" />

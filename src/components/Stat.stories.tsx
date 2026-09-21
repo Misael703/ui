@@ -14,7 +14,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Three stats together: numeric delta, a formatted delta, and no delta. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
       {/* Preferred: numeric `delta` → shared DeltaBadge (signed, localized, tone by sign). */}

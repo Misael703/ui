@@ -23,12 +23,21 @@ import {
  * > the collapse to mobile, use Storybook's viewport toolbar and go below
  * > 900px.
  */
+const BASE_ITEMS: ('separator' | UserMenuItem)[] = [
+  { label: 'Mi perfil' },
+  { label: 'Configuración' },
+  'separator',
+  { label: 'Cerrar sesión', danger: true },
+];
+
 const meta = {
   title: 'Components/UserMenu',
   component: UserMenu,
   tags: ['autodocs'],
+  args: { name: 'Administrador Admin', role: 'Administrador', items: BASE_ITEMS, compact: false },
 } satisfies Meta<typeof UserMenu>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 /** Strip that imitates the right edge of a topbar (only to frame the demo). */
 const headerStrip: React.CSSProperties = {
@@ -43,19 +52,10 @@ const Strip = ({ children }: { children: React.ReactNode }) => (
 );
 
 /** The minimum: name, role and three actions. A `'separator'` isolates the destructive action. */
-export const Default: StoryObj = {
-  render: () => (
+export const Default: Story = {
+  render: (a) => (
     <Strip>
-      <UserMenu
-        name="Administrador Admin"
-        role="Administrador"
-        items={[
-          { label: 'Mi perfil' },
-          { label: 'Configuración' },
-          'separator',
-          { label: 'Cerrar sesión', danger: true },
-        ]}
-      />
+      <UserMenu {...a} />
     </Strip>
   ),
 };

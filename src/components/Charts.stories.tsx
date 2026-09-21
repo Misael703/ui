@@ -21,10 +21,26 @@ const meta: Meta = {
   component: LineChart,
   subcomponents: { AreaChart, BarChart, DonutChart, Sparkline: SparklineChart },
   tags: ['autodocs'],
-  args: { data: SERIES, recharts: Recharts },
+  args: {
+    data: SERIES,
+    recharts: Recharts,
+    categoryKey: 'mes',
+    series: [
+      { key: 'ventas', label: 'Ventas' },
+      { key: 'devoluciones', label: 'Devoluciones' },
+    ],
+  },
 };
 export default meta;
 type Story = StoryObj;
+
+export const Default: Story = {
+  render: (a) => (
+    <div style={{ width: 600 }}>
+      <LineChart {...(a as any)} />
+    </div>
+  ),
+};
 
 // Zero-state: an empty `data` array renders the "Sin datos" placeholder at the
 // chart's height (locale `chart.empty`, overridable via `empty`) instead of a

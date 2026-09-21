@@ -23,7 +23,10 @@ type Story = StoryObj<typeof meta>;
 const row: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' };
 const TREND_DATA = [12, 18, 14, 22, 19, 28, 24, 31, 27, 35];
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A row of stat cards with different accents, icons and deltas. */
+export const Examples: Story = {
   render: () => (
     <div style={row}>
       <StatCard

@@ -7,14 +7,15 @@ const meta = {
   component: KeyValue,
   subcomponents: { KeyValueRow },
   tags: ['autodocs'],
+  args: { keyWidth: 200 },
 } satisfies Meta<typeof KeyValue>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
+  render: (a) => (
     <div style={{ maxWidth: 420 }}>
-      <KeyValue>
+      <KeyValue {...a}>
         <KeyValueRow label="Pedido">#1042</KeyValueRow>
         <KeyValueRow label="Cliente">Satoru Gojo</KeyValueRow>
         <KeyValueRow label="Total">{formatCurrency(45990)}</KeyValueRow>

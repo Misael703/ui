@@ -24,7 +24,10 @@ type Story = StoryObj<typeof meta>;
  * `formatDisplay` (`formatCurrency`); the stock cell simulates a server that
  * rejects values over 100.
  */
-export const Default: Story = {
+export const Default: Story = {};
+
+/** Two live cells: a currency-formatted price and a stock cell with a simulated server that rejects values over 100. */
+export const Examples: Story = {
   render: () => {
     const [price, setPrice] = React.useState('45990');
     const [stock, setStock] = React.useState('24');

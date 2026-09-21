@@ -5,8 +5,10 @@ const meta = {
   title: 'Components/Carousel',
   component: Carousel,
   tags: ['autodocs'],
+  args: { children: null, ariaLabel: 'Demostración', loop: false, autoplay: false, showControls: true, showDots: true },
 } satisfies Meta<typeof Carousel>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 const Slide = ({ n, color }: { n: number; color: string }) => (
   <div
@@ -28,10 +30,10 @@ const Slide = ({ n, color }: { n: number; color: string }) => (
   </div>
 );
 
-export const Default: StoryObj = {
-  render: () => (
+export const Default: Story = {
+  render: (a) => (
     <div style={{ width: 640 }}>
-      <Carousel ariaLabel="Demostración">
+      <Carousel {...a}>
         <Slide n={1} color="var(--color-secondary)" />
         <Slide n={2} color="var(--color-primary)" />
         <Slide n={3} color="#0ea5e9" />
@@ -41,6 +43,7 @@ export const Default: StoryObj = {
   ),
 };
 
+/** Looping and autoplaying variants of the same demo carousel. */
 export const Loop: StoryObj = {
   render: () => (
     <div style={{ width: 640 }}>

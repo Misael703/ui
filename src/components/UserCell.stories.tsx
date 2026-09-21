@@ -13,7 +13,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A few rows with different sizes and an image avatar. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320 }}>
       <UserCell name="Satoru Gojo" meta="satoru.gojo@northwind.cl" />

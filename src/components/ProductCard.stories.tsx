@@ -7,12 +7,15 @@ const meta = {
   title: 'Components/ProductCard',
   component: ProductCard,
   tags: ['autodocs'],
-  args: { name: 'Taladro percutor 650W', price: formatCurrency(45990) },
+  args: { sku: 'TLD-65-AC', name: 'Taladro percutor 650W', price: formatCurrency(45990), tag: 'Oferta' },
 } satisfies Meta<typeof ProductCard>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A row of product cards, each with its own tag and footer action. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, maxWidth: 720 }}>
       <ProductCard

@@ -5,7 +5,7 @@ const meta = {
   title: 'Components/Meter',
   component: Meter,
   tags: ['autodocs'],
-  args: { value: 64, max: 100 },
+  args: { value: 64, max: 100, label: 'Stock cemento', low: 20, high: 80, optimum: 'high', valueLabel: '64 / 100 sacos' },
   argTypes: {
     optimum: { control: 'inline-radio', options: ['low', 'high', 'middle'] },
     size: { control: 'inline-radio', options: ['sm', 'md'] },
@@ -14,7 +14,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A few meters with different threshold shapes side by side. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 360 }}>
       <Meter label="Stock cemento" value={72} low={20} high={80} optimum="high" valueLabel="72 / 100 sacos" />

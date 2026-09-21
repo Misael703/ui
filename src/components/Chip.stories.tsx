@@ -7,12 +7,18 @@ const meta = {
   component: Chip,
   subcomponents: { ChipGroup },
   tags: ['autodocs'],
-  args: { children: 'Taladro' },
+  args: { children: 'Taladro', active: false },
+  argTypes: {
+    active: { control: 'boolean' },
+  },
 } satisfies Meta<typeof Chip>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A removable filter group next to two plain chips. */
+export const Examples: Story = {
   render: () => {
     const [filtros, setFiltros] = React.useState(['Eléctrico', 'Pintura', 'Stock>0']);
     return (

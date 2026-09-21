@@ -137,9 +137,3 @@ export const Pulse: Story = {
     </div>
   ),
 };
-
-/** Interactive playground: use the Controls panel to try `variant` and `dot`. */
-export const Playground: Story = {
-  args: { children: 'Activo', variant: 'success' },
-  render: (a) => <Badge {...a} />,
-};

@@ -13,6 +13,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  render: (a) => (
+    <BulkActionBar {...a}>
+      <Button variant="outline" size="sm">Marcar como enviados</Button>
+      <Button variant="ghost" size="sm">Imprimir</Button>
+      <Button variant="danger" size="sm">Eliminar</Button>
+    </BulkActionBar>
+  ),
+};
+
+/** Clearing the selection hides the bar (`selectedCount` drops to 0). */
+export const Examples: Story = {
   render: () => {
     const [count, setCount] = React.useState(3);
     return (

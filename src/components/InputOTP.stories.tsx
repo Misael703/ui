@@ -6,15 +6,20 @@ const meta = {
   title: 'Components/InputOTP',
   component: InputOTP,
   tags: ['autodocs'],
+  args: { value: '', onChange: () => {}, length: 6, disabled: false, invalid: false, inputMode: 'numeric' },
+  argTypes: {
+    inputMode: { control: 'inline-radio', options: ['numeric', 'text'] },
+  },
 } satisfies Meta<typeof InputOTP>;
 export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: StoryObj = {
-  render: () => {
-    const [value, setValue] = React.useState('');
+export const Default: Story = {
+  render: (a) => {
+    const [value, setValue] = React.useState(a.value);
     return (
       <div style={{ display: 'grid', gap: 12 }}>
-        <InputOTP value={value} onChange={setValue} length={6} />
+        <InputOTP {...a} value={value} onChange={setValue} />
         <p style={{ fontSize: 13, color: 'var(--fg-muted)' }}>
           Valor: <code>{value || '—'}</code>
         </p>

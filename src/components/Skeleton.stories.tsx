@@ -10,7 +10,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+/** A text-block placeholder: a few lines plus a block, stacked. */
+export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320 }}>
       <Skeleton height={20} width="60%" />
