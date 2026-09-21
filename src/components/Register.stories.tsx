@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ListPagePlayground, type ListPageArgs } from './__fixtures__/listPage';
 
-export default { title: 'Internal/Register', tags: ['autodocs'] } as Meta;
+export default { title: 'Internal/Register' } as Meta;
 
 interface RegisterArgs {
   compare: boolean;

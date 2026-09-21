@@ -27,7 +27,7 @@ export const Default: Story = {
           <div>
             <div style={{ fontWeight: 700 }}>Satoru Gojo</div>
             <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Founder · Acme Supply Co</div>
-            <div style={{ fontSize: 12, marginTop: 6 }}>satoru.gojo@northwind.cl</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>satoru@example.com</div>
           </div>
         </div>
       </HoverCard>

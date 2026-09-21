@@ -18,7 +18,7 @@ describe('story metas', () => {
     const rel = file.slice(SRC.length + 1);
     it(`${rel} declares component:`, () => {
       if (EXEMPT_TITLES.test(src)) return;
-      expect(src).toMatch(/^\s*component:\s*[A-Z]\w+,/m);
+      expect(src).toMatch(/^\s*(?!\/\/)component:\s*[A-Z]\w+,/m);
     });
     it(`${rel} declares tags: ['autodocs']`, () => {
       if (EXEMPT_TITLES.test(src) || NO_AUTODOCS.test(src)) return;
@@ -28,7 +28,7 @@ describe('story metas', () => {
       expect(src).toMatch(/title:\s*'(Docs|Foundations|Components|Patterns|Blocks|Internal)\//);
     });
     it(`${rel} does not import another story`, () => {
-      expect(src).not.toMatch(/from '\.\/[A-Za-z]+\.stories'/);
+      expect(src).not.toMatch(/from\s+'[^']*\.stories'/);
     });
   }
 });

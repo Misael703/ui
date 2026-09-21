@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { CommentThread, type CommentItem } from './Comments';
 
 const SEED_COMMENTS: CommentItem[] = [
-  { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente pidió adelantar la entrega a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
+  { id: '1', author: { name: 'Bodega' }, body: 'Cliente pidió adelantar la entrega a mañana 8 AM.', timestamp: 'hace 2 días', internal: false },
   { id: '2', author: { name: 'Satoru Gojo' }, body: 'Confirmé con bodega, va con el comprobante actualizado.', timestamp: 'ayer', internal: true },
 ];
 
@@ -55,7 +55,7 @@ export const Inline: Story = {
   render: () => {
     const [empty, setEmpty] = React.useState<CommentItem[]>([]);
     const [withHistory, setWithHistory] = React.useState<CommentItem[]>([
-      { id: '1', author: { name: 'Patricia Rojas' }, body: 'Cliente llamó, va a pasar a buscar el pedido a las 11:00.', timestamp: 'hace 10 min' },
+      { id: '1', author: { name: 'Bodega' }, body: 'Cliente llamó, va a pasar a buscar el pedido a las 11:00.', timestamp: 'hace 10 min' },
       { id: '2', author: { name: 'Satoru Gojo' }, body: 'Listo, dejo el comprobante firmado arriba del mostrador.', timestamp: 'hace 3 min' },
     ]);
     const append = (set: typeof setEmpty) => (body: string) =>

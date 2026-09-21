@@ -57,7 +57,7 @@ export function ListPagePlayground(a: ListPageArgs) {
     <FilterField key="q" label="Buscar"><Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="N° o cliente" /></FilterField>,
     <FilterField key="status" label="Estado"><Combobox value={status} onChange={setStatus} searchable={false} options={opts(['Todos', 'Pendiente', 'Preparado', 'Entregado'])} /></FilterField>,
     <FilterField key="branch" label="Sucursal"><Combobox value={null} onChange={() => {}} placeholder="Todas" searchable={false} options={opts(['Sucursal Centro', 'Sucursal Sur'])} /></FilterField>,
-    <FilterField key="seller" label="Vendedor"><Combobox value={null} onChange={() => {}} placeholder="Todos" options={opts(['Mesón 1', 'Mesón 2'])} /></FilterField>,
+    <FilterField key="seller" label="Vendedor"><Combobox value={null} onChange={() => {}} placeholder="Todos" options={opts(['Vendedor 1', 'Vendedor 2'])} /></FilterField>,
     <FilterField key="date" label="Fecha"><DatePicker value={null} onChange={() => {}} placeholder="Cualquiera" /></FilterField>,
     <FilterField key="pay" label="Pago"><Select defaultValue="all"><option value="all">Todos</option><option value="paid">Pagado</option><option value="due">Pendiente</option></Select></FilterField>,
     <FilterField key="channel" label="Canal"><Select defaultValue="all"><option value="all">Todos</option><option value="store">Tienda</option><option value="web">Web</option></Select></FilterField>,

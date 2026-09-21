@@ -12,7 +12,6 @@ import { Slot, Slottable } from './Primitives';
 
 export default {
   title: 'Internal/Floating in overflow',
-  tags: ['autodocs'],
 } as Meta;
 
 const scroller: React.CSSProperties = {

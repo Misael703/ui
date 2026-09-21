@@ -5,7 +5,7 @@ import { AttachmentList } from './Comments';
 const INITIAL_FILES = [
   { id: '1', name: 'cotizacion-1042.pdf', size: '245 KB', uploadedBy: 'Satoru Gojo', uploadedAt: 'hace 2h', url: '#' },
   { id: '2', name: 'foto-entrega.jpg', size: '1.2 MB', uploadedBy: 'Bodega Norte', uploadedAt: 'hace 30min', url: '#' },
-  { id: '3', name: 'comprobante-1042.pdf', size: '89 KB', uploadedBy: 'Patricia Rojas', uploadedAt: 'hace 5min', url: '#' },
+  { id: '3', name: 'comprobante-1042.pdf', size: '89 KB', uploadedBy: 'Satoru Gojo', uploadedAt: 'hace 5min', url: '#' },
 ];
 
 const meta = {

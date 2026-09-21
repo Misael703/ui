@@ -19,8 +19,8 @@ export const Default: Story = {};
 export const Examples: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320 }}>
-      <UserCell name="Satoru Gojo" meta="satoru.gojo@northwind.cl" />
-      <UserCell name="Patricia Rojas" meta="Admin · Acme Co" size={40} />
+      <UserCell name="Satoru Gojo" meta="satoru@example.com" />
+      <UserCell name="Bodega" meta="Retiro y despacho" size={40} />
       <UserCell name="JN" meta="Bodeguero" avatarSrc="https://i.pravatar.cc/64?img=12" />
     </div>
   ),

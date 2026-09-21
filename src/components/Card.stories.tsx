@@ -67,7 +67,7 @@ export const Registers: Story = {
               <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
               <div><div style={{ color: 'var(--fg-muted)' }}>Sucursal</div><div>Casa matriz</div></div>
               <div><div style={{ color: 'var(--fg-muted)' }}>Entrega</div><div>Retiro en tienda</div></div>
-              <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Mesón 2</div></div>
+              <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Vendedor 2</div></div>
             </div>
           </CardBody>
           <CardFooter><Button variant="ghost" size="sm">Editar</Button></CardFooter>
@@ -150,7 +150,7 @@ export const SurfacesPlayground: StoryObj<SurfacesArgs> = {
         <div><div style={{ color: 'var(--fg-muted)' }}>Cliente</div><div>Northwind Builders</div></div>
         <div><div style={{ color: 'var(--fg-muted)' }}>Sucursal</div><div>Casa matriz</div></div>
         <div><div style={{ color: 'var(--fg-muted)' }}>Entrega</div><div>Retiro en tienda</div></div>
-        <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Mesón 2</div></div>
+        <div><div style={{ color: 'var(--fg-muted)' }}>Vendedor</div><div>Vendedor 2</div></div>
       </div>
     );
     const section = a.sectionAs === 'plain'
