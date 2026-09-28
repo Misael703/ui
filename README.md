@@ -1,5 +1,7 @@
 # @misael703/ui
 
+> **Status: maintenance mode.** This kit only receives bug and security fixes; no new features are planned. New projects use [shadcn/ui](https://ui.shadcn.com) with their own design tokens; despachos-ferreteria is the reference for that migration.
+
 React + TypeScript UI kit for Next.js (App Router). Design tokens, accessible components with no runtime dependencies, runtime-configurable branding through presets. Built for the author's own applications and published on npm under MIT; not positioned as a community project.
 
 ---
@@ -217,7 +219,7 @@ The mechanism re-scopes tokens (`--fg-default`, `--fg-muted`, `--fg-subtle`, `--
 | **Feedback** | `ToastProvider` + `useToast()` (pauses on hover/focus) |
 | **Hooks** | `useCommandPalette()` |
 
-> `Kpi` is deprecated — use `StatCard` (metric card) or `Stat` (inline stat) instead; removal planned for `5.0.0`.
+> `Kpi` is deprecated — use `StatCard` (metric card) or `Stat` (inline stat) instead; it stays exported while the kit is in maintenance mode.
 
 All components are **type-safe**, expose `forwardRef` where it applies, and accept `className` to extend styles.
 
