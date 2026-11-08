@@ -1,6 +1,12 @@
 # @misael703/ui
 
-> **Status: maintenance mode.** This kit only receives bug and security fixes; no new features are planned. New projects use [shadcn/ui](https://ui.shadcn.com) with their own design tokens; despachos-ferreteria is the reference for that migration.
+## Status
+
+This package is no longer maintained and the repository was archived in November 2026.
+
+- For new projects, use [shadcn/ui](https://ui.shadcn.com).
+- Existing versions on npm keep working; the package is marked as deprecated on npm.
+- Fork it if you need it; the license (MIT) is unchanged.
 
 React + TypeScript UI kit for Next.js (App Router). Design tokens, accessible components with no runtime dependencies, runtime-configurable branding through presets. Built for the author's own applications and published on npm under MIT; not positioned as a community project.
 
